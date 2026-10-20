@@ -1,0 +1,11 @@
+--- a/UsageRollupU3S_R14_V2_P0.gs
++++ b/SMQ_R14_V2_P0_GAS_HOTFIX_20261020.gs
+@@ -912,7 +912,7 @@
+     String(r[10]||'')===snapshot.sourceEventIdDigest &&
+     String(r[11]||'')===snapshot.sourceContentDigest &&
+     !!r[14] &&
+-    String(r[15]||'').toUpperCase()==='FALSE' &&
++    String(r[15]).trim().toUpperCase()==='FALSE' &&
+     String(r[16]||'')===notes &&
+     (expectedStatus!=='COMPLETE'||!!r[13]);
+   return {
