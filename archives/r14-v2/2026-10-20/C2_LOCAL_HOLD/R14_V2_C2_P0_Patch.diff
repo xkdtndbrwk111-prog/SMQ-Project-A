@@ -1,0 +1,273 @@
+--- a/SMQ_R14_V2_P0_GAS_HOTFIX_20261020.gs
++++ b/SMQ_R14_V2_P0_C2_CANDIDATE_20261020.gs
+@@ -469,6 +469,44 @@
+   return candidates[0]||null;
+ }
+ 
++/* R14-V2 P0-C1: every V1/V2 writer sharing these three sheets must reserve,
++   append and flush under the SAME ScriptLock. Snapshot calculation and
++   generation read-back are deliberately outside this short write section.
++   Other GAS script projects do not share this ScriptLock. */
++function smqUsageWriteGenerationRowsU3S_(
++  totalsSh,dimsSh,dateKey,generationSeq,generation,schema,snapshot,createdAt
++){
++  const lock=LockService.getScriptLock();
++  if(!lock.tryLock(10000))throw new Error('USAGE_ROLLUP_GENERATION_WRITE_LOCK_TIMEOUT');
++  try{
++    totalsSh.appendRow([
++      dateKey,generationSeq,generation,schema,
++      snapshot.totals.eventCount,
++      snapshot.totals.soloCount,
++      snapshot.totals.teamCount,
++      snapshot.totals.team2Count,
++      snapshot.totals.team3Count,
++      snapshot.totals.team4Count,
++      snapshot.totals.team5Count,
++      snapshot.totals.team6Count,
++      createdAt
++    ]);
++    if(snapshot.dimensions.length){
++      const rows=snapshot.dimensions.map(d=>[
++        dateKey,generationSeq,generation,schema,
++        d.dimension,d.dimensionKey,d.displayLabel,d.count,createdAt
++      ]);
++      // getLastRow, setValues and flush must remain within this lock.
++      dimsSh.getRange(
++        dimsSh.getLastRow()+1,1,rows.length,SMQ_USAGE_DIM_HEADERS_U3S.length
++      ).setValues(rows);
++    }
++    SpreadsheetApp.flush();
++  }finally{
++    lock.releaseLock();
++  }
++}
++
+ function smqUsageReadGenerationTotalsU3S_(sh,dateKey,generation){
+   if(sh.getLastRow()<2)return null;
+   const rows=sh.getRange(
+@@ -677,34 +715,15 @@
+     lock.releaseLock();
+   }
+ 
++  let snapshot;
+   try{
+-    const snapshot=smqUsageBuildRawSnapshotU3S_(eventSh,target,cutoffLastRow);
++    snapshot=smqUsageBuildRawSnapshotU3S_(eventSh,target,cutoffLastRow);
+     const createdAt=new Date();
+ 
+-    totalsSh.appendRow([
+-      target,generationSeq,generation,SMQ_USAGE_ROLLUP_SCHEMA_U3S,
+-      snapshot.totals.eventCount,
+-      snapshot.totals.soloCount,
+-      snapshot.totals.teamCount,
+-      snapshot.totals.team2Count,
+-      snapshot.totals.team3Count,
+-      snapshot.totals.team4Count,
+-      snapshot.totals.team5Count,
+-      snapshot.totals.team6Count,
+-      createdAt
+-    ]);
+-
+-    if(snapshot.dimensions.length){
+-      const rows=snapshot.dimensions.map(d=>[
+-        target,generationSeq,generation,SMQ_USAGE_ROLLUP_SCHEMA_U3S,
+-        d.dimension,d.dimensionKey,d.displayLabel,d.count,createdAt
+-      ]);
+-      dimsSh.getRange(
+-        dimsSh.getLastRow()+1,1,rows.length,SMQ_USAGE_DIM_HEADERS_U3S.length
+-      ).setValues(rows);
+-    }
+-
+-    SpreadsheetApp.flush();
++    smqUsageWriteGenerationRowsU3S_(
++      totalsSh,dimsSh,target,generationSeq,generation,
++      SMQ_USAGE_ROLLUP_SCHEMA_U3S,snapshot,createdAt
++    );
+ 
+     const verify=smqUsageVerifyGenerationU3S_(
+       totalsSh,dimsSh,target,generation,snapshot
+@@ -741,16 +760,47 @@
+     });
+     SpreadsheetApp.flush();
+ 
+-    smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{
+-      status:'COMPLETE'
+-    });
++    // Ensure V1 manifest evidence is readable BEFORE publishing COMPLETE.
++    const pending=smqUsageFindManifestRowU3S_(manifestSh,target,generation);
++    const r=pending&&pending.row;
++    if(!r ||
++       Number(r[1])!==generationSeq ||
++       String(r[3])!==SMQ_USAGE_ROLLUP_SCHEMA_U3S ||
++       String(r[4]).toUpperCase()!=='PREPARING' ||
++       Number(r[5])!==cutoffLastRow ||
++       Number(r[7])!==snapshot.sourceEventCount ||
++       Number(r[8])!==snapshot.sourceU3EventCount ||
++       Number(r[9])!==snapshot.sourceLegacyEventCount ||
++       String(r[10]||'')!==snapshot.sourceEventIdDigest ||
++       String(r[11]||'')!==snapshot.sourceContentDigest ||
++       !r[13] || !r[14] ||
++       String(r[15]).trim().toUpperCase()!=='FALSE'){
++      throw new Error('USAGE_ROLLUP_V1_COMMIT_READY_READBACK_MISMATCH');
++    }
++
++    // No post-COMPLETE read-back, and the FAILED cleanup catch ends here.
++
++  }catch(err){
++    try{
++      smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{
++        status:'FAILED',
++        completedAt:new Date(),
++        notes:((isAutomatic?'AUTO;':'MANUAL;')+String(err&&err.message||err)).slice(0,500)
++      });
++      SpreadsheetApp.flush();
++    }catch(_ignored){}
++    throw err;
++  }
++  try{
++    smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{status:'COMPLETE'});
+     SpreadsheetApp.flush();
+-
+-    const published=smqUsageFindManifestRowU3S_(manifestSh,target,generation);
+-    if(!published || String(published.row[4]||'').toUpperCase()!=='COMPLETE'){
+-      throw new Error('USAGE_ROLLUP_COMPLETE_PUBLISH_FAILED');
+-    }
+-
++  }catch(err){
++    // The final status may be durable even if its ACK or flush failed.
++    // Preserve this generation and require a read-only parity check.
++    const safe=smqUsageRecoverySafeErrorU3S_(err);
++    throw new Error('USAGE_ROLLUP_V1_PUBLISH_UNKNOWN;code='+safe.code+
++      ';digest='+safe.errorDigest);
++  }
+     return {
+       ok:true,
+       date:target,
+@@ -765,17 +815,6 @@
+       sourceContentDigest:snapshot.sourceContentDigest,
+       sourceOfTruth:'RAW_EVENT_LOG'
+     };
+-  }catch(err){
+-    try{
+-      smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{
+-        status:'FAILED',
+-        completedAt:new Date(),
+-        notes:((isAutomatic?'AUTO;':'MANUAL;')+String(err&&err.message||err)).slice(0,500)
+-      });
+-      SpreadsheetApp.flush();
+-    }catch(_ignored){}
+-    throw err;
+-  }
+ }
+ 
+ /* =========================================================
+@@ -804,6 +843,13 @@
+ 
+ function smqUsageRecoveryClaimDecisionU3S_(manifestSh,dateKey){
+   const rows=smqUsageRecoveryRowsU3S_(manifestSh,dateKey);
++  // An invalid status is evidence, not an instruction to try a fresh generation.
++  // Detect it before COMPLETE/PREPARING skips so it is never silently hidden.
++  if(rows.some(x=>!['FAILED','COMPLETE','PREPARING'].includes(
++    String(x.r[4]||'').trim().toUpperCase()
++  ))){
++    throw new Error('USAGE_ROLLUP_RECOVERY_UNKNOWN_MANIFEST_STATUS');
++  }
+   const existingComplete=rows.find(x=>
+     String(x.r[3]||'')===SMQ_USAGE_ROLLUP_RECOVERY_SCHEMA_U3S &&
+     String(x.r[4]||'').toUpperCase()==='COMPLETE' &&
+@@ -970,8 +1016,9 @@
+     lock.releaseLock();
+   }
+ 
++  let snapshot;
+   try{
+-    const snapshot=smqUsageBuildRawSnapshotU3S_(
++    snapshot=smqUsageBuildRawSnapshotU3S_(
+       eventSh,target,cutoffLastRow,
+       {duplicatePolicy:SMQ_USAGE_ROLLUP_RECOVERY_POLICY_U3S}
+     );
+@@ -980,29 +1027,10 @@
+     }
+ 
+     const createdAt=new Date();
+-    totalsSh.appendRow([
+-      target,generationSeq,generation,SMQ_USAGE_ROLLUP_RECOVERY_SCHEMA_U3S,
+-      snapshot.totals.eventCount,
+-      snapshot.totals.soloCount,
+-      snapshot.totals.teamCount,
+-      snapshot.totals.team2Count,
+-      snapshot.totals.team3Count,
+-      snapshot.totals.team4Count,
+-      snapshot.totals.team5Count,
+-      snapshot.totals.team6Count,
+-      createdAt
+-    ]);
+-
+-    if(snapshot.dimensions.length){
+-      const dimensionRows=snapshot.dimensions.map(d=>[
+-        target,generationSeq,generation,SMQ_USAGE_ROLLUP_RECOVERY_SCHEMA_U3S,
+-        d.dimension,d.dimensionKey,d.displayLabel,d.count,createdAt
+-      ]);
+-      dimsSh.getRange(
+-        dimsSh.getLastRow()+1,1,dimensionRows.length,SMQ_USAGE_DIM_HEADERS_U3S.length
+-      ).setValues(dimensionRows);
+-    }
+-    SpreadsheetApp.flush();
++    smqUsageWriteGenerationRowsU3S_(
++      totalsSh,dimsSh,target,generationSeq,generation,
++      SMQ_USAGE_ROLLUP_RECOVERY_SCHEMA_U3S,snapshot,createdAt
++    );
+ 
+     const generationVerify=smqUsageVerifyGenerationU3S_(
+       totalsSh,dimsSh,target,generation,snapshot
+@@ -1047,9 +1075,30 @@
+       throw new Error('USAGE_ROLLUP_RECOVERY_COMMIT_READY_READBACK_FAILED');
+     }
+ 
++    // Fully verified; exit the error-cleanup region before publication.
++  }catch(err){
++    const safe=smqUsageRecoverySafeErrorU3S_(err);
++    try{
++      smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{
++        status:'FAILED',completedAt:new Date(),notes:safe.note
++      });
++      SpreadsheetApp.flush();
++    }catch(_ignored){}
++    throw new Error(
++      'USAGE_ROLLUP_RECOVERY_FAILED;code='+safe.code+';digest='+safe.errorDigest
++    );
++  }
++  try{
+     smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{status:'COMPLETE'});
+     SpreadsheetApp.flush();
+-
++  }catch(err){
++    // No writes to FAILED here: the final status may be durable already.
++    const safe=smqUsageRecoverySafeErrorU3S_(err);
++    throw new Error(
++      'USAGE_ROLLUP_RECOVERY_PUBLISH_UNKNOWN;code='+safe.code+
++      ';digest='+safe.errorDigest
++    );
++  }
+     return {
+       ok:true,
+       date:target,
+@@ -1070,18 +1119,6 @@
+       sourceOfTruth:'RAW_EVENT_LOG',
+       rawDeletion:'HOLD'
+     };
+-  }catch(err){
+-    const safe=smqUsageRecoverySafeErrorU3S_(err);
+-    try{
+-      smqUsageUpdateManifestU3S_(manifestSh,manifestRow,{
+-        status:'FAILED',completedAt:new Date(),notes:safe.note
+-      });
+-      SpreadsheetApp.flush();
+-    }catch(_ignored){}
+-    throw new Error(
+-      'USAGE_ROLLUP_RECOVERY_FAILED;code='+safe.code+';digest='+safe.errorDigest
+-    );
+-  }
+ }
+ 
+ /* Read-only duplicate-failure diagnosis. Raw eventIds and old manifest notes
