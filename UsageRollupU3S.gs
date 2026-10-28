@@ -10,6 +10,9 @@
    - No production Statistics Source-of-Truth switch.
    ========================================================= */
 
+// Independent from the retired Mario Code.gs; data and triggers unchanged.
+const SMQ_USAGE_ROLLUP_STORAGE_PROP_U3S_ = 'SMQ_USAGE_SPREADSHEET_ID';
+const SMQ_USAGE_ROLLUP_EVENT_TAB_U3S_ = 'EVENT_LOG';
 const SMQ_USAGE_ROLLUP_TOTALS_SHEET_U3S = 'USAGE_DAILY_TOTALS';
 const SMQ_USAGE_ROLLUP_DIMENSIONS_SHEET_U3S = 'USAGE_DAILY_DIMENSIONS';
 const SMQ_USAGE_ROLLUP_MANIFEST_SHEET_U3S = 'USAGE_ROLLUP_MANIFEST';
@@ -40,7 +43,7 @@ const SMQ_USAGE_MANIFEST_HEADERS_U3S = [
 
 function smqUsageRollupStorageU3S_(){
   const id = String(
-    PropertiesService.getScriptProperties().getProperty(SMQ_USAGE_SPREADSHEET_ID_KEY_U1) || ''
+    PropertiesService.getScriptProperties().getProperty(SMQ_USAGE_ROLLUP_STORAGE_PROP_U3S_) || ''
   ).trim();
   if(!id) throw new Error('USAGE_STORAGE_NOT_CONFIGURED');
   return SpreadsheetApp.openById(id);
@@ -494,7 +497,7 @@ function smqUsageVerifyGenerationU3S_(totalsSh,dimsSh,dateKey,generation,snapsho
 function runUsageRollupDateU3S1(dateKey){
   const target=smqUsageValidatePastDateU3S_(dateKey);
   const ss=smqUsageRollupStorageU3S_();
-  const eventSh=ss.getSheetByName(SMQ_USAGE_SHEET_U1);
+  const eventSh=ss.getSheetByName(SMQ_USAGE_ROLLUP_EVENT_TAB_U3S_);
   if(!eventSh)throw new Error('USAGE_SHEET_NOT_FOUND');
 
   const totalsSh=smqUsageEnsureSheetU3S_(
@@ -669,7 +672,7 @@ function installUsageRollupDailyTriggerU3S1(){
 function runUsageRollupParityDateU3S2(dateKey){
   const target=smqUsageValidatePastDateU3S_(dateKey);
   const ss=smqUsageRollupStorageU3S_();
-  const eventSh=ss.getSheetByName(SMQ_USAGE_SHEET_U1);
+  const eventSh=ss.getSheetByName(SMQ_USAGE_ROLLUP_EVENT_TAB_U3S_);
   const totalsSh=ss.getSheetByName(SMQ_USAGE_ROLLUP_TOTALS_SHEET_U3S);
   const dimsSh=ss.getSheetByName(SMQ_USAGE_ROLLUP_DIMENSIONS_SHEET_U3S);
   const manifestSh=ss.getSheetByName(SMQ_USAGE_ROLLUP_MANIFEST_SHEET_U3S);

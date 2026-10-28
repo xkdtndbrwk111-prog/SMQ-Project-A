@@ -1,7 +1,6 @@
-# SUPER MARIO QUIZ → HOJA QUIZ 버전 보관
-| 폴더 | 명칭 | 출처 | 상태 |
-| --- | --- | --- | --- |
-| `1.0.0/` | SUPER MARIO QUIZ 1.0 계열 | 기존 GitHub main 루트 2026-09-29 스냅샷 | 보존, 무변경 |
-| `2.0.0/` | HOJA QUIZ 2.0 (R17S) | 사용자 승인 R17S Game.html | 게임 프런트엔드 정본 보관, 현행 GAS 서버 전체 소스 추가 확보 필요 |
-
-기존 루트는 변경하지 않았으며 최신 정본 파일의 실제 배포도 수정하지 않습니다.
+# 보관 정책
+- `1.0.0/`: 마리오 퀴즈 1.0 운영 원본 백업 (보존)
+- `2.0.0/`: **현재 HOJA QUIZ 2.0 최신 소스만** (이전 2.0 파일을 누적하지 않음)
+- 현재 Apps Script 서버 코드: 저장소 루트 `Code.gs` / `UsageRollupU3S.gs` / `appsscript.json`
+- 최신 `Game.html`: `2.0.0/Game.html.parts`에서 `restore_game.py`로 복원
+- Git 커밋 이력은 삭제하지 않음

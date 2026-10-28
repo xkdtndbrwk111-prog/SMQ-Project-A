@@ -1,0 +1,130 @@
+{
+  "version": "HOJA QUIZ 2.0",
+  "releaseDate": "2026-10-28",
+  "file": "Game.html",
+  "bytes": 7168687,
+  "sha256": "7ebf39499ea3cf607ad0969460ebd0b88f0ec3a77eb9b502fc7187c7779ee230",
+  "partCount": 24,
+  "parts": [
+    {
+      "name": "part-01.txt",
+      "bytes": 301334,
+      "gitBlobSha1": "6e298999ba9e77438f32134b398ae062837261f9"
+    },
+    {
+      "name": "part-02.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "a48ca17e641db6ce865ae5a62c5c1dd6916019c5"
+    },
+    {
+      "name": "part-03.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "4cf05f9ea6e12b6f65a641087ca795f3c8409c2a"
+    },
+    {
+      "name": "part-04.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "5595d4d2294ff8a55dcbeaf317ab28563f26356a"
+    },
+    {
+      "name": "part-05.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "4e300fcbf29e46d8e21e541f3d027637f1fa64fb"
+    },
+    {
+      "name": "part-06.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "3df3b0e47409ad7170439b8240704b2418b1f224"
+    },
+    {
+      "name": "part-07.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "8dad20e5dcefd0c2f4dc5866cb6d435f0da21f10"
+    },
+    {
+      "name": "part-08.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "e39bb096bd5665f5d5d31816d0af320401088c26"
+    },
+    {
+      "name": "part-09.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "ef78aa60fbcc66e160f1061af218d365d5ba49e7"
+    },
+    {
+      "name": "part-10.txt",
+      "bytes": 300018,
+      "gitBlobSha1": "46e38e9d720d18eede50d785b6d078edebb25ed3"
+    },
+    {
+      "name": "part-11.txt",
+      "bytes": 303293,
+      "gitBlobSha1": "7dc8eb0e491112c20e69017fd98bc5f957ee677e"
+    },
+    {
+      "name": "part-12.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "8bbb45ae47d78c8e4995311d153155bf98570ea7"
+    },
+    {
+      "name": "part-13.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "c92e1adeded83f8d5be2ad1f44daeffc8a425c1f"
+    },
+    {
+      "name": "part-14.txt",
+      "bytes": 300545,
+      "gitBlobSha1": "57d6a0261cfe85adfa0be43bbacdaeb4de0dd13e"
+    },
+    {
+      "name": "part-15.txt",
+      "bytes": 300058,
+      "gitBlobSha1": "dce1177487f02ca4b33a396f15eb74a8f13e1637"
+    },
+    {
+      "name": "part-16.txt",
+      "bytes": 300058,
+      "gitBlobSha1": "dee7ee370b4ad8a1e3c8c939901ef82f46544e69"
+    },
+    {
+      "name": "part-17.txt",
+      "bytes": 300084,
+      "gitBlobSha1": "432f81a0e75901069af51eaf65e3dd912a8e06ad"
+    },
+    {
+      "name": "part-18.txt",
+      "bytes": 300032,
+      "gitBlobSha1": "379f7614406a75faa7807066387a01de793c56b6"
+    },
+    {
+      "name": "part-19.txt",
+      "bytes": 300038,
+      "gitBlobSha1": "0ea4fe8e4dd8bf4f65baf916f738c3eb36bedda2"
+    },
+    {
+      "name": "part-20.txt",
+      "bytes": 300046,
+      "gitBlobSha1": "6936537c9eb72fce8fa02aded802cc410020af28"
+    },
+    {
+      "name": "part-21.txt",
+      "bytes": 300028,
+      "gitBlobSha1": "828b187efca7abcc399ff2c28c75cab2d1bf826f"
+    },
+    {
+      "name": "part-22.txt",
+      "bytes": 301553,
+      "gitBlobSha1": "b34e787791d6017c56a7ada1fcaa878b4a1ba599"
+    },
+    {
+      "name": "part-23.txt",
+      "bytes": 300000,
+      "gitBlobSha1": "24d90691852c540f61bb74d2c17b24b4ebfeed45"
+    },
+    {
+      "name": "part-24.txt",
+      "bytes": 261600,
+      "gitBlobSha1": "6f0f32082fa528ac3f46ba4686b4be56fd9bb1e2"
+    }
+  ]
+}

@@ -1,30 +1,19 @@
-# HOJA QUIZ 2.0.0 — 공식 소스 보관 (R17S)
-- 승인/기준일: 2026-10-28 KST
-- 제품: HOJA QUIZ 2.0 (기존 SUPER MARIO QUIZ 1.0의 후속)
-- 승인 근거: 사용자 R17S 실제 플레이 결과 현재 문제 없음 보고
-- 정본 프런트엔드: **Game.html**, 7,163,576 bytes, SHA-256 `8ef1856efe8380d97e22e183e66b8b1771b04ca3de9457128646c74681d3c9d0`
-- 로컬 아카이브 출처: 2026-10-28 R17S Game.html 전체 교체용 TXT
-- 구현: 기존 Phaser 아케이드 소스 1회 보관, 튜토리얼 Stage 0 차이 패치로 복원; 공용 감정 WebP 30개, MP3 12개, 걷기 스프라이트 2개 재사용
-- 원본 R17R은 최적화 전 복구 기준으로 별도 보존; 운영 배포 변경 없음
+# HOJA QUIZ 2.0 — 2026-10-28 최신 배포 후보
 
-## 소스 복원
-GitHub API 단일 대형 요청 제한으로 Game.html의 **전체 텍스트를 16개 Git blob으로 저장**했습니다. 조각 모두 저장되어 있으며 원본 손실 없는 복원 스크립트를 포함합니다.
+이 폴더는 **최신 버전 하나만** 보관합니다. 이전 R17S 분할본은 최신 UI 수정 `Game.html`로 교체되었습니다.
 
-```sh
-python3 versions/2.0.0/restore_game.py
-shasum -a 256 versions/2.0.0/Game.html
-```
-정상이라면 SHA-256은 `8ef1856efe8380d97e22e183e66b8b1771b04ca3de9457128646c74681d3c9d0`입니다. 스크립트는 조각 SHA와 복구 원본 SHA가 일치하지 않으면 중단합니다. **Game.html.parts의 일부를 직접 Apps Script에 붙여 넣으면 안 됩니다.**
+## 최종 입력 원본
+- 최신 `Game.html`: 7,168,687 bytes / SHA-256 `7ebf39499ea3cf607ad0969460ebd0b88f0ec3a77eb9b502fc7187c7779ee230`
+- `Code.gs`: 17,794 bytes / SHA-256 `f4f8475c4467c403a190d6be19e450004db971b43bb5f43ae7f31124691c96de`
+- `UsageRollupU3S.gs`: 25,470 bytes / SHA-256 `d39f96a5beb6eb4766faa92610de76043bfb9f24441c3a105f01b7016e0042cd`
+- `appsscript.json`: 188 bytes / SHA-256 `279bf2a9ff1da8e97db3b3cb5ebb3d0a17a401d68f88656174b2c96cfbf15610`
 
-## Apps Script 구성 현황
-- `Game.html` — **v2.0 R17S 원문 확보/보관**
-- `Code.gs`, `Boot.html`, `appsscript.json` 등 현재 GAS 프로젝트에 있는 나머지 파일 — **현행 서버 HEAD를 읽지 못했으므로 v2.0 원문 검증/보관 미완료**
-- 기존 저장소 루트의 `Code.gs`, `Index.html`, `Styles.html`, `UsageRollupU3S.gs`, `appsscript.json`은 **2026-09-29 슈퍼 마리오 퀴즈 1.0 계열 스냅샷**입니다. 현재 서버의 2.0 파일과 같다고 판단하지 말 것.
-- 호스팅 Apps Script 프로젝트에 코드·배포·트리거를 변경하지 않았음.
-- 최신 서버 export를 확보한 뒤 각 파일명/크기/SHA를 검증해 v2.0에 추가 보관할 것.
+`python3 versions/2.0.0/restore_game.py`를 실행하면 저장소 루트에 `Game.html`을 복원합니다.
 
-## QA
-- R17S 소스 복원 SHA: R17R Stage 0와 일치하는 복원 경로 검증(작업 보고)
-- 사용자의 실제 플레이 확인: 현재 문제 없음
-- 실제 GAS 서버 저장 HEAD와 이 아카이브의 동일성: **NOT VERIFIED**
-- 일반 아케이드·팀전 기존 코드/스타일 원본 유지, 패치 동작은 엔진 버전 의존
+## 이번 버전 변경
+- Project B 공개 카탈로그 ID 연결 문제 대응: 프로덕션 `Code.gs`에서 승인된 TEST와 동일한 공개 시트 ID 사용
+- 작은 해상도에서 '게임 모드 선택' 제목·버튼·안내문 겹침 방지
+- 혼자 놀기 연습 대화창을 왼쪽으로 확장하고 스크롤 제거/텍스트 자동 크기 조정
+- 기존 통계 집계 U3S의 서버 상수 의존성 해제, 게임 시작 이용 기록 기능 유지
+
+GitHub 저장은 Apps Script 배포와 별개입니다. 실제 운영 배포 전 /dev 테스트, 랭킹 시트 설정, 데이터/트리거 설정 점검이 필요합니다.

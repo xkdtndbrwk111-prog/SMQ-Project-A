@@ -1,0 +1,28 @@
+# HOJA QUIZ 2.0 — Project A (current source)
+
+**2026-10-28 기준 최신 코드 하나만 유지합니다.** GitHub 소스 갱신은 Google Apps Script 자동 배포가 아닙니다.
+
+## 현재 구성
+- `Code.gs` — HOJA 2.0 서버, Project B 공용 문제 조회(읽기 전용), 독립 랭킹, 이용 기록. 최근 공용 시트 연결 수정 포함.
+- `UsageRollupU3S.gs` — 기존 00:15 통계 집계/검증 유지.
+- `appsscript.json` — 운영 프로젝트 매니페스트.
+- `versions/2.0.0/Game.html.parts` — **최신 게임 코드** 분할본 24개. R17S 모드 선택/연습 대화창 화면 수정 반영.
+- `versions/2.0.0/SHA256_MANIFEST.json` — 전체 파일/개별 조각 검증.
+- `versions/2.0.0/restore_game.py` — 현재 `Game.html` 복원 스크립트.
+- `versions/1.0.0/` — 2026-10-28 기준 마리오 1.0 운영 원본 백업. **보존.**
+
+**주의:** GitHub API 대용량 단일 파일 제한 때문에 `Game.html` 원문을 루트에 커밋하지 않았습니다. 24개 조각을 저장했으며, 다음 명령을 실행하면 루트에 7,168,687바이트 원본이 복원됩니다.
+
+```sh
+python3 versions/2.0.0/restore_game.py
+```
+
+성공 메시지에 표시되는 SHA-256은 `7ebf39499ea3cf607ad0969460ebd0b88f0ec3a77eb9b502fc7187c7779ee230`이어야 합니다. 복원 후 `Code.gs`, `Game.html`, `UsageRollupU3S.gs`, `appsscript.json`을 배포 자료로 사용합니다.
+
+## 데이터/배포 안전
+- 이 GitHub 변경은 운영 Apps Script/웹앱 배포/스프레드시트/트리거를 바꾸지 않습니다.
+- `SMQ_USAGE_SPREADSHEET_ID` 속성, 기존 `EVENT_LOG` 및 U3S 자동 집계는 유지해야 합니다.
+- 운영용 랭킹 스프레드시트는 별도이며 `HOJA_PROD_RANKING_SPREADSHEET_ID` 속성이 필요합니다.
+- 과거 마리오 1.0 파일은 루트에서 제거했지만 `versions/1.0.0/`에서 복구할 수 있습니다.
+- 이전 HOJA 2.0 R17S 조각은 이 저장소의 현재 트리에서 제거되었습니다. Git의 이전 커밋 기록 자체는 보존됩니다.
+- 실제 GAS /dev 및 정식 배포 스모크 테스트는 별도로 진행해야 합니다.
