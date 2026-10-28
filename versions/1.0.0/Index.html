@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<!--
+SUPER MARIO QUIZ v1.00.242 — RESPONSIVE BOARD-ALIGNED SIDE UI
+- Functionality based on v7.6
+- Large embedded animation assets optimized
+- Development comments/blank lines removed
+-->
+
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css?family=Press+Start+2P&family=Noto+Sans+KR:wght@600;800;900&display=swap" rel="stylesheet">
+<?!= include('Styles'); ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body>
+<div id="roundAnnouncement" class="round-announcement" aria-live="polite">
+  <div class="round-announcement-text" id="roundAnnouncementText"></div>
+</div>
+
+<aside id="leftGameBar" class="game-side-bar game-side-bar-left">
+  <div class="side-brand">
+    <img id="sideMushroom" class="side-mushroom" alt="">
+    <div class="side-brand-title">SUPER<br>MARIO<br>QUIZ</div>
+  </div>
+  <div class="audio-mixer-panel team-audio-mixer" id="teamAudioMixer" aria-label="오디오 조절">
+    <label class="audio-slider-row">
+      <span>BGM</span>
+      <input id="teamBgmVolume" class="audio-volume-slider" type="range" min="0" max="100" value="100"
+             oninput="setBgmVolume(this.value)">
+    </label>
+    <label class="audio-slider-row">
+      <span>SFX</span>
+      <input id="teamSfxVolume" class="audio-volume-slider" type="range" min="0" max="100" value="100"
+             oninput="setSfxVolume(this.value)">
+    </label>
+  </div>
+  <button type="button" class="feedback-entry209 feedback-game209 feedback-team-game209"
+          onclick="openBetaFeedback159(event,'TEAM_GAME')">BETA FEEDBACK</button>
+  <div id="scoreHudLeft" class="score-hud score-hud-left"></div>
+</aside>
+
+<aside id="rightGameBar" class="game-side-bar game-side-bar-right">
+  <div class="side-round-label">ROUND</div>
+  <div id="sideRoundDisplay" class="side-round-display">1라운드</div>
+  <div id="scoreHudRight" class="score-hud score-hud-right"></div>
+</aside>
+
+<!-- SOLO MODE HUD -->
+<aside id="soloLeftPanel242" class="solo-left-panel242" aria-hidden="true">
+<div id="soloHudLeft" class="solo-hud solo-hud-left" aria-hidden="true">
+  <div class="solo-hud-kicker">1 PLAYER</div>
+  <div class="solo-hud-label">SCORE</div>
+  <div id="soloHudScore" class="solo-hud-value">0.0</div>
+</div>
+
+<div id="soloHudRight" class="solo-hud solo-hud-right" aria-hidden="true">
+  <div class="solo-hud-kicker">CORRECT</div>
+  <div id="soloHudCorrect" class="solo-hud-value">0 / 0</div>
+</div>
+<div id="soloAudioMixer" class="audio-mixer-panel solo-audio-mixer" aria-hidden="true">
+  <label class="audio-slider-row">
+    <span>BGM</span>
+    <input id="soloBgmVolume" class="audio-volume-slider" type="range" min="0" max="100" value="100"
+           oninput="setBgmVolume(this.value)">
+  </label>
+  <label class="audio-slider-row">
+    <span>SFX</span>
+    <input id="soloSfxVolume" class="audio-volume-slider" type="range" min="0" max="100" value="100"
+           oninput="setSfxVolume(this.value)">
+  </label>
+</div>
+<button type="button" class="feedback-entry209 feedback-game209 feedback-solo-game209" id="soloFeedbackBtn209"
+        aria-hidden="true" onclick="openBetaFeedback159(event,'SOLO_GAME')">BETA FEEDBACK</button>
+
+<!-- SOLO SIDE DECORATIONS / EASTER EGGS -->
+<div id="soloDecorLeft" class="solo-side-decor solo-side-decor-left" aria-hidden="true">
+  <div class="solo-coin-stack" id="soloCoinStack">
+    <img class="solo-decor-coin" data-coin-easter alt="">
+    <img class="solo-decor-coin" data-coin-easter alt="">
+    <img class="solo-decor-coin" data-coin-easter alt="">
+  </div>
+  <div class="solo-decor-platform solo-left-platform">
+    <img id="soloEasterPipe251" class="solo-easter-pipe251" alt="" aria-hidden="true">
+    <img id="soloDecorMario" class="solo-decor-mario" alt="">
+    <div class="solo-pixel-ground"></div>
+  </div>
+</div>
+</aside>
+
+<div id="soloDecorRight" class="solo-side-decor solo-side-decor-right" aria-hidden="true">
+  <img id="soloDecorQuestion" class="solo-decor-question" alt="">
+  <div class="solo-decor-platform solo-right-platform">
+    <img id="soloDecorSpike" class="solo-decor-spike" alt="">
+    <div id="soloUnderwaterSeaweed" class="solo-underwater-seaweed" aria-hidden="true"></div>
+    <div id="soloUnderwaterSeaweedSmall" class="solo-underwater-seaweed" aria-hidden="true"></div>
+    <div class="solo-pixel-ground"></div>
+  </div>
+</div>
+
+<!-- INTRO OVERLAY -->
+
+<div id="introOverlay" onclick="startCartridgeSelect()">
+  <div class="nes-intro-screen">
+
+    <div class="intro-stage-bg" id="introStageBg" aria-hidden="true">
+      <img id="introWalkingMario" class="intro-walking-mario" alt="" aria-hidden="true">
+    </div>
+
+    <div class="nes-intro-top">
+      <div class="nes-stat-block">
+        <div class="nes-stat-label">MARIO</div>
+        <div class="nes-stat-value">000000</div>
+      </div>
+
+      <div class="nes-stat-block nes-coin-stat">
+        <img class="nes-intro-coin" id="nesIntroCoin" alt="" aria-hidden="true">
+        <div class="nes-stat-value">×000</div>
+      </div>
+
+      <div class="nes-stat-block">
+        <div class="nes-stat-label">WORLD</div>
+        <div class="nes-stat-value">1-1</div>
+      </div>
+
+      <div class="nes-stat-block">
+        <div class="nes-stat-label">TIME</div>
+      </div>
+    </div>
+
+    <div class="nes-title-board">
+      <div class="nes-title-line">SUPER</div>
+      <div class="nes-title-line">MARIO</div>
+      <div class="nes-title-line">GAME</div>
+      <div class="nes-title-credit" style="font-family:'Mulmaru', monospace !important;">©2026 역사보리꼬리 Ver.1.00</div>
+    </div>
+
+    <div class="nes-press-select">PRESS ANY BUTTON</div>
+
+    <!-- v1.00.162 — beta tester feedback entry -->
+    <div class="beta-feedback-panel" id="betaFeedbackPanel" onclick="event.stopPropagation()">
+      <button type="button" class="beta-feedback-open feedback-entry209 feedback-intro209" onclick="openBetaFeedback159(event,'INTRO')">BETA FEEDBACK</button>
+    </div>
+
+  </div>
+</div>
+<!-- v1.00.162 — BETA FEEDBACK MODAL -->
+<div id="betaFeedbackModal159" class="beta-feedback-modal159" aria-hidden="true">
+  <div class="beta-feedback-card159" role="dialog" aria-modal="true" aria-labelledby="betaFeedbackTitle159" onclick="event.stopPropagation()">
+    <div class="beta-feedback-title159" id="betaFeedbackTitle159">BETA FEEDBACK</div>
+    <div class="beta-feedback-help159">게임을 사용하면서 발견한 오류나 의견을 자유롭게 적어주세요.</div>
+    <textarea id="betaFeedbackText159" class="beta-feedback-text159" maxlength="2000" placeholder="의견을 입력하세요."></textarea>
+    <div id="betaFeedbackStatus159" class="beta-feedback-status159">최대 2000자</div>
+    <div class="beta-feedback-actions159">
+      <button type="button" class="beta-feedback-cancel159" onclick="closeBetaFeedback159()">취소</button>
+      <button type="button" class="beta-feedback-send159" id="betaFeedbackSend159" onclick="submitBetaFeedback159()">보내기</button>
+    </div>
+  </div>
+</div>
+<!-- v1.00.151 — GRADE -> CARTRIDGE TWO-STEP SELECTION -->
+<div id="cartridgeSelectModal">
+  <div class="cartridge-title" id="cartridgeSelectTitle">SELECT GRADE</div>
+  <button type="button" class="feedback-entry209 feedback-cartridge209"
+          onclick="openBetaFeedback159(event,'CARTRIDGE_SELECT')">BETA FEEDBACK</button>
+
+  <div class="grade-select-container" id="gradeSelectList" aria-label="학년 선택">
+    <button type="button" class="grade-select-card" data-grade="3" onclick="selectGrade151(3)">
+      <span class="grade-select-number">3</span>
+      <span class="grade-select-label">학년</span>
+      <span class="grade-select-count" id="gradeCount151_3">0 CARTRIDGES</span>
+    </button>
+    <button type="button" class="grade-select-card" data-grade="4" onclick="selectGrade151(4)">
+      <span class="grade-select-number">4</span>
+      <span class="grade-select-label">학년</span>
+      <span class="grade-select-count" id="gradeCount151_4">0 CARTRIDGES</span>
+    </button>
+    <button type="button" class="grade-select-card" data-grade="5" onclick="selectGrade151(5)">
+      <span class="grade-select-number">5</span>
+      <span class="grade-select-label">학년</span>
+      <span class="grade-select-count" id="gradeCount151_5">0 CARTRIDGES</span>
+    </button>
+    <button type="button" class="grade-select-card" data-grade="6" onclick="selectGrade151(6)">
+      <span class="grade-select-number">6</span>
+      <span class="grade-select-label">학년</span>
+      <span class="grade-select-count" id="gradeCount151_6">0 CARTRIDGES</span>
+    </button>
+
+    <div class="grade-select-loading" id="gradeLoading151">
+      <span>문제를 불러들이는 중</span><span class="cartridge-loading-dots">...</span>
+    </div>
+  </div>
+
+  <div class="subject-select-wrap153" id="subjectSelectWrap153" style="display:none;">
+    <div class="subject-select-toolbar153">
+      <button type="button" class="cartridge-back-btn" onclick="showGradeSelect151()">◀ 학년 선택</button>
+      <div class="cartridge-grade-badge" id="subjectGradeBadge153"></div>
+    </div>
+
+  <div class="subject-select-container" id="subjectSelectList152" aria-label="과목 선택">
+    <button type="button" class="subject-select-card152" data-subject="사회" onclick="selectSubject152('사회')">
+      <span class="subject-select-main152">사회</span>
+      <span class="subject-select-count152" id="subjectCount152_사회">0 CARTRIDGES</span>
+    </button>
+    <button type="button" class="subject-select-card152" data-subject="영어" onclick="selectSubject152('영어')">
+      <span class="subject-select-main152">영어</span>
+      <span class="subject-select-count152" id="subjectCount152_영어">0 CARTRIDGES</span>
+    </button>
+  </div>
+  </div>
+
+  <div class="publisher-select-wrap154" id="publisherSelectWrap154" style="display:none;">
+    <div class="subject-select-toolbar153">
+      <button type="button" class="cartridge-back-btn" onclick="showSubjectSelect152()">◀ 과목 선택</button>
+      <div class="cartridge-grade-badge" id="publisherContextBadge154"></div>
+    </div>
+    <div class="publisher-select-container154" id="publisherSelectList154" aria-label="출판사 선택"></div>
+  </div>
+
+  <div class="cartridge-select-toolbar" id="cartridgeToolbar151" style="display:none;">
+    <button type="button" class="cartridge-back-btn" id="cartridgeBackBtn152" onclick="showSubjectSelect152()">◀ 과목 선택</button>
+    <div class="cartridge-grade-badge" id="cartridgeGradeBadge151"></div>
+  </div>
+
+  <div class="cartridge-scroll-container" id="cartridgeList" style="display:none;"></div>
+</div>
+<!-- HEADER -->
+<div class="header">
+  <div class="game-title">
+    <img id="headerMushroom" style="height: 38px; image-rendering:pixelated;">
+    SUPER MARIO QUIZ <span class="turn-info-badge" id="turnBadge">1</span>
+  </div>
+  <div class="team-scoreboard" id="scoreboard"></div>
+</div>
+<!-- 5x5 GRID -->
+<div class="grid-container" id="grid"></div>
+<!-- TEAM SETUP MODAL -->
+<div class="modal-overlay" id="setupModal">
+  <div class="setup-card mario-stage-select">
+    <div class="stage-select-heading">
+      <div class="setup-sub">몇 팀이 퀴즈 대결을 준비하고 있나요?</div>
+    </div>
+    <button type="button" class="feedback-entry209 feedback-team-select209"
+            onclick="openBetaFeedback159(event,'TEAM_SELECT')">BETA FEEDBACK</button>
+
+    <div class="team-stage-window">
+      <div class="stage-scroll-track" aria-hidden="true">
+        <div class="stage-panel"></div>
+        <div class="stage-panel"></div>
+      </div>
+
+      <div class="stage-team-blocks">
+        <button class="stage-team-btn solo-stage-btn" onclick="selectSoloMode()" aria-label="혼자하기 선택">
+          <span class="solo-stage-main">
+            <span class="solo-stage-line">혼 자</span>
+            <span class="solo-stage-line">하 기</span>
+          </span>
+        </button>
+        <button class="stage-team-btn" onclick="confirmTeamCount(2)" aria-label="2팀 선택">
+          <span class="stage-team-num">2</span>
+        </button>
+        <button class="stage-team-btn" onclick="confirmTeamCount(3)" aria-label="3팀 선택">
+          <span class="stage-team-num">3</span>
+        </button>
+        <button class="stage-team-btn" onclick="confirmTeamCount(4)" aria-label="4팀 선택">
+          <span class="stage-team-num">4</span>
+        </button>
+        <button class="stage-team-btn" onclick="confirmTeamCount(5)" aria-label="5팀 선택">
+          <span class="stage-team-num">5</span>
+        </button>
+        <button class="stage-team-btn" onclick="confirmTeamCount(6)" aria-label="6팀 선택">
+          <span class="stage-team-num">6</span>
+        </button>
+      </div>
+
+      <img id="walkingMario" class="walking-mario" alt="" aria-hidden="true">
+      <img id="walkingGoomba" class="walking-goomba" alt="" aria-hidden="true">
+      <img id="walkingKoopa" class="walking-koopa" alt="" aria-hidden="true">
+      <img id="walkingSpike" class="walking-spike" alt="" aria-hidden="true">
+      <img id="walkingMushroom" class="walking-mushroom" alt="" aria-hidden="true">
+      <img id="flyingKiller" class="flying-killer" alt="" aria-hidden="true">
+    </div>
+
+    <div class="stage-select-caption"><span>물음표 블록을</span><span>눌러</span><span>팀 수를</span><span>선택하세요</span></div>
+  </div>
+</div>
+
+<!-- SOLO MODE GUIDE MODAL -->
+
+<div id="soloLiveRanking" aria-label="현재 솔로 랭킹">
+  <div class="solo-live-rank-title">RANKING</div>
+  <div id="soloLiveRankingSheet" class="solo-live-rank-sheet"></div>
+  <div id="soloLiveRankingList" class="solo-live-rank-list"></div>
+</div>
+
+<div class="modal-overlay" id="soloGuideModal">
+  <div class="solo-guide-card" onclick="startSoloGameFromGuide()" role="button" tabindex="0" aria-label="1인 플레이 시작">
+    <div class="solo-guide-title">혼자 도전하기</div>
+
+    <div class="solo-guide-rules">
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>아이템 요소 없음</span>
+      </div>
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>문제마다 제한시간 10초</span>
+      </div>
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>OX · 객관식 문제만 플레이</span>
+      </div>
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>정답 기본점수 10점</span>
+      </div>
+      <div class="solo-guide-rule solo-guide-rule-time">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>5초가 지나면 0.1초마다 0.1점씩 감점</span>
+      </div>
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>여러 번 다시 도전 가능</span>
+      </div>
+      <div class="solo-guide-rule">
+        <span class="solo-guide-rule-icon">●</span>
+        <span>기록은 기기별로 하나만 등록 가능</span>
+      </div>
+    </div>
+
+    <div class="solo-guide-note">최고 250점에 도전하세요!</div>
+    <div class="solo-guide-start">CLICK TO START</div>
+  </div>
+</div>
+
+<!-- MAIN GAME MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
+    <div id="quizContent">
+      <div class="modal-header">
+        <div class="modal-badge" id="modalQNum">QUESTION 01</div>
+        <div class="modal-team-target" id="modalTeamTarget">도전자: 1팀</div>
+      </div>
+
+      <div id="soloTimerWrap" class="solo-timer-wrap" aria-hidden="true">
+        <div class="solo-timer-label">TIME</div>
+        <div class="solo-timer-track">
+          <div id="soloTimerBar" class="solo-timer-bar"></div>
+        </div>
+        <div id="soloTimerText" class="solo-timer-text">10.0</div>
+      </div>
+
+      <div class="modal-question" id="modalQuestionText">문제가 출력됩니다.</div>
+      <div id="inputArea"></div>
+    </div>
+    <div class="pipe-section" id="pipeSection">
+      <div class="pipe-title" id="pipeMainTitle">정답입니다! 토관을 선택하세요!</div>
+      <div class="pipes-container" id="pipesContainer">
+        <div class="pipe-box" onclick="selectPipe(0)" aria-label="1번 토관">
+          <img class="item-pipe-img" alt="" aria-hidden="true">
+          <span class="item-pipe-number" aria-hidden="true">1</span>
+        </div>
+        <div class="pipe-box" onclick="selectPipe(1)" aria-label="2번 토관">
+          <img class="item-pipe-img" alt="" aria-hidden="true">
+          <span class="item-pipe-number" aria-hidden="true">2</span>
+        </div>
+        <div class="pipe-box" onclick="selectPipe(2)" aria-label="3번 토관">
+          <img class="item-pipe-img" alt="" aria-hidden="true">
+          <span class="item-pipe-number" aria-hidden="true">3</span>
+        </div>
+      </div>
+    </div>
+    <div class="result-section" id="resultSection">
+      <div id="resIconBox" class="result-icon-container"></div>
+      <div class="result-title" id="resTitle">결과 내용</div>
+      <div class="result-desc" id="resDesc">설명 내용</div>
+      <div id="targetTeamArea"></div>
+      <button class="close-btn" id="continueBtn" onclick="closeModalAndNextTurn()">확인 (CONTINUE)</button>
+    </div>
+  </div>
+</div>
+
+<!-- SOLO GAME OVER MODAL -->
+<div class="modal-overlay" id="soloGameOverModal">
+  <button type="button" class="feedback-entry209 feedback-solo-score209"
+          onclick="openBetaFeedback159(event, resolveBetaFeedbackLocation209())">BETA FEEDBACK</button>
+  <div class="solo-ranking-stage" id="soloRankingStage" aria-hidden="true">
+    <img id="soloRankingMario" class="solo-ranking-mario" alt="">
+    <img id="soloRankingLuigi" class="solo-ranking-luigi" alt="">
+  </div>
+
+  <div class="solo-gameover-card">
+    <div class="solo-gameover-kicker">GAME OVER</div>
+    <div class="solo-gameover-title">1 PLAYER RESULT</div>
+
+    <div class="solo-gameover-score-label">FINAL SCORE</div>
+    <div id="soloGameOverScore" class="solo-gameover-score">0.0</div>
+
+    <div class="solo-gameover-stats">
+      <div class="solo-gameover-stat">
+        <span class="solo-gameover-stat-label">CORRECT</span>
+        <span id="soloGameOverCorrect" class="solo-gameover-stat-value">0</span>
+      </div>
+      <div class="solo-gameover-stat">
+        <span class="solo-gameover-stat-label">QUESTIONS</span>
+        <span id="soloGameOverQuestions" class="solo-gameover-stat-value">0</span>
+      </div>
+    </div>
+
+    <div id="soloRankEntry" class="solo-rank-entry">
+      <input id="soloRankName" class="solo-rank-name" type="text" maxlength="3"
+             autocomplete="off" spellcheck="false" inputmode="text"
+             aria-label="랭킹 이름 3글자">
+      <button id="soloRankSubmit" class="solo-rank-submit" onclick="submitSoloRanking()" disabled>REGISTER</button>
+    </div>
+    <div id="soloRankMessage" class="solo-rank-message">영문 또는 숫자 3글자를 입력하세요.</div>
+
+    <div class="solo-gameover-actions">
+      <button class="solo-gameover-btn primary" onclick="restartSoloChallenge()">다시 도전</button>
+      <button class="solo-gameover-btn" onclick="exitSoloToTeamSelect()">팀 선택으로</button>
+    </div>
+  </div>
+
+  <div class="solo-ranking-fullscreen" id="soloRankingFullscreen">
+    <div class="solo-ranking-board">
+      <div class="solo-ranking-board-title">HIGH SCORE</div>
+      <div class="solo-ranking-board-sub" id="soloRankingBoardSub">TOP 10</div>
+      <div class="solo-ranking-full-list" id="soloRankingFullList"></div>
+      <div class="solo-ranking-full-actions">
+        <button class="solo-gameover-btn primary" onclick="restartSoloChallenge()">다시 도전</button>
+        <button class="solo-gameover-btn" onclick="exitSoloToTeamSelect()">팀 선택으로</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- v1.00.200 SOLO IN-GAME CONFIRM -->
+<div class="solo-confirm-overlay200" id="soloConfirmOverlay200" aria-hidden="true">
+  <div class="solo-confirm-card200" role="dialog" aria-modal="true" aria-labelledby="soloConfirmTitle200">
+    <div class="solo-confirm-title200" id="soloConfirmTitle200">CONFIRM</div>
+    <div class="solo-confirm-message200" id="soloConfirmMessage200"></div>
+    <div class="solo-confirm-actions200">
+      <button class="solo-confirm-btn200 cancel" id="soloConfirmCancel200"
+              onclick="closeSoloConfirm200(false)">취소</button>
+      <button class="solo-confirm-btn200 ok" id="soloConfirmOk200"
+              onclick="closeSoloConfirm200(true)">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINAL ROUND OVERLAY -->
+<div id="finalRoundOverlay">
+  <div class="final-round-box">
+    FINAL ROUND
+    <div class="final-round-sub">모든 팀의 마지막 공정 라운드입니다!</div>
+  </div>
+</div>
+
+<!-- FINAL SCORE / WINNER MODAL -->
+<div class="modal-overlay" id="winnerModal">
+  <div class="final-score-stage">
+    <div class="final-stage-kicker" id="finalStageKicker">GAME FINISHED</div>
+    <div class="final-stage-title" id="finalStageTitle">CURRENT SCORE</div>
+    <div class="final-team-grid" id="finalTeamGrid"></div>
+    <div class="final-stage-message" id="finalStageMessage"></div>
+    <div class="final-action-bar">
+      <button class="final-next-btn" id="finalNextBtn" onclick="advanceFinalReveal()">정답 보너스 공개</button>
+    </div>
+  </div>
+</div>
+<?!= include('Game'); ?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- v1.00.76 — structural repair + robust Castle alignment re-apply -->
+
+
+<!-- v1.00.79 — exact Castle actor pixel positioning fix -->
+
+
+
+
+<!-- v1.00.82 — Castle actor final pixel correction -->
+
+
+
+
+
+<!-- v1.00.83 — OVERWORLD TRUE 16x16 SHARED TILE MAP
+     Rebuilds the existing 688x240 Overworld scene cell-for-cell from 16x16 tiles.
+     INTRO and TEAM select now use the same logical 43x15 map data. -->
+
+
+
+
+<!-- v1.00.84 — OVERWORLD ACTORS ON THE SAME 16x16 GRID + SCORE MAP REUSE -->
+
+
+
+
+<!-- v1.00.86 — UNDERGROUND TILE MAP COORDINATE ARRAY SYNTAX FIX -->
+
+
+
+
+<!-- v1.00.87 — UNDERWATER 16px GRID NORMALIZATION + SCORE SHARED MAP -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- =========================================================
+     v1.00.99 — NATIVE CANVAS CSS URL PARSER FIX
+     OW / UG / CASTLE native-canvas compositor can now read
+     background-image: url(...) correctly.
+     Underwater path is unchanged.
+     ========================================================= -->
+
+
+
+
+
+
+<!-- v1.00.101: v99 stable runtime + SOLO Overworld cloud/bush only -->
+
+
+
+
+
+
+<!-- v1.00.102: SOLO guide hides easter eggs + cloud/bush single-raster canvases -->
+
+
+
+
+<!-- v1.00.103 — smooth live ee-v93-jump path restored -->
+
+
+
+
+
+
+<!-- v1.00.104 — Castle is now a true 43x15 / 688x240 native world -->
+
+
+
+
+
+
+<!-- v1.00.105 — Castle 43x15 / exact 688x240 visibility repaired -->
+
+
+
+
+<!-- v1.00.106 — Castle 688x240 native world + host-height display scale -->
+
+
+
+
+
+
+<!-- v1.00.107 — Castle 86x15 / 1376x240, raised floor/bridge/actors -->
+
+
+<!-- =========================================================
+     v1.00.108
+     Castle gap repair:
+     - left approach floor filled from row 11 through row 14
+     - chain/axe transition columns filled with castle wall blocks
+     ========================================================= -->
+
+
+<!-- =========================================================
+     v1.00.109 — CASTLE GEOMETRY ADJUSTMENTS
+     - chain + axe: exactly 1 tile left
+     - old chain column + next 2 columns: solid castle wall
+     - first 5 bridge cells -> solid wall to bottom
+     - remaining lava filled through bottom row
+     - Castle team Mario final stop: +5 tiles right
+     ========================================================= -->
+
+
+
+
+<!-- v1.00.110
+     Bowser -1 tile; lower lava solid #D82800;
+     Castle left half cropped, right half preserved. -->
+
+
+
+
+
+
+<!-- v1.00.111
+     Castle 65x15 / 1040x240;
+     restored 22 tiles on LEFT only;
+     intro Bowser fire synchronized to existing fire SFX. -->
+
+
+
+
+<!-- v1.00.112
+     - Intro Bowser fire uses actual rendered Castle-map scale
+     - Castle cartridge/setup surroundings: black
+     - Space between cartridges: light gray -->
+
+
+
+
+<!-- v1.00.113 — Bowser intro fire calculated size now wins !important cascade -->
+
+
+
+
+
+
+<!-- v1.00.116
+     Root cause removed:
+     invisible inactive #setupModal stage-team buttons no longer intercept SOLO row 2.
+     v114/v115 document-level pointerup workarounds removed. -->
+
+
+
+
+
+
+<!-- v1.00.118
+     - v117 full fire ring removed
+     - CURRENT badge preserved
+     - one localized spark follows the existing team-card border
+     - no team-card geometry changes -->
+
+<!-- v1.00.119 — Unified question-block timing:
+     frame1 0.6s → frame2 1.2s → frame3 0.6s → frame2 1.2s.
+     Image assets unchanged. -->
+
+<!-- v1.00.120 — Unified rotating coin frame timing:
+     frame1 0.6s → frame2 1.2s → frame3 0.6s → frame2 1.2s (3.6s total).
+     Coin image assets unchanged.
+     Legacy automatic opacity blink removed from intro/SOLO decorative coins.
+     One-shot click/pop animations remain unchanged. -->
+
+
+
+
+<!-- v1.00.121
+     - Question blocks + coins share one 3.6s phase clock
+     - Same frame index at the same moment
+     - Images unchanged
+     - No extra visual effects added -->
+
+
+
+
+<!-- v1.00.122
+     - Question blocks and coins: 2 -> 1 -> 3 -> 1
+     - Same shared 3.6s clock
+     - 90ms soft frame-change pulse for JS image swaps
+     - Image assets unchanged -->
+
+
+
+
+
+
+
+<!-- v1.00.123
+     ALL QUESTION BLOCK / COIN ANIMATION PASS
+     order: 2 -> 1 -> 3 -> 1
+     timing: 0.6 -> 1.2 -> 0.6 -> 1.2 sec
+     crossfade: 150ms
+     fixed stale v97 canvas timings (OW question / UG coin)
+     item-result coins and team-score coins included
+     image assets unchanged -->
+
+
+
+
+
+
+
+<!-- v1.00.124
+     FRAME 1 = always fully visible base
+     wait 1.0 sec
+     FRAME 2 = fade in 0.2 + fade out 0.2
+     wait 1.0 sec
+     FRAME 3 = fade in 0.2 + fade out 0.2
+     repeat, total 2.8 sec
+     Applies to all question blocks and all coins, including native canvas maps and pipe-result coins. -->
+
+
+
+
+
+
+
+<!-- v1.00.125
+     Fixes intro HUD coin duplicate/offset issue and oversized pipe-result coin.
+     Frame 1 remains the real coin IMG at its original size/location.
+     Frames 2 and 3 are fixed overlays matched to the exact base coin rectangle. -->
+
+
+
+
+<!-- v1.00.126
+     - Coin animation no longer calls getBoundingClientRect/getComputedStyle every 30ms.
+     - Base IMG remains in normal flow; overlay frames are absolute inside the same wrapper.
+     - Pulse animation is opacity-only.
+     - Initial random Underwater receives the same explicit rebuild/raster treatment as TEST switching. -->
+
+
+
+
+
+
+<!-- v1.00.127
+     Overworld Part 2 random chance remains the existing 5%.
+     Theme identity remains "overworld"; only data-stage-variant="part2" changes the map.
+     Native size: 688x240 / 43x15.
+     Reference map occupies the left section; the lower-right gap and remaining width
+     are flattened with continuous Overworld ground.
+     Intro + team-selection stage supported.
+     Existing Overworld actors/BGM/sign/UI are reused unchanged. -->
+
+
+
+
+<!-- v1.00.128
+     Added OVERWORLD 2 button to intro THEME TEST panel.
+     OVERWORLD = classic
+     OVERWORLD 2 = overworld + part2 stage variant -->
+
+
+
+
+<!-- v1.00.129
+     Overworld-2 background = black:
+     intro + cartridge + team/setup + main game.
+     Classic Overworld and all other themes unchanged. -->
+
+
+
+
+<!-- v1.00.130
+     Overworld-2:
+     - embedded map sky changed from #5C94FC to true black
+     - actual #cartridgeSelectModal background forced black
+     - intro/team/main-game exposed backgrounds forced black
+     - existing start-side castle half preserved
+     - mirrored castle half placed at far-right edge for seamless loop completion
+     - native size remains 688x240 / 43x15 -->
+
+<!-- v1.00.131 — OVERWORLD 2 CASTLE LOOP CORRECTION
+     - removed the v130 full mirrored castle-half concept
+     - clean v127-style start-side castle restored
+     - only the missing lower-left 2-tile / 32px castle fragment is placed at the map far right
+     - fragment is assembled from existing castle tile artwork, not a full decalcomania
+     - black sky/background retained
+     - native size remains 688x240 / 43x15 -->
+
+<!-- v1.00.132 — OVERWORLD 2 USER CASTLE FRAGMENT
+     - removed fabricated v131 fragment
+     - used the user's uploaded castle fragment unchanged
+     - fragment native size: 32x96
+     - placed flush to far-right edge at x=656, y=112
+     - map remains 688x240 / 43x15
+     - black Overworld-2 background retained -->
+
+
+
+
+
+
+<!-- v1.00.133
+     Overworld-2 castle artwork unchanged from v132.
+     Fixes TEAM-select loop overlap by making each scrolling panel exactly
+     688 * rendered scale pixels wide and moving exactly one map width per loop. -->
+
+
+
+
+
+
+<!-- v1.00.134
+     Overworld-2 only:
+     - cannon 48x32 at native x=592, y=152
+     - tall tree 16x46 at x=352, y=162
+     - small tree 16x32 at x=496, y=176
+     - all source #5C94FC sky pixels converted to alpha 0
+     - TEAM-select Killer launches from the visible cannon toward the left
+     - default right-edge Killer entry disabled
+     - intro/team map props share the same native 688x240 coordinates -->
+
+<!-- v1.00.135
+     - Overworld-2 cannon Killer now plays the same billfirework SFX as the pipe KILLER item at launch.
+     - Final TEAM winner reveal plays that same SFX three times with deliberately uneven spacing:
+       0ms, 430ms, 1180ms.
+     - Existing levelComplete winner music remains intact. -->
+
+<!-- v1.00.136
+     Overworld-2 cannon/Killer alignment:
+     - cannon snapped to exact native 16px grid: tile (37,9), 48x32 = 3x2 tiles
+     - muzzle anchor uses exact internal sprite coordinates (+16px,+8px native)
+     - Killer starts with its right edge on the muzzle centerline
+     - Killer leftward screen speed = 2x the actual Overworld-2 background scroll speed
+     - launch billfirework SFX retained -->
+
+<!-- v1.00.137
+     Overworld-2 Killer movement fix:
+     - removed transform animation conflict caused by transform:translateX(0)!important
+     - Killer now moves by updating its actual left coordinate with requestAnimationFrame
+     - speed remains exactly 2x rendered Overworld-2 background scroll speed
+     - Killer exits fully past the left edge before disappearing -->
+
+<!-- v1.00.138
+     Overworld-2 Killer strict 16x16 native-grid alignment:
+     - cannon remains tile (37,9), size 3x2 tiles
+     - Killer native size fixed to 16x16 = exactly one tile
+     - muzzle coordinate fixed to native tile point (38,10)
+     - spawn coordinate fixed to native tile (37,9) relative to muzzle
+     - only the rendered scale converts native coordinates to screen pixels
+     - movement remains smooth between grid-aligned spawn and exit -->
+
+<!-- v1.00.139
+     Overworld-2 Killer spawn correction:
+     - cannon remains on exact native 16px grid
+     - Killer remains exact native 16x16
+     - spawn now follows the ACTUAL visible cannon position while the map scrolls
+     - muzzle offset is still grid-derived: +16px X / +8px Y native
+     - 2x background-speed leftward flight retained -->
+
+<!-- v1.00.140
+     Overworld-2 Killer path micro-adjustment:
+     - raise launch/fly path by exactly 2 native pixels
+     - cannon grid position unchanged
+     - Killer remains native 16x16
+     - horizontal spawn and 2x background-speed flight unchanged -->
+
+
+
+
+
+<!-- v1.00.141
+     Overworld-2 SOLO:
+     - cloud #5C94FC pixels -> alpha 0
+     - old bush hidden only in part2 SOLO
+     - reused transparent 16x46 / 16x32 tree sprites
+     - trees placed on floor at columns 4 and 6 -->
+
+<!-- v1.00.142
+     Presentation-stage ambient SFX scope:
+     - Castle Bowser fire ambience: INTRO + TEAM SELECT only
+     - Overworld-2 cannon Killer ambience: INTRO + TEAM SELECT only
+     - hidden setup-stage animation may continue visually/timing-wise, but its ambience is muted in MAIN GAME
+     - pipe-item Killer SFX remains unchanged
+     - final-winner triple billfirework cue remains unchanged -->
+
+<!-- v1.00.143
+     - Final winner billfirework triple delayed by +2s: 2000 / 2430 / 3180ms
+     - FINAL ROUND hurry-up SFX volume reduced from 0.90 to 0.45
+     - TEAM question sample count now fits complete rounds:
+       2 teams=24, 3=24, 4=24, 5=25, 6=24
+     - 5x5 board remains 25 slots; unused remainder is rendered as empty/isNull
+     - SOLO remains 25 questions -->
+
+<!-- v1.00.144
+     TEAM fair-end revision:
+     - all 25 question cells active from game start
+     - bingo board has no pre-closed cell
+     - fair match-end turn is independent of board activation
+     - 2/3/4/6 teams end after turn 24; 5 teams after turn 25
+     - unused final cell remains available during the match but is simply never reached after the fair turn limit
+     - FINAL ROUND cue is based on turns remaining to the fair finish line
+     - v143 audio timing/volume changes retained -->
+
+<!-- v1.00.145
+     Final board visual-state fix:
+     - server solvedList responses can only ADD solved cells, never erase local solved cells
+     - replaced 1 stale overwrite path(s) with union merge
+     - triggerGameEnd renders the board once before winner overlay
+     - 25 active cells / fair 24-turn TEAM ending from v144 unchanged -->
+
+<!-- v1.00.146
+     SHELL pipe-item animation:
+     - existing ASSETS.shell + user-supplied second 16x16 frame loop
+     - attached frame background RGB(146,144,255) converted to alpha 0
+     - 90 blue pixels made transparent
+     - 180ms per frame
+     - all item scoring/target behavior unchanged -->
+
+<!-- v1.00.147
+     SHELL timing:
+     - original shell: 540ms total
+     - added shell frame: 180ms
+     - repeat
+     - transparency and item behavior unchanged -->
+
+<!-- v1.00.150
+     Rollback:
+     - removed the two added pre-intro screens entirely
+     - original intro is again the first visible game screen
+     - original intro click starts the already-selected theme BGM as before
+     - all v147 game/audio/SHELL behavior retained -->
+
+<!-- v1.00.151
+     Grade categorization:
+     - Intro -> 3/4/5/6 grade selector -> cartridge selector
+     - Google Sheet tab convention: "3학년-사회", "4학년 - 사회", etc.
+     - Only the visible cartridge label removes the leading grade prefix.
+     - Actual server sheet name remains untouched for getGameDataBySheet/ranking writes.
+     - Existing v150/v147 gameplay and audio behavior preserved. -->
+
+<!-- v1.00.152
+     Selection flow:
+     - Intro -> Grade -> Subject (사회/영어) -> Cartridge -> Team/Solo
+     - Expected tab name: "3학년-사회-카트리지명"
+     - Cartridge label shows only the trailing cartridge name.
+     - Full tab name remains untouched for server reads/writes and ranking storage.
+     - Existing v151/v150 gameplay behavior preserved. -->
+
+<!-- v1.00.153
+     Subject selection:
+     - added "◀ 학년 선택" back button
+     - reuses the exact cartridge-back-btn style from cartridge selection
+     - returns from subject screen to grade selection
+     - no gameplay/server/cartridge parsing changes -->
+
+<!-- v1.00.154
+     English-only publisher category:
+     - Social: Grade -> Subject -> Cartridge
+     - English: Grade -> Subject -> Publisher -> Cartridge
+     - English tab format: 학년-영어-출판사-게임이름
+     - Publishers are discovered automatically from tab names
+     - Cartridge label shows only 게임이름
+     Subjective questions:
+     - added separate 정답 확인 button
+     - correct/wrong teacher judgement buttons are disabled initially
+     - judgement unlocks only after answer reveal
+     - no separate popup added; all interaction stays inside the question modal
+     Existing gameplay/server/ranking logic preserved. -->
+
+<!-- v1.00.155
+     Final bingo bonus:
+     - if a team has 0 completed bingo lines, show "빙고 점수가 없습니다."
+     - teams with bingo continue to show line count and +bonus normally
+     - scoring calculation itself is unchanged -->
