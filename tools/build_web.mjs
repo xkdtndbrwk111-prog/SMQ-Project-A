@@ -101,13 +101,20 @@ for (const f of patchFiles) {
 // ---- 시험 전용 확인 함수 (HOJA_TEST_PROBE=1 일 때만, 배포용 dist에는 절대 넣지 않음)
 const TEST_PROBE = process.env.HOJA_TEST_PROBE === '1';
 if (TEST_PROBE) {
+  A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
+  A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
     'state(){const s=ACTIVE_SCENE;if(!s||!s.playerBody)return null;const b=s.playerBody.body;return {x:Math.round(s.playerBody.x),y:Math.round(s.playerBody.y),vx:Math.round(b.velocity.x),vy:Math.round(b.velocity.y),' +
     'grounded:!!(b.blocked.down||b.touching.down),sitting:!!s.hojaIsSitting,quiz:!!s.quizActive,paused:!!s.manualPaused,timeUp:!!s.timeUp,clear:!!s.clear,sec:Math.ceil(s.remainingMs/1000),found:RUN.found,stage:STAGE_INDEX};},' +
     'quiz(){const s=ACTIVE_SCENE;const e=(s.enemies||[]).find(x=>x&&x.type===\'BALLOONEY\'&&!x.dead&&x.bodyObj&&x.bodyObj.active!==false);if(!e)return false;s.showQuiz(e);return true;},' +
     'setTime(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;},' +
     'death(){ACTIVE_SCENE.startDeath(\'pit\');},' +
-    'metrics(){return {...hojaStep09_3Metrics_()};}});');
+    'metrics(){return {...hojaStep09_3Metrics_()};},resume(){ACTIVE_SCENE.scene.resume();},' +
+    'snapshot(){const s=ACTIVE_SCENE;if(!s?.playerBody?.body)return null;const b=s.playerBody.body;return {' +
+    'seed:RUN.seed,stage:STAGE_INDEX,remainingMs:s.remainingMs,score:s.score,found:RUN.found,deaths:RUN.deaths,' +
+    'player:{x:s.playerBody.x,y:s.playerBody.y,vx:b.velocity.x,vy:b.velocity.y,blocked:{...b.blocked},touching:{...b.touching}},' +
+    'enemies:(s.enemies||[]).map(e=>({type:e.type,key:e.memKey,state:e.state,alive:e.alive,consumed:e.consumed,x:e.bodyObj?.x,y:e.bodyObj?.y,vx:e.bodyObj?.body?.velocity.x,vy:e.bodyObj?.body?.velocity.y})),' +
+    'quiz:!!s.quizActive,dying:!!s.dying,clear:!!s.clear,timeUp:!!s.timeUp,records:window.HOJA_RUN_RECORD(),metrics:hojaStep09_3Metrics_()};}});');
   // Separate, visibly marked controls for focused manual regression tests.
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">

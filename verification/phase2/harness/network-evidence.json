@@ -1,0 +1,153 @@
+{
+  "teacher": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/vendor/qrcode.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/js/teacher_qr.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/cartridges/catalog.json",
+        "type": "fetch"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/cartridges/test-joseon-a.json",
+        "type": "fetch"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/arcade.html?season=winter",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script"
+      }
+    ],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:<port>/dist/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/js/teacher_qr.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/vendor/qrcode.js",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/cartridges/catalog.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/cartridges/test-joseon-a.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/arcade.html?season=winter",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      }
+    ],
+    "failures": [],
+    "errors": []
+  },
+  "student": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=9fa20fcd03&s=winter",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/js/student.js",
+        "type": "script"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/cartridges/catalog.json",
+        "type": "fetch"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/cartridges/test-joseon-a.json",
+        "type": "fetch"
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist/arcade.html?season=winter",
+        "type": "document"
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script"
+      }
+    ],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:<port>/dist/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=9fa20fcd03&s=winter",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/js/student.js",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/cartridges/catalog.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/cartridges/test-joseon-a.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist/arcade.html?season=winter",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      }
+    ],
+    "failures": [],
+    "errors": []
+  }
+}

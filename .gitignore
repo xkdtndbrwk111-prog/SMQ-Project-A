@@ -4,3 +4,6 @@
 .DS_Store
 __pycache__/
 /dist-test/
+
+/verification/phase2/harness/node_modules/
+/verification/phase2/harness/results/
