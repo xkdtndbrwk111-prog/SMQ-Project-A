@@ -38,7 +38,7 @@ const HELP = `
     '<tr><th>점프</th><td><kbd>Space</kbd> <kbd>Z</kbd> <kbd>W</kbd> <kbd>↑</kbd></td></tr>'+
     '<tr><th>문 들어가기</th><td>문 앞에서 <kbd>W</kbd> 또는 <kbd>↑</kbd></td></tr>'+
     '<tr><th>앉기 · 파이프 들어가기</th><td><kbd>S</kbd> 또는 <kbd>↓</kbd></td></tr>'+
-    '<tr><th>문제 풀기</th><td>숫자 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 또는 보기를 눌러 고르기</td></tr>'+
+    '<tr><th>문제 풀기</th><td>숫자 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> · OX 문제는 <kbd>O</kbd><kbd>X</kbd> · 보기를 눌러도 됨</td></tr>'+
     '<tr><th>다음으로</th><td><kbd>Enter</kbd></td></tr>'+
     '<tr><th>도움말 열기 · 닫기</th><td><kbd>H</kbd> 또는 화면 오른쪽 위 <kbd>H</kbd> 버튼</td></tr>'+
     '</table><button id="hojaHelpClose" type="button">닫기 (H)</button></div>';
