@@ -55,4 +55,14 @@ test('complete distribution hashes, version changes and safe retirement of gener
  await writeFile(path.join(output,'personal.txt'),'keep');
  assert.notEqual(build().status,0);
  assert.equal(await readFile(path.join(output,'personal.txt'),'utf8'),'keep');
+ await rm(path.join(output,'personal.txt'));
+ const arcadePath=path.join(source,'arcade.html');
+ const original=await readFile(arcadePath,'utf8');
+ await writeFile(arcadePath,original.replace('<script src="js/arcade-host.js"></script>',''));
+ assert.notEqual(build().status,0,'build refuses missing host script tag');
+ await writeFile(arcadePath,original);
+ const hostPath=path.join(source,'js/arcade-host.js');
+ await rename(hostPath,hostPath+'.retired');
+ assert.notEqual(build().status,0,'build refuses missing host script file');
+
 });

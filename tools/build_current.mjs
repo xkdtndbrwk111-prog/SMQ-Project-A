@@ -28,7 +28,7 @@ const files=Object.fromEntries(production.map(p=>[p,hash(fs.readFileSync(path.jo
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'tools/current-baseline-hashes.json'),'utf8'));
 const unchanged=JSON.stringify(Object.entries(files).sort())===JSON.stringify(Object.entries(baseline.files).sort());
 let arcade=fs.readFileSync(path.join(source,'arcade.html'),'utf8');
-if(arcade.includes('src="js/arcade-host.js"')){
+{
  const sourcePages={'arcade.html':arcade};
  for(const page of ['index.html','play.html'])sourcePages[page]=fs.readFileSync(path.join(source,page),'utf8');
  const errors=checkModuleOrder(sourcePages);
