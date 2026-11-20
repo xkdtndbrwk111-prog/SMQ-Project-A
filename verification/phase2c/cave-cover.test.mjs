@@ -77,6 +77,10 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   await frame.locator('#hojaTestNextStage').click();
   await game.waitForFunction(()=>window.HOJA_TEST_PROBE.state()?.stage===0,null,{timeout:30000});
   await game.waitForFunction(()=>typeof document.getElementById('caveRandomBtn')?.onclick==='function',null,{timeout:30000});
+  for(const id of ['v055ChunkBtn','hojaZoomAutoBtn','qualityBtn','cullPerfBtn','colliderBtn'])
+   assert.equal(await frame.locator('#'+id).evaluate(element=>typeof element.onclick),'function',id+' is test-only and bound');
+  await frame.locator('#cullPerfBtn').click();
+  await frame.locator('#cullPerfBtn').click();
   for(const id of ['resetBtn','escapeCaveBtn','caveRandomBtn'])
    assert.equal(await frame.locator('#'+id).evaluate(element=>typeof element.onclick),'function',id+' is test-only and bound');
   const randomBefore=await game.evaluate(()=>window.HOJA_TEST_PROBE.caveRandom());
