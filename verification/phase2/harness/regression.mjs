@@ -64,6 +64,11 @@ async function teacher(page){
    const stage=await game.locator('#domStageMap').innerText();
    assert.equal(await game.evaluate(()=>window.HOJA_V2_NEXT_STAGE()),false,'production solo stage skip denied');
    assert.equal(await game.locator('#domStageMap').innerText(),stage);
+   const dialogue=await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_PREVIEW({lines:[{speaker:'HOJA',text:'Maker 이벤트 확인'}]}));
+   assert.equal(dialogue.ok,true,'shared Maker dialogue accepts event payload');
+   assert.equal(await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STATUS().open),true);
+   await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STOP());
+   assert.equal(await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STATUS().open),false);
  }
  await new Promise(resolve=>setTimeout(resolve,500));
  return qr;

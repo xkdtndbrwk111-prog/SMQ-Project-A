@@ -36,6 +36,10 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   assert.equal(await game.evaluate(()=>typeof window.HOJA_V054_RENDER_AB?.toggle),'function');
   for(const id of ['v055BenchBtn','scaleBenchBtn','scaleQuickBtn','renderBenchBtn'])
    assert.equal(await frame.locator('#'+id).evaluate(element=>typeof element.onclick),'function',id+' is bound in test build');
+  await frame.locator('#hojaDialoguePreviewBtn').click();
+  assert.equal(await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STATUS().open),true,'test preview opens');
+  await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STOP());
+  assert.equal(await game.evaluate(()=>window.HOJA_EVENT_DIALOGUE_STATUS().open),false);
   const [site]=await game.evaluate(()=>window.HOJA_TEST_PROBE.coverSites());
   assert.ok(site);
   const position=async y=>game.evaluate(({x,y})=>window.HOJA_TEST_PROBE.moveForCover(x,y),{x:(site.a+site.b)/2,y});

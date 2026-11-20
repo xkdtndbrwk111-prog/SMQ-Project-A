@@ -1,3 +1,4 @@
+import {dialogueButtons,dialoguePreviewBindings} from './current-test-dialogue.mjs';
 import {controlsBeforeSound,controlsAfterSound,controlButtons} from './current-test-controls.mjs';
 import {actionHandlers,emergencyReturnMethod} from './current-test-actions.mjs';
 import {profilerSource,profilerHandler} from './current-test-profiler.mjs';
@@ -25,6 +26,9 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit("    document.getElementById('soundBtn').onclick=()=>this.toggleSound();", "    document.getElementById('soundBtn').onclick=()=>this.toggleSound();"+controlsAfterSound);
   A.edit('async function boot(){',profilerSource+'async function boot(){');
   A.edit('  respawnNow(){',emergencyReturnMethod+'  respawnNow(){');
+  A.edit('<main>',dialogueButtons+'\n<main>');
+  A.edit("  nextEl.addEventListener('click',advance);",dialoguePreviewBindings+"  nextEl.addEventListener('click',advance);");
+
   A.edit('// V0.32 PALETTE SHIFTS', `window.HOJA_V2_TOGGLE_CAVE_VISIBILITY=function(){
     if(STAGE.theme!=='cave'||!ACTIVE_SCENE)return;
     const scene=ACTIVE_SCENE;
