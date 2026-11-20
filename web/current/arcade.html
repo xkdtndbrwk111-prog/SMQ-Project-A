@@ -20,9 +20,6 @@ main{max-width:1200px;margin:auto;padding:14px 16px}
 .controls{padding:9px 11px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);
 display:flex;flex-wrap:wrap;gap:7px 14px;align-items:center}
 .controls .spacer{flex:1}
-.stageBtns{display:inline-flex;gap:4px;align-items:center}
-.stageBtns button{padding:4px 9px}
-.stageBtns button.on{background:#f1e3b5;color:#1b2430;border-color:#f1e3b5}
 kbd{display:inline-block;min-width:23px;text-align:center;padding:2px 5px;border:1px solid #617180;
 border-bottom-width:2px;border-radius:4px;background:#202a34;color:#fff;font:11px ui-monospace,monospace}
 button{border:1px solid #536474;background:#25313d;color:#fff;border-radius:7px;padding:6px 10px;cursor:pointer;font:inherit;font-size:12px}
@@ -1169,9 +1166,6 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
   <div class="internalControls" style="display:none!important" aria-hidden="true"><span><kbd>V</kbd> 원형/지형 · <kbd>G</kbd> 부드러움/선명함 · <kbd>Shift+V</kbd> OFF</span> <span id="visionMetric">시야 A/B</span>
     <span class="spacer"></span>
     <span id="mapCode" style="opacity:.6;font:11px ui-monospace,monospace"></span>
-    <span class="stageBtns">스테이지
-      <button type="button" data-stage="0">1</button><button type="button" data-stage="1">2</button><button type="button" data-stage="2">3</button><button type="button" data-stage="3">4</button><button type="button" data-stage="4">동굴</button>
-    </span>
     
     <button id="c1CameraBtn" type="button" title="C1 수동 카메라와 V0.60 원본 자동 카메라를 비교합니다. 단축키 없음." style="border-color:#e8c880;color:#ffe2a3">카메라: C1 직접 추적</button>
     <button id="qualityBtn" type="button" title="균형 / 성능 / 고화질 (게임 진행 중 변경 가능)">렌더 배율: 균형</button>
@@ -3041,9 +3035,6 @@ function startStage(index,fresh,spawn='start'){
   }
   PENDING_SPAWN=spawn;
   applyStage(index);
-  document.querySelectorAll('.stageBtns button').forEach(b=>{
-    b.classList.toggle('on',Number(b.dataset.stage)===STAGE_INDEX);
-  });
   const v2btn=document.getElementById('hojaV2StageCycleBtn');
   if(v2btn)v2btn.textContent=HOJA_MAKER_MODE?('Maker 맵 '+(STAGE_INDEX+1)+'/'+RUN_STAGES.length+' → 다음'):('시험 스테이지: '+(STAGE_INDEX===4?'지하':`${STAGE_INDEX+1}/4`)+' → 다음');
   window.HOJA_V2_SYNC_CAVE_VISIBILITY?.();
@@ -5792,9 +5783,6 @@ class HojaScene extends Phaser.Scene{
       btn.blur();
       startStage(0,true);
     };
-    document.querySelectorAll('.stageBtns button').forEach(btn=>{
-      btn.onclick=()=>{btn.blur();startStage(Number(btn.dataset.stage),true);};
-    });
     document.getElementById('soundBtn').onclick=()=>this.toggleSound();
     document.getElementById('c1CameraBtn').onclick=()=>{
       HOJA_C1_MANUAL_CAMERA=!HOJA_C1_MANUAL_CAMERA;
@@ -9178,7 +9166,7 @@ function hojaRankBrowserId_(){
 
 // Developer stage skips cannot produce rankable runs; reset on fresh game.
 window.addEventListener('click',e=>{
-  if(e.target.closest('#hojaV2StageCycleBtn, [data-stage]'))queueMicrotask(()=>{HOJA_RANK_TEST_MODE_=true;});
+  if(e.target.closest('#hojaV2StageCycleBtn'))queueMicrotask(()=>{HOJA_RANK_TEST_MODE_=true;});
 },true);
 if(typeof window.HOJA_V2_NEXT_STAGE==='function'){
   const original=window.HOJA_V2_NEXT_STAGE;
