@@ -52,6 +52,7 @@ ok(syntaxFail.length === 0, `스크립트 문법 (인라인 ${inlineCount}개 + 
 
 // 5
 const idx = read('index.html'), ply = read('play.html'), arc = read('arcade.html');
+const b0 = JSON.parse(read('BUILD.json'));
 const gone = (t, re) => !re.test(t);
 for (const [label, re] of [
   ['팀전 블록', /id="hojaTeam(V067Runtime|R10PortraitAssets|V067Assets)"/],
@@ -67,6 +68,15 @@ for (const [label, re] of [
 ok(gone(arc, /id="hojaV063Perf(Style|Script)"/), '제거됨: 아케이드 F9 성능 패널');
 ok(/id="hojaP1BHelp"/.test(arc) && /qaKeys=new Set\(\['B','C','F','G','I'/.test(arc), 'H 도움말 들어감, H만 차단 목록에서 빠짐');
 ok(!/__HOJA_ARCADE_SEASON__';<\/script><style id="hojaV055ArcadeSharedHud">/.test(arc), '아케이드 시즌은 주소(?season=)로 정함');
+
+// 5-1 Phase 1C 조작·도움말·기록
+ok(!/addKey\(/.test(arc) && !/hojaDoubleTapRun\(this/.test(arc) && /const HOJA_P1C_INPUT=/.test(arc), '키 입력은 code 기반 관리자뿐 (Phaser addKey·두 번 누르기 달리기 없음)');
+ok(/CODE=\{KeyA:'left',KeyD:'right',KeyW:'up',KeyS:'down',Comma:'run',Period:'jump',Enter:'enter'\}/.test(arc), '조작표: A·D·W·S·쉼표·마침표·Enter (키 하나 = 동작 하나)');
+ok(!/jumpPressed=spacePressed\|\|zPressed\|\|\(upPressed/.test(arc), 'W 점프 없음');
+ok(!/<kbd>(Space|Shift|←→|↑|↓)<\/kbd>/.test(arc) && !/O\/X 문제는 O·X 키/.test(arc), '중복·개발용 키 안내 없음');
+ok(!/HOJA_TT_ARCADE/.test(arc) && !/id="hojaHelpBtn"|hojaHelpBtn'/.test(arc), '가상 입력 경로·터치 조작 버튼 없음');
+ok(/id="hojaP1CReview"/.test(arc) && /window\.HOJA_RUN_RECORD=/.test(arc), '결산·오답 풀이와 문항별 응답 기록 들어감');
+ok(!/HOJA_TEST_PROBE/.test(arc + idx + ply) && b0.testProbe === false, '시험 전용 확인 함수 없음(배포본)');
 
 // 6
 ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');
