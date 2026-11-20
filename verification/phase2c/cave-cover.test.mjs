@@ -32,6 +32,10 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   await frame.locator('#scoreHud').waitFor({state:'visible',timeout:30000});
   const game=page.frames().find(f=>f.url().includes('/arcade.html'));
   await game.waitForFunction(()=>!!window.HOJA_TEST_PROBE?.state(),null,{timeout:30000});
+  assert.equal(await game.evaluate(()=>typeof window.HOJA_V053_BENCH?.toggle),'function');
+  assert.equal(await game.evaluate(()=>typeof window.HOJA_V054_RENDER_AB?.toggle),'function');
+  for(const id of ['v055BenchBtn','scaleBenchBtn','scaleQuickBtn','renderBenchBtn'])
+   assert.equal(await frame.locator('#'+id).evaluate(element=>typeof element.onclick),'function',id+' is bound in test build');
   const [site]=await game.evaluate(()=>window.HOJA_TEST_PROBE.coverSites());
   assert.ok(site);
   const position=async y=>game.evaluate(({x,y})=>window.HOJA_TEST_PROBE.moveForCover(x,y),{x:(site.a+site.b)/2,y});
@@ -59,6 +63,8 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   const vision=await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision());
   await frame.locator('#hojaTestCaveVision').click();
   assert.equal(await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision()),!vision,'test build cave vision toggle');
+  await frame.locator('#scaleQuickBtn').click();
+  await frame.locator('#scaleQuickBtn').click();
 
  } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
 });

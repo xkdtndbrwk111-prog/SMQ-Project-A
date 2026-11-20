@@ -85,7 +85,7 @@ ok(!/HOJA_TT_ARCADE/.test(arc) && !/id="hojaHelpBtn"|hojaHelpBtn'/.test(arc), '�
 ok(/id="hojaP1CReview"/.test(arc) && /window\.HOJA_RUN_RECORD=/.test(arc), '결산·오답 풀이와 문항별 응답 기록 들어감');
 ok(count(/HOJA_TEST_PROBE/g)===0 && b0.testProbe === false, '시험 전용 확인 함수 없음(배포본)');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
-  ok(count(/HOJA_PHASER_APP|HOJA_STEP09_3_TEST|HOJA_STEP12_6_HUD_TEST|HOJA_STEP10_RANK_UI|HOJA_V064_PERF_|HOJA_V049_QA|HOJA_V050_QA|HOJA_STEP12_3_QUIZ_LAYOUT|HOJA_V2_TOGGLE_CAVE_VISIBILITY|HOJA_V2_SYNC_CAVE_VISIBILITY/g)===0, '과거 시험용 게임 조작 API 없음(배포본)');
+  ok(count(/HOJA_PHASER_APP|HOJA_STEP09_3_TEST|HOJA_STEP12_6_HUD_TEST|HOJA_STEP10_RANK_UI|HOJA_V064_PERF_|HOJA_V049_QA|HOJA_V050_QA|HOJA_STEP12_3_QUIZ_LAYOUT|HOJA_V2_TOGGLE_CAVE_VISIBILITY|HOJA_V2_SYNC_CAVE_VISIBILITY|HOJA_V053_BENCH|HOJA_V054_RENDER_AB|HOJA_V055_BENCH|HOJA_V056_BENCH_LOG|HOJA_V054_LAST_RESULT/g)===0, '과거 시험용 게임 조작 API 없음(배포본)');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/stageBtns|data-stage=["']/.test(arc), '숨은 단계별 강제 이동 버튼 없음');
 
