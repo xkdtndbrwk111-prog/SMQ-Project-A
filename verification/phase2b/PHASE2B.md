@@ -38,6 +38,7 @@ Chrome과 jsDelivr 접근이 필요하다. `CHROME_PATH`로 Chrome 경로를 지
 - 두 빌드 각각 유도 FINISH 63점(문항 10·과일 5·시간 48), 정산 재호출 시 불변, 오답 복습 전후 원래 기록·지표 불변, FINISH 랭킹 화면. 위치/맵/과일은 시험 훅으로 유도했으며 자연 완주가 아니다. `legacy-settlement.json`, `current-settlement.json`에 증거 보존.
 - 두 빌드 각각 교사·학생을 독립 브라우저 컨텍스트로 분리해 교사 싱글/생성 QR 학생 입장부터 게임 장면 준비까지 실제 요청 검사. 교사 8건·학생 7건씩 HTTP 200, 실패/페이지 오류 0. 로컬·고정 Phaser jsDelivr 외 요청과 Firebase·운영 Apps Script 요청 0. `legacy-network.json`, `current-network.json` 참조.
 - 신규 정본의 학생 JS를 임시 변경했을 때 게임 버전이 바뀌고 복원 후 기존 버전 및 두 빌드 일치가 복구됨. 출력 폴더의 예상 외 파일은 보존하고 빌드를 중지하는 것과 잘못된 시험 모드의 실패를 확인했다.
+- 과거 자연 탐색은 재현 자료로 유지하되 방문한 맵 번호의 개수만으로 PASS가 나지 않도록 했다. 동굴 진입·복귀 및 지상 전환 이벤트를 확인하는 회귀는 후속 단계다.
 
 ## FAIL / NOT RUN
 

@@ -202,7 +202,9 @@ async function deterministic(){
 async function natural(){
  const result=await replay('explore');output.natural=result;
  console.log(`NATURAL stop=${result.reason} stages=${result.visited.join(',')}`);
- assert.ok(result.reason==='finish'&&result.visited.length===5,'natural 5-map finish not reached within bound');
+ // The historical explorer does not verify cave return and surface door events.
+ // Do not ever treat a count of visited stage IDs as a verified natural route.
+ throw Error('Historical exploration is not a natural-route verification; event-based tests are required.');
 }
 async function settlement(){output.settlement=await replay('settlement');console.log('PASS induced finish, fruit, duplicate settlement, review and ranking');}
 try {if(!mode||mode==='network')await network();if(!mode||mode==='replay')await deterministic();if(mode==='explore')await natural();if(!mode||mode==='settlement')await settlement();}
