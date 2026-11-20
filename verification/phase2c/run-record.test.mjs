@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const source=fs.readFileSync(fileURLToPath(new URL('../../web/current/js/run-record.js',import.meta.url)),'utf8');
+const sandbox={window:{}};vm.runInNewContext(source,sandbox);
+const make=()=>{const run={};let clock=100,progress=0;const record=sandbox.window.HOJA_CREATE_RECORD({run,hasQuestions:()=>true,onProgress:()=>progress++,now:()=>clock});return {run,record,advance:ms=>clock+=ms,get progress(){return progress}}};
+const q={familyKey:'A\0id1',type:'OX',q:'문제',choices:['O','X'],answer:0,source:'A'};
+test('first answer is recorded once, with independent returned choices',()=>{const s=make();assert.equal(s.record.hojaStep09_3Open_(q),true);assert.equal(s.record.hojaStep09_3Open_(q),false);s.advance(300);s.record.hojaStep09_3Answer_(q,false,0,1);s.advance(500);s.record.hojaStep09_3Answer_(q,true,10,0);let row=s.record.rows()[0];assert.equal(row.chosenIndex,1);assert.equal(row.correct,false);assert.equal(row.ms,300);assert.equal(s.progress,1);row.choices[0]='changed';assert.equal(s.record.rows()[0].choices[0],'O')});
+test('invalid questions do not create a record',()=>{const s=make();assert.equal(s.record.hojaStep09_3Open_({...q,answer:3}),false);assert.equal(s.record.rows().length,0)});
