@@ -1,13 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdtemp, cp, mkdir, writeFile, readFile, readdir, rename} from 'node:fs/promises';
+import {mkdtemp, cp, mkdir, writeFile, readFile, readdir, rename, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {after} from 'node:test';
-import {rm} from 'node:fs/promises';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -30,9 +29,16 @@ test('complete distribution hashes, version changes and safe retirement of gener
  await writeFile(path.join(source,added),'// module');
  assert.equal(build().status,0);
  const first = await manifest();
- const entries = await readdir(output,{recursive:true,withFileTypes:true});
- const names = entries.filter(e => e.isFile() && e.name !== 'BUILD.json')
-   .map(e => path.relative(output, path.join(e.parentPath,e.name)));
+ async function filesIn(dir) {
+   const names = [];
+   for (const entry of await readdir(dir, {withFileTypes:true})) {
+     const full = path.join(dir, entry.name);
+     if (entry.isDirectory()) names.push(...await filesIn(full));
+     else names.push(path.relative(output, full));
+   }
+   return names;
+ }
+ const names = (await filesIn(output)).filter(name => name !== 'BUILD.json');
  assert.deepEqual(Object.keys(first.files).sort(),names.sort());
  for(const [name,entry] of Object.entries(first.files)) {
    const bytes=await readFile(path.join(output,name));
