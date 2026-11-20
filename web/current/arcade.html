@@ -1142,7 +1142,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
     <div id="bootError"></div>
   </div>
   <div class="controls cleanLabControls" aria-label="게임 시험판 간편 조작">
-    <button id="hojaTerrainSplitBtn" style="display:none" type="button" title="A: 발판·장식 모두 청크 / B: 발판 개별·장식 청크 / C: 발판 청크·장식 개별">청크 원인 비교: A — 모두 청크</button><button type="button" id="hojaV2StageCycleBtn" onclick="window.HOJA_V2_NEXT_STAGE()">시험 스테이지: 1/4</button><button type="button" id="hojaV2CaveVisibilityBtn" onclick="window.HOJA_V2_TOGGLE_CAVE_VISIBILITY()" style="display:none" title="V2 동굴의 검은 시야 가림막을 켜고 끄는 진단 버튼">동굴 시야: 끔 (시험)</button>
+    <button id="hojaTerrainSplitBtn" style="display:none" type="button" title="A: 발판·장식 모두 청크 / B: 발판 개별·장식 청크 / C: 발판 청크·장식 개별">청크 원인 비교: A — 모두 청크</button><button type="button" id="hojaV2StageCycleBtn" onclick="window.HOJA_V2_NEXT_STAGE()">시험 스테이지: 1/4</button>
     <span class="cleanZoomLabel">카메라 줌</span>
     <div class="cleanZoomGroup" role="group" aria-label="카메라 자동·수동 확대 배율">
       <button type="button" id="hojaZoomAutoBtn" data-zoom-mode="auto" aria-pressed="true">자동</button>
@@ -3029,7 +3029,6 @@ function startStage(index,fresh,spawn='start'){
   applyStage(index);
   const v2btn=document.getElementById('hojaV2StageCycleBtn');
   if(v2btn)v2btn.textContent=HOJA_MAKER_MODE?('Maker 맵 '+(STAGE_INDEX+1)+'/'+RUN_STAGES.length+' → 다음'):('시험 스테이지: '+(STAGE_INDEX===4?'지하':`${STAGE_INDEX+1}/4`)+' → 다음');
-  window.HOJA_V2_SYNC_CAVE_VISIBILITY?.();
   const vp=document.getElementById('gameViewport');
   if(vp)vp.style.background=THEME.sky;
   if(ACTIVE_SCENE){
@@ -3041,26 +3040,6 @@ function startStage(index,fresh,spawn='start'){
 window.HOJA_V2_NEXT_STAGE=function(){
   const next=(STAGE_INDEX+1)%RUN_STAGES.length;
   startStage(next,false,'start');
-};
-// V2 CAVE MASK DIAG: no texture, world, camera or physics mutations.
-window.HOJA_V2_TOGGLE_CAVE_VISIBILITY=function(){
-  if(STAGE.theme!=='cave'||!ACTIVE_SCENE)return;
-  const sc=ACTIVE_SCENE;
-  sc.caveVisionEnabled=!sc.caveVisionEnabled;
-  const vp=document.getElementById('gameViewport');
-  vp?.classList.toggle('caveVisionOff',!sc.caveVisionEnabled);
-  if(sc.caveVisionEnabled)sc.updateCaveVisibility(true);
-  window.HOJA_V2_SYNC_CAVE_VISIBILITY();
-};
-window.HOJA_V2_SYNC_CAVE_VISIBILITY=function(){
-  const b=document.getElementById('hojaV2CaveVisibilityBtn');
-  if(!b)return;
-  b.style.display=STAGE.theme==='cave'?'':'none';
-  if(STAGE.theme==='cave'){
-    const enabled=!!ACTIVE_SCENE?.caveVisionEnabled;
-    b.textContent=enabled?'동굴 시야: 켬':'동굴 시야: 끔 (시험)';
-    b.setAttribute('aria-pressed',String(enabled));
-  }
 };
 
 // --------------------------------------------------------------------------
@@ -3461,8 +3440,7 @@ class HojaScene extends Phaser.Scene{
     this.lastUrgencyApplied=null;
     this.lastPaletteBand=-1;
     document.getElementById('gameViewport')?.classList.toggle('inCave',STAGE.theme==='cave');
-    window.HOJA_V2_SYNC_CAVE_VISIBILITY?.();
-    this.applyUrgencyState();
+      this.applyUrgencyState();
     this.updateSurfaceChunkPalette();
     if(STAGE.theme==='cave'||this.surfaceStreetLamps?.length)this.createCaveActorLight();
     this.foundStage=this.mem.found;

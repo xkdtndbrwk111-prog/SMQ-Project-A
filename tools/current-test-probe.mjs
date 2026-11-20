@@ -11,11 +11,20 @@ export function instrumentArcade(input) {
   };
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
+  A.edit('// V0.32 PALETTE SHIFTS', `window.HOJA_V2_TOGGLE_CAVE_VISIBILITY=function(){
+    if(STAGE.theme!=='cave'||!ACTIVE_SCENE)return;
+    const scene=ACTIVE_SCENE;
+    scene.caveVisionEnabled=!scene.caveVisionEnabled;
+    document.getElementById('gameViewport')?.classList.toggle('caveVisionOff',!scene.caveVisionEnabled);
+    if(scene.caveVisionEnabled)scene.updateCaveVisibility(true);
+  };
+  // V0.32 PALETTE SHIFTS`);
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
     'stopLoop(){ACTIVE_SCENE.game.loop.stop();},step(){ACTIVE_SCENE.game.step(performance.now(),16);},' +
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
+    'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
     'cameraInfo(){const c=ACTIVE_SCENE.cameras.main;return {scrollX:c.scrollX,scrollY:c.scrollY,zoom:c.zoom,width:c.width,height:c.height};},' +
     'bankInfo(){return (ACTIVE_SCENE.waterBankForeground||[]).map(o=>({x:o.x,y:o.y,w:o.width,h:o.height,depth:o.depth,visible:o.visible}));},' +
     'coverInfo(){return (ACTIVE_SCENE.caveCovers||[]).map(({cover})=>{const source=cover.texture.getSourceImage();const ctx=source.getContext("2d");const pixels=ctx.getImageData(0,0,source.width,source.height).data;let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)transparent++;return {x:cover.x,y:cover.y,w:source.width,h:source.height,alpha:cover.alpha,transparent};});},' +
@@ -39,10 +48,12 @@ export function instrumentArcade(input) {
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
     TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <button id="hojaTestCaveVision">동굴 시야 전환</button>
     <button id="hojaTestQuiz">문제 열기</button>
     <button id="hojaTestTimeout">2초 후 종료</button>
   </div><script>
   document.getElementById('hojaTestDeath').onclick=()=>window.HOJA_TEST_PROBE.death();
+  document.getElementById('hojaTestCaveVision').onclick=()=>window.HOJA_V2_TOGGLE_CAVE_VISIBILITY();
   document.getElementById('hojaTestQuiz').onclick=()=>window.HOJA_TEST_PROBE.quiz();
   document.getElementById('hojaTestTimeout').onclick=()=>window.HOJA_TEST_PROBE.setTime(2);
   </script>`);
