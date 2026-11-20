@@ -30,7 +30,7 @@ html.hojaStudentPage #hojaNextMode{display:none!important}
   const gate = document.createElement('div'); gate.id = 'hojaStudentGate';
   gate.innerHTML = '<div class="sgCard"><h1>HOJA</h1><p class="sgMode">혼자 아케이드</p><p class="sgUnits" id="hojaStudentUnits"></p>' +
     '<p class="sgError" id="hojaStudentError" hidden></p><p class="sgStatus" id="hojaStudentStatus">문제를 준비하는 중…</p>' +
-    '<button type="button" id="hojaStudentStart" disabled>시작</button><p class="sgHint" id="hojaStudentHint">게임 중 <b>H</b> 또는 오른쪽 위 H 버튼: 조작법 도움말</p></div>';
+    '<button type="button" id="hojaStudentStart" disabled>시작</button><p class="sgHint" id="hojaStudentHint">이동 <b>A D</b> · 점프 <b>.</b> · 달리기 <b>,</b> · 게임 중 <b>H</b>: 조작 도움말</p></div>';
   const $ = id => document.getElementById(id);
   let ready = false, season = 'spring', played = false;
 
