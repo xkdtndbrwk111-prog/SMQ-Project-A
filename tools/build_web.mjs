@@ -105,7 +105,20 @@ if (TEST_PROBE) {
     'state(){const s=ACTIVE_SCENE;if(!s||!s.playerBody)return null;const b=s.playerBody.body;return {x:Math.round(s.playerBody.x),y:Math.round(s.playerBody.y),vx:Math.round(b.velocity.x),vy:Math.round(b.velocity.y),' +
     'grounded:!!(b.blocked.down||b.touching.down),sitting:!!s.hojaIsSitting,quiz:!!s.quizActive,paused:!!s.manualPaused,timeUp:!!s.timeUp,clear:!!s.clear,sec:Math.ceil(s.remainingMs/1000),found:RUN.found,stage:STAGE_INDEX};},' +
     'quiz(){const s=ACTIVE_SCENE;const e=(s.enemies||[]).find(x=>x&&x.type===\'BALLOONEY\'&&!x.dead&&x.bodyObj&&x.bodyObj.active!==false);if(!e)return false;s.showQuiz(e);return true;},' +
-    'setTime(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;}});');
+    'setTime(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;},' +
+    'death(){ACTIVE_SCENE.startDeath(\'pit\');},' +
+    'metrics(){return {...hojaStep09_3Metrics_()};}});');
+  // Separate, visibly marked controls for focused manual regression tests.
+  // These call actual game paths; they do not establish that a natural route is reachable.
+  A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
+    TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <button id="hojaTestQuiz">문제 열기</button>
+    <button id="hojaTestTimeout">2초 후 종료</button>
+  </div><script>
+  document.getElementById('hojaTestDeath').onclick=()=>window.HOJA_TEST_PROBE.death();
+  document.getElementById('hojaTestQuiz').onclick=()=>window.HOJA_TEST_PROBE.quiz();
+  document.getElementById('hojaTestTimeout').onclick=()=>window.HOJA_TEST_PROBE.setTime(2);
+  </script>`);
   if (!process.argv[2]) process.argv[2] = 'dist-test';
 }
 
@@ -126,6 +139,9 @@ const page = name => {
 };
 
 const out = path.resolve(ROOT, process.argv[2] || 'dist');
+if (TEST_PROBE && out !== path.join(ROOT, 'dist-test')) {
+  throw new Error('시험 전용 빌드 출력은 dist-test만 허용합니다.');
+}
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 const files = { 'index.html': page('index'), 'play.html': page('play'), 'arcade.html': arcade };
