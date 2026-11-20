@@ -63,6 +63,11 @@ const A = {
     if (a < 0 || b < 0 || arcade.indexOf(start, a + 1) >= 0) throw new Error(`[arcade] 범위 표지 오류: ${start.slice(0, 60)}`);
     arcade = arcade.slice(0, a) + after + arcade.slice(b);
   },
+  /** 정규식 치환: 맞는 곳이 정확히 count개여야 한다 */
+  replaceRe(re, after, count) {
+    const n = (arcade.match(re) || []).length; if (n !== count) throw new Error(`[arcade] ${re} : ${n}개 (기대 ${count})`);
+    arcade = arcade.replace(re, after);
+  },
   beforeBodyEnd(html) { const i = arcade.lastIndexOf('</body>'); if (i < 0) throw new Error('아케이드 </body> 없음'); arcade = arcade.slice(0, i) + html + '\n' + arcade.slice(i); },
 };
 
@@ -93,6 +98,17 @@ for (const f of patchFiles) {
   applied.push({ file: f, title: mod.title });
 }
 
+// ---- 시험 전용 확인 함수 (HOJA_TEST_PROBE=1 일 때만, 배포용 dist에는 절대 넣지 않음)
+const TEST_PROBE = process.env.HOJA_TEST_PROBE === '1';
+if (TEST_PROBE) {
+  A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
+    'state(){const s=ACTIVE_SCENE;if(!s||!s.playerBody)return null;const b=s.playerBody.body;return {x:Math.round(s.playerBody.x),y:Math.round(s.playerBody.y),vx:Math.round(b.velocity.x),vy:Math.round(b.velocity.y),' +
+    'grounded:!!(b.blocked.down||b.touching.down),sitting:!!s.hojaIsSitting,quiz:!!s.quizActive,paused:!!s.manualPaused,timeUp:!!s.timeUp,clear:!!s.clear,sec:Math.ceil(s.remainingMs/1000),found:RUN.found,stage:STAGE_INDEX};},' +
+    'quiz(){const s=ACTIVE_SCENE;const e=(s.enemies||[]).find(x=>x&&x.type===\'BALLOONEY\'&&!x.dead&&x.bodyObj&&x.bodyObj.active!==false);if(!e)return false;s.showQuiz(e);return true;},' +
+    'setTime(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;}});');
+  if (!process.argv[2]) process.argv[2] = 'dist-test';
+}
+
 // ---- 합치기
 const DROP = '\u0000HOJA_DROP\u0000';
 let base = pieces.map(p => (p.dropped ? DROP : p.text)).join('');
@@ -116,7 +132,7 @@ const files = { 'index.html': page('index'), 'play.html': page('play'), 'arcade.
 for (const [n, t] of Object.entries(files)) fs.writeFileSync(path.join(out, n), t);
 for (const [from, to] of P.copies) fs.cpSync(path.join(ROOT, from), path.join(out, to), { recursive: true });
 const info = {
-  gameVersion, builtAt: new Date().toISOString(), source: man.sha256, patches: applied,
+  gameVersion, testProbe: TEST_PROBE, builtAt: new Date().toISOString(), source: man.sha256, patches: applied,
   files: Object.fromEntries(Object.entries(files).map(([n, t]) => [n, { bytes: Buffer.byteLength(t), sha256: sha(t) }])),
 };
 fs.writeFileSync(path.join(out, 'BUILD.json'), JSON.stringify(info, null, 1) + '\n');
