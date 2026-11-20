@@ -1180,11 +1180,11 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
     <button id="bgPerfBtn" type="button" title="원본 패럴랙스 / 경량 배경을 실시간 비교합니다">배경: 원본</button>
     <button id="lampPerfBtn" type="button" title="성능 실험: 가로등의 원형 빛을 원본·경량·끄기로 비교">지상 광원: 원본 300px (N)</button>
     <button id="cullPerfBtn" type="button" title="고정 지형의 화면 밖 그리기 여부를 실시간 비교합니다">화면 밖 컬링: 켬</button>
-    <button id="caveRandomBtn" type="button" title="새 게임을 시작하면서 랜덤 동굴과 기존 동굴을 비교합니다">동굴: 랜덤 실험</button>
-    <button id="escapeCaveBtn" type="button" title="동굴에 갇혔을 때 진행 기록을 유지하고 마지막 동굴 토관으로 돌아갑니다">동굴 비상 복귀</button>
+
+
     <button id="colliderBtn" type="button">콜라이더 표시</button>
     
-    <button id="resetBtn" type="button">처음부터 (R)</button>
+
   </div>
   <div id="hojaSeamMeasurePanel" role="status" aria-live="off"></div>
 </section>
@@ -5375,25 +5375,6 @@ class HojaScene extends Phaser.Scene{
     const v055Btn=document.getElementById('v055ChunkBtn');
     if(v055Btn)v055Btn.textContent=this.v055Chunks?.length?
       '지상 지형: '+(this.surfaceChunkMode?'청크':'원본')+' (Y)':'지상 지형: 동굴 제외';
-    document.getElementById('resetBtn').onclick=()=>{
-      // V0.57: a stray click must not wipe a 600-second run.
-      const ended=this.timeUp||(this.clear&&STAGE_INDEX===3);
-      const started=RUN.score>0||RUN.found>0||RUN.remainingMs<RUN_TIME_LIMIT_MS-15000;
-      if(!ended&&started&&!window.confirm('지금까지의 기록을 지우고 처음부터 다시 시작할까요?'))return;
-      if(this.input?.keyboard)this.input.keyboard.resetKeys();
-      startStage(0,true);
-    };
-    document.getElementById('escapeCaveBtn').onclick=()=>{
-      if(STAGE.theme!=='cave'||!ACTIVE_SCENE){window.alert('동굴 안에서만 사용할 수 있습니다.');return;}
-      if(window.confirm('마지막 동굴 출입구로 돌아갈까요? 수집 기록과 남은 시간은 유지됩니다.'))ACTIVE_SCENE.hojaEmergencyReturn();
-    };
-    document.getElementById('caveRandomBtn').onclick=()=>{
-      CAVE_EXPERIMENT_ENABLED=!CAVE_EXPERIMENT_ENABLED;
-      const btn=document.getElementById('caveRandomBtn');
-      btn.textContent=CAVE_EXPERIMENT_ENABLED?'동굴: 랜덤 실험':'동굴: 기존 맵';
-      btn.blur();
-      startStage(0,true);
-    };
     document.getElementById('soundBtn').onclick=()=>this.toggleSound();
     document.getElementById('c1CameraBtn').onclick=()=>{
       HOJA_C1_MANUAL_CAMERA=!HOJA_C1_MANUAL_CAMERA;
@@ -7644,17 +7625,6 @@ class HojaScene extends Phaser.Scene{
     const note=document.getElementById('caveEscapeToast');
     if(note)note.style.display='none';
     clearTimeout(this._emergencyToastTimer);
-  }
-
-  hojaEmergencyReturn(){
-    if(STAGE.theme!=='cave'||!this.caveRespawnAnchor||this.quizActive||this.clear||this.dying||this.timeUp||this.manualPaused)return false;
-    // Deliberate fail-safe only: no stage reload, no RNG, no score or collectible reset.
-    this.respawnNow();
-    const note=document.getElementById('caveEscapeToast');
-    if(note){note.textContent='마지막 동굴 출입구로 복귀했습니다';note.style.display='block';
-      clearTimeout(this._emergencyToastTimer);
-      this._emergencyToastTimer=setTimeout(()=>{note.style.display='none';},2100);}
-    return true;
   }
 
   respawnNow(){

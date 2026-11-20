@@ -1,3 +1,4 @@
+import {actionHandlers,emergencyReturnMethod} from './current-test-actions.mjs';
 import {profilerSource,profilerHandler} from './current-test-profiler.mjs';
 import {caveRenderTestSource,caveRenderProductionSource} from './current-test-cave-render.mjs';
 import {benchmarkSource,benchmarkHandlers} from './current-test-benchmarks.mjs';
@@ -19,8 +20,9 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
-  A.edit("    document.getElementById('v055ChunkBtn').onclick=", benchmarkHandlers+profilerHandler+"    document.getElementById('v055ChunkBtn').onclick=");
+  A.edit("    document.getElementById('v055ChunkBtn').onclick=", benchmarkHandlers+profilerHandler+actionHandlers+"    document.getElementById('v055ChunkBtn').onclick=");
   A.edit('async function boot(){',profilerSource+'async function boot(){');
+  A.edit('  respawnNow(){',emergencyReturnMethod+'  respawnNow(){');
   A.edit('// V0.32 PALETTE SHIFTS', `window.HOJA_V2_TOGGLE_CAVE_VISIBILITY=function(){
     if(STAGE.theme!=='cave'||!ACTIVE_SCENE)return;
     const scene=ACTIVE_SCENE;
@@ -37,6 +39,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
     'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
+    'caveRandom(){return CAVE_EXPERIMENT_ENABLED;},' +
     'caveRenderState(){const s=ACTIVE_SCENE;return {stage:STAGE_INDEX,collision:(s.hojaStep136CollisionOnly||[]).filter(o=>o?.active).map(o=>!!o.visible),culled:(s.hojaStep136Cullables||[]).filter(o=>o?.active).length};},' +
 
     'cameraInfo(){const c=ACTIVE_SCENE.cameras.main;return {scrollX:c.scrollX,scrollY:c.scrollY,zoom:c.zoom,width:c.width,height:c.height};},' +
@@ -62,6 +65,9 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
     TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <button id="resetBtn" type="button">처음부터</button>
+    <button id="escapeCaveBtn" type="button">동굴 비상 복귀</button>
+    <button id="caveRandomBtn" type="button">동굴: 랜덤 실험</button>
     <button id="hojaCpuProfileBtn" type="button" aria-pressed="false">CPU 성능 진단: 끔</button>
     <div id="hojaPerfPanel" style="display:none" aria-label="상세 성능 분석"></div>
     <style>#hojaPerfPanel[style*="block"]{display:block!important;white-space:pre-wrap;color:#000;background:#fff}</style>

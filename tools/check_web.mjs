@@ -92,6 +92,8 @@ if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/window\.HOJA_STEP13[456]_DIAG/.test(arc), '동굴 렌더 진단 전역 조작 없음');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/data-step13[456]-/.test(arc), '동굴 렌더 A/B 제어 코드는 시험 빌드에만');
+if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
+  ok(!/id="(?:resetBtn|escapeCaveBtn|caveRandomBtn)"|hojaEmergencyReturn/.test(arc), '숨은 재시작·맵 실험 조작 없음');
 
 // 6
 ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');
