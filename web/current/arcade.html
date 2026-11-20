@@ -3477,53 +3477,6 @@ class HojaScene extends Phaser.Scene{
     this.clearTextShown=false;
     this.scoreFlyFx=[];
 
-    window.HOJA_PHASER_APP={
-      version:'HOJA_CLIENT_V0_62_R3_4_PRE_R2_RENDER_RESTORE',
-      phaser:Phaser.VERSION,
-      scene:()=>ACTIVE_SCENE,
-      stage:()=>STAGE_INDEX+1,
-      stageCount:STAGES.length,
-      caveAudit:()=>CAVE_NAV_AUDIT,
-      perfSnapshot:()=>HOJA_V050_PROFILE.snapshot(),
-      emergencyReturn:()=>ACTIVE_SCENE?.hojaEmergencyReturn(),
-      caveGeneration:()=>CAVE_EXPERIMENT_RESULT,
-      setRandomCave:(on)=>{CAVE_EXPERIMENT_ENABLED=!!on;return '설정은 다음 새 게임부터 적용';},
-      vision:()=>({mode:ACTIVE_SCENE?.caveVisionMode,
-        feathered:ACTIVE_SCENE?.caveFovSoft,
-        enabled:ACTIVE_SCENE?.caveVisionEnabled,
-        recomputes:ACTIVE_SCENE?.caveFov?.recomputes||0,
-        computeMs:ACTIVE_SCENE?.caveFov?.lastComputeMs??null,
-        renderMs:ACTIVE_SCENE?.caveFov?.lastPaintMs??null,
-        maskPaints:ACTIVE_SCENE?.caveFov?.renderCount||0,
-        heroProbes:ACTIVE_SCENE?.caveFov?.heroProbeCount||0,
-        heroProbeSkipped:ACTIVE_SCENE?.caveFov?.heroProbeSkipped||0,
-        fallbackCount:ACTIVE_SCENE?.hojaV2FovFallbackCount||0,
-        sample:ACTIVE_SCENE?.visionCompareReport?.()||{}}),
-      caveVisual:()=>({visionOn:!!ACTIVE_SCENE?.caveVisionEnabled,covered:!document.getElementById('gameViewport')?.classList.contains('caveVisionOff'),caveArt:ACTIVE_SCENE?.hojaV2CaveArt?.length??null}),
-      caveChunks:()=>({created:ACTIVE_SCENE?.caveTerrainChunks?.length||0,
-        visible:ACTIVE_SCENE?.caveTerrainChunks?.filter(c=>c.visible).length||0}),
-      cavePortals:()=>CAVE_PORTALS.map((p,i)=>({from:i+1,to:p.target+1,x:p.x,y:p.groundY})),
-      staticCulling:()=>({enabled:ACTIVE_SCENE?.staticCullEnabled,visible:ACTIVE_SCENE?.staticVisibleCount,total:ACTIVE_SCENE?.staticScenery?.length}),
-      toggleLightBackground:()=>ACTIVE_SCENE?.toggleLightBackground(),
-      startStage:(n)=>startStage((Number(n)||1)-1,true),
-      score:()=>RUN.score,
-      assetTrial:()=>({fruits:['apple','cherries','strawberry'],iceFx:true}),
-      gameFeel:()=>({active:true,stompCombo:ACTIVE_SCENE?.stompCombo||0,
-        shellCombos:ACTIVE_SCENE?.enemies?.filter(e=>e.type==='HERMIE').map(e=>({combo:e.fxShellCombo||0,state:e.state}))||[]}),
-      sfxLoaded:arcadeAudio.loadedSamples,
-      totalQuestions:TOTAL_QUESTIONS,
-      found:()=>RUN.found,
-      radarTargets:()=>ACTIVE_SCENE?.getRemainingQuestionTargets().map(t=>({...t})),
-      sharedTimeLimitSeconds:600,
-      timeRemaining:()=>Math.ceil(RUN.remainingMs/1000),
-      // Random maps: the code shown under the game reproduces a layout.
-      mapCode:()=>RUN.seed,
-      setSeed:(n)=>{const v=Math.floor(Number(n));if(v>0)PENDING_SEED=v;},
-      setFixedMaps:(on)=>{USE_FIXED_MAPS=!!on;},
-      layout:()=>RUN_STAGES.map(s=>s.segmentOrder?s.segmentOrder.join(' '):'fixed'),
-      // Kept outside the scene so questions survive stage changes/restarts.
-      setQuestions:(q)=>{if(Array.isArray(q)&&q.length){EXTERNAL_QUESTIONS=q;QUIZ_DECK=[];}}
-    };
 
     this.showStageBanner();
     this.updateHUD();
@@ -9478,12 +9431,6 @@ const settlement=window.HOJA_CREATE_SETTLEMENT({
   closeRanking:hojaRankClose_, showRanking:hojaRankShow_
 });
 const {hojaStep09_3Metrics_,hojaStep09_3RenderProgress_,hojaStep09_3ResetDisplay_,hojaStep09_3ShowResult_}=settlement;
-window.HOJA_STEP09_3_TEST={
-  metrics:()=>({...hojaStep09_3Metrics_()}),
-  history:()=>((RUN.step09History||[]).map(x=>({...x}))),
-  result:()=>({shown:document.getElementById('step09RunResult')?.style.display==='block',
-    verified:document.getElementById('step09RunResult')?.dataset.verified||null})
-};
 document.getElementById('step09RunRestart')?.addEventListener('click',()=>{
   if(!EXTERNAL_QUESTIONS?.length)return;
   if(ACTIVE_SCENE?.input?.keyboard)ACTIVE_SCENE.input.keyboard.resetKeys();
@@ -9523,7 +9470,6 @@ function hojaHudSetUnits_(sources){
   list.setAttribute('aria-label',items.length>1 ? lead+' 등 '+items.length+'단원 선택됨' : lead);
   syncDomHudScale();
 }
-window.HOJA_STEP12_6_HUD_TEST={unitTitle:hojaHudUnitTitle_,setUnits:hojaHudSetUnits_};
 
 /* STEP 10-A: Project A-like ranking presentation only.
    No ranking server writes. The real TEST GAS host remains question-read-only. */
@@ -9768,18 +9714,6 @@ function hojaRankRestart_(){
     if(e.target===field)e.stopPropagation();
   },true);
 })();
-window.HOJA_STEP10_RANK_UI={
-  status:()=>({open:document.getElementById('hojaRankOverlay')?.classList.contains('is-open')||false,
-    score:HOJA_RANK_LAST_?.score??null,eligible:HOJA_RANK_LAST_?.eligible??null,reason:HOJA_RANK_LAST_?.ineligibleReason||'',serverSaved:HOJA_RANK_SAVED_}),
-  preview:()=>{HOJA_RANK_TEST_MODE_=true;if(ACTIVE_SCENE)hojaRankShow_(ACTIVE_SCENE,'전체 스테이지 완료');},
-  // Only for future UI-level comparison with real verified rank read data; never transmits data.
-  setReadOnlyRows:(rows)=>{
-    if(!Array.isArray(rows))return;
-    HOJA_RANK_ROWS_=rows.filter(r=>r&&/^[가-힣A-Z0-9]{2,6}$/.test(hojaRankNormalize_(r.name))&&
-      Number.isFinite(r.score)&&r.score>=0).slice(0,25).map(r=>({name:hojaRankNormalize_(r.name),score:r.score}));
-    if(!document.getElementById('hojaRankListPhase')?.hidden)hojaRankRenderRows_(HOJA_RANK_ROWS_);
-  }
-};
 
 (function hojaStudentDisableQaKeys_(){
   const qaKeys=new Set(['B','C','F','G','I','J','K','N','Q','T','V','Y']); // H: 도움말(Phase 1B)

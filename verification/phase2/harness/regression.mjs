@@ -42,7 +42,7 @@ async function sceneReady(page){
  await page.frameLocator('#hqArcadeFrame').locator('#scoreHud').waitFor({state:'visible',timeout:30000});
  const frame=page.frames().find(f=>f.url().includes('/arcade.html'));
  assert.ok(frame,'arcade frame found');
- try { await frame.waitForFunction(()=>!!window.HOJA_PHASER_APP?.scene()?.playerBody,null,{timeout:30000}); }
+ try { await frame.waitForFunction(()=>document.querySelector('#bootStatus.hidden') && document.querySelector('#phaserRoot canvas'),null,{timeout:30000}); }
  catch(e){output.sceneDiagnostic=await frame.evaluate(()=>({boot:document.querySelector('#bootStatus')?.textContent,phaser:typeof window.Phaser,app:!!window.HOJA_PHASER_APP,scene:!!window.HOJA_PHASER_APP?.scene(),body:document.body.innerText.slice(0,1000)}));throw e;}
 }
 async function teacher(page){
@@ -132,11 +132,11 @@ async function replay(mode='replay'){
  assert.ok(await frame.evaluate(()=>window.HOJA_TEST_PROBE.state()),'scene ready');
  await page.clock.runFor(100); // allow the queued scene pause to take effect
  await page.clock.pauseAt(new Date('2024-01-01T00:00:20Z')); // same absolute frame phase in both runs
- await frame.evaluate(()=>window.HOJA_PHASER_APP.scene().game.loop.stop());
+ await frame.evaluate(()=>window.HOJA_TEST_PROBE.stopLoop ? window.HOJA_TEST_PROBE.stopLoop() : window.HOJA_PHASER_APP.scene().game.loop.stop());
  const trace=[];
  const sample=async(label)=>trace.push({label,...await frame.evaluate(()=>window.HOJA_TEST_PROBE.snapshot())});
  const key=async(type,code,value)=>frame.evaluate(({type,code,value})=>window.dispatchEvent(new KeyboardEvent(type,{code,key:value,bubbles:true})),{type,code,value});
- const step=async(count)=>{for(let i=0;i<count;i++) {await page.clock.runFor(16);await frame.evaluate(()=>window.HOJA_PHASER_APP.scene().game.step(performance.now(),16));}};
+ const step=async(count)=>{for(let i=0;i<count;i++) {await page.clock.runFor(16);await frame.evaluate(()=>window.HOJA_TEST_PROBE.step ? window.HOJA_TEST_PROBE.step() : window.HOJA_PHASER_APP.scene().game.step(performance.now(),16));}};
  await sample('start');
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.resume());
  if(mode==='explore'){
