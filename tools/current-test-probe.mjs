@@ -19,6 +19,10 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit('window.HOJA_V2_NEXT_STAGE=function(...args){if(HOJA_MAKER_MODE)HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};',
     'window.HOJA_V2_NEXT_STAGE=function(...args){HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};');
 
+  if(!keepProductionCave){
+    A.edit("this.caveVisionMode='terrain';","this.caveVisionMode=window.HOJA_V046_PREFERRED_VISION||'terrain';");
+    A.edit('this.caveFovSoft=true;','this.caveFovSoft=window.HOJA_V047_FOV_SOFT!==false;');
+  }
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
@@ -45,6 +49,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
     'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
+    'caveSettings(){return {mode:ACTIVE_SCENE?.caveVisionMode,soft:ACTIVE_SCENE?.caveFovSoft};},' +
     'caveRandom(){return CAVE_EXPERIMENT_ENABLED;},' +
     'caveRenderState(){const s=ACTIVE_SCENE;return {stage:STAGE_INDEX,collision:(s.hojaStep136CollisionOnly||[]).filter(o=>o?.active).map(o=>!!o.visible),culled:(s.hojaStep136Cullables||[]).filter(o=>o?.active).length};},' +
 

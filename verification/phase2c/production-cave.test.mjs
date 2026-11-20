@@ -27,7 +27,7 @@ test('production cave culling creates and runs its default rendering path',async
  try {
   const page=await browser.newPage();
   const errors=[];page.on('pageerror',error=>errors.push(String(error)));
-  await page.addInitScript(()=>sessionStorage.setItem('HOJA_TEST_SEED','314159'));
+  await page.addInitScript(()=>{sessionStorage.setItem('HOJA_TEST_SEED','314159');window.HOJA_V047_FOV_SOFT=false;window.HOJA_V046_PREFERRED_VISION='probe';});
   const info=JSON.parse(await readFile(path.join(dir,'BUILD.json'),'utf8'));
   const params=new URLSearchParams({m:'s',c:'test-joseon-a',cv:'19065b1d0fc5',gv:info.gameVersion,s:'spring'});
   await page.goto('http://127.0.0.1:'+server.address().port+'/play.html?'+params,{waitUntil:'load'});
@@ -41,6 +41,7 @@ test('production cave culling creates and runs its default rendering path',async
   await page.waitForTimeout(400);
   const result=await game.evaluate(()=>window.HOJA_TEST_PROBE.caveRenderState());
   assert.equal(result.stage,4);
+  assert.deepEqual(await game.evaluate(()=>window.HOJA_TEST_PROBE.caveSettings()),{mode:'terrain',soft:true},'production ignores diagnostic overrides');
   assert.ok(result.culled>0,'cave scenery is present');
   assert.ok(result.collision.every(visible=>!visible),'collision-only graphics are hidden');
   assert.deepEqual(errors,[]);

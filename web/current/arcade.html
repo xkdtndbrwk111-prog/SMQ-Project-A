@@ -2906,9 +2906,9 @@ class HojaScene extends Phaser.Scene{
     // The baseline cave shadowcasting implementation is preserved and can be
     // re-enabled with the small button; the surface stages are unaffected.
     this.caveVisionEnabled=true; // Restore V0.58 terrain-based cave visibility by default.
-    this.caveVisionMode=window.HOJA_V046_PREFERRED_VISION||'terrain';
+    this.caveVisionMode='terrain';
     // V0.47: turn on gentle edge feathering by default.
-    this.caveFovSoft=window.HOJA_V047_FOV_SOFT!==false;
+    this.caveFovSoft=true;
     this.caveGlowEnabled=true;
     const visionViewport=document.getElementById('gameViewport');
     visionViewport?.classList.toggle('caveVisionOff',!this.caveVisionEnabled);
