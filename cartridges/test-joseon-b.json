@@ -1,0 +1,418 @@
+{
+ "questionSchemaVersion": 2,
+ "sourceSheetVersion": 2,
+ "cartridgeId": "test-joseon-b",
+ "questions": [
+  {
+   "num": 1,
+   "sourceNum": 1,
+   "familyId": "q_0026",
+   "familyOrder": 1,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "성인이 되었음을 알리는 의식은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "관례",
+    "혼례",
+    "상례",
+    "제례"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 2,
+   "sourceNum": 2,
+   "familyId": "q_0027",
+   "familyOrder": 2,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "혼인을 하는 의식을 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "혼례",
+    "관례",
+    "상례",
+    "제례"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 3,
+   "sourceNum": 3,
+   "familyId": "q_0028",
+   "familyOrder": 3,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "사람이 죽었을 때 치르는 의식은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "상례",
+    "관례",
+    "혼례",
+    "제례"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 4,
+   "sourceNum": 4,
+   "familyId": "q_0029",
+   "familyOrder": 4,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조상에게 제사를 지내는 의식은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "제례",
+    "관례",
+    "혼례",
+    "상례"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 5,
+   "sourceNum": 5,
+   "familyId": "q_0030",
+   "familyOrder": 5,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "유교가 퍼지면서 가족 안에서 가장의 권위가 낮아졌다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 6,
+   "sourceNum": 6,
+   "familyId": "q_0031",
+   "familyOrder": 6,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "유교가 퍼지면서 제사는 점차 큰아들이 맡게 되었다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 7,
+   "sourceNum": 7,
+   "familyId": "q_0032",
+   "familyOrder": 7,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선에서 유교가 퍼지며 재산 상속에서 점차 우대받은 사람은 누구입니까?",
+   "answer": "1",
+   "options": [
+    "큰아들",
+    "막내아들",
+    "딸",
+    "사위"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 8,
+   "sourceNum": 8,
+   "familyId": "q_0033",
+   "familyOrder": 8,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "가문의 계통을 기록한 책을 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "족보",
+    "호패",
+    "위패",
+    "교지"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 9,
+   "sourceNum": 9,
+   "familyId": "q_0034",
+   "familyOrder": 9,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "유교가 퍼지면서 혼인한 뒤 신랑이 신부 집에서 사는 경우가 점차 많아졌다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 10,
+   "sourceNum": 10,
+   "familyId": "q_0035",
+   "familyOrder": 10,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "훈민정음을 만든 왕은 누구입니까?",
+   "answer": "1",
+   "options": [
+    "세종",
+    "성종",
+    "광해군",
+    "인조"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 11,
+   "sourceNum": 11,
+   "familyId": "q_0036",
+   "familyOrder": 11,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "처음 훈민정음은 몇 자로 이루어졌습니까?",
+   "answer": "1",
+   "options": [
+    "28자",
+    "14자",
+    "24자",
+    "40자"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 12,
+   "sourceNum": 12,
+   "familyId": "q_0037",
+   "familyOrder": 12,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "훈민정음은 소리 나는 대로 쓸 수 있고 쉽게 배울 수 있는 글자이다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 13,
+   "sourceNum": 13,
+   "familyId": "q_0038",
+   "familyOrder": 13,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "훈민정음의 닿소리는 무엇의 모양을 본떠 만들었습니까?",
+   "answer": "1",
+   "options": [
+    "발음 기관",
+    "산과 강",
+    "별자리",
+    "건물 모양"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 14,
+   "sourceNum": 14,
+   "familyId": "q_0039",
+   "familyOrder": 14,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "훈민정음의 홀소리는 무엇을 본떠 만들었습니까?",
+   "answer": "1",
+   "options": [
+    "하늘·사람·땅",
+    "왕·신하·백성",
+    "해·달·별",
+    "산·강·바다"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 15,
+   "sourceNum": 15,
+   "familyId": "q_0040",
+   "familyOrder": 15,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "우리 땅과 날씨에 맞는 농사법을 정리한 책은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "농사직설",
+    "경국대전",
+    "삼강행실도",
+    "칠정산"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 16,
+   "sourceNum": 16,
+   "familyId": "q_0041",
+   "familyOrder": 16,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "비의 양을 측정하는 기구는 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "측우기",
+    "자격루",
+    "앙부일구",
+    "혼천의"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 17,
+   "sourceNum": 17,
+   "familyId": "q_0042",
+   "familyOrder": 17,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "해의 그림자로 시각을 알 수 있는 기구는 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "앙부일구",
+    "측우기",
+    "자격루",
+    "혼천의"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 18,
+   "sourceNum": 18,
+   "familyId": "q_0043",
+   "familyOrder": 18,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "물을 이용해 시각을 알려 주는 기구는 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "자격루",
+    "측우기",
+    "앙부일구",
+    "간의"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 19,
+   "sourceNum": 19,
+   "familyId": "q_0044",
+   "familyOrder": 19,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "간의와 혼천의는 비가 내린 양을 재는 기구이다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 20,
+   "sourceNum": 20,
+   "familyId": "q_0045",
+   "familyOrder": 20,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선에 맞는 달력을 만들기 위해 펴낸 역법책은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "칠정산",
+    "경국대전",
+    "삼강행실도",
+    "훈요 10조"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 21,
+   "sourceNum": 21,
+   "familyId": "q_0046",
+   "familyOrder": 21,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "조선 전기에는 양반의 검소한 생활에 맞는 분청사기와 백자가 인기를 끌었다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 22,
+   "sourceNum": 22,
+   "familyId": "q_0047",
+   "familyOrder": 22,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "임진왜란이 일어난 해는 언제입니까?",
+   "answer": "1",
+   "options": [
+    "1592년",
+    "1392년",
+    "1636년",
+    "1270년"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 23,
+   "sourceNum": 23,
+   "familyId": "q_0048",
+   "familyOrder": 23,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "임진왜란 때 조선 수군을 이끈 인물은 누구입니까?",
+   "answer": "1",
+   "options": [
+    "이순신",
+    "이성계",
+    "세종",
+    "광해군"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 24,
+   "sourceNum": 24,
+   "familyId": "q_0049",
+   "familyOrder": 24,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "의병은 나라에서 뽑아 훈련시킨 정식 군대이다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 25,
+   "sourceNum": 25,
+   "familyId": "q_0050",
+   "familyOrder": 25,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "1636년 청이 조선을 침략한 전쟁은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "병자호란",
+    "임진왜란",
+    "정유재란",
+    "귀주 대첩"
+   ],
+   "isNull": false
+  }
+ ]
+}
