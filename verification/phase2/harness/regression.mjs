@@ -62,6 +62,22 @@ async function teacher(page){
  await new Promise(resolve=>setTimeout(resolve,500));
  return qr;
 }
+async function checkStaleQr(qr, parameter, expectedMessage) {
+ const stale = new URL(qr);
+ stale.searchParams.set(parameter, 'old-version');
+ const context = await browser.newContext();
+ try {
+   const page = await context.newPage();
+   const data = await track(page);
+   await page.goto(stale.href, {waitUntil:'load'});
+   const error = page.locator('#hojaStudentError');
+   await error.waitFor({state:'visible'});
+   assert.ok((await error.innerText()).includes(expectedMessage));
+   assert.equal(await page.locator('#hojaStudentStart').isHidden(), true);
+   assert.equal(page.frames().some(f => f.url().includes('/arcade.html')), false);
+   return data;
+ } finally { await context.close(); }
+}
 async function network(){
  const teacherContext=await browser.newContext();
  const t=await teacherContext.newPage();const ta=await track(t);
@@ -75,7 +91,11 @@ async function network(){
  await s.locator('#hojaStudentStart:not([disabled])').click({timeout:30000});
  await sceneReady(s);
  await new Promise(resolve=>setTimeout(resolve,500));
- for(const [label,data] of [['teacher',ta],['student',sa]]){
+ await studentContext.close();
+ const staleGame = await checkStaleQr(qr, 'gv', '게임이 새 버전');
+ const staleCartridge = await checkStaleQr(qr, 'cv', '단원 문제가 바뀌어');
+ output.network = {teacher:ta, student:sa, staleGame, staleCartridge};
+ for(const [label,data] of Object.entries(output.network)){
    assert.equal(data.requests.filter(r=>deny.test(r.url)).length,0,`${label} forbidden requests`);
    assert.equal(data.requests.filter(r=>!r.url.startsWith(base+'/')&&!r.url.startsWith('https://cdn.jsdelivr.net/')).length,0,`${label} unexpected external requests`);
    assert.equal(data.failures.length,0,`${label} request failures`);
@@ -83,9 +103,7 @@ async function network(){
    assert.ok(data.requests.length>0,`${label} no requests captured`);
    assert.deepEqual(data.requests.filter(r=>r.status===null||r.status<200||r.status>=300),[],`${label} non-2xx or missing HTTP response`);
  }
- output.network={teacher:ta,student:sa};
- await studentContext.close();
- console.log('PASS network: teacher single and generated student QR');
+ console.log('PASS network: teacher, generated student QR, stale game and cartridge versions, real HTTP responses');
 }
 async function replay(mode='replay'){
  const context=await browser.newContext();
@@ -163,22 +181,24 @@ async function replay(mode='replay'){
    assert.equal(await frame.evaluate(()=>window.HOJA_TEST_PROBE.finish()),true,'induced FINISH door double confirmation');
    await step(250);
    const before=await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()}));
-   assert.equal(before.metrics.correct,1);assert.equal(before.metrics.wrong,1);
-   assert.ok(before.metrics.flowers>=1);assert.ok(before.metrics.flowerBonus>=5);assert.ok(before.metrics.score>=15);
+   const expected = JSON.parse(await readFile(path.join(root,'verification/phase2/harness/settlement-evidence.json'),'utf8'));
+   assert.deepEqual(before, expected.before, 'fixed FINISH score breakdown (63) and original answers');
    const repeat=await frame.evaluate(()=>window.HOJA_TEST_PROBE.repeatSettlement());
    assert.deepEqual(repeat,before.metrics,'repeated settlement leaves score unchanged');
    await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
-   const reviewChoice=await frame.locator('#hojaReviewChoices button.ans').count();
-   assert.equal(reviewChoice,0);
+   assert.equal(await frame.evaluate(()=>window.HOJA_REVIEW.phase),'ask');
    const wrongRecord=before.records.find(r=>r.correct===false);const choice=wrongRecord.answerIndex+1;
    await key('keydown',`Digit${choice}`,String(choice));await key('keyup',`Digit${choice}`,String(choice));
    await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
    await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
    const after=await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()}));
    assert.deepEqual(after,before,'original record and score survive review');
+   assert.deepEqual(await frame.evaluate(()=>window.HOJA_REVIEW.log()), [{
+     order:wrongRecord.order, familyId:wrongRecord.familyId, round:1, chosenIndex:wrongRecord.answerIndex, correct:true
+   }], 'the wrong answer was corrected during review');
    await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
    const rank=await frame.locator('#hojaRankOverlay.is-open').innerText();
-   assert.ok(rank.includes('HIGH SCORE'));
+   assert.equal(rank,expected.rank,'FINISH ranking screen and score');
    await context.close();return {before,after,repeat,rank};
  }
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.setTime(0));await step(7);await sample('timeout');
