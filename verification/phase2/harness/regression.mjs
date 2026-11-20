@@ -75,7 +75,7 @@ async function network(){
  await context.close();
  console.log('PASS network: teacher single and generated student QR');
 }
-async function replay(){
+async function replay(mode='replay'){
  const context=await browser.newContext();
  await context.addInitScript(()=>{
    let n=0x12345678;
@@ -109,6 +109,26 @@ async function replay(){
  const step=async(count)=>{for(let i=0;i<count;i++) {await page.clock.runFor(16);await frame.evaluate(()=>window.HOJA_PHASER_APP.scene().game.step(performance.now(),16));}};
  await sample('start');
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.resume());
+ if(mode==='explore'){
+   const wallStart=Date.now(), visited=new Set([0]);let reason='frame limit',stuck=0,lastX=128;
+   await key('keydown','KeyD','d');await key('keydown','Comma',',');
+   for(let i=0;i<40;i++){
+     if(Date.now()-wallStart>120000){reason='120s wall limit';break;}
+     await key('keydown','Period','.');await step(6);await key('keyup','Period','.');await step(24);
+     const s=await frame.evaluate(()=>window.HOJA_TEST_PROBE.snapshot());
+     visited.add(s.stage);trace.push({segment:i+1,...s});
+     if(s.quiz){await key('keydown','Digit1','1');await key('keyup','Digit1','1');await step(80);}
+     if(s.dying){await step(50);await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');await step(30);}
+     if(s.deaths>=3){reason='three deaths';break;}
+     if(s.timeUp){reason='time expired';break;}
+     if(s.clear&&s.stage===3){reason='finish';break;}
+     if(Math.abs(s.player.x-lastX)<4)stuck++;else stuck=0;
+     lastX=s.player.x;
+     if(stuck>=8){reason='stuck for 240 frames';break;}
+     await key('keydown','KeyW','w');await step(1);await key('keyup','KeyW','w');
+   }
+   await context.close();return {reason,visited:[...visited],trace};
+ }
  await key('keydown','KeyD','d');
  await key('keydown','Period','.');
  await step(6);await key('keyup','Period','.');
@@ -118,6 +138,37 @@ async function replay(){
  await step(25);await sample('quiz');
  const answer=(await frame.evaluate(()=>window.HOJA_RUN_RECORD().at(-1).answerIndex))+1;
  await key('keydown',`Digit${answer}`,String(answer));await key('keyup',`Digit${answer}`,String(answer));await step(94);await sample('answer');
+ if(mode==='settlement'){
+   assert.equal(await frame.evaluate(()=>window.HOJA_TEST_PROBE.quizNext()),true,'second question');
+   await step(25);
+   const rec=await frame.evaluate(()=>window.HOJA_RUN_RECORD().at(-1));
+   const wrong=(rec.answerIndex+1)%rec.choices.length+1;
+   await key('keydown',`Digit${wrong}`,String(wrong));await key('keyup',`Digit${wrong}`,String(wrong));await step(94);
+   assert.equal(await frame.evaluate(()=>window.HOJA_TEST_PROBE.collectFruit()),true,'fruit pickup by induced overlap');
+   await frame.evaluate(()=>window.HOJA_TEST_PROBE.stage(3));await step(5);
+   await frame.evaluate(()=>window.HOJA_TEST_PROBE.resume());await step(5);
+   assert.equal((await frame.evaluate(()=>window.HOJA_TEST_PROBE.snapshot())).stage,3,'induced stage 4');
+   assert.equal(await frame.evaluate(()=>window.HOJA_TEST_PROBE.finish()),true,'induced FINISH door double confirmation');
+   await step(250);
+   const before=await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()}));
+   assert.equal(before.metrics.correct,1);assert.equal(before.metrics.wrong,1);
+   assert.ok(before.metrics.flowers>=1);assert.ok(before.metrics.flowerBonus>=5);assert.ok(before.metrics.score>=15);
+   const repeat=await frame.evaluate(()=>window.HOJA_TEST_PROBE.repeatSettlement());
+   assert.deepEqual(repeat,before.metrics,'repeated settlement leaves score unchanged');
+   await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
+   const reviewChoice=await frame.locator('#hojaReviewChoices button.ans').count();
+   assert.equal(reviewChoice,0);
+   const wrongRecord=before.records.find(r=>r.correct===false);const choice=wrongRecord.answerIndex+1;
+   await key('keydown',`Digit${choice}`,String(choice));await key('keyup',`Digit${choice}`,String(choice));
+   await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
+   await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
+   const after=await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()}));
+   assert.deepEqual(after,before,'original record and score survive review');
+   await key('keydown','Enter','Enter');await key('keyup','Enter','Enter');
+   const rank=await frame.locator('#hojaRankOverlay.is-open').innerText();
+   assert.ok(rank.includes('HIGH SCORE'));
+   await context.close();return {before,after,repeat,rank};
+ }
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.setTime(0));await step(7);await sample('timeout');
  await context.close();return trace;
 }
@@ -135,5 +186,11 @@ async function deterministic(){
  assert.deepEqual(normalize(a),JSON.parse(await readFile(fixture,'utf8')),'Phase 1 baseline trace');
  console.log('PASS deterministic replay: seed, input, clocks, state, quiz and timeout');
 }
-try {if(process.env.HOJA_TEST_ONLY!=='replay')await network();if(process.env.HOJA_TEST_ONLY!=='network')await deterministic();}
+async function natural(){
+ const result=await replay('explore');output.natural=result;
+ console.log(`NATURAL stop=${result.reason} stages=${result.visited.join(',')}`);
+ assert.ok(result.reason==='finish'&&result.visited.length===5,'natural 5-map finish not reached within bound');
+}
+async function settlement(){output.settlement=await replay('settlement');console.log('PASS induced finish, fruit, duplicate settlement, review and ranking');}
+try {const mode=process.env.HOJA_TEST_ONLY;if(!mode||mode==='network')await network();if(!mode||mode==='replay')await deterministic();if(mode==='explore')await natural();if(!mode||mode==='settlement')await settlement();}
 finally {await writeFile(path.join(resultDir,'last-run.json'),JSON.stringify(output,null,2));await browser.close();await new Promise(r=>server.close(r));}

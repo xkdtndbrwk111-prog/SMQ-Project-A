@@ -1,0 +1,173 @@
+{
+  "description": "자연 키 입력, 위치 조작 없음. 도달 실패는 탐색 전략의 한계이며 게임 결함이라고 판정하지 않음.",
+  "seed": 314159,
+  "limits": "1200 기본 프레임, 3회 쓰러짐, 정체 240프레임, 벽시계 120초. 사망/문제 처리 프레임 별도.",
+  "reason": "three deaths",
+  "visited": [
+    0
+  ],
+  "trace": [
+    {
+      "segment": 0,
+      "stage": 0,
+      "x": 128,
+      "y": 859,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 1,
+      "stage": 0,
+      "x": 159.12,
+      "y": 795,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 2,
+      "stage": 0,
+      "x": 343.29,
+      "y": 718.94,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 3,
+      "stage": 0,
+      "x": 559.29,
+      "y": 722.41,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 4,
+      "stage": 0,
+      "x": 654.78,
+      "y": 673.01,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 5,
+      "stage": 0,
+      "x": 814.83,
+      "y": 749.01,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 6,
+      "stage": 0,
+      "x": 1030.83,
+      "y": 859,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 7,
+      "stage": 0,
+      "x": 1246.83,
+      "y": 855.72,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 8,
+      "stage": 0,
+      "x": 1463.76,
+      "y": 927.94,
+      "deaths": 0,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 9,
+      "stage": 0,
+      "x": 1571.76,
+      "y": 1135.22,
+      "deaths": 1,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 10,
+      "stage": 0,
+      "x": 1148.81,
+      "y": 856.37,
+      "deaths": 1,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 11,
+      "stage": 0,
+      "x": 1364.81,
+      "y": 887.91,
+      "deaths": 1,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 12,
+      "stage": 0,
+      "x": 1580.81,
+      "y": 899.06,
+      "deaths": 1,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 13,
+      "stage": 0,
+      "x": 1582,
+      "y": 1131.01,
+      "deaths": 2,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 14,
+      "stage": 0,
+      "x": 1150.5,
+      "y": 856.37,
+      "deaths": 2,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 15,
+      "stage": 0,
+      "x": 1336.76,
+      "y": 827.9,
+      "deaths": 2,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 16,
+      "stage": 0,
+      "x": 1545.56,
+      "y": 985.06,
+      "deaths": 2,
+      "quiz": false,
+      "found": 0
+    },
+    {
+      "segment": 17,
+      "stage": 0,
+      "x": 1582,
+      "y": 1122.26,
+      "deaths": 3,
+      "quiz": false,
+      "found": 0
+    }
+  ]
+}
