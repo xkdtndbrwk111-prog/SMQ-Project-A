@@ -1,0 +1,5 @@
+# 복원 스크립트 출력(versions/2.0.0/restore_game.py)과 빌드 결과
+/Game.html
+/dist/
+.DS_Store
+__pycache__/

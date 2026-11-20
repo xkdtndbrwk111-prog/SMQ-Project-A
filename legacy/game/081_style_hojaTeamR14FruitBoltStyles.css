@@ -1,0 +1,9 @@
+
+/* Five separate narrow firebolts. Effects are DOM-only and never adjust the game camera. */
+#hojaGamePlay[data-mode="team"] .htFruitFirebolt{position:absolute;width:21px;height:21px;border-radius:54% 46% 63% 37%;pointer-events:none;z-index:13;background:radial-gradient(circle at 36% 33%,#ffffff 0 10%,#fffac6 18%,#ffe15c 43%,#ff941e 69%,#ee471a 92%);box-shadow:0 0 9px 2px #ffe46bbb,0 0 15px 3px #ff8b3099;will-change:transform,opacity;filter:saturate(1.18)}
+#hojaGamePlay[data-mode="team"] .htFruitFirebolt::before{content:"";position:absolute;inset:3px 9px 3px -14px;border-radius:80% 16% 60% 24%;background:linear-gradient(100deg,transparent,#ff97268c 38%,#fff0a5cc);transform:rotate(-22deg);opacity:.94}
+#hojaGamePlay[data-mode="team"] .htFruitFirebolt::after{content:"";position:absolute;width:9px;height:8px;left:6px;top:5px;border-radius:50%;background:#fffbdc;box-shadow:0 0 4px #fff}
+#hojaGamePlay[data-mode="team"] .htFruitAfterglow{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:12;background:#ffe28b;box-shadow:0 0 5px 2px #ffa32a8c}
+#hojaGamePlay[data-mode="team"] .htTeamPts.htFruitScoreTick{animation:htFruitCountImpact .2s ease-out}
+#hojaGamePlay[data-mode="team"] .htFruitHitPop{pointer-events:none;animation-duration:.46s!important}
+@keyframes htFruitCountImpact{0%{filter:brightness(1);scale:1}30%{filter:brightness(1.4);scale:1.15}100%{filter:brightness(1);scale:1}}

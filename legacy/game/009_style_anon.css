@@ -1,0 +1,27 @@
+
+/* V0.4.4: the single circled-i character travels WITH the card hover. */
+.hcPakWrap>.hcInfoBtn{width:25px;height:28px;right:10px;top:25px;padding:0;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#ffe4a0;font-size:24px;line-height:28px;font-family:Arial,sans-serif;text-shadow:2px 2px 0 #07202b;transition:transform .15s ease,color .15s ease;outline-offset:2px}
+.hcPakWrap:hover>.hcPak,.hcPakWrap:focus-within>.hcPak{transform:translateY(-7px);filter:brightness(1.13)}
+.hcPakWrap:hover>.hcInfoBtn,.hcPakWrap:focus-within>.hcInfoBtn{transform:translateY(-7px);color:#fff9d1}
+.hcPakWrap>.hcInfoBtn:hover,.hcPakWrap>.hcInfoBtn:focus-visible{background:transparent!important;color:white;outline:2px solid #fff0b7}
+/* Game selection UI above the authentic autumn stage. */
+#hojaNextMode{background:#fff0d6;color:#193745;overflow:hidden;align-items:stretch;z-index:70}
+.hmHeading{flex:0 0 auto;position:relative;z-index:3;text-align:center;padding:clamp(42px,8%,53px) 18px 0}
+.hmHeading .hcKicker{color:#9c592d}.hmHeading h2{font-size:clamp(23px,3.6vw,40px);font-weight:1000;margin:3px 0;color:#5c2e36;text-shadow:2px 3px 0 #e1c3a0}
+.hmHeading p{font-size:clamp(11px,1.3vw,15px);font-weight:800;margin:0 0 2px;color:#7c4e49;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.hmSelections{position:relative;z-index:3;flex:0 0 auto;min-height:102px;max-width:900px;width:96%;margin:8px auto 0;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.hmPick{position:relative;min-width:min(35vw,210px);min-height:96px;padding:14px 16px;background:#f7e7c8;border:4px solid #73534a;border-radius:9px;color:#53383b;box-shadow:inset 0 0 0 4px #d9a66b,5px 7px 0 #6a4537;font-weight:1000;transition:transform .14s ease,filter .14s ease;cursor:pointer}
+.hmPick strong{display:block;font-size:clamp(18px,2.3vw,28px);white-space:nowrap}
+.hmPick small{display:block;font-size:clamp(10px,1.15vw,13px);margin-top:5px;color:#826454}
+.hmPick:hover,.hmPick:focus-visible{transform:translateY(-5px);filter:brightness(1.05);outline:3px solid #9b673e;outline-offset:3px}
+.hmSelections.teamCount{max-width:920px;gap:12px}
+.hmSelections.teamCount .hmPick{min-width:0;width:clamp(85px,12%,115px);min-height:104px;padding:11px 8px}
+.hmSelections.teamCount .hmPick strong{font-size:clamp(25px,3vw,36px)}
+.hmSelections.teamCount .hmPick small{font-size:12px}
+.hmSelectionHint{position:relative;z-index:3;flex:0 0 auto;text-align:center;margin:13px auto 1px;font-size:clamp(12px,1.25vw,15px);font-weight:850;color:#7d4b40;max-width:90%;line-height:1.4}
+.hmLandscape{position:absolute;left:0;right:0;bottom:0;height:45%;z-index:1;overflow:hidden;background:#fff0cf;border-top:4px solid #e6b471;pointer-events:none}
+.hmLandscape canvas{display:block;width:100%;height:100%;image-rendering:pixelated;object-fit:fill}
+.hmAutumnCaption{position:absolute;bottom:9px;right:12px;color:#fff0ca;text-shadow:2px 2px 0 #2b2030;font-size:10px;letter-spacing:.13em;font-weight:900}
+.hmSelectedUnits{position:absolute;z-index:3;top:55%;width:82%;left:9%;text-align:center;font-size:11px;max-height:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#f7e5bb;text-shadow:2px 2px #49323a;pointer-events:none}
+.hmSelections.finalChoice .hmPick{min-width:220px;background:#d4e2cc;border-color:#67865b}
+@media(max-width:670px){.hmHeading{padding-top:38px}.hmSelections{gap:8px;min-height:100px;margin-top:5px}.hmPick{min-height:80px;min-width:39%;padding:8px}.hmPick strong{font-size:16px}.hmPick small{font-size:10px}.hmSelections.teamCount{gap:7px}.hmSelections.teamCount .hmPick{width:29%;min-height:55px;padding:3px}.hmSelections.teamCount .hmPick strong{font-size:23px}.hmSelections.teamCount .hmPick small{font-size:9px}.hmLandscape{height:39%}.hmSelectionHint{margin:6px auto}.hmSelectedUnits{display:none}.hcPakWrap>.hcInfoBtn{right:2px;top:19px;font-size:20px}}

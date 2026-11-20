@@ -1,0 +1,35 @@
+
+
+/* STEP 14-1 V0.5.8 isolated game entries; all back buttons align to the original fixed slot. */
+#hojaGamePlay{position:absolute;inset:0;z-index:130;background:#0a1c2b;color:#f5eedc;display:flex;flex-direction:column;align-items:stretch;overflow:hidden}
+#hojaGamePlay[hidden]{display:none!important}
+#hojaGamePlay .hqTop{height:62px;flex:0 0 62px;display:flex;align-items:center;justify-content:center;gap:12px;background:#0a2433;border-bottom:3px solid #d5ae69;font-weight:850}
+#hqModeLabel{font-size:clamp(13px,1.8vw,23px)}
+#hojaGamePlay .hqBack{position:absolute;left:clamp(10px,2.2%,24px);top:clamp(10px,3.1%,22px);z-index:145;background:#14354a;border:2px solid #e5c78c;color:#fff1cc;min-height:42px;min-width:142px;padding:7px 13px;box-shadow:3px 4px 0 #101e2c;font:850 14px system-ui;cursor:pointer}
+#hqArcadeFrame{width:100%;flex:1;min-height:0;border:0;background:#122e3f}
+#hqArcadeInfo{position:absolute;top:65px;right:12px;background:rgba(8,22,33,.85);border:1px solid #bdab7b;border-radius:7px;padding:7px 10px;z-index:132;font-size:12px}
+#hqStage{width:100%;height:calc(100% - 62px);position:relative;overflow:hidden;isolation:isolate;background:#75bafa;touch-action:manipulation}
+#hqBg{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
+#hqCharacter{position:absolute;left:50%;bottom:13%;width:min(22%,192px);aspect-ratio:1/1;transform:translateX(-50%);image-rendering:pixelated;z-index:4;pointer-events:none}
+#hqBalloon{position:absolute;left:50%;bottom:calc(13% + min(27%,235px));width:clamp(52px,8.8%,92px);aspect-ratio:1/1;transform:translateX(-50%);z-index:5;background:transparent;border:0;padding:0;cursor:pointer;filter:drop-shadow(0 7px 0 rgba(21,48,65,.36));animation:hqHover 2.1s ease-in-out infinite}
+#hqBalloon img{width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
+@keyframes hqHover{0%,100%{margin-bottom:0}50%{margin-bottom:6px}}
+#hqBalloon:focus-visible{outline:3px solid #ffdc7c;outline-offset:8px}
+#hqStageHelp{position:absolute;left:50%;transform:translateX(-50%);bottom:7px;padding:7px 18px;background:#102838d9;border-radius:9px;text-align:center;color:#fce9aa;z-index:3;font:750 clamp(11px,1.7vw,18px) system-ui;pointer-events:none}
+#hqStats{position:absolute;right:12px;top:12px;z-index:3;border:2px solid #f1d694;background:#102533d9;border-radius:8px;padding:8px 13px;font:800 15px system-ui}
+#hqOverlay{z-index:18!important}
+#hqOverlay[hidden]{display:none!important}
+#hqOverlay:not([hidden]){display:grid}
+#hqCard{color:#f4f5f9;max-width:100%}
+#hqOverlay #hqChoices{display:grid}
+#hqOverlay button.hqChoice{cursor:pointer}
+#hqOverlay .hqChoice.correct{border-color:#71db8d;background:#23482f}
+#hqOverlay .hqChoice.wrong{border-color:#ff7c7c;background:#542828}
+#hqOverlay .hqChoice.focus{border-color:#f1e3b5;box-shadow:0 0 0 3px #f1e3b555}
+#hqOverlay #hqQuestion{color:#fff}
+#hqOverlay #hqType{color:#8de5a9}
+#hqOverlay #hqHint{color:#aebdca}
+#hqCard.hojaQuizDense{--hoja-quiz-q-size:clamp(22px,5vw,48px);--hoja-quiz-c-size:clamp(19px,3.8vw,36px)}
+#hqCard[data-quiz-kind="OX"] .hqChoiceLabel{--hoja-quiz-ox-size:clamp(40px,10vw,120px)}
+@media(max-width:600px){#hojaGamePlay .hqBack{min-height:32px;min-width:105px;font-size:11px;padding:5px}#hojaGamePlay .hqTop{height:52px;flex-basis:52px}#hqStage{height:calc(100% - 52px)}#hqCharacter{width:27%}#hqBalloon{bottom:calc(13% + 27%)}#hqStageHelp{bottom:5px}}
+

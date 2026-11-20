@@ -1,0 +1,131 @@
+
+/* R11 only: side-biased portrait positions are measured from the actual card edges in JS.
+   Strict green/orange anchor alignment and all approved portrait image data remain unchanged. */
+
+/* Score reaction moves the composite team unit: illustration and card together. */
+#hojaGamePlay[data-mode="team"] .htTeamUnit{transform-origin:center 83%;will-change:transform;}
+#hojaGamePlay[data-mode="team"] .htTeamUnit.scoreGain{
+  animation:htR11UnitGain 1.06s cubic-bezier(.18,1.2,.28,1) both!important;
+}
+#hojaGamePlay[data-mode="team"] .htTeamUnit.scoreLoss{
+  animation:htR11UnitLoss 1.06s cubic-bezier(.18,1.2,.28,1) both!important;
+}
+@keyframes htR11UnitGain{
+  0%,100%{transform:translate(0,0) scale(1)}
+  17%{transform:translate(-3px,-2px) rotate(-2deg) scale(1.105)}
+  37%{transform:translate(3px,0) rotate(1.5deg) scale(1.03)}
+  57%{transform:translate(-2px,1px) rotate(-.8deg) scale(1.075)}
+  76%{transform:translate(1px,0) rotate(.6deg) scale(1.02)}
+}
+@keyframes htR11UnitLoss{
+  0%,100%{transform:translate(0,0) scale(1)}
+  17%{transform:translate(3px,1px) rotate(2deg) scale(.90)}
+  37%{transform:translate(-3px,0) rotate(-1.6deg) scale(.96)}
+  57%{transform:translate(2px,0) rotate(1.3deg) scale(.915)}
+  76%{transform:translate(-1px,0) rotate(-.7deg) scale(.98)}
+}
+
+/* OX: QUESTION takes priority. O/X are still large, but do not monopolize height. */
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqQuestion{
+  flex:1 1 auto!important;
+  min-height:clamp(160px,24vh,300px)!important;
+  font-size:clamp(32px,3.8vw,60px)!important;
+  line-height:1.34!important;
+  margin-block:10px 16px!important;
+  overflow-wrap:anywhere!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{
+  flex:0 0 auto!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  height:clamp(135px,23vh,218px)!important;
+  min-height:0!important;
+  gap:clamp(14px,2vw,26px)!important;
+  overflow:visible!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice{
+  height:100%!important;
+  min-height:0!important;
+  padding:8px!important;
+  border-width:4px!important;
+  border-radius:20px!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{
+  font-size:clamp(72px,9.5vw,130px)!important;
+  line-height:1!important;
+}
+
+/* Team-score portraits must remain undimmed during PIPE and ITEM phases.
+   Only the central gameplay lane receives a backdrop and a modal.
+   Do not change #hqOverlay: the full-screen QUESTION remains exactly as R10. */
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull){
+  inset:0 auto 0 var(--ht-modal-left,20%)!important;
+  width:var(--ht-modal-width,60%)!important;
+  height:100%!important;
+  background:rgba(7,22,36,.52)!important;
+  padding:clamp(5px,.7vw,12px)!important;
+  pointer-events:none!important;
+  z-index:60!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard{
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+  max-height:96%!important;
+  padding:clamp(9px,1.25vw,18px)!important;
+  gap:clamp(7px,1.4vh,16px)!important;
+  border-width:3px!important;
+  border-radius:16px!important;
+  box-shadow:5px 7px 0 #071827!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalTitle{
+  font-size:clamp(24px,2.5vw,38px)!important;
+  line-height:1.18!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalDesc{
+  font-size:clamp(16px,1.65vw,25px)!important;
+  line-height:1.4!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htPipeSelect{
+  width:100%!important;gap:clamp(4px,.8vw,13px)!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htPipeBtn{
+  min-width:0!important;padding:clamp(4px,.7vw,10px)!important;
+  font-size:clamp(13px,1.3vw,20px)!important;
+  border-width:2px!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htPipeBtn img{
+  width:min(100%,clamp(54px,8.5vw,128px))!important;
+  height:clamp(60px,10vw,140px)!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htItemArt{
+  min-height:clamp(80px,18vh,175px)!important;gap:clamp(6px,1vw,14px)!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htItemSpriteClip,
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htItemSpriteImg{
+  max-width:min(100%,160px)!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htAction{
+  font-size:clamp(13px,1.4vw,20px)!important;
+  padding:clamp(7px,1vw,12px)!important;
+  min-height:38px!important;
+}
+/* Final settlement intentionally restores the original full-width result layout. */
+#hojaGamePlay[data-mode="team"] #htItemLayer.htFinalFull{
+  inset:0!important;width:100%!important;height:100%!important;
+  background:#071726c8!important;pointer-events:auto!important;
+}
+@media(max-width:900px){
+  #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{height:clamp(120px,21vh,172px)!important;}
+  #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{font-size:clamp(60px,11vw,100px)!important;}
+  #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqQuestion{font-size:clamp(29px,4.5vw,48px)!important;}
+}
+@media(max-width:600px){
+  #hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalTitle{font-size:22px!important;}
+  #hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalDesc{font-size:14px!important;}
+  #hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htPipeBtn img{height:60px!important;}
+  #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{height:130px!important;}
+  #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqQuestion{min-height:140px!important;}
+}

@@ -1,0 +1,21 @@
+
+/* R17A: ALL flying score text, fruit firebolts and particle trails are
+   above portraits, the item modal, the final modal (99) and round overlay (105).
+   Remain pointer-transparent so overlay controls still work. */
+#hojaGamePlay[data-mode="team"] #htFxLayer{position:absolute!important;inset:0!important;z-index:200!important;pointer-events:none!important;overflow:visible!important;isolation:isolate}
+/* R17B: Arrival badges share the topmost FX stacking context, not a team's card. */
+#hojaGamePlay[data-mode="team"] #htFxLayer .htScorePop{z-index:15!important;pointer-events:none!important;}
+#hojaGamePlay[data-mode="team"] .htFxOrb{position:absolute;z-index:6;min-width:56px;text-align:center;padding:9px 13px;border:3px solid #fff2bb;border-radius:999px;background:#167b59;color:#fffde4;font:1000 clamp(19px,2vw,29px)/1 system-ui;white-space:nowrap;box-shadow:0 0 8px 2px #ffcf4b77,0 4px 8px #0008;text-shadow:0 1px 2px #000a;will-change:transform,opacity}
+#hojaGamePlay[data-mode="team"] .htFxOrb.loss{background:#ae3442;border-color:#ffb5a3;box-shadow:0 0 15px 5px #ff6f3aaa,0 4px 8px #000a}
+#hojaGamePlay[data-mode="team"] .htFxOrb.swap{background:#455cb5;border-color:#c6f0ff;box-shadow:0 0 16px 5px #71c9ffaa,0 4px 8px #000a}
+#hojaGamePlay[data-mode="team"] .htFxEmber{position:absolute;width:11px;height:11px;border-radius:50%;background:#ffec73;box-shadow:0 0 5px 2px #ffa730aa,0 0 9px 3px #ff5a2388;pointer-events:none;z-index:5;will-change:transform,opacity}
+#hojaGamePlay[data-mode="team"] .htFxEmber.loss{background:#ffd4a5;box-shadow:0 0 9px 4px #ff6641,0 0 15px 5px #e92f36}
+#hojaGamePlay[data-mode="team"] .htFxEmber.swap{background:#dcf5ff;box-shadow:0 0 9px 4px #59abff,0 0 16px 6px #5270ff}
+/* Older R5 CSS uses transform:none!important, so animate the independent CSS
+   translate and scale properties instead. This keeps the card visibly moving. */
+#hojaGamePlay[data-mode="team"] .htTeamScore.scoreGain{animation:htR7CardGain 1s ease-in-out!important;will-change:translate,scale,filter}
+#hojaGamePlay[data-mode="team"] .htTeamScore.scoreLoss{animation:htR7CardLoss 1s ease-in-out!important;will-change:translate,scale,filter}
+@keyframes htR7CardGain{0%,100%{translate:0 0;scale:1;filter:brightness(1)}17%{translate:-6px -2px;scale:1.12;filter:brightness(1.35)}33%{translate:7px 2px;scale:1.07}50%{translate:-7px 0;scale:1.11}70%{translate:5px -1px;scale:1.04}85%{translate:-2px 0;scale:1.02}}
+@keyframes htR7CardLoss{0%,100%{translate:0 0;scale:1;filter:brightness(1)}17%{translate:6px 2px;scale:.89;filter:brightness(.7)}33%{translate:-7px -1px;scale:.96}50%{translate:8px 0;scale:.91}70%{translate:-6px 2px;scale:.96}85%{translate:2px 0;scale:.99}}
+#hojaGamePlay[data-mode="team"] .htTeamScore.scoreGain .htTeamPts,#hojaGamePlay[data-mode="team"] .htTeamScore.scoreLoss .htTeamPts{filter:drop-shadow(0 0 7px #f0bd58)}
+#hojaGamePlay[data-mode="team"] .htItemActions .htAction:disabled{opacity:.75;background:#3b6873!important;cursor:wait}

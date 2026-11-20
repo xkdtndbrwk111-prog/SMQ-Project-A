@@ -1,0 +1,50 @@
+
+/* R9: pixel-perfect team tint belongs to the FULL solved balloon artwork,
+   never to a CSS filter (which discards the per-team color). */
+#hojaGamePlay[data-mode="team"] .htBalloon.solved img{
+  opacity:1!important;
+  filter:none!important;
+  image-rendering:pixelated!important;
+}
+#hojaGamePlay[data-mode="team"] .htBalloon.solved .htBalloonNumber{
+  color:#fff!important;
+  text-shadow:-2px -2px 0 #1b1721,2px -2px 0 #1b1721,
+    -2px 2px 0 #1b1721,2px 2px 0 #1b1721,0 3px 0 #1b1721!important;
+}
+/* Both team score columns: horizontal one-line team and total, center both axes. */
+#hojaGamePlay[data-mode="team"] .htScores .htTeamScore{
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:center!important;
+  flex-wrap:nowrap!important;
+  column-gap:clamp(8px,1.1vw,22px)!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+#hojaGamePlay[data-mode="team"] .htScores .htTeamName{
+  flex:0 0 auto!important;
+  font-size:clamp(24px,2.45vw,43px)!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  font-weight:1000!important;
+}
+#hojaGamePlay[data-mode="team"] .htScores .htTeamPts{
+  flex:0 0 auto!important;
+  font-size:clamp(33px,3.25vw,59px)!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  font-weight:1000!important;
+  font-variant-numeric:tabular-nums!important;
+}
+/* Active team still keeps the R5 white-on-dark inverse, spark, R7 score shakes. */
+@media(max-width:1000px){
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamScore{column-gap:clamp(3px,.7vw,9px)!important;padding-inline:4px!important}
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamName{font-size:clamp(16px,2.35vw,26px)!important}
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamPts{font-size:clamp(20px,3vw,34px)!important}
+}
+@media(max-width:620px){
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamScore{column-gap:2px!important;padding-inline:1px!important}
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamName{font-size:clamp(11px,2.2vw,17px)!important}
+  #hojaGamePlay[data-mode="team"] .htScores .htTeamPts{font-size:clamp(14px,3vw,23px)!important}
+}

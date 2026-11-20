@@ -1,0 +1,140 @@
+
+/* V0.6.6 VISUAL LAYOUT ONLY
+   Keep canonical Phaser/scrolling scene, game coordinates, Project B APIs,
+   quiz data and performance probe untouched. */
+
+/* The intro logo's real DOM element still takes its position from its existing animation.
+   Enlarge the sign itself (uniform typography, no stretched game pixels). */
+#hojaLogo {width:min(81%,850px)!important;max-width:850px!important;}
+#hojaLogo .logoBox {padding:clamp(22px,3.1vh,33px) clamp(15px,2.2vw,32px)!important;
+ border-width:clamp(7px,.7vw,10px)!important;}
+#hojaLogo .logoBox .main {font-size:clamp(40px,7.5vw,111px)!important;
+ line-height:1.15!important;letter-spacing:-.045em!important;}
+#hojaLogo .logoBox img {width:clamp(90px,9vw,148px)!important;
+ height:clamp(90px,9vw,148px)!important;top:clamp(-100px,-6.8vw,-62px)!important;}
+#hojaLogo .logoBox .portraitLeft {left:clamp(-70px,-4vw,-34px)!important;}
+#hojaLogo .logoBox .portraitRight {right:clamp(-70px,-4vw,-34px)!important;}
+#hojaLogo .logoSub {font-size:clamp(13px,1.45vw,20px)!important;}
+
+/* Loader stays centered. Only visual sizes change; its existing frame animation remains. */
+#loadingOverlay {padding:clamp(12px,3vw,34px)!important;}
+#loadingOverlay .loadingTitle {font-size:clamp(30px,4.4vw,56px)!important;
+ margin-bottom:clamp(14px,2vh,24px)!important;}
+#loadingOverlay .loadingRow {width:min(1190px,96%)!important;
+ min-height:clamp(176px,27vh,270px)!important;gap:clamp(9px,2.7vw,45px)!important;}
+#loadingOverlay .loadingActor {flex:0 0 clamp(90px,11.5vw,180px)!important;}
+#loadingOverlay .loadingCharacter {width:clamp(90px,11.5vw,180px)!important;
+ height:clamp(90px,11.5vw,180px)!important;min-width:0!important;}
+#loadingOverlay .loadingName {font-size:clamp(15px,1.65vw,23px)!important;margin-top:4px!important;}
+#loadingOverlay .loadingText {font-size:clamp(17px,2.1vw,31px)!important;line-height:1.45!important;}
+#loadingOverlay .loadingTrack {width:min(640px,92%)!important;height:16px!important;margin:25px auto 10px!important;}
+#loadingOverlay .loadingNote {font-size:clamp(13px,1.2vw,18px)!important;margin-top:14px!important;}
+
+/* Repository choice: enlarge the two cards to use the center of the screen. */
+#hojaRepoChoice {gap:clamp(16px,2.7vh,28px)!important;
+ padding:clamp(60px,12vh,120px) clamp(12px,2vw,34px) clamp(24px,4vh,50px)!important;}
+#hojaRepoChoice .hrHeader h2 {font-size:clamp(36px,4.4vw,66px)!important;
+ line-height:1.2!important;margin:10px 0 10px!important;}
+#hojaRepoChoice .hrHeader p {font-size:clamp(16px,1.9vw,27px)!important;line-height:1.4!important;}
+#hojaRepoChoice .hrHeader .hcKicker {font-size:clamp(10px,1vw,15px)!important;}
+#hojaRepoChoice .hrChoices {width:min(1180px,96%)!important;
+ gap:clamp(14px,2.2vw,35px)!important;}
+#hojaRepoChoice .hrCard {width:50%!important;
+ min-height:clamp(175px,26vh,290px)!important;
+ padding:clamp(12px,2.2vw,30px)!important;gap:clamp(8px,1.1vh,15px)!important;}
+#hojaRepoChoice .hrIcon {font-size:clamp(38px,4.2vw,64px)!important;}
+#hojaRepoChoice .hrCard strong {font-size:clamp(21px,2.45vw,36px)!important;}
+#hojaRepoChoice .hrCard small {font-size:clamp(12px,1.35vw,20px)!important;}
+
+/* Catalog screens are ONE shared renderer (grade, subject, publisher, unit).
+   Re-center the whole block as a unit instead of pinning title at top while
+   rail floats in the middle and multi-select falls to the bottom. */
+#hojaCatalog {display:flex!important;flex-direction:column!important;
+ align-items:center!important;justify-content:flex-start!important;}
+#hojaCatalog .hcHeader {box-sizing:border-box!important;flex:0 0 auto!important;
+ width:100%!important;margin:clamp(96px,15vh,160px) auto 5px!important;
+ padding:0 16px!important;}
+#hojaCatalog .hcKicker {font-size:clamp(11px,1vw,16px)!important;}
+#hojaCatalog .hcTitle {font-size:clamp(39px,4.65vw,74px)!important;
+ line-height:1.16!important;margin:6px auto 5px!important;}
+#hojaCatalog .hcContext {font-size:clamp(16px,1.55vw,23px)!important;
+ min-height:22px!important;line-height:1.3!important;}
+#hojaCatalog .hcRail {box-sizing:border-box!important;flex:0 0 auto!important;
+ height:clamp(240px,43vh,405px)!important;min-height:0!important;
+ width:96%!important;max-width:none!important;
+ padding:10px clamp(13px,2vw,36px)!important;
+ align-items:center!important;justify-content:safe center!important;
+ gap:clamp(12px,1.6vw,27px)!important;overflow-x:auto!important;}
+#hojaCatalog .hcPakWrap {flex:0 0 clamp(157px,16vw,240px)!important;
+ height:clamp(225px,36vh,333px)!important;max-height:94%!important;}
+#hojaCatalog .hcPakWrap>.hcPak {max-height:none!important;height:100%!important;}
+#hojaCatalog .hcRail>.hcPak {flex:0 0 clamp(157px,16vw,240px)!important;
+ height:clamp(225px,36vh,333px)!important;max-height:94%!important;}
+#hojaCatalog .hcPak .hcFace strong:not(.hcUnitName) {font-size:clamp(18px,2.1vw,32px)!important;}
+#hojaCatalog .hcPak.isGrade .hcFace strong {font-size:clamp(33px,3.5vw,56px)!important;}
+#hojaCatalog .hcPak .hcFace small {font-size:clamp(11px,1.05vw,16px)!important;}
+#hojaCatalog .hcPak.isUnit .hcFace strong {font-size:clamp(15px,1.45vw,23px)!important;}
+#hojaCatalog .hcMultiControls {flex:0 0 auto!important;
+ margin:0 auto!important;padding:3px 12px 4px!important;
+ gap:clamp(10px,1.2vw,20px)!important;font-size:clamp(15px,1.35vw,19px)!important;}
+#hojaCatalog .hcMultiSwitch {padding:8px 14px!important;}
+#hojaCatalog .hcMultiCount {font-size:clamp(12px,1vw,16px)!important;}
+#hojaCatalog .hcFoot {flex:0 0 auto!important;order:3!important;
+ min-height:0!important;margin:3px auto 0!important;padding:0 12px!important;}
+/* Step titles already explain what to choose; keep confirm action for multi-select. */
+#hojaCatalog #hcHint {display:none!important;}
+#hojaCatalog #hcConfirm:not([hidden]) {font-size:clamp(15px,1.35vw,20px)!important;
+ padding:8px 25px!important;}
+
+@media(max-height:680px) and (min-width:701px){
+ #hojaCatalog .hcHeader {margin-top:clamp(56px,10vh,75px)!important;}
+ #hojaCatalog .hcTitle {font-size:clamp(34px,3.8vw,56px)!important;}
+ #hojaCatalog .hcRail {height:clamp(207px,43vh,300px)!important;}
+ #hojaCatalog .hcPakWrap,#hojaCatalog .hcRail>.hcPak {
+  height:clamp(190px,37vh,270px)!important;}
+ #hojaRepoChoice {padding-top:35px!important;gap:10px!important;}
+ #hojaRepoChoice .hrCard {min-height:150px!important;}
+}
+@media(max-width:700px){
+ #hojaLogo {width:83%!important;max-width:480px!important;}
+ #hojaLogo .logoBox {padding:13px 9px!important;}
+ #hojaLogo .logoBox .main {font-size:clamp(27px,6.7vw,48px)!important;}
+ #hojaLogo .logoBox img {width:64px!important;height:64px!important;top:-38px!important;}
+ #hojaLogo .logoBox .portraitLeft {left:-23px!important;}
+ #hojaLogo .logoBox .portraitRight {right:-23px!important;}
+ #loadingOverlay .loadingRow {width:100%!important;gap:7px!important;min-height:150px!important;}
+ #loadingOverlay .loadingActor {flex-basis:clamp(52px,18vw,100px)!important;}
+ #loadingOverlay .loadingCharacter {width:clamp(52px,18vw,100px)!important;
+ height:clamp(52px,18vw,100px)!important;}
+ #loadingOverlay .loadingName {font-size:clamp(11px,2.8vw,15px)!important;}
+ #loadingOverlay .loadingText {font-size:clamp(13px,3vw,19px)!important;}
+ #loadingOverlay .loadingTitle {font-size:clamp(27px,6vw,38px)!important;}
+ #hojaRepoChoice {padding:68px 7px 14px!important;gap:12px!important;}
+ #hojaRepoChoice .hrHeader h2 {font-size:clamp(28px,6vw,40px)!important;}
+ #hojaRepoChoice .hrHeader p {font-size:clamp(12px,3vw,16px)!important;}
+ #hojaRepoChoice .hrChoices {width:97%!important;gap:8px!important;}
+ #hojaRepoChoice .hrCard {min-height:clamp(140px,23vh,205px)!important;padding:8px!important;}
+ #hojaRepoChoice .hrIcon {font-size:clamp(28px,7vw,39px)!important;}
+ #hojaRepoChoice .hrCard strong {font-size:clamp(14px,3.5vw,20px)!important;}
+ #hojaRepoChoice .hrCard small {font-size:clamp(10px,2.4vw,13px)!important;}
+ #hojaCatalog .hcHeader {margin:clamp(75px,13vh,115px) auto 3px!important;}
+ #hojaCatalog .hcTitle {font-size:clamp(31px,6.2vw,45px)!important;}
+ #hojaCatalog .hcContext {font-size:clamp(12px,3vw,17px)!important;}
+ #hojaCatalog .hcRail {width:100%!important;height:clamp(230px,42vh,350px)!important;
+ gap:11px!important;padding:8px 9px!important;}
+ #hojaCatalog .hcPakWrap,#hojaCatalog .hcRail>.hcPak {
+ flex-basis:clamp(124px,39vw,170px)!important;height:clamp(200px,36vh,290px)!important;}
+ #hojaCatalog .hcPak.isGrade .hcFace strong {font-size:clamp(29px,7vw,37px)!important;}
+ #hojaCatalog .hcPak .hcFace strong:not(.hcUnitName) {font-size:clamp(17px,4vw,22px)!important;}
+ #hojaCatalog .hcPak.isUnit .hcFace strong {font-size:clamp(13px,3.2vw,18px)!important;}
+ #hojaCatalog .hcMultiControls {padding:2px 5px!important;gap:6px!important;font-size:13px!important;}
+ #hojaCatalog .hcMultiSwitch {padding:5px 9px!important;}
+}
+@media(max-width:700px) and (max-height:520px){
+ #hojaCatalog .hcHeader {margin-top:49px!important;}
+ #hojaCatalog .hcTitle {font-size:27px!important;}
+ #hojaCatalog .hcRail {height:clamp(132px,39vh,200px)!important;}
+ #hojaCatalog .hcPakWrap,#hojaCatalog .hcRail>.hcPak {height:clamp(120px,36vh,175px)!important;}
+ #hojaRepoChoice {padding-top:25px!important;gap:6px!important;}
+ #hojaRepoChoice .hrCard {min-height:105px!important;}
+}

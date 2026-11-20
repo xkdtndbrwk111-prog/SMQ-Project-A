@@ -1,0 +1,141 @@
+
+/* R13 — TEAM ONLY. Production arcade source remains completely untouched. */
+/* 1) Original NAHANSANG Hi: six unique 64x64 frames at original 8fps,
+      plus seamless duplicate of frame 1 as the 7th column. */
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip.nahan .htSpriteSheet{
+  width:700%!important;max-width:none!important;
+  animation:htR13NahanHi .75s steps(6,end) infinite!important;
+}
+@keyframes htR13NahanHi{from{transform:translateX(0)}to{transform:translateX(-85.714285714%)} }
+/* 2) 5x5 bingo-ownership selection: cells are actual squares. */
+#hojaGamePlay[data-mode="team"] .htPeachGrid{
+  box-sizing:border-box!important;
+  width:min(100%,min(52vh,470px))!important;
+  aspect-ratio:1/1!important;
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  grid-template-rows:repeat(5,minmax(0,1fr))!important;
+  gap:clamp(4px,.6vmin,9px)!important;
+  margin-inline:auto!important;
+  flex:0 1 auto!important;
+}
+#hojaGamePlay[data-mode="team"] .htPeachCell{
+  aspect-ratio:1/1!important;min-width:0!important;min-height:0!important;
+  width:100%!important;height:100%!important;
+  box-sizing:border-box!important;display:grid!important;place-items:center!important;
+  font-size:clamp(18px,2vw,32px)!important;
+  padding:0!important;
+}
+/* 3) Arcade STEP12-4 measured-fit idea mapped onto the actual team DOM. */
+#hojaGamePlay[data-mode="team"] #hqOverlay{padding:clamp(4px,.65vmin,10px)!important;overflow:hidden!important;}
+#hojaGamePlay[data-mode="team"] #hqCard.hojaQuizDense{
+  box-sizing:border-box!important;
+  width:100%!important;height:100%!important;min-height:0!important;
+  max-width:100%!important;max-height:100%!important;
+  padding:clamp(9px,1.2vmin,18px) clamp(10px,1.5vmin,23px)!important;
+  gap:clamp(3px,.55vmin,10px)!important;overflow:hidden!important;
+  display:flex!important;flex-direction:column!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqType{
+  flex:0 0 auto!important;font-size:clamp(17px,2.1vmin,29px)!important;
+  line-height:1.12!important;margin:0!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqQuestionArea{
+  flex:1.08 1 0%!important;min-height:0!important;overflow:hidden!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:0 clamp(4px,.6vmin,9px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqQuestion{
+  display:block!important;flex:none!important;width:100%!important;height:auto!important;
+  min-height:0!important;max-width:100%!important;
+  font-size:var(--ht-r13-question-size,64px)!important;
+  line-height:1.1!important;letter-spacing:-.025em!important;
+  margin:0!important;padding:0!important;
+  font-weight:900!important;text-align:center!important;
+  white-space:normal!important;word-break:keep-all!important;overflow-wrap:anywhere!important;
+  text-wrap:balance!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqChoices{
+  box-sizing:border-box!important;display:grid!important;
+  flex:1.45 1 0%!important;min-height:0!important;width:100%!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;
+  gap:clamp(6px,1vmin,13px)!important;
+  overflow:hidden!important;margin:0!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard .hqChoice{
+  display:grid!important;box-sizing:border-box!important;
+  grid-template-columns:max-content minmax(0,1fr)!important;
+  column-gap:clamp(12px,1.6vmin,28px)!important;
+  place-items:center!important;min-height:0!important;height:100%!important;
+  width:100%!important;min-width:0!important;
+  padding:clamp(4px,.9vmin,14px) clamp(12px,2vw,30px)!important;
+  font-size:var(--ht-r13-choice-size,44px)!important;
+  line-height:1.1!important;font-weight:850!important;
+  overflow:hidden!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard .hqChoiceNumber{
+  font-size:.8em!important;line-height:1!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard .hqChoiceLabel{
+  display:block!important;width:100%!important;max-width:100%!important;
+  font-size:inherit!important;line-height:1.1!important;
+  text-align:center!important;white-space:normal!important;
+  overflow-wrap:anywhere!important;word-break:keep-all!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqFeedback{
+  flex:0 0 clamp(20px,3.5vmin,36px)!important;height:auto!important;
+  margin:0!important;min-height:0!important;font-size:clamp(15px,2.3vmin,26px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard #hqHint{
+  flex:0 0 auto!important;margin:0!important;padding:0!important;
+  font-size:clamp(12px,1.45vmin,18px)!important;line-height:1.16!important;
+  white-space:normal!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqQuestionArea{flex:1.55 1 0%!important;}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{
+  flex:0 0 auto!important;height:clamp(120px,20vh,190px)!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:clamp(8px,1.2vmin,18px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  height:100%!important;min-height:0!important;padding:clamp(5px,.8vmin,12px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceNumber{display:none!important;}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{
+  width:auto!important;font-size:var(--ht-r13-ox-size,100px)!important;
+  font-weight:1000!important;line-height:1!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="SUBJECTIVE"] #hqChoices{
+  display:flex!important;flex:1 1 0%!important;flex-direction:column!important;
+  align-items:stretch!important;justify-content:center!important;overflow:auto!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="SUBJECTIVE"] #hqChoices button{
+  min-height:clamp(64px,10vh,118px)!important;
+  font-size:clamp(24px,3.3vmin,42px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="SUBJECTIVE"] .htAnswerReveal{
+  font-size:clamp(26px,4.6vmin,60px)!important;
+}
+/* Match the earlier, more specific R11/R12 per-kind selectors: do not
+   let their old clamped font sizes defeat the measured STEP12-4 values. */
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="MC3"] #hqQuestionArea{
+  flex:1.25 1 0%!important;min-height:clamp(130px,24vh,235px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="MC3"] #hqChoices{
+  flex:1.05 1 0%!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="MC3"] .hqChoice{
+  font-size:var(--ht-r13-choice-size,44px)!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="MC3"] .hqChoiceLabel{
+  font-size:inherit!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqQuestion{
+  display:block!important;flex:none!important;min-height:0!important;
+  font-size:var(--ht-r13-question-size,64px)!important;
+  height:auto!important;line-height:1.1!important;margin:0!important;
+}

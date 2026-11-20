@@ -1,0 +1,8 @@
+
+/* Crop exactly one 32×32 (or NAHAN HI single-frame) cell out of horizontal strips. */
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip{--frames:1;position:relative;width:clamp(130px,19vh,240px);aspect-ratio:1;flex:none;overflow:hidden;image-rendering:pixelated;filter:drop-shadow(0 10px 7px #0009)}
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip .htSpriteSheet{display:block;width:calc(var(--frames)*100%)!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill;image-rendering:pixelated;animation:htR7SpriteFrameWalk .85s steps(var(--frames),end) infinite;will-change:transform}
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip.enemy{animation:htEnemyWiggle .8s ease-in-out infinite alternate}
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip.fruit{animation:htFruitBob .72s ease-in-out infinite alternate}
+#hojaGamePlay[data-mode="team"] .htItemSpriteClip.nahan{width:clamp(180px,26vh,320px);animation:none}
+@keyframes htR7SpriteFrameWalk{from{transform:translateX(0)}to{transform:translateX(-100%)}}

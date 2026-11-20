@@ -1,0 +1,71 @@
+
+/* 2026-11-10: no independently-positioned heading/cards/hint; prevent collision at short heights. */
+#hojaNextMode{
+  display:flex!important;flex-direction:column!important;
+  justify-content:safe center!important;align-items:center!important;
+  gap:clamp(7px,1.6vh,16px)!important;
+  box-sizing:border-box!important;
+  padding:clamp(8px,2vh,24px) clamp(7px,1.7vw,20px)!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+}
+#hojaNextMode .hmHeading{
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  width:100%!important;box-sizing:border-box!important;
+  margin:0!important;padding:0!important;
+  flex:0 0 auto!important;max-width:100%!important;
+}
+#hojaNextMode .hmHeading h2{
+  font-size:clamp(24px,min(4.35vw,8vh),64px)!important;
+  line-height:1.12!important;margin:0!important;
+}
+#hojaNextMode .hmHeading p{
+  font-size:clamp(12px,min(1.4vw,3.25vh),22px)!important;
+  line-height:1.24!important;margin:clamp(2px,.6vh,6px) 0 0!important;
+  white-space:normal!important;overflow:visible!important;
+  text-overflow:clip!important;
+}
+#hojaNextMode .hmSelections{
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  transform:none!important;margin:0!important;width:min(100%,1050px)!important;
+  max-width:1050px!important;min-height:0!important;
+  flex:0 0 auto!important;box-sizing:border-box!important;
+  gap:clamp(6px,1.3vw,16px)!important;
+}
+#hojaNextMode .hmSelections:not(.teamCount)>.hmPick{
+  box-sizing:border-box!important;min-width:0!important;
+  width:auto!important;flex:0 1 31%!important;max-width:32%!important;
+  min-height:clamp(72px,17vh,114px)!important;
+  padding:clamp(7px,1.2vh,14px) clamp(5px,1vw,15px)!important;
+}
+#hojaNextMode .hmSelections:not(.teamCount):has(>.hmPick:nth-child(2):last-child)>.hmPick{
+  flex-basis:42%!important;max-width:340px!important;
+}
+#hojaNextMode .hmSelections:not(.teamCount) .hmPick strong{
+  font-size:clamp(16px,min(2.6vw,4.2vh),36px)!important;
+  white-space:normal!important;overflow-wrap:keep-all!important;
+}
+#hojaNextMode .hmSelections:not(.teamCount) .hmPick small{
+  font-size:clamp(10px,min(1.15vw,2.5vh),13px)!important;
+  line-height:1.24!important;word-break:keep-all!important;
+}
+#hojaNextMode .hmSelectionHint{
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  transform:none!important;margin:0!important;
+  width:max-content!important;max-width:95%!important;
+  padding:clamp(4px,1vh,7px) clamp(8px,1.5vw,20px)!important;
+  box-sizing:border-box!important;flex:0 0 auto!important;
+  font-size:clamp(12px,min(1.75vw,3vh),24px)!important;
+  line-height:1.25!important;white-space:normal!important;
+}
+@media(max-width:670px){
+  #hojaNextMode .hmSelections:not(.teamCount)>.hmPick{
+    flex-basis:30%!important;max-width:32%!important;
+    min-height:62px!important;padding:6px 4px!important;
+  }
+  #hojaNextMode .hmSelections:not(.teamCount):has(>.hmPick:nth-child(2):last-child)>.hmPick{
+    flex-basis:43%!important;max-width:43%!important;
+  }
+  #hojaNextMode .hmSelections.teamCount .hmPick{
+    min-width:0!important;min-height:48px!important;
+  }
+}

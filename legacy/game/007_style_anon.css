@@ -1,0 +1,27 @@
+
+/* V0.4.4 – catalog selection behavior and long-title treatment */
+.hcPakWrap{position:relative;flex:0 0 clamp(128px,16vw,185px);height:clamp(205px,42vh,245px);max-height:85%;min-width:0}
+.hcPakWrap>.hcPak{width:100%;height:100%;max-height:none;flex:0 0 auto}
+.hcPak.isUnit .hcFace{gap:4px;padding:6px 5px}.hcPak.isUnit .hcEmblem{width:43px;height:43px;flex-basis:43px}.hcPak.isUnit .hcFace small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-size:10px;flex:0 0 auto}.hcPak.isUnit .hcFace strong{font-size:clamp(12px,1.55vw,18px);line-height:1.23;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+.hcPak.isUnit.isLong .hcFace strong{font-size:clamp(11px,1.4vw,16px)}
+.hcInfoBtn{position:absolute;right:11px;top:26px;z-index:2;width:28px;height:28px;border:1px solid #f2d58c;border-radius:50%;background:#112f3b;color:#ffe5a4;font-size:18px;line-height:23px;text-align:center;cursor:pointer}
+.hcInfoBtn:hover,.hcInfoBtn:focus-visible{background:#386e71;outline:2px solid #fff2bf}
+.hcMultiControls[hidden],.hcUnitInfoPanel[hidden]{display:none!important}
+.hcMultiControls{order:2;display:flex;justify-content:center;align-items:center;gap:12px;flex:0 0 auto;padding:0 14px 7px;font-weight:900;color:#fff2d0}
+.hcMultiSwitch{display:flex;align-items:center;gap:9px;cursor:pointer;padding:5px 11px;border:2px solid #a88755;border-radius:12px;background:#102d3b}
+.hcMultiSwitch input{position:absolute;opacity:0;width:1px;height:1px}
+.hcSwitchTrack{width:45px;height:24px;border-radius:20px;background:#657e84;border:2px solid #d5d9d2;position:relative;transition:background .16s}
+.hcSwitchTrack:before{content:'';position:absolute;width:16px;height:16px;background:#f7e6c1;border-radius:50%;left:2px;top:2px;transition:transform .16s}
+.hcMultiSwitch input:checked+.hcSwitchTrack{background:#387d60}
+.hcMultiSwitch input:checked+.hcSwitchTrack:before{transform:translateX(21px)}
+.hcMultiSwitch input:focus-visible+.hcSwitchTrack{outline:3px solid #fff2be;outline-offset:3px}
+.hcMultiCount{color:#c5e1dc;font-size:12px}
+.hcFoot{order:3;min-height:54px;flex-wrap:wrap;padding-bottom:12px}
+.hcAction{min-height:38px;cursor:pointer;font-weight:900}.hcAction:disabled{opacity:.48;cursor:not-allowed}
+.hcUnitInfoPanel{position:absolute;inset:0;z-index:98;display:grid;place-items:center;background:#081720cf;padding:20px}
+.hcUnitInfoBox{width:min(590px,94%);padding:24px;border:3px solid #e1be7c;border-radius:12px;background:#163c45;box-shadow:10px 10px 0 #06131a;text-align:center;color:#fff5d8}
+.hcUnitInfoKicker{font-size:13px;letter-spacing:.08em;color:#d2b87e}
+.hcUnitInfoName{font-weight:900;font-size:clamp(16px,2.4vw,26px);line-height:1.6;margin:20px 0;overflow-wrap:anywhere}
+#hcUnitInfoClose{padding:9px 26px;border:2px solid #e2c38a;background:#e2b876;color:#132e36;font-weight:900;cursor:pointer}
+.hcNextSelected{background:#102b32;padding:10px 12px;border-radius:6px;font-weight:900;color:#fee2a1;overflow-wrap:anywhere}
+@media(max-width:680px){.hcPakWrap{flex-basis:116px;height:185px}.hcPak.isUnit .hcFace strong{font-size:12px}.hcPak.isUnit.isLong .hcFace strong{font-size:11px}.hcInfoBtn{right:3px;top:20px;width:24px;height:24px;font-size:15px;line-height:20px}.hcMultiControls{gap:6px}.hcMultiCount{font-size:10px}.hcFoot{font-size:11px;min-height:50px}}

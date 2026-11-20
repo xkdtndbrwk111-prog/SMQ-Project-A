@@ -1,0 +1,130 @@
+
+#hqOverlay{
+display:none;position:absolute;z-index:20;inset:0;background:rgba(4,8,14,.91);place-items:center;padding:2.2%}
+#hqOverlay.active{display:grid}
+#hqCard{width:96%;height:92%;border:3px solid #f1e3b5;border-radius:14px;background:#121922;
+padding:22px 26px;display:flex;flex-direction:column}
+#hqType{font-size:13px;font-weight:800;color:#8de5a9;letter-spacing:.08em}
+#hqQuestion{font-size:clamp(22px,3.3vw,36px);font-weight:850;line-height:1.28;margin:18px 0 20px;flex:1;
+display:flex;align-items:center;justify-content:center;text-align:center}
+#hqChoices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hqChoice{min-height:58px;border:2px solid #617180;background:#24313d;color:#fff;border-radius:10px;
+font-size:clamp(16px,2vw,22px);font-weight:750;padding:10px 14px;cursor:pointer}
+.hqChoice.focus{border-color:#f1e3b5;box-shadow:0 0 0 3px #f1e3b555}
+.hqChoice.correct{border-color:#71db8d;background:#23482f}.hqChoice.wrong{border-color:#ff7c7c;background:#542828}
+#hqFeedback{height:30px;text-align:center;font-size:18px;font-weight:800;margin-top:10px}
+#hqHint{text-align:center;color:#aebdca;font-size:13px;font-weight:700;margin-top:2px;letter-spacing:.04em}
+#hqOverlay{padding:clamp(5px,.8vmin,12px);overflow:hidden}
+#hqCard.hojaQuizDense{
+  box-sizing:border-box;width:100%;height:100%;max-width:100%;max-height:100%;
+  min-height:0;min-width:0;overflow:hidden!important;
+  display:flex;flex-direction:column;
+  padding:clamp(6px,1.1vmin,16px) clamp(8px,1.3vmin,20px);
+  gap:clamp(3px,.5vmin,8px);
+  border-width:clamp(2px,.25vmin,3px);
+}
+#hqCard.hojaQuizDense #hqType{
+  flex:0 0 auto;line-height:1.1;font-size:clamp(12px,1.35vmin,20px);
+  margin:0;min-height:0;
+}
+#hqCard.hojaQuizDense #hqQuestionArea{
+  box-sizing:border-box;flex:var(--hoja-quiz-q-grow,1) 1 0%;
+  min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;margin:0;padding:0 clamp(1px,.2vmin,4px);
+}
+#hqCard.hojaQuizDense #hqQuestion{
+  display:block;box-sizing:border-box;width:100%;max-width:100%;flex:none;
+  margin:0;padding:0;min-height:0;height:auto;
+  font-size:var(--hoja-quiz-q-size,64px);
+  line-height:1.1;letter-spacing:-.025em;
+  text-align:center;overflow:visible;
+  white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
+  font-weight:900;text-wrap:balance;
+}
+/* Multiline questions stay centered; balanced wrapping favors TV readability. */
+#hqCard.hojaQuizDense #hqQuestion.hojaQuizMultiline{text-align:center}
+#hqCard.hojaQuizDense #hqChoices{
+  box-sizing:border-box;flex:var(--hoja-quiz-c-grow,1.55) 1 0%;
+  display:grid;grid-template-columns:minmax(0,1fr);
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  gap:clamp(4px,.7vmin,10px);
+  min-width:0;min-height:0;width:100%;margin:0;
+  overflow:hidden;
+}
+#hqCard.hojaQuizDense .hqChoice{
+  box-sizing:border-box;display:grid;grid-template-columns:max-content minmax(0,1fr);
+  column-gap:clamp(9px,1.35vmin,24px);
+  place-items:center;min-width:0;min-height:0;height:100%;width:100%;
+  padding:clamp(3px,.5vmin,10px) clamp(6px,.8vmin,14px);
+  /* Offset the choice numbers by a fraction of the actual card width. */
+  padding-inline-start:var(--hoja-quiz-number-inset,24px);
+  font-size:var(--hoja-quiz-c-size,40px);font-weight:850;
+  line-height:1.08;text-align:center;
+  border-radius:clamp(5px,.75vmin,11px);
+  overflow:hidden;white-space:normal;
+}
+#hqCard.hojaQuizDense .hqChoiceNumber{
+  display:block;font-size:.8em;line-height:1;justify-self:center;color:#ffe38b;
+}
+#hqCard.hojaQuizDense .hqChoiceLabel{
+  display:block;box-sizing:border-box;width:100%;max-width:100%;
+  margin:0;padding:0;font:inherit;text-align:center;
+  line-height:1.08;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
+}
+#hqCard.hojaQuizDense #hqFeedback{
+  box-sizing:border-box;flex:0 0 clamp(20px,3.6vmin,36px);
+  height:auto;min-height:0;margin:0;text-align:center;
+  font-size:clamp(13px,2.4vmin,27px);line-height:1.1;
+  display:flex;justify-content:center;align-items:center;
+  overflow:hidden;
+}
+#hqCard.hojaQuizDense #hqHint{
+  flex:0 0 auto;margin:0;padding:0;line-height:1.15;
+  font-size:clamp(10px,1.25vmin,15px);
+  text-align:center;white-space:nowrap;overflow:hidden;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"]{
+  --hoja-quiz-q-grow:1.55;--hoja-quiz-c-grow:1;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] #hqChoices{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:minmax(0,1fr);
+  gap:clamp(8px,1.2vmin,18px);
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice{
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(4px,1vmin,16px);
+  border-width:clamp(2px,.3vmin,4px);
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoiceNumber{display:none}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoiceLabel{
+  width:auto;max-width:100%;text-align:center;
+  font-size:var(--hoja-quiz-ox-size,140px);
+  line-height:1;
+  font-weight:950;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice[data-answer="O"]{
+  background:#173b36;border-color:#55c6a1;color:#98f5d4;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice[data-answer="X"]{
+  background:#482831;border-color:#e48596;color:#ffb9c6;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.focus{
+  box-shadow:inset 0 0 0 2px #fff9d0,0 0 0 3px #f1e3b5;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.correct{
+  background:#23482f;border-color:#71db8d;color:#c6ffe0;
+}
+#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.wrong{
+  background:#542828;border-color:#ff7c7c;color:#ffced2;
+}
+@media(max-width:620px){
+  #hqOverlay{position:fixed;inset:0;padding:clamp(4px,1vmin,9px)}
+  #hqCard.hojaQuizDense{
+    width:100%;height:100%;max-height:100%;overflow:hidden!important;
+    padding:clamp(5px,1.4vmin,10px) clamp(6px,1.5vmin,12px);
+  }
+  #hqCard.hojaQuizDense #hqQuestion{margin:0}
+  #hqCard.hojaQuizDense .hqChoice{min-height:0}
+}
+

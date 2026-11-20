@@ -1,0 +1,22 @@
+
+/* R12B: prevent unlaid-out 384px native portraits from ever appearing. */
+#hojaGamePlay[data-mode="team"] .htTeamPortrait{
+  width:0;height:0;visibility:hidden;
+}
+#hojaGamePlay[data-mode="team"] .htTeamPortrait[data-layout-ready="true"]{
+  visibility:visible;
+}
+/* Four identical lanes, so pairs 1/2,3/4,5/6 line up; 7 alone at left. */
+#hojaGamePlay[data-mode="team"] #htLeft,
+#hojaGamePlay[data-mode="team"] #htRight{
+  display:grid!important;
+  grid-template-rows:repeat(4,minmax(0,1fr))!important;
+  row-gap:0!important;
+  align-content:stretch!important;
+}
+#hojaGamePlay[data-mode="team"] .htTeamEmptySlot{
+  grid-row:auto;
+  visibility:hidden;
+  pointer-events:none;
+  min-height:0;
+}

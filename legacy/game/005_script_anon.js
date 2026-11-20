@@ -1,0 +1,1 @@
+if(!window.Phaser){let fallback=document.createElement('script');fallback.src='https://cdnjs.cloudflare.com/ajax/libs/phaser/4.2.1/phaser.min.js';fallback.async=false;document.head.appendChild(fallback);}

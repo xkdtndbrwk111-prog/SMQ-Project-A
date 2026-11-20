@@ -1,0 +1,36 @@
+
+/* V0.6.1: public repository errors are visible independently of private-code panel. */
+#hrNotice.hrPublicNotice{max-width:min(820px,94vw);margin:0;padding:10px 16px;
+  border:1px solid #d8aa67;border-radius:8px;background:#213b47;color:#ffdbab;
+  font-size:clamp(12px,1.2vw,16px);font-weight:750;line-height:1.5;text-align:center;
+  overflow-wrap:anywhere;max-height:23vh;overflow:auto;}
+#hrNotice[hidden]{display:none!important;}
+#hrPublic[disabled]{cursor:wait;filter:saturate(.6);opacity:.75;}
+
+/* V0.6.1 — responsive virtual viewport. Height=540; width follows the
+   browser aspect, with uniform scaling and no letterbox bars. */
+html,body{width:100%!important;height:100%!important;min-height:0!important;
+  margin:0!important;overflow:hidden!important;background:#071622!important;}
+body{position:relative!important;display:block!important;}
+/* Legacy instrumentation stays in DOM only for scene callbacks; not visible to students. */
+body>header,body>.footer,#readyMock,.hcMockBadge,.hrDemo,#hqArcadeInfo,
+#progressWrap,#elapsed,.footer .anchors,.footer .note{display:none!important;}
+#stage{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;
+  height:100dvh!important;max-width:none!important;min-height:0!important;
+  margin:0!important;padding:0!important;overflow:hidden!important;background:#071622!important;}
+#frame{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  max-width:none!important;min-height:0!important;max-height:none!important;
+  aspect-ratio:auto!important;border:0!important;border-radius:0!important;
+  margin:0!important;box-shadow:none!important;background:#071622!important;overflow:hidden!important;}
+#phaserRoot{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;}
+#phaserRoot canvas{display:block!important;width:100%!important;height:100%!important;
+  aspect-ratio:auto!important;object-fit:contain!important;image-rendering:pixelated!important;}
+/* Selection UI occupies full available viewport, while background game keeps square pixels. */
+#hojaRepoChoice,#hojaCatalog,#hojaNextMode,#hojaGamePlay,#loadingOverlay{max-width:none!important;}
+#hojaGamePlay[data-mode="arcade"] .hqTop,#hojaGamePlay[data-mode="arcade"]>.hqBack,
+#hojaGamePlay[data-mode="arcade"]>#hqAudioTop{display:none!important;}
+/* Screen-space picture remains centered and uncut when a browser is not 16:9. */
+@media (orientation:portrait){
+ .hcHeader{padding-top:clamp(54px,13vw,90px)!important;}
+ .hmHeading{padding-top:clamp(54px,13vw,100px)!important;}
+}

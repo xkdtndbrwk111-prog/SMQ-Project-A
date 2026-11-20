@@ -1,0 +1,82 @@
+
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif}
+*{box-sizing:border-box}body{margin:0;color:#e8f5fa;background:linear-gradient(160deg,#102e42 0,#08141f 85%);min-height:100vh}
+header{max-width:1120px;margin:auto;padding:18px 20px 13px;display:flex;justify-content:space-between;align-items:end;gap:15px;flex-wrap:wrap}
+h1{font-size:19px;margin:0 0 5px}header p{font-size:12px;color:#a9c4d3;margin:0}
+.eyebrow{letter-spacing:.17em;color:#90c9dd;font-size:10px;font-weight:700;margin-bottom:5px}
+#stage{max-width:1120px;margin:auto;padding:0 20px}
+#frame{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:#51b8ec;border:1px solid #487387;border-radius:10px;box-shadow:0 15px 60px #0008}
+#frame{cursor:pointer}
+#phaserRoot{position:absolute;inset:0}
+#phaserRoot canvas{width:100%!important;height:auto!important;aspect-ratio:16/9;display:block;object-fit:contain;image-rendering:pixelated}
+#blackCut{position:absolute;inset:0;z-index:9;background:#000;opacity:0;pointer-events:none}
+#hojaLogo{position:absolute;z-index:10;width:54%;max-width:570px;left:50%;top:15%;opacity:0;pointer-events:none;transform:translate(-50%,-530px);filter:drop-shadow(0 13px 0 #12253b99);}
+.logoBox{border:7px solid #3a253f;background:#ffde8b;box-shadow:inset 0 0 0 5px #ffbd69,9px 10px 0 #26354a,0 0 0 4px #f6a867;border-radius:14px;padding:21px 12px;text-align:center;position:relative}
+.logoBox .main{color:#75334d;font-size:clamp(28px,5.9vw,76px);font-weight:1000;letter-spacing:-.04em;text-shadow:3px 3px #fff0aa,5px 6px #c66e64;line-height:1.2;white-space:nowrap}
+.logoBox img{position:absolute;top:-74px;width:110px;height:110px;object-fit:contain;image-rendering:auto;filter:drop-shadow(2px 4px #44385777)}
+.logoBox .portraitLeft{left:-52px;transform:rotate(-13deg)}.logoBox .portraitRight{right:-51px;transform:rotate(13deg)}
+.logoSub{display:block;margin-top:6px;font-weight:900;color:#8d4a58;font-size:clamp(10px,1.5vw,15px);letter-spacing:.2em}
+
+.footer{max-width:1120px;margin:14px auto;padding:0 20px 25px;display:grid;gap:12px}
+.actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+button{background:#25495b;color:#e8f5fa;border:1px solid #57778a;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700}
+button:hover{background:#426b7f}#elapsed,#status{color:#a9bdc9;font-size:12px}
+#progressWrap{width:100%;height:6px;background:#243b49;border-radius:5px;overflow:hidden}
+#progress{height:100%;width:0;background:#dfbe77;transition:width .1s linear}
+.anchors{display:flex;flex-wrap:wrap;gap:7px}.anchors button{padding:6px 10px;font-size:11px;background:#1d3445}
+.note{font-size:12px;color:#a5b8c2;line-height:1.65}.note strong{color:#d9eff3}
+#hiddenArt{display:none}
+@media(max-width:600px){header{padding-top:13px}.logoBox{padding:10px 6px;border-width:4px}.logoBox img{width:54px;height:54px;top:-33px}.logoBox .portraitLeft{left:-25px}.logoBox .portraitRight{right:-25px}}
+
+/* Loader sits on top of the Phaser attract at the exact completion beat. */
+#loadingOverlay,#readyMock{position:absolute;inset:0;z-index:40;color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;background:radial-gradient(ellipse at 50% 20%,#24779a 0%,#102d49 66%,#0a1a2d 100%)}
+#loadingOverlay[hidden],#readyMock[hidden]{display:none!important}
+.loadingTitle{font-size:clamp(20px,3.8vw,40px);font-weight:1000;color:#ffe19e;text-shadow:3px 4px 0 #0a2036;margin-bottom:10px}
+.loadingRow{width:min(900px,95%);display:flex;justify-content:center;gap:clamp(10px,2vw,26px);align-items:center;min-height:180px}
+.loadingCharacter{width:128px;height:128px;min-width:128px;object-fit:contain;image-rendering:pixelated;align-self:center}
+.loadingActor{display:flex;flex-direction:column;align-items:center;flex:0 0 128px}.loadingName{margin-top:1px;font-weight:900;font-size:clamp(13px,1.55vw,19px);color:#f9e4b2;text-shadow:2px 3px 0 #081c2a;white-space:nowrap}.loadingCenter{flex:1;max-width:565px;min-width:0}
+.loadingText{display:inline;font-size:clamp(13px,2vw,24px);font-weight:900;line-height:1.65;text-shadow:2px 3px 0 #061a2b;overflow-wrap:anywhere}
+.loadingDots{display:inline-block;min-width:2.2em;color:#ffe19e;font-weight:900}
+.loadingTrack{height:12px;border:2px solid #d5ecf3;background:#11374b;border-radius:12px;overflow:hidden;width:min(480px,75%);margin:28px auto 8px}
+.loadingFill{height:100%;width:28%;background:repeating-linear-gradient(90deg,#fbd682 0 22px,#efb355 22px 28px);animation:barTravel 1.5s ease-in-out infinite alternate}
+@keyframes barTravel{from{transform:translateX(-100%)}to{transform:translateX(360%)}}
+.loadingNote{font-size:12px;color:#c0d9e9;margin-top:12px}
+
+#readyMock h2{font-size:clamp(23px,4vw,46px);color:#ffe19e}
+#readyMock p{line-height:1.8;max-width:560px}
+#readyMock button{margin:10px;padding:12px 18px}
+@media(max-width:600px){.loadingActor{flex-basis:64px}.loadingName{font-size:11px}.loadingCharacter{width:64px;height:64px;min-width:64px}.loadingRow{min-height:130px;gap:5px}.loadingText{font-size:12px}.loadingTitle{margin-bottom:0}}
+
+/* STEP 14-2: fixed navigation anchor is shared by grade, subject, publisher, units and future modes. */
+.hmSelectedUnits{display:none!important}
+#hojaSharedBack{position:absolute;left:clamp(10px,2.2%,24px);top:clamp(10px,3.1%,22px);z-index:86;background:#14354a;border:2px solid #e5c78c;color:#fff1cc;min-width:142px;min-height:42px;padding:7px 13px;font-size:14px;box-shadow:3px 4px 0 #101e2c}
+#hojaSharedBack[hidden]{display:none!important}
+#hojaCatalog,#hojaNextMode{position:absolute;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% -15%,#315c66,#142d3e 70%,#091926);color:#fff3cf;cursor:default}
+#hojaCatalog[hidden],#hojaNextMode[hidden]{display:none!important}
+.hcHeader{width:100%;padding:clamp(45px,7.8%,70px) 15px 10px;text-align:center;flex:0 0 auto}
+.hcKicker{font-weight:900;font-size:clamp(10px,1.3vw,14px);letter-spacing:.21em;color:#9ec4b8}
+.hcTitle{font-size:clamp(23px,3.7vw,42px);font-weight:1000;margin:5px auto;color:#fff1c6;letter-spacing:.04em;text-shadow:3px 4px #1c2028}
+.hcContext{font-size:clamp(11px,1.35vw,16px);color:#d3e1db;font-weight:700;min-height:19px}
+.hcRail{width:min(930px,95%);flex:1;min-height:0;display:flex;align-items:center;justify-content:safe center;gap:18px;padding:10px 15px 20px;overflow-x:auto;overflow-y:hidden;scrollbar-color:#bc996a #1d3d4c}
+.hcPak{position:relative;display:flex;flex:0 0 clamp(128px,16vw,185px);height:clamp(170px,33vh,245px);max-height:85%;min-width:0;align-items:stretch;justify-content:stretch;padding:0;border:0;border-radius:9px 9px 18px 18px;background:linear-gradient(92deg,#84654c 0 6%,#c9a77a 6% 12%,#bf966a 12% 89%,#725b4c 89% 94%,#513d32 94%);box-shadow:inset 0 0 0 5px #5d493b,inset 0 0 0 9px #e2bf86,5px 7px 0 #06121a;transform:translateY(0);transition:transform .15s ease,filter .15s ease;color:#e9eff3;cursor:pointer}
+.hcPak:hover,.hcPak:focus-visible{transform:translateY(-7px);filter:brightness(1.13);outline:3px solid #f2d58c;outline-offset:2px}
+.hcPak:disabled{opacity:.45;cursor:not-allowed}
+.hcPak.isSelected{outline:4px solid #8ee5b0;outline-offset:3px}
+.hcPak:before{content:'';position:absolute;top:9px;left:18%;right:18%;height:10px;border-radius:0 0 5px 5px;background:repeating-linear-gradient(90deg,#76533b 0 5px,#e4c086 5px 10px)}
+.hcPak:after{content:'';position:absolute;bottom:7px;left:20%;right:20%;height:9px;border-radius:3px;background:repeating-linear-gradient(90deg,#3c3430 0 5px,#f2d7a0 5px 13px)}
+.hcFace{position:absolute;inset:26px 12px 23px;border:3px solid #4a5350;background:linear-gradient(180deg,#284b4e,#173741);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 8px;text-align:center;border-radius:2px}
+.hcEmblem{display:flex;align-items:center;justify-content:center;background:#e2bf82;border:3px double #78543b;color:#644a35;width:42px;height:42px;border-radius:50%;font-weight:1000;font-size:22px}
+.hcFace strong{color:#fff2cc;font-weight:1000;font-size:clamp(14px,2vw,22px);line-height:1.25;overflow-wrap:anywhere;max-width:100%}
+.hcFace small{font-size:clamp(9px,1.15vw,12px);line-height:1.3;color:#addbd7;overflow-wrap:anywhere}
+.hcFoot{flex:0 0 auto;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 15px clamp(18px,3%,23px);font-size:12px;color:#bcd0d6;text-align:center}
+.hcAction{background:#d6a86c;border:2px solid #fff0c7;color:#152c39;font-size:14px;padding:7px 15px}
+.hcMockBadge{position:absolute;right:14px;top:14px;color:#b6cbd0;background:#102634bc;border:1px solid #597780;border-radius:5px;padding:4px 8px;font-size:10px;letter-spacing:.1em}
+.hcNextCard{width:min(660px,86%);margin:auto;padding:25px;border:2px solid #ddc390;background:#183c43;border-radius:12px;text-align:center}
+.hcNextCard h2{margin:0 0 10px;font-size:clamp(25px,3vw,37px);color:#ffdfa1}
+.hcNextCard p{font-size:clamp(12px,1.5vw,16px);line-height:1.7}
+@media(max-width:680px){#hojaSharedBack{min-width:104px;min-height:32px;padding:5px 7px;font-size:11px}.hcPak{flex-basis:116px;height:165px}.hcRail{gap:11px;padding-left:7px;padding-right:7px}.hcFace{inset:22px 9px 19px;padding:6px}.hcEmblem{width:34px;height:34px;font-size:18px}.hcTitle{font-size:23px}.hcHeader{padding-top:40px}.hcFoot{padding-bottom:10px;font-size:10px}}
+
+/* Google Noto subject icon marks: same-size, undistorted square images. */
+.hcEmblem{width:52px;height:52px;flex:0 0 52px;border-radius:50%;overflow:hidden}
+.hcSubjectIcon{display:block;width:35px;height:35px;object-fit:contain;aspect-ratio:1 / 1;image-rendering:auto;flex:0 0 auto}
+@media(max-width:680px){.hcEmblem{width:43px;height:43px;flex-basis:43px}.hcSubjectIcon{width:29px;height:29px}}

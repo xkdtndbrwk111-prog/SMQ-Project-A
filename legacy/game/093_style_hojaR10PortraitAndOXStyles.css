@@ -1,0 +1,59 @@
+
+/* Portraits are in their own layers above the existing score cards. Cards remain independent for score shake. */
+#hojaGamePlay[data-mode="team"] .htScores{
+  display:flex!important;flex-direction:column!important;justify-content:space-around!important;
+  gap:0!important;height:100%!important;overflow:visible!important;min-height:0!important;
+}
+#hojaGamePlay[data-mode="team"] .htTeamUnit{
+  position:relative;flex:1 1 0;min-height:0;max-height:none;isolation:isolate;
+}
+#hojaGamePlay[data-mode="team"] .htTeamUnit > .htTeamScore{
+  position:absolute!important;left:0;right:0;bottom:5px;
+  width:100%;height:clamp(39px,7.5vh,78px);
+  min-height:0!important;padding:4px 5px!important;
+  z-index:2;overflow:visible!important;
+}
+#hojaGamePlay[data-mode="team"] .htTeamPortrait{
+  position:absolute;z-index:4;pointer-events:none;display:block;overflow:visible;
+  background:none;filter:drop-shadow(0 3px 2px rgba(0,0,0,.28));
+}
+#hojaGamePlay[data-mode="team"] .htTeamPortrait img{
+  display:block;max-width:none;max-height:none;object-fit:contain;image-rendering:auto;
+}
+#hojaGamePlay[data-mode="team"] .htTeamScore.active{
+  background:#fafafa!important;color:#171921!important;border-color:#ffad4d!important;
+}
+#hojaGamePlay[data-mode="team"] .htTeamScore.active .htTeamName,
+#hojaGamePlay[data-mode="team"] .htTeamScore.active .htTeamPts{
+  color:#111827!important;text-shadow:none!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-template-rows:minmax(180px,1fr)!important;gap:clamp(15px,3vw,46px)!important;
+  flex:1 1 auto!important;min-height:180px!important;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-height:clamp(190px,38vh,410px)!important;
+  border-width:6px!important;border-radius:24px!important;padding:16px!important;
+  box-shadow:0 10px 0 rgba(0,0,0,.4);
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceNumber{display:none!important;}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{
+  display:block!important;font-family:system-ui,sans-serif!important;
+  font-size:clamp(105px,18vw,250px)!important;font-weight:1000!important;
+  width:auto!important;line-height:1!important;text-align:center!important;
+  text-shadow:4px 5px 0 #0008;
+}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice[data-answer="O"]{background:#164c40!important;border-color:#7be6ad!important;color:#e1ffe8!important}
+#hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice[data-answer="X"]{background:#5d2731!important;border-color:#ff8894!important;color:#ffe5e8!important}
+@media(max-width:950px){
+ #hojaGamePlay[data-mode="team"] .htTeamUnit>.htTeamScore{height:clamp(32px,6vh,52px)!important;}
+ #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{font-size:clamp(82px,17vw,160px)!important}
+}
+@media(max-width:600px){
+ #hojaGamePlay[data-mode="team"] .htTeamUnit>.htTeamScore{height:clamp(27px,5vh,36px)!important;bottom:1px!important}
+ #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] #hqChoices{gap:10px!important}
+ #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoice{min-height:150px!important;border-width:3px!important}
+ #hojaGamePlay[data-mode="team"] #hqCard[data-quiz-kind="OX"] .hqChoiceLabel{font-size:clamp(74px,19vw,128px)!important}
+}

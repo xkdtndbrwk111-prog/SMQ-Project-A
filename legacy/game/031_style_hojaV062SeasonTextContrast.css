@@ -1,0 +1,41 @@
+
+/* V0.6.2 typography only: same single full-screen season canvas, untouched.
+   All four seasons share the same shadow/contrast treatment. */
+#hojaNextMode .hmHeading{top:clamp(77px,9.5vh,112px)!important;}
+#hojaNextMode .hmHeading h2{
+ font-size:clamp(34px,4.35vw,64px)!important;line-height:1.16!important;
+ color:#fff7db!important;letter-spacing:-.035em;
+ -webkit-text-stroke:1.65px #182b39;paint-order:stroke fill;
+ text-shadow:3px 3px 0 #243949,-2px -2px 0 #243949,
+  3px -2px 0 #243949,-2px 3px 0 #243949,
+  0 5px 10px rgba(5,19,30,.82)!important;
+}
+#hojaNextMode .hmHeading p{
+ font-size:clamp(16px,1.4vw,22px)!important;line-height:1.38!important;
+ font-weight:900!important;color:#fff9df!important;
+ -webkit-text-stroke:.45px #1b3442;paint-order:stroke fill;
+ text-shadow:2px 2px 0 #1b3442,-1px -1px 0 #1b3442,0 3px 9px #061b2dc9!important;
+}
+#hojaNextMode .hmSelectionHint{
+ top:clamp(290px,40%,430px)!important;left:50%!important;
+ transform:translateX(-50%);width:max-content!important;max-width:calc(100% - 28px)!important;
+ padding:7px 22px!important;border-radius:8px;
+ background:rgba(13,35,50,.83);border:1px solid rgba(237,216,165,.38);
+ box-shadow:0 3px 0 rgba(10,23,34,.36);
+ color:#fff8dc!important;font-size:clamp(18px,1.75vw,26px)!important;
+ font-weight:950!important;line-height:1.35!important;letter-spacing:-.02em;
+ text-shadow:1px 2px 0 #081b29!important;text-align:center;
+}
+#hojaNextMode .hmSelections:not(.teamCount) .hmPick strong{
+ font-size:clamp(23px,2.6vw,36px);
+}
+#hojaNextMode .hmPick small:empty{display:none!important;}
+@media(max-width:670px){
+ #hojaNextMode .hmHeading{top:clamp(63px,10%,82px)!important;}
+ #hojaNextMode .hmHeading h2{font-size:clamp(29px,5.4vw,38px)!important;}
+ #hojaNextMode .hmHeading p{font-size:clamp(12px,2.7vw,17px)!important;}
+ #hojaNextMode .hmSelections{top:clamp(164px,25%,235px)!important;}
+ #hojaNextMode .hmSelectionHint{top:clamp(330px,45%,430px)!important;
+  padding:5px 11px!important;font-size:clamp(13px,3vw,18px)!important;}
+ #hojaNextMode .hmSelections:not(.teamCount) .hmPick strong{font-size:clamp(17px,4vw,23px)!important;}
+}

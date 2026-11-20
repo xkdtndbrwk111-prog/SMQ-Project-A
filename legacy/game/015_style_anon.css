@@ -1,0 +1,9 @@
+
+/* V0.5.8: calculated word-boundary title balance. Only UI text, never sheet identifiers. */
+.hcPak.isUnit .hcFace .hcUnitName{
+  display:block!important;max-width:100%;margin:0 auto;flex:0 0 auto;
+  word-break:keep-all!important;overflow-wrap:normal!important;
+  white-space:pre-line;line-height:1.2!important;text-align:center;
+  font-weight:1000;letter-spacing:0;
+}
+.hcPak.isUnit.isLong .hcFace .hcUnitName{font-size:inherit;}

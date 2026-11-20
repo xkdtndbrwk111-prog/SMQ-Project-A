@@ -1,0 +1,103 @@
+
+/* Parent top bar not duplicated over the REAL arcade scoreHud. */
+#hojaGamePlay[data-mode="arcade"] .hqTop,#hojaGamePlay[data-mode="arcade"]>.hqBack,
+#hojaGamePlay[data-mode="arcade"]>#hqAudioTop{display:none!important}
+#hojaGamePlay[data-mode="arcade"] #hqArcadeFrame{height:100%!important;flex:1 1 100%!important}
+#hojaGamePlay[data-mode="arcade"] #hqArcadeInfo{display:none!important}
+#hqBalloon{width:128px!important;height:128px!important;image-rendering:pixelated!important;transform:translateX(-50%);}
+#hqBalloon img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+#hqCharacter{bottom:calc(21.2963% - 6px)!important}
+#hqBalloonBurst{position:absolute;pointer-events:none;left:50%;width:1px;height:1px;z-index:10}
+.hqBurstPix{position:absolute;left:0;top:0;width:8px;height:8px;border-radius:0;background:#ffd449;box-shadow:0 0 0 1px #663b14;animation:hqBurstPop .42s ease-out forwards;--x:0px;--y:0px}
+@keyframes hqBurstPop{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
+.hqEnemy{position:absolute;bottom:calc(21.2963% - 3px);width:64px;height:64px;z-index:3;pointer-events:none;image-rendering:pixelated}
+.hqEnemy>img:first-child{display:block;width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
+.hqEnemy-jumpy{left:18%}.hqEnemy-hermie{left:29%}.hqEnemy-roach{right:28%}
+.hqEnemy-owl{right:18%;bottom:calc(21.2963% + 130px)}.hqEnemy-ghost{left:12%;bottom:calc(21.2963% + 128px)}
+.hqEnemy-hermie>img:first-child,.hqEnemy-jumpy>img:first-child,.hqEnemy-ghost>img:first-child{transform:scaleX(-1)}
+.hqEnemy .hqHeart{position:absolute;bottom:95%;left:50%;width:40px;height:40px;transform:translateX(-50%) translateY(4px);opacity:0;image-rendering:pixelated;transition:none}
+.hqEnemy.hqCelebrate>img:first-child{animation:hqHappyHop .42s ease-in-out 2 alternate}
+.hqEnemy-owl.hqCelebrate>img:first-child,.hqEnemy-ghost.hqCelebrate>img:first-child{animation:hqHappyWing .22s ease-in-out 4 alternate}
+.hqEnemy.hqCelebrate .hqHeart{animation:hqHeartShow 1.4s ease-out both}
+@keyframes hqHappyHop{0%,100%{translate:0 0}50%{translate:0 -15px}}
+@keyframes hqHappyWing{from{translate:0 0;scale:1 1}to{translate:0 -6px;scale:1 .94}}
+@keyframes hqHeartShow{0%{opacity:0;transform:translateX(-50%) translateY(8px)}20%,75%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+.hqResult{position:absolute;inset:0;z-index:24;background:#061a27c9;display:flex;align-items:center;justify-content:center;padding:18px}
+.hqResult[hidden]{display:none!important}
+.hqResultCard{width:min(650px,94%);border:4px solid #d9ba78;border-radius:13px;background:#133a45;color:#fff0cb;text-align:center;padding:25px 20px;box-shadow:6px 7px 0 #06131d}
+.hqResultCard h2{font-size:clamp(24px,3.3vw,42px);margin:2px 0 22px}
+.hqResultMetrics{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.hqResultMetrics span{display:flex;flex-direction:column;min-width:125px;border:1px solid #7bafab;border-radius:6px;padding:9px;font-size:14px}
+.hqResultMetrics b{font-size:28px}
+.hqResultActions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.hqResultActions button{border:2px solid #e4c58c;border-radius:8px;background:#d9b878;color:#17303b;padding:12px 19px;font-weight:850;font-size:17px;cursor:pointer}
+#hqStage[data-quiz-finished="true"] #hqBalloon{visibility:hidden}
+@media(max-width:660px){#hqBalloon{width:64px!important;height:64px!important}#hqCharacter{bottom:calc(21.2963% - 4px)!important}.hqEnemy{width:32px;height:32px}.hqEnemy-owl,.hqEnemy-ghost{bottom:calc(21.2963% + 67px)}}
+/* V0.5.8 QUIZ IDLE: pixel-safe integer enlargement from 32x32 source (4x native).
+   Idle locomotion is on wrapper; sprite mirroring/reaction stays on child, so no transform collision. */
+#hojaGamePlay[data-mode="quiz"] .hqEnemy{
+  width:128px!important;height:128px!important;image-rendering:pixelated!important;
+  transform-origin:center bottom;will-change:translate;
+  bottom:calc(21.2963% - 6px);
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy>img:first-child{
+  width:128px!important;height:128px!important;
+  object-fit:contain;image-rendering:pixelated!important;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy{
+  left:14%;animation:hqV057SlimeJump 1.08s steps(8,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie{
+  left:27%;animation:hqV057GroundBob 1.55s steps(2,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-roach{
+  right:22%;animation:hqV057GroundBob 1.15s steps(2,end) infinite reverse;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-owl{
+  right:10%;bottom:calc(21.2963% + 116px)!important;
+  animation:hqV057OwlHover 1.8s steps(4,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost{
+  left:6%;bottom:calc(21.2963% + 116px)!important;
+  animation:hqV057GhostFloat 3.6s steps(4,end) infinite;
+}
+/* The original sprites retain their exact integer pixels; no fractional X/Y scaling. */
+@keyframes hqV057SlimeJump{
+  0%,100%{translate:0 0}
+  12.5%,87.5%{translate:0 -8px}
+  25%,75%{translate:0 -24px}
+  37.5%,62.5%{translate:0 -36px}
+  50%{translate:0 -40px}
+}
+@keyframes hqV057GroundBob{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@keyframes hqV057OwlHover{0%,100%{translate:0 -8px}50%{translate:0 8px}}
+@keyframes hqV057GhostFloat{0%,100%{translate:0 -4px}50%{translate:0 4px}}
+/* Correct answer: every enemy accelerates briefly while the Kenney heart emote is shown. */
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy.hqCelebrate{
+  animation:hqV057SlimeJump .34s steps(8,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie.hqCelebrate,
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-roach.hqCelebrate{
+  animation:hqV057GroundBob .27s steps(2,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-owl.hqCelebrate{
+  animation:hqV057OwlHover .42s steps(4,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost.hqCelebrate{
+  animation:hqV057GhostFloat .72s steps(4,end) infinite;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy .hqHeart{
+  width:64px;height:64px;bottom:103%;z-index:5;
+}
+#hojaGamePlay[data-mode="quiz"] .hqEnemy.hqCelebrate .hqHeart{
+  animation:hqHeartShow 1.45s steps(6,end) both;
+}
+/* Responsive cards are reflowed without silently reducing sprite pixels. */
+@media(max-width:800px){
+  #hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy{left:5%}
+  #hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie{left:20%}
+  #hojaGamePlay[data-mode="quiz"] .hqEnemy-roach{right:18%}
+  #hojaGamePlay[data-mode="quiz"] .hqEnemy-owl{right:4%}
+  #hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost{left:1%}
+}
+

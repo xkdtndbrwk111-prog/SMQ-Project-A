@@ -1,0 +1,39 @@
+
+/* R17G: the host owns ONE back/music/SFX control strip in solo arcade.
+   Inner arcade scoreHud still owns only gameplay metrics. */
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqPlayBack{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  position:absolute!important;top:clamp(8px,2.2%,15px)!important;left:clamp(8px,1.5%,18px)!important;
+  height:36px!important;min-height:36px!important;width:92px!important;min-width:92px!important;
+  box-sizing:border-box!important;padding:5px 7px!important;font-size:13px!important;
+  z-index:220!important;white-space:nowrap!important;pointer-events:auto!important;
+}
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop{
+  display:flex!important;position:absolute!important;
+  top:clamp(8px,2.2%,15px)!important;
+  left:calc(clamp(8px,1.5%,18px) + 105px)!important;
+  gap:6px!important;align-items:center!important;z-index:220!important;
+  pointer-events:auto!important;
+}
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop button{
+  height:36px!important;min-height:36px!important;width:92px!important;min-width:92px!important;
+  padding:5px 7px!important;font-size:13px!important;box-sizing:border-box!important;
+}
+/* Parent catalog's separate controls must not float above the arcade HUD. */
+body:has(#hojaGamePlay[data-mode="arcade"]:not([hidden])) #hojaSharedBack,
+body:has(#hojaGamePlay[data-mode="arcade"]:not([hidden])) #hojaAudioTop{
+  display:none!important;pointer-events:none!important;
+}
+@media(max-width:660px){
+  #hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqPlayBack{
+    width:76px!important;min-width:76px!important;height:30px!important;min-height:30px!important;
+    padding:3px!important;font-size:10px!important;
+  }
+  #hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop{
+    left:calc(clamp(8px,1.5%,18px) + 82px)!important;gap:4px!important;
+  }
+  #hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop button{
+    width:66px!important;min-width:66px!important;height:30px!important;min-height:30px!important;
+    padding:3px!important;font-size:10px!important;
+  }
+}

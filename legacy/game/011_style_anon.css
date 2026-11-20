@@ -1,0 +1,25 @@
+
+/* V0.4.8 — mode transition without shake/fade; randomized four-season scroll lock */
+#hojaRepoChoice{position:absolute;inset:0;z-index:71;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at 50% 0,#315c66,#142d3e 70%,#091926);color:#fff3cf}
+#hojaRepoChoice[hidden],#hrPrivatePanel[hidden]{display:none!important}
+.hrHeader{text-align:center;padding:0 12px}.hrHeader .hcKicker{font-size:12px}.hrHeader h2{color:#ffe0ac;font-weight:1000;font-size:clamp(25px,4vw,40px);margin:8px 0 5px}.hrHeader p{font-size:clamp(12px,1.5vw,18px);margin:0;color:#c4dcdd}
+.hrChoices{display:flex;justify-content:center;align-items:stretch;gap:20px;width:min(800px,90%)}
+.hrCard{width:45%;min-height:155px;background:linear-gradient(160deg,#f5e4be,#cba775);border:5px solid #6f523f;box-shadow:inset 0 0 0 5px #e7c98f,6px 8px 0 #081b24;border-radius:9px;color:#4c3738;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;transition:transform .15s,filter .15s;padding:14px}
+.hrCard:hover,.hrCard:focus-visible{background:#ffecca;color:#4c3738;transform:translateY(-5px);filter:brightness(1.06);outline:3px solid #f7cf7b}
+.hrIcon{font-size:clamp(30px,4vw,45px)}.hrCard strong{font-size:clamp(16px,2vw,25px)}.hrCard small{font-size:clamp(10px,1.3vw,15px);color:#745a50}
+.hrPrivate{min-height:83px;text-align:center;width:min(500px,94%);padding:8px 12px;border:2px solid #a88a66;border-radius:9px;background:#183b48}
+.hrPrivate label{display:block;margin-bottom:8px;font-weight:800;font-size:13px}.hrCodeRow{display:flex;gap:9px;justify-content:center}.hrCodeRow input{min-width:0;max-width:140px;text-align:center;letter-spacing:.14em;color:#1e3d46;background:#fff8e5;font-size:20px;font-weight:900;border-radius:5px;border:2px solid #d7b985;padding:5px}.hrCodeRow button{background:#e3bd80;color:#263944;border:2px solid #fff0c7;padding:6px 16px;font-weight:950}.hrPrivate p{font-size:11px;min-height:15px;color:#f5da9d;margin:5px 0}
+.hrDemo{color:#a9c2c6;text-align:center;font-size:11px;max-width:85%;margin:2px 0}
+/* Remove English adventure subheading without leaving unused header space. */
+.hmHeading{padding-top:clamp(48px,8%,59px)}.hmHeading .hcKicker{display:none}.hmAutumnCaption{display:none}
+/* Longer descriptions stay fully visible. */
+.hmSelections:not(.teamCount) .hmPick{min-width:min(38vw,255px);min-height:112px;padding:16px 19px}
+.hmPick small{white-space:normal;line-height:1.45;overflow-wrap:keep-all;color:#6a4f46;max-width:250px;margin:7px auto 0}
+/* gather cleanly, replace at center, then deal next choices outward */
+/* Gather once at the true rail centre. Never shake, rotate or fade. */
+.hmPick.hmGather{pointer-events:none;animation:hmGatherCenter .40s cubic-bezier(.36,.03,.74,.43) both!important;}
+/* Newly rendered choices start at that same centre and spread to their slots. */
+.hmPick.hmDeal{pointer-events:none;animation:hmDealFromCenter .44s cubic-bezier(.19,.78,.27,1) both!important;}
+@keyframes hmGatherCenter{from{transform:translate(0,0) scale(1)}to{transform:translate(var(--hm-gx),var(--hm-gy)) scale(.82)}}
+@keyframes hmDealFromCenter{from{transform:translate(var(--hm-deal-x),var(--hm-deal-y)) scale(.82)}to{transform:translate(0,0) scale(1)}}
+@media(max-width:600px){#hojaRepoChoice{gap:13px}.hrChoices{gap:10px;width:95%}.hrCard{width:50%;min-height:120px;padding:7px}.hrCard strong{font-size:13px}.hrCard small{font-size:10px}.hrIcon{font-size:27px}.hrDemo{font-size:9px}.hmSelections:not(.teamCount) .hmPick{min-height:85px;min-width:40%;padding:8px 5px}.hmPick small{font-size:10px;margin-top:4px}.hmHeading{padding-top:44px}}

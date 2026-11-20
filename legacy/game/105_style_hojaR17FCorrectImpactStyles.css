@@ -1,0 +1,53 @@
+
+/* R17F: success hit feedback before pipes; FX layer stays pointer-transparent and topmost. */
+#hojaGamePlay[data-mode="team"] #htFxLayer .htCorrectImpact{
+  position:absolute;inset:0;z-index:90;display:grid;place-items:center;
+  pointer-events:none;isolation:isolate;overflow:hidden;
+  background:radial-gradient(circle at center,rgba(21,101,76,.80),rgba(4,17,30,.91) 60%,rgba(4,13,22,.94));
+  animation:htCorrectHitFlash .78s ease both;
+}
+#hojaGamePlay[data-mode="team"] .htCorrectImpactInner{
+  display:grid;place-items:center;position:relative;z-index:2;min-width:320px;max-width:94%;
+  padding:clamp(18px,2.4vw,32px) clamp(40px,5vw,78px);text-align:center;color:#fff4c8;
+  border:3px solid #b8efb3;border-radius:20px;background:rgba(4,39,40,.87);
+  box-shadow:0 10px 0 #001923,0 0 38px #8fe46d66;
+  filter:drop-shadow(0 7px 0 #0b2d36) drop-shadow(0 0 16px #ffe97e99);
+  animation:htCorrectHitText .78s cubic-bezier(.17,1.45,.35,1) both;
+}
+#hojaGamePlay[data-mode="team"] .htCorrectImpactTitle{
+  font:1000 clamp(76px,9.8vw,148px)/1.05 system-ui,"Noto Sans KR",sans-serif;
+  -webkit-text-stroke:clamp(1px,.15vw,2.5px) #1f5a49;
+  letter-spacing:-.065em;text-shadow:4px 5px 0 #0d6147,0 0 22px #f8e26faa;
+  white-space:nowrap;
+}
+#hojaGamePlay[data-mode="team"] .htCorrectImpactSub{
+  font:900 clamp(15px,1.8vw,27px)/1.2 system-ui,"Noto Sans KR",sans-serif;
+  color:#fffdf1;margin-top:14px;letter-spacing:.02em;
+  text-shadow:0 3px 0 #14534b;
+}
+#hojaGamePlay[data-mode="team"] .htCorrectSpark{
+  position:absolute;left:50%;top:48%;z-index:1;
+  width:clamp(7px,1vw,17px);height:clamp(7px,1vw,17px);background:#fff1a0;
+  clip-path:polygon(50% 0,62% 39%,100% 50%,62% 61%,50% 100%,38% 61%,0 50%,38% 39%);
+  box-shadow:0 0 12px #fff19c;opacity:0;
+  animation:htCorrectSparkBurst .72s ease-out both;
+  transform:translate(-50%,-50%);
+}
+@keyframes htCorrectHitFlash{0%{opacity:0}12%{opacity:1}78%{opacity:1}100%{opacity:0}}
+@keyframes htCorrectHitText{
+  0%{opacity:0;transform:scale(1.75) translateY(-8px)}
+  22%{opacity:1;transform:scale(.91) translateY(0)}
+  38%{transform:scale(1.045)}60%{transform:scale(1)}
+  86%{opacity:1}100%{opacity:0;transform:scale(.98) translateY(-9px)}
+}
+@keyframes htCorrectSparkBurst{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateX(0) scale(.2)}
+  20%{opacity:1}
+  80%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--dist)) scale(.38)}
+}
+@media(prefers-reduced-motion:reduce){
+  #hojaGamePlay[data-mode="team"] .htCorrectImpact,
+  #hojaGamePlay[data-mode="team"] .htCorrectImpactInner,
+  #hojaGamePlay[data-mode="team"] .htCorrectSpark{animation:none!important;opacity:1!important;}
+}

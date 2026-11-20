@@ -1,0 +1,9 @@
+
+/* V0.4.5: grade cartridges show only the large grade label — no round emblem. */
+.hcPak.isGrade .hcFace{gap:0;justify-content:center;padding:5px}
+.hcPak.isGrade .hcFace strong{font-size:clamp(26px,3.6vw,43px);font-weight:1000;white-space:nowrap;line-height:1.2}
+.hcPak.isGrade .hcEmblem,.hcPak.isGrade .hcFace small{display:none!important}
+/* Never let an invisible stale overlay intercept the restored intro. */
+#hojaRepoChoice[hidden],#hojaCatalog[hidden],#hojaNextMode[hidden],#loadingOverlay[hidden],#readyMock[hidden]{display:none!important;pointer-events:none!important}
+#hojaIntroError{position:absolute;inset:0;z-index:12;background:#102a40;color:#fff3d9;display:none;align-items:center;justify-content:center;text-align:center;padding:25px;font-weight:900;line-height:1.8}
+#hojaIntroError.visible{display:flex}

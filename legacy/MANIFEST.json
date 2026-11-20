@@ -1,0 +1,699 @@
+{
+ "source": "versions/2.0.0/Game.html.parts (SMQ-Project-A fa09c97)",
+ "bytes": 7208766,
+ "sha256": "4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6",
+ "pieceCount": 133,
+ "pieces": [
+  {
+   "file": "game/000_html.html",
+   "bytes": 172,
+   "sha256": "b680cc4688496d9851d240a2ac24e8ee1869aa0ce7f1507666b9d639a9bd1b13"
+  },
+  {
+   "file": "game/001_style_anon.css",
+   "bytes": 9821,
+   "sha256": "7b750be59b12c6c678562ce6187c7029c8f7ab38117fa26f7061cf18f47b77ee"
+  },
+  {
+   "file": "game/002_html.html",
+   "bytes": 84,
+   "sha256": "da86bcf1a070add4eed0c258d29ba32e7ef5f0397ec81d47ab2cddeba1addf20"
+  },
+  {
+   "file": "game/003_script_anon.js",
+   "bytes": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "file": "game/004_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/005_script_anon.js",
+   "bytes": 204,
+   "sha256": "fc3bbe86c97ea73379a9ad4761870caf91168b0adbca3e1792e5c2ded1a61b4c"
+  },
+  {
+   "file": "game/006_html.html",
+   "bytes": 17,
+   "sha256": "53f1ebd086f5cfe21f98c453a8a56fdd5e7366938cdcf9491c17ab81c4bd6766"
+  },
+  {
+   "file": "game/007_style_anon.css",
+   "bytes": 3370,
+   "sha256": "09d07f1a235e10295ec20190da192cafd93841ce9c8b76d34104f0a05498e5b0"
+  },
+  {
+   "file": "game/008_html.html",
+   "bytes": 16,
+   "sha256": "50caa5178fb28c272693ecb90c389825df89313e25a58ee9b21fe9f972c8f76f"
+  },
+  {
+   "file": "game/009_style_anon.css",
+   "bytes": 3931,
+   "sha256": "f0ac125d87380542c9d06fe0755850948f5a5364b02b443c1106a1a0688db37d"
+  },
+  {
+   "file": "game/010_html.html",
+   "bytes": 16,
+   "sha256": "50caa5178fb28c272693ecb90c389825df89313e25a58ee9b21fe9f972c8f76f"
+  },
+  {
+   "file": "game/011_style_anon.css",
+   "bytes": 3661,
+   "sha256": "084513d1e44923f1d8a82179b4cae3f77c526e3b344616f5e60fec2eaa678092"
+  },
+  {
+   "file": "game/012_html.html",
+   "bytes": 16,
+   "sha256": "50caa5178fb28c272693ecb90c389825df89313e25a58ee9b21fe9f972c8f76f"
+  },
+  {
+   "file": "game/013_style_anon.css",
+   "bytes": 824,
+   "sha256": "f4672e395aa3dad0c829f427d9f8d92265bab7dee0cab36a31e03719b0bb40a5"
+  },
+  {
+   "file": "game/014_html.html",
+   "bytes": 17,
+   "sha256": "dd9d8a5542cb8e1e6d45e857fc8c20de1c964eb21da40a4e3903b0ffbe6244f0"
+  },
+  {
+   "file": "game/015_style_anon.css",
+   "bytes": 431,
+   "sha256": "8631865631727cda9df07773f4ebec65da4c94e67e4f8c43a658a09b528b253e"
+  },
+  {
+   "file": "game/016_html.html",
+   "bytes": 49,
+   "sha256": "a5c9cb8cbc605d376ca91e9861da0c7a18647cde88f1203810f5b158e76a04dd"
+  },
+  {
+   "file": "game/017_style_hojaV051GameOriginalQuizCSS.css",
+   "bytes": 5868,
+   "sha256": "d288d87d062df8d1766b789c4d01070319f084c4f1bbdcd1e98227ba55541105"
+  },
+  {
+   "file": "game/018_html.html",
+   "bytes": 36,
+   "sha256": "d3745ffcd9412fc05fa2d805df765d20dc41a23e98f2c138455c119da7a9a0c2"
+  },
+  {
+   "file": "game/019_style_hojaV051GameCSS.css",
+   "bytes": 3410,
+   "sha256": "7ec19e1ae04031e9dcb062270ddb7473a36218927bf148fbc8ecb0a620f66546"
+  },
+  {
+   "file": "game/020_html.html",
+   "bytes": 47,
+   "sha256": "dc44f1fe97157eb2f162ad37ac4f8df7673564f81057e32a0d741846c8cafe51"
+  },
+  {
+   "file": "game/021_style_hojaV053AudioControlsStyle.css",
+   "bytes": 872,
+   "sha256": "e9fa3028da6d88fb27df550f2f404b6c3a5d5ee75d183b6857f6579456b6847b"
+  },
+  {
+   "file": "game/022_html.html",
+   "bytes": 43,
+   "sha256": "c3c78a2970a2fceeebb39e3105bf78265f7a78688b2712f2dd357f448ee4589a"
+  },
+  {
+   "file": "game/023_style_hojaV054CompactHudCss.css",
+   "bytes": 3881,
+   "sha256": "7ee3b26e7884502124e2d76a6a0ad51dad5ad8e94d25fa2d0f787addd4caaf1d"
+  },
+  {
+   "file": "game/024_html.html",
+   "bytes": 46,
+   "sha256": "69f75486da8dd4d17e8e7efb4f642d0980a041ab67a5eb0ab29ca724edb69bd9"
+  },
+  {
+   "file": "game/025_style_hojaV055QuizAndArcadeCss.css",
+   "bytes": 6567,
+   "sha256": "d8bce0080a63e9f6237e7f12eac84cb2f82be465cf3131498abe0b51fda11d04"
+  },
+  {
+   "file": "game/026_html.html",
+   "bytes": 122,
+   "sha256": "c6e381737d9d262092604023dbbd936f360a14c81870ccd52a14eb926f73d067"
+  },
+  {
+   "file": "game/027_style_hojaV059FullscreenStudentUI.css",
+   "bytes": 2589,
+   "sha256": "21b21e54745cde6b2d160630afa78284cdf8ce8cfc0d3c577bfe45894777cb23"
+  },
+  {
+   "file": "game/028_html.html",
+   "bytes": 44,
+   "sha256": "49f15ae7c3cffdf29751a065e3fe3aac3319d4a5decc73de45ee130a8510f893"
+  },
+  {
+   "file": "game/029_style_hojaV061ModeAndCatalog.css",
+   "bytes": 2310,
+   "sha256": "c7c7ce1b619235f8e0ca095be88e3a1fe0830f868070a5f81098527614057de7"
+  },
+  {
+   "file": "game/030_html.html",
+   "bytes": 49,
+   "sha256": "81f6480ec372a205320a5e26a65e88bfad65fbf7c9a95ecfbf9016d52c75c5b4"
+  },
+  {
+   "file": "game/031_style_hojaV062SeasonTextContrast.css",
+   "bytes": 2111,
+   "sha256": "2717c3efcd597a97ef4861e18ab86160eb838445e156b80d07455961c5e79fad"
+  },
+  {
+   "file": "game/032_html.html",
+   "bytes": 44,
+   "sha256": "0d71d3df88771b99d20ef38b3c1280421df4e0e970a0bb1732d370557d7237da"
+  },
+  {
+   "file": "game/033_style_hojaV065SpaceAndScale.css",
+   "bytes": 9183,
+   "sha256": "6603c67db3fb2447efacd1768b2bfa96ccc55c2ce436a54de683774c91b5cd5f"
+  },
+  {
+   "file": "game/034_html.html",
+   "bytes": 43,
+   "sha256": "2233d050129d1eb49be33e924c54266727211682201488f1048a03c9376d9795"
+  },
+  {
+   "file": "game/035_style_hojaWebtoonBannerR13B.css",
+   "bytes": 2462,
+   "sha256": "9d1417d5669d364c182d69fd664bb0e58442a1034ed3929f4a35db882c316d22"
+  },
+  {
+   "file": "game/036_html.html",
+   "bytes": 40,
+   "sha256": "f956fb07c2a468add73b5d52b6a02bb5ab5954aafb210b24b7098bcc3a725102"
+  },
+  {
+   "file": "game/037_style_hojaR12TeamGridMC3.css",
+   "bytes": 1548,
+   "sha256": "4c52a3b1512840606e20f006f154de4885959b8a22f01d1d2b7dec0e09a7a239"
+  },
+  {
+   "file": "game/038_html.html",
+   "bytes": 56,
+   "sha256": "2aac3bc2a361e2af9158b30806fdb8d8444ba3ca6db51b1e1f0a30781b71b92c"
+  },
+  {
+   "file": "game/039_style_hojaR15SevenCharacterRankHudStyles.css",
+   "bytes": 2785,
+   "sha256": "cd449666e1f2999a7a1c8fd86be8fbf64b9aebe28851713016b6fe0e99cc1fd7"
+  },
+  {
+   "file": "game/040_html.html",
+   "bytes": 48,
+   "sha256": "b4b0e839a26737e6597d9feabaed6bd002c486c8f8c8704ed41d98ffdb9f2446"
+  },
+  {
+   "file": "game/041_style_hojaR17GSingleArcadeHudFix.css",
+   "bytes": 2126,
+   "sha256": "d60b89fa586f660bf2379130fb12d24048421f7d96c8a01b9465833672e65fab"
+  },
+  {
+   "file": "game/042_html.html",
+   "bytes": 2716115,
+   "sha256": "10b503c9a0e2dabc8afada9ff575e85346aa73b1de209a1bbea0381dc23a686d"
+  },
+  {
+   "file": "game/043_script_anon.js",
+   "bytes": 367139,
+   "sha256": "524e6eb499ad3656207f7e65eae65e3a4c4df35fcd335ac2d2f32db16ce399ab"
+  },
+  {
+   "file": "game/044_html.html",
+   "bytes": 44,
+   "sha256": "e15614b60b304e971292302d4ad658648a2ad0efcc1461778574b889f2b2b7f9"
+  },
+  {
+   "file": "game/045_script_hojaV053MusicSession.js",
+   "bytes": 3485,
+   "sha256": "824a8de8e5c41874ecc5f4f2965c185dc58b79b53171de276bbc743775fa6928"
+  },
+  {
+   "file": "game/046_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/047_script_anon.js",
+   "bytes": 2723,
+   "sha256": "036a21465e3bb6848ed024db188b99ff40c78d6041ecbb6aaa59c196744aac78"
+  },
+  {
+   "file": "game/048_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/049_script_anon.js",
+   "bytes": 24840,
+   "sha256": "a2100ced8244634e0c40f7d7209c1e7586d926ec05474aa3b2ff6b9226fbce71"
+  },
+  {
+   "file": "game/050_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/051_script_anon.js",
+   "bytes": 4610,
+   "sha256": "10c1760372034012f49db6c90bfa515e6ea343fa37a4a27760888b6010a0ddf2"
+  },
+  {
+   "file": "game/052_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/053_script_anon.js",
+   "bytes": 1911,
+   "sha256": "62e985991d838f7331eccace188c24d3faa08bc71bc7c29472b342f95527e8ef"
+  },
+  {
+   "file": "game/054_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/055_script_anon.js",
+   "bytes": 3516,
+   "sha256": "ec0c52bcd34ad5b1bc813278c9d035d29bf2b48619b1ebcc8ea11bdb77974da0"
+  },
+  {
+   "file": "game/056_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/057_script_anon.js",
+   "bytes": 94019,
+   "sha256": "a8abb9d120ca87eb710155f8b60eb6435939925fb314c2c418ba066b793d7dc6"
+  },
+  {
+   "file": "game/058_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/059_script_anon.js",
+   "bytes": 3255,
+   "sha256": "bed2accbe7866ed27f00033d02c386bfa632a682d61a5ee9e9dcd2bff8979ba6"
+  },
+  {
+   "file": "game/060_html.html",
+   "bytes": 18,
+   "sha256": "567648a82a8c215eafd42ccc0b99598ce4ae3b8d8686467a59c63e3256240238"
+  },
+  {
+   "file": "game/061_script_anon.js",
+   "bytes": 10864,
+   "sha256": "1738e00e756873bd343dcb057ffa1c9f457065b6ba99275d5cf92ea259a398cc"
+  },
+  {
+   "file": "game/062_html.html",
+   "bytes": 19,
+   "sha256": "7c98d739b7150dd68d23d8eb60f3d08da6306a84090b5a3b5b2f863003299f70"
+  },
+  {
+   "file": "game/063_script_anon.js",
+   "bytes": 1676,
+   "sha256": "fe957048d7eab3bf31bb12e4bd6a7f93773e899e0db30ff1478381a4ed2e3ddb"
+  },
+  {
+   "file": "game/064_html.html",
+   "bytes": 40,
+   "sha256": "0d99fd2398e213679ac50a7444ed67a583e7991f080a2dc3a4801b889d9c5e3f"
+  },
+  {
+   "file": "game/065_script_hojaV051Gameplay.js",
+   "bytes": 755906,
+   "sha256": "abe9c3316a388c51992ce0ba578004009defb58d8cb8a2546882508390052d6c"
+  },
+  {
+   "file": "game/066_html.html",
+   "bytes": 5229,
+   "sha256": "a53bed4e6fdb2b11d73a2278f1d8eb593a6ab881da76a73fb262dd6c4e083d47"
+  },
+  {
+   "file": "game/067_script_hojaV055QuizSfx.js",
+   "bytes": 299,
+   "sha256": "5149aa857e5106110a4dd13368a4e603227bc48dc100aff39a3f2e50d65b523f"
+  },
+  {
+   "file": "game/068_html.html",
+   "bytes": 50,
+   "sha256": "98462c6392dc6d181abb52817fd2285f7f178f7473b6619bbe9f59d55ab4ec76"
+  },
+  {
+   "file": "game/069_script_hojaV055ArcadeParentBinder.js",
+   "bytes": 1319,
+   "sha256": "79717c5811e201c93e0f13ef51fc1b8c3a427e6db92a518e0457867fa1b69d3d"
+  },
+  {
+   "file": "game/070_html.html",
+   "bytes": 121,
+   "sha256": "247837c6b675d4396e90de884764ff575514c93d6c3332229fac0db88f9a3c9d"
+  },
+  {
+   "file": "game/071_style_hojaTeamV067Style.css",
+   "bytes": 14268,
+   "sha256": "4848d569b9229eb4245537172a29e4e742a5d48cf3cbc96abd65ee3810c8a422"
+  },
+  {
+   "file": "game/072_html.html",
+   "bytes": 41,
+   "sha256": "2f7c4851575d197db0b94e0e4fe76f4ebfb3477e107039f129180b2241f3be9c"
+  },
+  {
+   "file": "game/073_style_hojaTeamV067R5Fixes.css",
+   "bytes": 5973,
+   "sha256": "4495165770a5161cec5fc336232814a09ab0e75933fd4d5baeb84abce330f99e"
+  },
+  {
+   "file": "game/074_html.html",
+   "bytes": 41,
+   "sha256": "03bfe5e5f70465a042667f4c433086f587056b4aed298f5cefec49c14e901849"
+  },
+  {
+   "file": "game/075_script_hojaTeamV067Assets.js",
+   "bytes": 3018,
+   "sha256": "eeaeba4f2a9664b85d764bda608ca8673d6e5084baace96ac2347931830a21dd"
+  },
+  {
+   "file": "game/076_html.html",
+   "bytes": 73,
+   "sha256": "b66a09bed93515f94804640deaa1651634dc155b0e8163fe10061cc01217003d"
+  },
+  {
+   "file": "game/077_script_hojaTeamR10PortraitAssets.json",
+   "bytes": 2413625,
+   "sha256": "2e2634d4f4f84f34de1aafdd46d19467e60d6e5fcc6388ed13292870c02d42f6"
+  },
+  {
+   "file": "game/078_html.html",
+   "bytes": 47,
+   "sha256": "a6ca2a5c0d3314c8f776d97f6695cd8134bfe879b6913471905152443c4cb7c1"
+  },
+  {
+   "file": "game/079_script_hojaR13NahanHiSixFrames.js",
+   "bytes": 2243,
+   "sha256": "2a6511ee1bf8bdef05d47d5f9f0d7bb0474a866fd808dcf1e565202b2af98731"
+  },
+  {
+   "file": "game/080_html.html",
+   "bytes": 49,
+   "sha256": "6cd5bc516d8b3cc97ac43cc666e5efd3534d07719133f02a7fc2c070497e7a84"
+  },
+  {
+   "file": "game/081_style_hojaTeamR14FruitBoltStyles.css",
+   "bytes": 1428,
+   "sha256": "e5204da13ef0f0d1a584ee2c7e5df87211e437f6745ae0bd1a855e8d0e964ef5"
+  },
+  {
+   "file": "game/082_html.html",
+   "bytes": 42,
+   "sha256": "23b5279c0cbaffb9c76bc2334f08c443c34565a4f8f930c0d10e72fa640cc0c3"
+  },
+  {
+   "file": "game/083_script_hojaTeamV067Runtime.js",
+   "bytes": 73695,
+   "sha256": "60f3aafa18dfec9b087af7596d9cf281cf0936fe8325ecc68021a20b56536dd8"
+  },
+  {
+   "file": "game/084_html.html",
+   "bytes": 52,
+   "sha256": "9ee3948dcc07ef4248e18b77e923c386345c28553d3b63b5ace265b5cc7d8c5e"
+  },
+  {
+   "file": "game/085_style_hojaTeamV067R7UnifiedScoreFx.css",
+   "bytes": 2970,
+   "sha256": "b9d41641328f73ba9e53eea3a1cd588b1dfd62e01616c418fa16fd9e80ff80c4"
+  },
+  {
+   "file": "game/086_html.html",
+   "bytes": 46,
+   "sha256": "fc87f998ac070c117eda8629013ba583186c12545c71a066d469474fcac88732"
+  },
+  {
+   "file": "game/087_style_hojaTeamV067R7SpriteClip.css",
+   "bytes": 1055,
+   "sha256": "e68da1eb0f1d19dca11683f1f5fb203334dc17b8c723bf66de082f135e90d599"
+  },
+  {
+   "file": "game/088_html.html",
+   "bytes": 54,
+   "sha256": "b312c62b21781fa55d6c56eda021782ecb2cf45923c3f4eb0349a4c279437a69"
+  },
+  {
+   "file": "game/089_style_hojaTeamV067R8RoundsRankingFinal.css",
+   "bytes": 5554,
+   "sha256": "a6823956514f15fee90fccb8995062e82d763dfdedcfc7bbb4ddfa5482ecc0c2"
+  },
+  {
+   "file": "game/090_html.html",
+   "bytes": 180,
+   "sha256": "97c5812ddf73cc66aa12752cd7fc6db3358f0d091e5b5aacf669f42e17872282"
+  },
+  {
+   "file": "game/091_style_hojaTeamV067R9BingoAndScoreRow.css",
+   "bytes": 2169,
+   "sha256": "40bd5ccfbdc29a7f7ed5d5a354ed454d0a3aca687e03a5275ea7ed681fe5dd7e"
+  },
+  {
+   "file": "game/092_html.html",
+   "bytes": 48,
+   "sha256": "9edc4d2d73afd6b50f261263d0da07231a7534c2e66d2994b0382aab635c0fc2"
+  },
+  {
+   "file": "game/093_style_hojaR10PortraitAndOXStyles.css",
+   "bytes": 3533,
+   "sha256": "47d61d5f8c38c65eb634a60162fd24ec35bccaf6823649c4c55cf9c5b2b0b638"
+  },
+  {
+   "file": "game/094_html.html",
+   "bytes": 56,
+   "sha256": "75fc955d0ccaf0f045a45ceb1a69db1bbcb177087afea3dd3622190d225d152a"
+  },
+  {
+   "file": "game/095_style_hojaR11PortraitQuestionPipePolish.css",
+   "bytes": 6032,
+   "sha256": "49e18f41ec38ba20273fa20cc64225a20d0fede685c1c86ef4e6cc0abf45f643"
+  },
+  {
+   "file": "game/096_html.html",
+   "bytes": 54,
+   "sha256": "ccc056a689833b486c49e8ef46a67a9956e3c68d7078c15b6c454c0675fbcf7f"
+  },
+  {
+   "file": "game/097_style_hojaR12BStablePortraitAlignment.css",
+   "bytes": 693,
+   "sha256": "fc6b531325a8de0b39449a38a3ef204be6765524e3b64f72557e0c8d6532f2e1"
+  },
+  {
+   "file": "game/098_html.html",
+   "bytes": 56,
+   "sha256": "064fc8c42f912ca4df0ec45e548533066f1920dcba7185724152d666a98839b0"
+  },
+  {
+   "file": "game/099_style_hojaR13ArcadeQuizPeachNahanMirror.css",
+   "bytes": 7147,
+   "sha256": "d91a5345ce67d62bc2adb8e8e9915ce091738b931062b3158a35cb7a245b6ffc"
+  },
+  {
+   "file": "game/100_html.html",
+   "bytes": 54,
+   "sha256": "c23104a80ab111a27bb2fbfebb1c322bcc8502a1e9b02d1a3bca791874f79058"
+  },
+  {
+   "file": "game/101_script_hojaWebtoonIntroClickIsolation.js",
+   "bytes": 252,
+   "sha256": "148bdde8fc7f7da3901cfab9ee3807f68c8ed075a26f653c159ccad6a0632fc9"
+  },
+  {
+   "file": "game/102_html.html",
+   "bytes": 52,
+   "sha256": "61f51d294c1de0685647cab9243322b1289a65c7697335a7100794bc80aea1eb"
+  },
+  {
+   "file": "game/103_style_hojaR16SteppedTeamScoreplates.css",
+   "bytes": 4168,
+   "sha256": "52dd3e55ae8c0defef313e0317ae609f2a3b6b5499c56360d0b3a59684e7d174"
+  },
+  {
+   "file": "game/104_html.html",
+   "bytes": 49,
+   "sha256": "1bdf551fbc87d71d06d02b209fccd9492e0c9094358541514394280071cb6b18"
+  },
+  {
+   "file": "game/105_style_hojaR17FCorrectImpactStyles.css",
+   "bytes": 2691,
+   "sha256": "cdd5585cba5426f4d314da904ef14224f851c26c9db3880bbd7376ba7014a938"
+  },
+  {
+   "file": "game/106_html.html",
+   "bytes": 122,
+   "sha256": "714a0e30cc3c780943d4769dae747c6a17ce12f675d27ef512109ca248098310"
+  },
+  {
+   "file": "game/107_style_hojaR17KTutorialOverlayCSS.css",
+   "bytes": 723,
+   "sha256": "f7c051b6844a851f1d6b62adf2d4837c1f7d3f48a8a826ad0d3eb8bc5b4ff6d2"
+  },
+  {
+   "file": "game/108_html.html",
+   "bytes": 270,
+   "sha256": "a0129d28fc03b17bd809c35b780c00506f27e10fb82ac74957632582e15ebbb5"
+  },
+  {
+   "file": "game/109_script_hojaR17PTutorialHostSpaceRelay.js",
+   "bytes": 892,
+   "sha256": "5b7161ebbaa51c226c9043dcf7f11c2d74e0fcf906b4baa215bf37742fbe99ca"
+  },
+  {
+   "file": "game/110_html.html",
+   "bytes": 76,
+   "sha256": "e082ab66b85059680f980e7224df93aa4e20891a7740b620d1e0d1f9973ddb51"
+  },
+  {
+   "file": "game/111_script_hojaR17KTutorialGzip.b64",
+   "bytes": 551380,
+   "sha256": "1e021df8c7b18d88e119559b5db1d4f786aa91feabc5bf60e11e53501bb4b45d"
+  },
+  {
+   "file": "game/112_html.html",
+   "bytes": 52,
+   "sha256": "e8e7bedd45c67f2aa7b5a33043acf802b27b8d8c9be6003c2f5aafa08c4fe508"
+  },
+  {
+   "file": "game/113_script_hojaR17MTutorialAudioBridge.js",
+   "bytes": 2156,
+   "sha256": "8b1908193f9750f894fec04ebf1de6a967a202982cfabcf2d59f9da71cba2054"
+  },
+  {
+   "file": "game/114_html.html",
+   "bytes": 84,
+   "sha256": "2c6436bc92121b69d7f79d7e42457f37d4760a227be709245f034e2fee7f1c38"
+  },
+  {
+   "file": "game/115_script_hojaR17STutorialArcadeDelta.b64",
+   "bytes": 15572,
+   "sha256": "c642bf1ecfb09805355194123e003b506a728b14c0734438b6d26d81aea441d8"
+  },
+  {
+   "file": "game/116_html.html",
+   "bytes": 52,
+   "sha256": "f6fcbb1c8e34d28aa9e1ab7a7655e26d8b5f72156190ae39e2ecc97109e47be6"
+  },
+  {
+   "file": "game/117_script_hojaR17STutorialNativeBridge.js",
+   "bytes": 1960,
+   "sha256": "c77961d31a8ba779f340ddfb93382e88e55543cf0bc5ce49e62fbc57cca5449f"
+  },
+  {
+   "file": "game/118_html.html",
+   "bytes": 51,
+   "sha256": "6306d657c057243c9d30794f0f670b9a176f6256b86acc8bd2f4338f3ac65b9e"
+  },
+  {
+   "file": "game/119_script_hojaR17LTutorialIntegration.js",
+   "bytes": 6272,
+   "sha256": "49e3c59604f2f5cc8625f606f1e8c15ab2f5bdaf19bf7120d51a3947fabdb0a7"
+  },
+  {
+   "file": "game/120_html.html",
+   "bytes": 48,
+   "sha256": "2471e6d886d96264d8ecb05202593b66796cb81f4e1d33c40ee3e1af6c5bf963"
+  },
+  {
+   "file": "game/121_style_hojaR17QPracticeCardSize.css",
+   "bytes": 443,
+   "sha256": "a241aaf8e0eed806ed56a0aa9cc579d8c29d79335fe781f6b5ff3df5bc8f221e"
+  },
+  {
+   "file": "game/122_html.html",
+   "bytes": 51,
+   "sha256": "42aebd5235fd9a5a9a10404659eb56f5cf6ac5f04f2a9b85bd781a8c13fd0211"
+  },
+  {
+   "file": "game/123_style_hoja20261110ResponsiveModeFix.css",
+   "bytes": 3170,
+   "sha256": "56e5488d98728fe156fe7d8d3232fe7a81f037cc2c693e357e7bf4d390bcd4dd"
+  },
+  {
+   "file": "game/124_html.html",
+   "bytes": 46,
+   "sha256": "035e5937bda4e920250233cb7afe4a47a8bf6b3ecbe810568d6cf4ec4b92d0b6"
+  },
+  {
+   "file": "game/125_script_hojaProdUsageTelemetry.js",
+   "bytes": 738,
+   "sha256": "50a390e94f3a9499768b59acb32419b25fc19168cd0dfa78b59045ccdae83e36"
+  },
+  {
+   "file": "game/126_html.html",
+   "bytes": 55,
+   "sha256": "5377e04c7ce4874488e826a9a27f4edf09b83f84021bef4f2aeded36b225965f"
+  },
+  {
+   "file": "game/127_script_hojaTeacherToolsArcadeSourceV1.js",
+   "bytes": 2041,
+   "sha256": "a8818e17304abd6fdd2c29f8ce11a228e717689943f3fd5af9e63799f9d19b30"
+  },
+  {
+   "file": "game/128_html.html",
+   "bytes": 57,
+   "sha256": "b5d91410b82c6c6a7b2db797c3f78d857978f572573c6ca2f0e1ff0ff23a886f"
+  },
+  {
+   "file": "game/129_script_hojaTeacherToolsPracticeSourceV8.js",
+   "bytes": 1883,
+   "sha256": "fe5f6d566d235aadb38f7ce7b79d5341f2b1c2108926dc1217167bf77174204b"
+  },
+  {
+   "file": "game/130_html.html",
+   "bytes": 47,
+   "sha256": "706078b2c7c611094d72a0005c9ba979917f5080fa29f8b4ea70e08bb8f20bc9"
+  },
+  {
+   "file": "game/131_script_hojaTeacherToolsTouchV1.js",
+   "bytes": 2691,
+   "sha256": "20a16502c5a0649096bd26e15a83877a77f377ad99c2278935dd0cadd92c39c8"
+  },
+  {
+   "file": "game/132_html.html",
+   "bytes": 25,
+   "sha256": "893cb35f3016a3523c33b676c4dfbe5686c4b99a1e7128d78e2e3fa271cd4829"
+  }
+ ],
+ "decoded": [
+  {
+   "file": "decoded/arcade.html",
+   "bytes": 1260448,
+   "sha256": "a764872219d6e244e21ed17c79e4c3a9ccc891274fddc89575d1735752f8ee9d",
+   "from": "HOJA_V051_ARCADE_GZIP (Game.html hojaV051Gameplay) gzip 해제"
+  },
+  {
+   "file": "decoded/tutorial.html",
+   "bytes": 618877,
+   "sha256": "6d60b3db23c9fdb53ba58d3ae6010a4ad74eb84d57766354e2259976ae1be239",
+   "from": "hojaR17KTutorialGzip gzip 해제"
+  },
+  {
+   "file": "decoded/tutorial_arcade_delta.json",
+   "bytes": 11677,
+   "sha256": "273a31692d9a82b566374a68436c812baf731cb7d0f0b72b8c8033e856e508bd",
+   "from": "hojaR17STutorialArcadeDelta base64 해제"
+  },
+  {
+   "file": "decoded/team_portraits.json",
+   "bytes": 2413625,
+   "sha256": "2e2634d4f4f84f34de1aafdd46d19467e60d6e5fcc6388ed13292870c02d42f6",
+   "from": "hojaTeamR10PortraitAssets 본문 그대로"
+  }
+ ]
+}

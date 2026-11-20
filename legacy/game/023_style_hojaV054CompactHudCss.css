@@ -1,0 +1,60 @@
+
+/* V0.5.8: a fixed compact left-aligned navigation strip, shared by catalog and game. */
+#hojaSharedBack,#hojaGamePlay .hqBack{
+  left:clamp(8px,1.5%,18px)!important;top:clamp(8px,2.2%,15px)!important;
+  min-width:97px!important;width:97px!important;height:36px!important;min-height:36px!important;
+  padding:5px 9px!important;font-size:13px!important;line-height:1.1!important;
+  border-radius:8px!important;white-space:nowrap!important;
+}
+.hojaAudioTop{
+  left:calc(clamp(8px,1.5%,18px) + 105px)!important;
+  top:clamp(8px,2.2%,15px)!important;gap:6px!important;align-items:center!important;
+}
+.hojaAudioTop button{
+  width:92px!important;min-width:92px!important;height:36px!important;
+  padding:5px 7px!important;font-size:13px!important;
+  border-radius:8px!important;white-space:nowrap!important;
+  transition:background .18s linear,border-color .18s linear,color .18s linear,filter .18s linear,opacity .18s linear!important;
+}
+.hojaAudioTop button[aria-pressed="false"]{
+  background:#52616b!important;border-color:#8c969d!important;color:#e0e0e0!important;
+  filter:grayscale(1) saturate(.05)!important;opacity:.6!important;
+  box-shadow:2px 2px 0 #101d26!important;
+}
+.hojaAudioTop button[aria-pressed="true"]{opacity:1!important;filter:none!important}
+/* Game-mode header uses the same strip at left, HUD occupies the remaining right side. */
+#hojaGamePlay .hqTop{
+  min-height:66px!important;height:66px!important;flex-basis:66px!important;
+  padding:0 14px 0 322px!important;
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
+}
+#hqModeLabel{font-size:clamp(13px,1.65vw,19px)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#hojaGamePlay .hqHud{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+#hojaGamePlay .hqHud[hidden]{display:none!important}
+.hqHudCell{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:92px;
+  border:1px solid #557783;background:#143344;border-radius:7px;padding:4px 8px;line-height:1.2}
+.hqHudCell span{font-size:11px;color:#a8c3d2;font-weight:800;white-space:nowrap}
+.hqHudCell b{font-size:19px;color:#ffe5ad;font-weight:900;font-variant-numeric:tabular-nums}
+#hqStage{height:calc(100% - 66px)!important}
+/* Integer pixel scaling: 64 source pixels x2=128, 32 balloon x2=64. */
+#hqCharacter{width:128px!important;height:128px!important;aspect-ratio:1/1!important;
+  bottom:calc(21.2963% - 2px)!important;image-rendering:pixelated!important}
+#hqBalloon{width:64px!important;height:64px!important;aspect-ratio:1/1!important;
+  image-rendering:pixelated!important}
+#hqBalloon img{image-rendering:pixelated!important}
+@media(max-width:940px){
+ #hojaGamePlay .hqTop{padding-left:305px!important;padding-right:9px!important;gap:5px!important}
+ .hqHudCell{min-width:67px;padding:3px 4px}.hqHudCell span{font-size:10px}.hqHudCell b{font-size:17px}
+ #hqModeLabel{font-size:12px!important}
+}
+@media(max-width:660px){
+ #hojaSharedBack,#hojaGamePlay .hqBack{width:76px!important;min-width:76px!important;height:30px!important;min-height:30px!important;font-size:10px!important;padding:4px!important}
+ .hojaAudioTop{left:calc(clamp(8px,1.5%,18px) + 82px)!important;gap:4px!important}
+ .hojaAudioTop button{min-width:66px!important;width:66px!important;height:30px!important;font-size:10px!important;padding:3px!important}
+ #hojaGamePlay .hqTop{height:72px!important;flex-basis:72px!important;min-height:72px!important;padding:33px 5px 2px!important;justify-content:space-between!important}
+ .hqHudCell{min-width:59px;padding:2px}.hqHudCell span{font-size:9px}.hqHudCell b{font-size:13px}
+ #hqModeLabel{font-size:11px!important}
+ #hqStage{height:calc(100% - 72px)!important}
+ #hqCharacter{width:64px!important;height:64px!important} /* 1x for narrow screens */
+ #hqBalloon{width:32px!important;height:32px!important}
+}
