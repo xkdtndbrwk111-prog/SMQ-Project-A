@@ -1024,26 +1024,10 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 
 <main>
 
-<!-- STEP09-2 isolated integration experiment: question lookup/selection only. -->
-<section id="hojaStep09Panel" style="display:none;margin:0 0 12px;background:#142b38;border:2px solid #4cb6c2;border-radius:10px;padding:14px;color:#eaf6fa;font:14px system-ui">
- <h2 style="font-size:17px;margin:0 0 6px">STEP 09-3 · 문제 진행·점수 정산 시험</h2>
- <p style="margin:5px 0 12px;color:#b3d7df">25개의 서로 다른 문제 묶음으로 게임을 시작합니다. 객관식은 원본 4보기에서 3개를 골라 출제합니다.</p>
- <div id="step09ServerRow" style="display:none;margin-bottom:10px">
-  <button id="step09List" type="button">Project B 공개 목록 조회</button>
-  <label for="step09Search">목록 검색</label>
-  <input id="step09Search" type="search" placeholder="카트리지명 검색" autocomplete="off" style="min-width:190px;padding:7px;background:#eff7fb;border:0;border-radius:5px;color:#152c38">
-  <div id="step09Catalog" style="max-height:170px;overflow:auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:5px;margin:8px 0"></div>
-  <button id="step09Fetch" type="button">선택한 카트리지로 게임 시작</button>
- </div>
- <div id="step09LocalRow" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
-  <label for="step09File" style="display:inline-block;border:1px solid #b4d8eb;border-radius:6px;padding:9px 13px;background:#eaf8ff;color:#172d3c;font-weight:800;cursor:pointer">📁 오프라인 비교용 .smq 불러오기</label>
-  <input id="step09File" type="file" accept=".smq,application/json" style="max-width:280px;min-width:160px;color:#d8f3ff" aria-label="SMQ 카트리지 파일 선택">
- </div>
- <p id="step09ModeHint" style="margin:9px 0 0;color:#c7e4ed">로컬 파일에서는 .smq 비교만 가능합니다. 서버 조회는 격리 GAS 호스트에서 실행합니다.</p>
+<div id="hojaStep09Panel" hidden>
  <p id="step09State" role="status" aria-live="polite" style="font-weight:700;margin:12px 0 0">문제 로드 전 · 게임 실행 대기</p>
   <p id="step09Progress" aria-live="polite" style="margin:7px 0 0;color:#dceef6;display:none">만난 문제 0/25 · 답변 0 · 정답 0 · 문제 점수 0점</p>
- <small style="display:block;margin-top:6px;color:#acc9d5">출제: 객관식 3지선다 또는 O/X · 주관식 제외 · 선택 위치 셔플. 점수·정답 판정은 브라우저에서만 수행합니다.</small>
-</section>
+</div>
 <section class="gameBox" id="gameBox">
   <div class="gameViewport" id="gameViewport" data-boot="loading">
     <div id="phaserRoot"></div>
@@ -11530,8 +11514,7 @@ window.HOJA_V049_QA={candidateForSeed:(seed)=>{try{const c=hojaMakeRandomCave(Nu
 
 /* HOJA STEP 12-1: read-only live Project B public questions (V2 and LEGACY). */
 /* HOJA V0.5.4 ISOLATED TEST ONLY: skip Project B STEP09 host-gated import because no GAS server is connected. Boot the canonical Phaser game with local QUIZ_POOL. NEVER enable test mode in production. */
-const HOJA_STEP09_ENABLED = false;
-const {hojaStep09Shuffle_,hojaStep09Normalize_,hojaStep09FromSmq_}=window.HOJA_QUIZ_NORMALIZER;
+const {hojaStep09Normalize_}=window.HOJA_QUIZ_NORMALIZER;
 /* STEP 09-3: read-only in-memory quiz audit; no network, ranking or server writes.
    The existing +10 quiz score, enemy score, flower +5, time bonus and 600s
    timer remain the only point sources. */
@@ -11634,138 +11617,6 @@ function hojaHudSetUnits_(sources){
   syncDomHudScale();
 }
 window.HOJA_STEP12_6_HUD_TEST={unitTitle:hojaHudUnitTitle_,setUnits:hojaHudSetUnits_};
-
-function hojaStep09Start_(){
-  const panel=document.getElementById('hojaStep09Panel');
-  const status=document.getElementById('step09State');
-  const list=document.getElementById('step09Catalog');
-  const search=document.getElementById('step09Search');
-  const fileInput=document.getElementById('step09File');
-  const serverRow=document.getElementById('step09ServerRow');
-  const fetchBtn=document.getElementById('step09Fetch');
-  const loadBtn=document.getElementById('step09List');
-  const hint=document.getElementById('step09ModeHint');
-  panel.style.display='block';
-  let started=false,busy=false,hostReady=false,catalog=[],selected=new Set();
-  let serial=0;
-  const pending=new Map();
-  document.getElementById('bootStatus').textContent='STEP 09-3 · 문제 데이터 검증 대기 중';
-  const show=(v,error=false)=>{status.textContent=v;status.style.color=error?'#ffb3b3':'#b2f4c5';setStudentStatus(v,error);};
-  const rpc=(method,names)=>new Promise((resolve,reject)=>{
-    reject(new Error('시험판: 외부 서버에 연결하지 않습니다.'));
-  });
-  window.HOJA_STEP10_RPC=rpc;
-  // Game.html is now the HtmlService page itself: no nested srcdoc iframe.
-  hostReady=false;
-  if(hostReady){serverRow.style.display='block';hint.textContent='TEST 문제은행 · 랭킹 연결됨';}
-  const studentSelect=document.getElementById('hojaStudentCartridge');
-  const studentPlay=document.getElementById('hojaStudentPlay');
-  const studentRank=document.getElementById('hojaStudentRankList');
-  const studentPreview=document.getElementById('hojaStudentPreview');
-  const studentStatus=document.getElementById('hojaStudentStatus');
-  const setStudentStatus=(message,error)=>{
-    if(!studentStatus)return;studentStatus.textContent=message;studentStatus.style.color=error?'#ff9c9c':'#c4e2e6';
-  };
-  if(!hostReady){setStudentStatus('이 파일은 TEST Apps Script 웹앱 주소에서만 실행할 수 있습니다.',true);}
-  else queueMicrotask(()=>loadBtn.click());
-  studentPlay?.addEventListener('click',()=>{
-    if(busy||started||!studentSelect.value)return;
-    selected.clear();selected.add(studentSelect.value);
-    studentPlay.disabled=true;
-    studentRank.disabled=true;
-    fetchBtn.click();
-  });
-  studentSelect?.addEventListener('change',()=>{
-    studentPlay.disabled=!studentSelect.value;
-    studentRank.disabled=!studentSelect.value;
-    studentPreview.classList.remove('visible');
-  });
-  studentRank?.addEventListener('click',async()=>{
-    if(!studentSelect?.value||!hostReady)return;
-    studentRank.disabled=true;studentPreview.replaceChildren();
-    setStudentStatus('기존 랭킹을 불러오는 중…');
-    try{
-      const result=await rpc('RANK_LIST',studentSelect.value);
-      if(!result||!Array.isArray(result.rows))throw new Error('랭킹 응답 오류');
-      if(!result.rows.length){studentPreview.textContent='아직 등록된 기록이 없습니다.';}
-      else result.rows.slice(0,10).forEach((row,i)=>{
-        const el=document.createElement('div');el.className='hojaStudentRankRow';
-        const n=document.createElement('span');n.textContent=String(i+1).padStart(2,'0')+'  '+String(row.name||'---');
-        const sc=document.createElement('span');sc.textContent=String(row.score??'---')+'점';
-        el.append(n,sc);studentPreview.append(el);
-      });
-      studentPreview.classList.add('visible');setStudentStatus('TEST 랭킹 · 상위 10명');
-    }catch(e){setStudentStatus('랭킹 조회 실패: '+String(e.message||e),true);}
-    finally{studentRank.disabled=!studentSelect.value;}
-  });
-  const renderCatalog=()=>{
-    const term=search.value.trim().toLocaleLowerCase();
-    list.replaceChildren();
-    catalog.filter(x=>!term||x.name.toLocaleLowerCase().includes(term)).forEach(item=>{
-      const row=document.createElement('label');row.className='step09Item';
-      const check=document.createElement('input');check.type='checkbox';check.checked=selected.has(item.name);
-      check.addEventListener('change',()=>{
-        if(check.checked){if(selected.size>=5){check.checked=false;show('카트리지는 최대 5개까지 선택할 수 있습니다.',true);return;}selected.add(item.name);}
-        else selected.delete(item.name);
-        show('선택 '+selected.size+'개 · 25개의 서로 다른 문제 묶음이 필요합니다.');
-      });
-      const name=document.createElement('span');name.textContent=item.name;
-      row.append(check,name);list.append(row);
-    });
-    if(!list.childElementCount)list.textContent='일치하는 공개 카트리지가 없습니다.';
-  };
-  search.addEventListener('input',renderCatalog);
-  loadBtn.addEventListener('click',async()=>{
-    if(started||busy)return;
-    busy=true;loadBtn.disabled=true;show('공개 카트리지 목록 조회 중…');
-    try{
-      const rows=await rpc('LIST');
-      if(!Array.isArray(rows)||rows.some(x=>!x||typeof x.name!=='string'||!x.name.trim())||
-         new Set(rows.map(x=>x.name)).size!==rows.length)
-        throw new Error('공개 카트리지 목록 응답 오류');
-      catalog=rows;selected.clear();renderCatalog();
-      studentSelect.replaceChildren();
-      rows.forEach(item=>{const opt=document.createElement('option');opt.value=item.name;opt.textContent=item.name;studentSelect.append(opt);});
-      studentSelect.disabled=!rows.length;studentPlay.disabled=!rows.length;studentRank.disabled=!rows.length;
-      show(rows.length?'플레이할 카트리지를 선택하세요.':'플레이할 카트리지가 없습니다.',!rows.length);
-    }catch(e){show('목록 조회 실패: '+String(e.message||e),true);}
-    finally{busy=false;loadBtn.disabled=false;}
-  });
-  const receive=(payload,source)=>{
-    const result=hojaStep09Normalize_(payload);
-    HOJA_RANK_CARTRIDGE_=source==='운영 B 공개 조회'&&payload.length===1?payload[0].sheetName:'';
-    HOJA_RANK_TEST_MODE_=false;
-    hojaHudSetUnits_(payload);
-    EXTERNAL_QUESTIONS=result.questions;QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
-    started=true;fetchBtn.disabled=true;loadBtn.disabled=true;fileInput.disabled=true;
-    show(source+' · 25개의 서로 다른 문제 확인 · 게임 시작');
-    document.getElementById('hojaStudentLobby').hidden=true;
-    document.getElementById('hojaStudentTools').classList.add('visible');
-    document.activeElement?.blur?.();
-    boot().catch(showBootError);
-  };
-  fetchBtn.addEventListener('click',async()=>{
-    if(started||busy)return;
-    const names=[...selected];
-    if(!names.length||names.length>5){show('공개 카트리지를 1~5개 선택하세요.',true);return;}
-    busy=true;fetchBtn.disabled=true;show('Project B 공개 문제 조회·검증 중…');
-    try{receive(await rpc('GET',names),'운영 B 공개 조회');}
-    catch(e){show('문제 조회 중단: '+String(e.message||e),true);}
-    finally{busy=false;if(!started){fetchBtn.disabled=false;studentPlay.disabled=!studentSelect?.value;studentRank.disabled=!studentSelect?.value;}}
-  });
-  fileInput.addEventListener('change',async()=>{
-    const file=fileInput.files?.[0];if(!file||started||busy)return;
-    if(file.size>4*1024*1024){show('SMQ 파일은 4MB 이하여야 합니다.',true);return;}
-    busy=true;show('로컬 SMQ 문제 검증 중…');
-    try{
-      const parsed=JSON.parse((await file.text()).replace(/^\uFEFF/,''));
-      receive(hojaStep09FromSmq_(parsed),'로컬 SMQ 비교');
-    }catch(e){show('SMQ 출제 중단: '+String(e.message||e),true);}
-    finally{busy=false;}
-  });
-  window.HOJA_STEP09_TEST={normalize:hojaStep09Normalize_,fromSmq:hojaStep09FromSmq_,
-    status:()=>({ready:started,busy,hostReady,catalogCount:catalog.length})};
-}
 
 /* STEP 10-A: Project A-like ranking presentation only.
    No ranking server writes. The real TEST GAS host remains question-read-only. */

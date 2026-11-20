@@ -82,34 +82,5 @@ function hojaStep09Normalize_(response, rng=Math.random) {
   return {questions,metrics:{sourceCount:sources.length,sourceRows:totalRows,
     eligibleFamilies:families.size,selected:25,unsupported}};
 }
-function hojaStep09FromSmq_(smq){
-  if(!smq||smq.format!=='super-mario-quiz-cartridge'||smq.formatVersion!==2||
-     !Array.isArray(smq.cartridges)||!smq.cartridges.length||smq.cartridges.length>5)
-    throw new Error('SMQ V2 카트리지 파일이 필요합니다.');
-  const names=new Set();
-  return smq.cartridges.map((cart,cidx)=>{
-    if(!cart||!Array.isArray(cart.questions))throw new Error('SMQ 문제 배열 누락');
-    const name=String(cart.title||'').trim();
-    if(!name||names.has(name))throw new Error('SMQ 카트리지 이름 누락·중복');
-    names.add(name);
-    const ids=new Set(), questions=[];
-    cart.questions.forEach((family,i)=>{
-      const id=String(family?.id||'').trim();
-      if(!id||ids.has(id))throw new Error('SMQ 문제 묶음 ID 누락·중복: '+name+' '+(i+1));
-      ids.add(id);
-      const v=family.variants||{};
-      if(v.ox)questions.push({type:'OX',familyId:id,question:v.ox.question,
-        answer:v.ox.answer,options:['O','X'],isNull:false});
-      if(v.multiple)questions.push({type:'MULTIPLE',familyId:id,
-        question:v.multiple.question,answer:v.multiple.answer,
-        options:v.multiple.choices,isNull:false});
-      if(v.subjective)questions.push({type:'SUBJECTIVE',familyId:id,
-        question:v.subjective.question,answer:v.subjective.answer,
-        options:[],isNull:false});
-    });
-    return {sheetName:name,data:{questionSchemaVersion:2,sourceSheetVersion:2,
-      questions,cartridgeId:'local_'+cidx}};
-  });
-}
-window.HOJA_QUIZ_NORMALIZER=Object.freeze({hojaStep09Shuffle_,hojaStep09Normalize_,hojaStep09FromSmq_});
+window.HOJA_QUIZ_NORMALIZER=Object.freeze({hojaStep09Normalize_});
 })();
