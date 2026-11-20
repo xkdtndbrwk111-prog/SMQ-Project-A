@@ -1350,6 +1350,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/arcade-host.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/physics.js"></script>
+<script src="js/springs.js"></script>
 <script src="js/enemies/system.js"></script>
 <script src="js/enemies/jumpy.js"></script>
 <script src="js/enemies/owl.js"></script>
@@ -1900,6 +1901,7 @@ const arcadeAudio=window.HOJA_CREATE_AUDIO({
   remainingMs:()=>RUN.remainingMs
 });
 const {SFX,hojaBgmDuckReset,syncBgm,unlockAudio,playSampleSfx,stopHojaSnore,preloadSampleSfx}=arcadeAudio;
+const springSystem=window.HOJA_CREATE_SPRING_SYSTEM(SFX);
 // Terrain Renderer V2 TRIAL — experimental, geometry/collisions never modified.
 const HOJA_V2_RENDER=true;
 const HOJA_V2_ATLAS_COLS=22;
@@ -6019,31 +6021,8 @@ class HojaScene extends Phaser.Scene{
     tex.add(1,0,16,0,16,16);
   }
 
-  createSprings(){
-    this.springs=SPRINGS.map(p=>({
-      x:p.x+16,y:p.y,until:0,
-      img:this.add.image(p.x+16,p.y,'spring',0).setOrigin(.5,1).setScale(2).setDepth(6)
-    }));
-  }
-
-  updateSprings(time){
-    const pb=this.playerBody.body;
-    for(const sp of this.springs){
-      if(sp.until&&time>sp.until){sp.until=0;sp.img.setFrame(0);}
-      if(pb.velocity.y<0)continue;
-      if(pb.right<=sp.x-14||pb.left>=sp.x+14)continue;
-      if(pb.bottom<sp.y-34||pb.bottom>sp.y-6)continue;
-      this.strongStomp=false;
-      this.bounce(560,'spring');
-      this.coyoteMs=0;
-      sp.img.setFrame(1);sp.until=time+150;
-      this.squash(.76,1.28,220);
-      this.emitDust(sp.x,sp.y-2,6,30);
-      this.emitBurst(sp.x,sp.y-28,6,0xffd2c2,-.6);
-      // Spring launch must not alter camera zoom (manual zoom stays fixed).
-      SFX.spring();
-    }
-  }
+  createSprings(){springSystem.createSprings(this,SPRINGS);}
+  updateSprings(time){springSystem.updateSprings(this,time);}
 
   // Autumn: leaf ledges shake ~0.5s after Hoja lands, drop, and regrow.
   createCrumbles(){
