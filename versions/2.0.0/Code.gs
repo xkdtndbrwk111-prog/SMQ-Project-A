@@ -21,7 +21,9 @@ const HOJA_SHEETS_API_ = 'https://sheets.googleapis.com/v4/spreadsheets/';
 const HOJA_V2_HEADERS_ = ['묶음ID','유형','문제','정답','보기1','보기2','보기3','보기4'];
 
 function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Game').setTitle('HOJA QUIZ 2.0');
+  return HtmlService.createHtmlOutputFromFile('Game')
+    .setTitle('HOJA QUIZ 2.0')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
 
@@ -197,6 +199,12 @@ const HOJA_RANK_PROP_ = 'HOJA_PROD_RANKING_SPREADSHEET_ID';
 const HOJA_RANK_TAB_ = 'HOJA_RANKING';
 const HOJA_RANK_HEADERS_ = ['cartridge','name','score','correct','found','remainingSeconds','createdAt','runId','finish','deviceId'];
 const HOJA_RANK_FORBIDDEN_ = ['SEX','XES','EXS','SXE'];
+function hojaRankNormalizeName_(v) {
+  return String(v == null ? '' : v).normalize('NFC').replace(/[a-z]/g,c=>c.toUpperCase());
+}
+function hojaRankValidName_(v) {
+  return /^[가-힣A-Z0-9]{2,6}$/.test(v) && !HOJA_RANK_FORBIDDEN_.includes(v);
+}
 
 /* Ranking sheet must be provisioned and verified separately before production deployment. */
 function hojaRankSheet_() {
@@ -217,10 +225,10 @@ function hojaRankRows_(sheet,cartridge) {
   const last=sheet.getLastRow();
   if(last<=1)return [];
   const raw=sheet.getRange(2,1,last-1,HOJA_RANK_HEADERS_.length).getValues();
-  return raw.map((r,i)=>({row:i+2,cartridge:String(r[0]),name:String(r[1]),score:Number(r[2]),
+  return raw.map((r,i)=>({row:i+2,cartridge:String(r[0]),name:hojaRankNormalizeName_(r[1]),score:Number(r[2]),
     correct:Number(r[3]),found:Number(r[4]),remainingSeconds:Number(r[5]),
     createdAt:r[6] instanceof Date?r[6].getTime():Number(r[6])||0,runId:String(r[7]),finish:String(r[8]),deviceId:String(r[9]||'')}))
-   .filter(x=>x.cartridge===cartridge&&/^[A-Z0-9]{3}$/.test(x.name)&&Number.isInteger(x.score))
+   .filter(x=>x.cartridge===cartridge&&hojaRankValidName_(x.name)&&Number.isInteger(x.score))
    .sort((a,b)=>b.score-a.score||a.createdAt-b.createdAt||a.row-b.row);
 }
 function hojaRankPublicRows_(rows) {
@@ -233,12 +241,12 @@ function hojaRankList(cartridge) {
 function hojaRankSave(payload) {
   if(!payload||typeof payload!=='object'||Array.isArray(payload))throw new Error('RANK_INVALID_REQUEST');
   const cartridge=hojaRankCartridge_(payload.cartridge);
-  const name=String(payload.name||'').trim().toUpperCase();
+  const name=hojaRankNormalizeName_(payload.name);
   const score=Number(payload.score),found=Number(payload.found),correct=Number(payload.correct);
   const remainingSeconds=Number(payload.remainingSeconds);
   const runId=String(payload.runId||'');
   const deviceId=String(payload.deviceId||'');
-  if(!/^[A-Z0-9]{3}$/.test(name)||HOJA_RANK_FORBIDDEN_.includes(name))throw new Error('RANK_INVALID_NAME');
+  if(!hojaRankValidName_(name))throw new Error('RANK_INVALID_NAME');
   if(payload.finish!=='FINISH')throw new Error('RANK_FINISH_REQUIRED');
   if(!Number.isInteger(score)||score<0||score>100000||!Number.isInteger(found)||found<0||found>25||
      !Number.isInteger(correct)||correct<0||correct>found||!Number.isInteger(remainingSeconds)||
@@ -250,10 +258,18 @@ function hojaRankSave(payload) {
   try {
     const sheet=hojaRankSheet_();
     let rows=hojaRankRows_(sheet,cartridge);
-    // Repeated submission of the same run never creates another row.
     const sameRun=rows.find(r=>r.runId===runId);
     if(sameRun){
       if(sameRun.deviceId!==deviceId)throw new Error('RANK_RUN_DEVICE_MISMATCH');
+      const duplicates=rows.filter(r=>r.deviceId===deviceId && r.row!==sameRun.row);
+      if(duplicates.length && payload.replaceConfirmed!==true){
+        return {requiresReplace:true,replayed:true,current:{name:sameRun.name,score:sameRun.score},
+          existing:{name:duplicates[0].name,score:duplicates[0].score},rows:hojaRankPublicRows_(rows)};
+      }
+      for(const prior of duplicates.sort((a,b)=>b.row-a.row))sheet.deleteRow(prior.row);
+      if(duplicates.length)rows=hojaRankRows_(sheet,cartridge);
+      for(const extra of rows.slice(25).sort((a,b)=>b.row-a.row))sheet.deleteRow(extra.row);
+      rows=hojaRankRows_(sheet,cartridge);
       const rank=rows.findIndex(r=>r.runId===runId);
       return {saved:rank>=0,rank:rank>=0?rank+1:null,rows:hojaRankPublicRows_(rows),replayed:true};
     }
@@ -262,10 +278,10 @@ function hojaRankSave(payload) {
       return {requiresReplace:true,existing:{name:previous[0].name,score:previous[0].score},
         rows:hojaRankPublicRows_(rows)};
     }
-    // One browser has one entry per cartridge, including an explicitly
-    // confirmed lower-score replacement. Unidentified older rows are left intact.
-    for(const prior of previous.sort((a,b)=>b.row-a.row))sheet.deleteRow(prior.row);
-    sheet.appendRow([cartridge,name,score,correct,found,remainingSeconds,new Date(),runId,'FINISH',deviceId]);
+    const targetRow=previous.length?previous[0].row:sheet.getLastRow()+1;
+    sheet.getRange(targetRow,2).setNumberFormat('@');
+    sheet.getRange(targetRow,1,1,HOJA_RANK_HEADERS_.length).setValues([[cartridge,name,score,correct,found,remainingSeconds,new Date(),runId,'FINISH',deviceId]]);
+    for(const prior of previous.filter(r=>r.row!==targetRow).sort((a,b)=>b.row-a.row))sheet.deleteRow(prior.row);
     rows=hojaRankRows_(sheet,cartridge);
     for(const extra of rows.slice(25).sort((a,b)=>b.row-a.row))sheet.deleteRow(extra.row);
     rows=hojaRankRows_(sheet,cartridge);
