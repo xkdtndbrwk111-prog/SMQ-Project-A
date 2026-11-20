@@ -1725,6 +1725,7 @@ return {TILE,SIZE,ROWS,COLS,ROOM,BODY,JUMP_HEIGHT,CERT_STEP_TILES,PORTAL_ROOMS,
 });
 
 </script>
+<script src="js/arcade-host.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/quiz-normalizer.js"></script>
 <script src="js/run-record.js"></script>
@@ -12293,40 +12294,20 @@ const HOJA_STEP136_DIAG=(()=>{
 })();
 window.HOJA_STEP136_DIAG=HOJA_STEP136_DIAG;
 
-/* V0.5.8 authenticated TEST host response, never fall back to local questions. */
-(function hojaV058ServerGate(){
- let started=false,seq=0;const pending=new Map();
- const fail=(e)=>{document.getElementById('bootStatus').textContent='Project B 로딩 실패: '+String(e?.message||e);};
- window.HOJA_STEP10_RPC=(method,payload)=>new Promise((resolve,reject)=>{
-   if(!['RANK_LIST','RANK_SAVE'].includes(method))return reject(new Error('RPC_METHOD_DENIED'));
-   const id=++seq;const timer=setTimeout(()=>{pending.delete(id);reject(new Error('랭킹 서버 응답 시간 초과'))},45000);
-   pending.set(id,{resolve,reject,timer});
-   parent.postMessage({type:'HOJA_V058_ARCADE_RPC',id,method,payload},'*');
- });
- window.addEventListener('message',e=>{
-   if(e.source!==parent||!e.data||typeof e.data!=='object')return;
-   const msg=e.data;
-   if(msg.type==='HOJA_V058_ARCADE_RPC_RESULT'){
-     const p=pending.get(msg.id);if(!p)return;pending.delete(msg.id);clearTimeout(p.timer);
-     msg.ok?p.resolve(msg.value):p.reject(new Error(String(msg.error||'랭킹 오류')));return;
-   }
-   if(msg.type==='HOJA_V058_ARCADE_ERROR'){fail(msg.error);return;}
-   if(msg.type!=='HOJA_V058_ARCADE_START'||started)return;
-   try{
-     const sources=msg.sources,names=msg.names;
-     if(!Array.isArray(names)||names.length!==sources?.length||names.some((n,i)=>n!==sources[i]?.sheetName))throw new Error('카트리지 이름 불일치');
-     const normalized=hojaStep09Normalize_(sources);
-     EXTERNAL_QUESTIONS=normalized.questions;QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
-     HOJA_RANK_CARTRIDGE_=names.length===1?names[0]:'';
-     HOJA_RANK_TEST_MODE_=false;hojaHudSetUnits_(sources);
-     started=true;document.getElementById('hojaStudentLobby').hidden=true;
-     document.getElementById('hojaStudentTools')?.classList.add('visible');
-     boot().catch(showBootError);
-   }catch(error){fail(error)}
- });
- document.getElementById('bootStatus').textContent='Project B 검증 완료 문제 수신 중…';
- parent.postMessage({type:'HOJA_V058_ARCADE_READY'},'*');
-})();
+window.HOJA_CONNECT_ARCADE_HOST({
+  prepare(sources,names){
+    const normalized=hojaStep09Normalize_(sources);
+    EXTERNAL_QUESTIONS=normalized.questions;QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
+    HOJA_RANK_CARTRIDGE_=names.length===1?names[0]:'';
+    HOJA_RANK_TEST_MODE_=false;hojaHudSetUnits_(sources);
+  },
+  launch(){
+    document.getElementById('hojaStudentLobby').hidden=true;
+    document.getElementById('hojaStudentTools')?.classList.add('visible');
+    boot().catch(showBootError);
+  },
+  showStatus(message){document.getElementById('bootStatus').textContent=message;}
+});
 
 
 })();
