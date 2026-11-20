@@ -10,6 +10,10 @@ export function instrumentArcade(input) {
     },
     beforeBodyEnd(html) {const i=arcade.lastIndexOf('</body>');if(i<0)throw new Error('arcade body missing');arcade=arcade.slice(0,i)+html+'\n'+arcade.slice(i);}
   };
+  A.edit('  if(!HOJA_MAKER_MODE)return false;\n  const next=', '  const next=');
+  A.edit('window.HOJA_V2_NEXT_STAGE=function(...args){if(HOJA_MAKER_MODE)HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};',
+    'window.HOJA_V2_NEXT_STAGE=function(...args){HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};');
+
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
@@ -59,11 +63,13 @@ export function instrumentArcade(input) {
     <div id="hojaV053Panel" style="display:none" role="status" aria-live="polite"></div>
     <style>#hojaV053Panel[style*="block"]{display:block!important;white-space:pre-wrap;color:#000;background:#fff}</style>
     <button id="hojaTestCaveVision">동굴 시야 전환</button>
+    <button id="hojaTestNextStage">시험 맵 전환</button>
     <button id="hojaTestQuiz">문제 열기</button>
     <button id="hojaTestTimeout">2초 후 종료</button>
   </div><script>
   document.getElementById('hojaTestDeath').onclick=()=>window.HOJA_TEST_PROBE.death();
   document.getElementById('hojaTestCaveVision').onclick=()=>window.HOJA_V2_TOGGLE_CAVE_VISIBILITY();
+  document.getElementById('hojaTestNextStage').onclick=()=>window.HOJA_V2_NEXT_STAGE();
   document.getElementById('hojaTestQuiz').onclick=()=>window.HOJA_TEST_PROBE.quiz();
   document.getElementById('hojaTestTimeout').onclick=()=>window.HOJA_TEST_PROBE.setTime(2);
   </script>`);

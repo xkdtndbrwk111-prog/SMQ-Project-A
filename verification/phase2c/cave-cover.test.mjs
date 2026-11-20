@@ -68,6 +68,9 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   assert.equal(await game.evaluate(()=>typeof window.HOJA_STEP136_DIAG?.setMode),'function');
   await frame.locator('#scaleQuickBtn').click();
   await frame.locator('#scaleQuickBtn').click();
+  await frame.locator('#hojaTestNextStage').click();
+  await game.waitForFunction(()=>window.HOJA_TEST_PROBE.state()?.stage===0,null,{timeout:30000});
+
 
  } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
 });

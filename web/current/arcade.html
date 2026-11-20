@@ -1142,7 +1142,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
     <div id="bootError"></div>
   </div>
   <div class="controls cleanLabControls" aria-label="게임 시험판 간편 조작">
-    <button id="hojaTerrainSplitBtn" style="display:none" type="button" title="A: 발판·장식 모두 청크 / B: 발판 개별·장식 청크 / C: 발판 청크·장식 개별">청크 원인 비교: A — 모두 청크</button><button type="button" id="hojaV2StageCycleBtn" onclick="window.HOJA_V2_NEXT_STAGE()">시험 스테이지: 1/4</button>
+    <button id="hojaTerrainSplitBtn" style="display:none" type="button" title="A: 발판·장식 모두 청크 / B: 발판 개별·장식 청크 / C: 발판 청크·장식 개별">청크 원인 비교: A — 모두 청크</button>
     <span class="cleanZoomLabel">카메라 줌</span>
     <div class="cleanZoomGroup" role="group" aria-label="카메라 자동·수동 확대 배율">
       <button type="button" id="hojaZoomAutoBtn" data-zoom-mode="auto" aria-pressed="true">자동</button>
@@ -2677,8 +2677,6 @@ function startStage(index,fresh,spawn='start'){
   }
   PENDING_SPAWN=spawn;
   applyStage(index);
-  const v2btn=document.getElementById('hojaV2StageCycleBtn');
-  if(v2btn)v2btn.textContent=HOJA_MAKER_MODE?('Maker 맵 '+(STAGE_INDEX+1)+'/'+RUN_STAGES.length+' → 다음'):('시험 스테이지: '+(STAGE_INDEX===4?'지하':`${STAGE_INDEX+1}/4`)+' → 다음');
   const vp=document.getElementById('gameViewport');
   if(vp)vp.style.background=THEME.sky;
   if(ACTIVE_SCENE){
@@ -2688,6 +2686,7 @@ function startStage(index,fresh,spawn='start'){
 }
 
 window.HOJA_V2_NEXT_STAGE=function(){
+  if(!HOJA_MAKER_MODE)return false;
   const next=(STAGE_INDEX+1)%RUN_STAGES.length;
   startStage(next,false,'start');
 };
@@ -8781,12 +8780,9 @@ function hojaRankBrowserId_(){
 }
 
 // Developer stage skips cannot produce rankable runs; reset on fresh game.
-window.addEventListener('click',e=>{
-  if(e.target.closest('#hojaV2StageCycleBtn'))queueMicrotask(()=>{HOJA_RANK_TEST_MODE_=true;});
-},true);
 if(typeof window.HOJA_V2_NEXT_STAGE==='function'){
   const original=window.HOJA_V2_NEXT_STAGE;
-  window.HOJA_V2_NEXT_STAGE=function(...args){HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};
+  window.HOJA_V2_NEXT_STAGE=function(...args){if(HOJA_MAKER_MODE)HOJA_RANK_TEST_MODE_=true;return original.apply(this,args);};
 }
 let HOJA_RANK_LAST_ = null;
 let HOJA_RANK_ROWS_ = [];

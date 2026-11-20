@@ -59,6 +59,12 @@ async function teacher(page){
  await page.locator('#hojaQrClose').click();
  await page.getByRole('button',{name:/바로 플레이/}).click();
  await sceneReady(page);
+ if(build==='current'){
+   const game=page.frames().find(f=>f.url().includes('/arcade.html'));
+   const stage=await game.locator('#domStageMap').innerText();
+   assert.equal(await game.evaluate(()=>window.HOJA_V2_NEXT_STAGE()),false,'production solo stage skip denied');
+   assert.equal(await game.locator('#domStageMap').innerText(),stage);
+ }
  await new Promise(resolve=>setTimeout(resolve,500));
  return qr;
 }
