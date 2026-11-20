@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { instrumentArcade } from './current-test-probe.mjs';
+import { checkModuleOrder } from './check_module_order.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const source=path.join(root,'web/current');
@@ -27,6 +28,18 @@ const files=Object.fromEntries(production.map(p=>[p,hash(fs.readFileSync(path.jo
 const baseline=JSON.parse(fs.readFileSync(path.join(root,'tools/current-baseline-hashes.json'),'utf8'));
 const unchanged=JSON.stringify(Object.entries(files).sort())===JSON.stringify(Object.entries(baseline.files).sort());
 let arcade=fs.readFileSync(path.join(source,'arcade.html'),'utf8');
+if(arcade.includes('src="js/arcade-host.js"')){
+ const sourcePages={'arcade.html':arcade};
+ for(const page of ['index.html','play.html'])sourcePages[page]=fs.readFileSync(path.join(source,page),'utf8');
+ const errors=checkModuleOrder(sourcePages);
+ for(const [name,html] of Object.entries(sourcePages)){
+  for(const match of html.matchAll(/<script\b[^>]*\bsrc=["'](js\/[^"']+)["']/g)){
+   if(!production.includes(match[1]))errors.push(name+': 스크립트 파일이 없습니다: '+match[1]);
+  }
+ }
+ if(errors.length)throw Error('모듈 검사 실패: '+errors.join(' | '));
+}
+
 if(test)arcade=instrumentArcade(arcade);
 // Preserve Phase 1 QR compatibility at the frozen baseline. Any source asset change
 // produces a new version, including copied scripts and cartridge files.

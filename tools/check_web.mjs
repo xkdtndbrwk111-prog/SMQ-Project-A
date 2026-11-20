@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import { fileURLToPath } from 'url';
+import { checkModuleOrder } from './check_module_order.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.resolve(ROOT, process.argv[2] || 'dist');
@@ -54,6 +55,11 @@ ok(syntaxFail.length === 0, `스크립트 문법 (인라인 ${inlineCount}개 + 
 const idx = read('index.html'), ply = read('play.html'), arc = read('arcade.html');
 const keyboard = fs.existsSync(path.join(dist,'js/keyboard.js')) ? read('js/keyboard.js') : '';
 const b0 = JSON.parse(read('BUILD.json'));
+if(fs.existsSync(path.join(dist,'js/arcade-host.js'))){
+  const orderErrors=checkModuleOrder({'index.html':idx,'play.html':ply,'arcade.html':arc});
+  ok(orderErrors.length===0, '모듈 동기 로드와 초기화 순서',orderErrors.join(' | '));
+}
+
 const gone = (t, re) => !re.test(t);
 for (const [label, re] of [
   ['팀전 블록', /id="hojaTeam(V067Runtime|R10PortraitAssets|V067Assets)"/],

@@ -2579,4 +2579,18 @@ window.HOJA_USAGE=Object.freeze({track(){}});
 
 
 <script src="js/student.js"></script>
+
+<script>
+(function(){
+  const required=['HOJA_B_LIVE','HOJA_GAMEPLAY','HOJA_STUDENT'];
+  const missing=required.filter(name=>!window[name]);
+  if(!missing.length)return;
+  const message=document.createElement('div');
+  message.setAttribute('role','alert');
+  message.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#151d26;color:#ffb3b3;padding:24px;font:16px system-ui;white-space:pre-wrap';
+  message.textContent='필수 화면 모듈을 불러오지 못했습니다.\n'+missing.join(', ');
+  document.body.appendChild(message);
+  console.error('필수 화면 모듈 누락:',missing.join(', '));
+})();
+</script>
 </body></html>

@@ -15,7 +15,7 @@ test('complete distribution hashes, version changes and safe retirement of gener
  after(() => rm(temp, {recursive:true, force:true}));
  const source = path.join(temp,'web/current');
  await mkdir(path.join(temp,'tools'), {recursive:true});
- for(const file of ['build_current.mjs','current-test-probe.mjs','current-baseline-hashes.json']) {
+ for(const file of ['build_current.mjs','current-test-probe.mjs','current-baseline-hashes.json','check_module_order.mjs']) {
    await cp(path.join(root,'tools',file), path.join(temp,'tools',file));
  }
  await cp(path.join(root,'web/current'), source, {recursive:true});
