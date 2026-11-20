@@ -1352,6 +1352,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/physics.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/quiz-normalizer.js"></script>
+<script src="js/hud.js"></script>
 <script src="js/run-record.js"></script>
 <script src="js/settlement.js"></script>
 <script>
@@ -1759,18 +1760,20 @@ const HOJA_V054_RENDER_AB={
 window.HOJA_V054_RENDER_AB=HOJA_V054_RENDER_AB;
 
 
-function syncDomHudScale(){
-  const vp=document.getElementById('gameViewport');
-  const dom=document.getElementById('scoreHud');
-  if(!vp||!dom)return;
-  const width=vp.getBoundingClientRect().width||VIEW_W;
-  const scale=width/Math.max(1,VIEW_W);
-  dom.style.setProperty('--hud-scale',String(scale));
-  vp.style.setProperty('--hud-scale',String(scale));
-  // Do not use window.innerWidth: the game may be embedded in a smaller panel.
-  vp.dataset.hudLayout=width<500?'mini':width<740?'compact':width<900?'slim':'wide';
-  vp.style.setProperty('--hud-current-height',Math.ceil(dom.getBoundingClientRect().height)+'px');
-}
+const arcadeHud=window.HOJA_CREATE_HUD({
+  get width(){return VIEW_W;},
+  get height(){return VIEW_H;},
+  get renderScale(){return RS;},
+  get fpsVisible(){return FPS_VISIBLE;},
+  get stageIndex(){return STAGE_INDEX;},
+  get stageCount(){return STAGES.length;},
+  get run(){return RUN;},
+  get totalQuestions(){return TOTAL_QUESTIONS;},
+  get stageQuestions(){return stageQuestionCount(STAGE);},
+  get flowerCount(){return FLOWERS.length;},
+  get makerMode(){return HOJA_MAKER_MODE;}
+});
+const {syncDomHudScale}=arcadeHud;
 function computeRenderScale(cssW){
   // V0.6.6: CSS-to-backing 1:1 in ALL modes. Never render a reduced buffer
   // and enlarge it by a fractional CSS factor; 64x64 source pixels stay square.
@@ -6068,150 +6071,11 @@ class HojaScene extends Phaser.Scene{
   }
 
   createHUD(){
-    const barH=44;
-    this.hudBar=this.add.rectangle(0,0,VIEW_W,barH,0x102737,.92)
-      .setOrigin(0,0).setScrollFactor(0).setDepth(190);
-
-    this.hudRule=this.add.rectangle(0,barH-2,VIEW_W,2,0xcce7ef,.34)
-      .setOrigin(0,0).setScrollFactor(0).setDepth(191);
-
-    const labelStyle={
-      fontFamily:'monospace',
-      fontSize:'9px',
-      fontStyle:'bold',
-      color:'#93b9c8'
-    };
-    const valueStyle={
-      fontFamily:'monospace',
-      fontSize:'16px',
-      fontStyle:'bold',
-      color:'#ffffff'
-    };
-
-    this.hudScoreLabel=this.add.text(24,5,'점수',labelStyle)
-      .setScrollFactor(0).setDepth(200);
-    this.hudScoreValue=this.add.text(24,18,'000000',valueStyle)
-      .setScrollFactor(0).setDepth(200);
-
-    this.hudStageLabel=this.add.text(VIEW_W*0.28,5,'현재 맵',labelStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-    this.hudStageValue=this.add.text(VIEW_W*0.28,18,`${STAGE_INDEX+1}/${STAGES.length}`,valueStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-
-    this.hudQuizLabel=this.add.text(VIEW_W/2,5,'전체 문제',labelStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-    this.hudQuizValue=this.add.text(VIEW_W/2,18,'00',valueStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-
-    this.hudFlowerLabel=this.add.text(VIEW_W*0.72,5,'과일',labelStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-    this.hudFlowerValue=this.add.text(VIEW_W*0.72,18,'0/3',valueStyle)
-      .setOrigin(.5,0).setScrollFactor(0).setDepth(200);
-
-    this.hudTimeLabel=this.add.text(VIEW_W-24,5,'남은 시간',labelStyle)
-      .setOrigin(1,0).setScrollFactor(0).setDepth(200);
-    this.hudTimeValue=this.add.text(VIEW_W-24,18,String(Math.ceil(RUN.remainingMs/1000)),valueStyle)
-      .setOrigin(1,0).setScrollFactor(0).setDepth(200);
-
-    this.comboText=this.add.text(VIEW_W/2,barH+3,'',{
-      fontFamily:'monospace',fontSize:'11px',fontStyle:'bold',
-      color:'#fff3a8',stroke:'#2d2412',strokeThickness:3
-    }).setOrigin(.5,0).setScrollFactor(0).setDepth(201).setVisible(false);
-
-    this.pauseText=this.add.text(VIEW_W/2,74,'',{
-      fontFamily:'monospace',fontStyle:'bold',fontSize:'26px',color:'#ffffff',
-      stroke:'#263340',strokeThickness:6
-    }).setOrigin(.5).setScrollFactor(0).setDepth(201);
-
-    this.clearText=this.add.text(VIEW_W/2,VIEW_H*0.42,'',{
-      fontFamily:'monospace',fontStyle:'bold',fontSize:'28px',color:'#ffffff',
-      align:'center',stroke:'#263340',strokeThickness:7
-    }).setOrigin(.5).setScrollFactor(0).setDepth(201);
-
-    // V0.51: draw performance text in a real DOM overlay above the FOV,
-    // never as a Phaser object that could be covered by cave darkness.
-    this.fpsDisplay=document.getElementById('hojaFpsDisplay');
-    if(this.fpsDisplay)this.fpsDisplay.style.display=FPS_VISIBLE?'block':'none';
-    this.fpsSamples=[];this.fpsShownAt=0;this.lowFpsWindows=0;
-    // F9 diagnostics keep a true five-second window separately from the
-    // legacy 60-frame HUD sample.  The legacy array is intentionally left
-    // unchanged because quality fallback and older QA modules depend on it.
-    this.hojaFps5sSamples=[];
-    this.hojaPerfLastNow=performance.now();
-    this.hojaPerfLastPlayerX=this.playerBody?.x??null;
-    this.hojaPerfLastPlayerY=this.playerBody?.y??null;
-    this.hojaDiagStartedAt=this.time?.now??0;
-    this.hojaDiagMinFps=null;
-    // STEP13-1: per-map minimum based on stable half-second sample windows.
-    this.hojaStep131MinFps=null;
-
-    this.stageBanner=this.add.text(VIEW_W/2,VIEW_H*0.36,'',{
-      fontFamily:'monospace',fontStyle:'bold',fontSize:'30px',color:'#ffffff',
-      align:'center',stroke:'#263340',strokeThickness:7
-    }).setOrigin(.5).setScrollFactor(0).setDepth(202);
-
-    this.nextText=this.add.text(VIEW_W/2,VIEW_H*0.68,'',{
-      fontFamily:'monospace',fontStyle:'bold',fontSize:'14px',color:'#fff3a8',
-      align:'center',stroke:'#263340',strokeThickness:5
-    }).setOrigin(.5).setScrollFactor(0).setDepth(201);
-
-    this.layoutHUD();
-    for(const obj of [
-      this.hudBar,this.hudRule,this.hudScoreLabel,this.hudScoreValue,
-      this.hudStageLabel,this.hudStageValue,this.hudQuizLabel,this.hudQuizValue,
-      this.hudFlowerLabel,this.hudFlowerValue,this.hudTimeLabel,this.hudTimeValue
-    ])obj.setVisible(false);
-    syncDomHudScale();
+    return arcadeHud.createHUD(this);
   }
 
   layoutHUD(){
-    const barH=44;
-
-    this.hudBar
-      .setPosition(0,0)
-      .setDisplaySize(VIEW_W,barH);
-
-    this.hudRule
-      .setPosition(0,barH-2)
-      .setDisplaySize(VIEW_W,2);
-
-    this.hudScoreLabel.setPosition(24,5);
-    this.hudScoreValue.setPosition(24,18);
-
-    this.hudStageLabel.setPosition(VIEW_W*0.28,5);
-    this.hudStageValue.setPosition(VIEW_W*0.28,18);
-
-    this.hudQuizLabel.setPosition(VIEW_W/2,5);
-    this.hudQuizValue.setPosition(VIEW_W/2,18);
-
-    this.hudFlowerLabel.setPosition(VIEW_W*0.72,5);
-    this.hudFlowerValue.setPosition(VIEW_W*0.72,18);
-
-    this.hudTimeLabel.setPosition(VIEW_W-24,5);
-    this.hudTimeValue.setPosition(VIEW_W-24,18);
-
-    this.comboText.setPosition(VIEW_W/2,barH+3);
-    this.pauseText.setPosition(VIEW_W/2,Math.max(74,VIEW_H*0.14));
-    this.clearText.setPosition(VIEW_W/2,VIEW_H*0.42);
-    this.stageBanner.setPosition(VIEW_W/2,VIEW_H*0.36);
-    this.nextText.setPosition(VIEW_W/2,VIEW_H*0.68);
-
-    this.fixedHUD=[
-      this.hudBar,this.hudRule,
-      this.hudScoreLabel,this.hudScoreValue,
-      this.hudStageLabel,this.hudStageValue,
-      this.hudQuizLabel,this.hudQuizValue,
-      this.hudFlowerLabel,this.hudFlowerValue,
-      this.hudTimeLabel,this.hudTimeValue,
-      this.comboText,this.pauseText,this.clearText,
-      this.stageBanner,this.nextText
-    ].filter(obj=>obj.visible).map(obj=>({
-      obj,
-      x:obj.x,y:obj.y,
-      scaleX:obj.scaleX,scaleY:obj.scaleY
-    }));
-
-    this.updateFixedHUD(this.cameras.main);
+    return arcadeHud.layoutHUD(this);
   }
 
   // =========================================================================
@@ -7346,22 +7210,7 @@ class HojaScene extends Phaser.Scene{
   }
 
   updateFixedHUD(cam){
-    if(!this.fixedHUD)return;
-
-    const zoom=Math.max(.01,cam.zoom);
-    const inv=RS/zoom;
-    const cx=cam.width/2,cy=cam.height/2;
-
-    for(const item of this.fixedHUD){
-      // Camera zoom is centered on the gameplay viewport.
-      // Counter both size and position so HUD remains true screen-space UI.
-      item.obj
-        .setPosition(
-          cx+(item.x*RS-cx)/zoom,
-          cy+(item.y*RS-cy)/zoom
-        )
-        .setScale(item.scaleX*inv,item.scaleY*inv);
-    }
+    return arcadeHud.updateFixedHUD(this,cam);
   }
 
   // Switch modes without restarting the stage, so the same terrain, camera
@@ -9340,31 +9189,7 @@ class HojaScene extends Phaser.Scene{
   }
 
   updateHUD(){
-    RUN.score=this.score;
-    RUN.correctQuiz=this.correctQuizCount;
-    RUN.quizAnswered=this.quizAnswered;
-    RUN.remainingMs=this.remainingMs; // shared across all 5 maps
-    const sec=Math.max(0,Math.ceil(this.remainingMs/1000));
-    // The old Phaser top HUD is hidden; avoid needless text texture uploads
-    // on every frame. The visible fixed DOM HUD is updated below.
-    const combo=this.stompCombo>1?`STOMP COMBO  x${this.stompCombo}`:'';
-    if(this.comboText.text!==combo)this.comboText.setText(combo);
-    // DOM HUD: unaffected by camera shake. Only touch DOM when values change.
-    const setDom=(id,value)=>{
-      const el=document.getElementById(id);
-      if(el&&el.textContent!==value)el.textContent=value;
-    };
-    setDom('domScore',String(this.score));
-    // STEP13-0: progress for THIS stage, preserved by stageMem when changing maps.
-    // Do not use RUN.found here: that is the all-map 25-question total.
-    const stageFound=Number(this.mem?.found||0);
-    const stageTotal=Number(this.stageQuestions??stageQuestionCount(STAGE));
-    setDom('domStageMap',`${stageFound}/${stageTotal}`);
-
-    setDom('domQuiz',HOJA_MAKER_MODE?'MAKER':`${String(RUN.found).padStart(2,'0')}/${TOTAL_QUESTIONS}`);
-    setDom('domFlower',`${this.flowersGot||0}/${FLOWERS.length}`);
-    setDom('domTime',String(sec).padStart(3,'0'));
-    document.getElementById('scoreHud')?.classList.toggle('timeLow',sec<=30);
+    return arcadeHud.updateHUD(this);
   }
 }
 
