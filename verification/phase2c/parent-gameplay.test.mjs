@@ -12,9 +12,13 @@ for (const page of ['index', 'play']) {
   test(page + ' opens and exits the arcade with no standalone quiz stage or input handlers', async () => {
     const html = await readFile(new URL(page + '.html', source), 'utf8');
     assert.doesNotMatch(html, /hqStage|hqHud|hqResult|hqBalloon|hqSfx_|hoja-test-contract/);
-    const tag = /<script id=['"]hojaV051Gameplay['"]([^>]*)>([\s\S]*?)<\/script>/.exec(html);
-    const file = /src="([^"]+)"/.exec(tag[1]);
-    const script = file ? await readFile(new URL(file[1], source), 'utf8') : tag[2];
+    const tag = '<script id="hojaV051Gameplay" src="js/parent-gameplay.js"></script>';
+    const position = html.indexOf(tag);
+    assert.ok(html.includes('window.HOJA_V051_FIT_INFO='));
+    assert.ok(position > html.indexOf('window.HOJA_V051_FIT_INFO='));
+    assert.ok(position < html.indexOf('window.HOJA_V055_BIND_ARCADE='));
+    assert.equal(html.lastIndexOf(tag), position);
+    const script = await readFile(new URL('js/parent-gameplay.js', source), 'utf8');
     const listeners = {};
     const elements = new Map();
     const alerts = [];
@@ -44,6 +48,15 @@ for (const page of ['index', 'play']) {
     assert.equal(listeners.keydown, undefined);
     await game.launch('arcade', 'summer');
     assert.equal(alerts.length, 1);
+    assert.throws(() => game.setServerQuestions([sources[0], sources[0]]), /중복 카트리지/);
+    const few = [{ ...sources[0], data: { ...sources[0].data,
+      questions: sources[0].data.questions.filter(q => q.type === 'OX').slice(0, 1) } }];
+    window.HOJA_B_LIVE.sources = few;
+    game.setServerQuestions(few);
+    await game.launch('arcade', 'summer');
+    assert.equal(frame.src, undefined);
+    assert.match(document.getElementById('hqArcadeInfo').textContent, /25개/);
+    window.HOJA_B_LIVE.sources = sources;
     game.setServerQuestions(sources);
     await game.launch('arcade', 'summer');
     assert.equal(frame.src, 'arcade.html?season=summer');
