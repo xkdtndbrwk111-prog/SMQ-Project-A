@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const source=fs.readFileSync(fileURLToPath(new URL('../../web/current/js/quiz-normalizer.js',import.meta.url)),'utf8');
+const sandbox={window:{}};vm.runInNewContext(source,sandbox);const {hojaStep09Normalize_:normalize,hojaStep09FromSmq_:fromSmq}=sandbox.window.HOJA_QUIZ_NORMALIZER;
+const rng=()=>{let n=123;return()=>((n=Math.imul(n,1664525)+1013904223>>>0)/4294967296)};
+const fixture=()=>[{sheetName:'A',data:{questionSchemaVersion:2,sourceSheetVersion:2,questions:Array.from({length:25},(_,i)=>({type:'MULTIPLE',familyId:'id'+i,question:'q'+i,options:['a','b','c','d'],answer:'2'}))}}];
+test('deterministic question and choice order preserves correct answer',()=>{const input=fixture(),before=JSON.stringify(input);const a=normalize(input,rng()),b=normalize(input,rng());assert.equal(JSON.stringify(a),JSON.stringify(b));assert.equal(a.questions.length,25);assert.equal(new Set(a.questions.map(q=>q.familyKey)).size,25);for(const q of a.questions){assert.equal(q.choices.length,3);assert.equal(q.choices[q.answer],'b');}assert.equal(JSON.stringify(input),before)});
+test('duplicate families and malformed cartridges are rejected',()=>{const input=fixture();input[0].data.questions[1].familyId='id0';assert.throws(()=>normalize(input,rng()),/중복/);assert.throws(()=>fromSmq({format:'invalid'}),/SMQ/)});
