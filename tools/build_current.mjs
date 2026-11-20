@@ -41,15 +41,26 @@ for(const name of ['index.html','play.html']){
 }
 pages['arcade.html']=arcade;
 const template=JSON.parse(fs.readFileSync(path.join(source,'BUILD.json'),'utf8'));
-const info={...template,gameVersion:version,testProbe:test,builtAt:new Date().toISOString(),
- files:Object.fromEntries(Object.entries(pages).map(([n,t])=>[n,{bytes:Buffer.byteLength(t),sha256:hash(t)}]))};
+// Hash the exact bytes served, including every external module and cartridge.
+const artifacts = production.map(name => {
+ const bytes = Object.hasOwn(pages,name) ? Buffer.from(pages[name]) : fs.readFileSync(path.join(source,name));
+ return [name, {bytes:bytes.length, sha256:hash(bytes)}];
+});
+const info = {...template, gameVersion:version, testProbe:test, builtAt:new Date().toISOString(),
+ files:Object.fromEntries(artifacts)};
 if(fs.existsSync(output)){
- const expected=new Set([...production,'BUILD.json']);
- const existing=paths(output);
- if(!existing.includes('BUILD.json')||existing.some(name=>!expected.has(name)))
-  throw Error('출력 폴더에 예상하지 못한 파일이 있어 삭제를 중단합니다.');
- const previous=JSON.parse(fs.readFileSync(path.join(output,'BUILD.json'),'utf8'));
+ const existing = paths(output);
+ if(!existing.includes('BUILD.json'))throw Error('빌드 정보가 없는 폴더를 보존합니다.');
+ const previous = JSON.parse(fs.readFileSync(path.join(output,'BUILD.json'),'utf8'));
  if(previous.testProbe!==test)throw Error('다른 종류의 빌드 출력이므로 삭제를 중단합니다.');
+ const expected = new Set([...production,'BUILD.json']);
+ for(const name of existing){
+  if(expected.has(name))continue;
+  const recorded = previous.files?.[name];
+  const bytes = fs.readFileSync(path.join(output,name));
+  if(!recorded || recorded.bytes!==bytes.length || recorded.sha256!==hash(bytes))
+   throw Error('출력 폴더의 예기치 않거나 수정된 파일을 보존합니다: '+name);
+ }
 }
 fs.rmSync(output,{recursive:true,force:true});
 fs.mkdirSync(output,{recursive:true});
