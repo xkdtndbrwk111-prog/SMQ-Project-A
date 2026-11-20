@@ -6,13 +6,20 @@ import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..');
+const build=process.env.HOJA_BUILD||'legacy';
+if(!['legacy','current'].includes(build))throw Error('Unknown HOJA_BUILD: '+build);
+const prodDir=build==='current'?'dist-current':'dist';
+const testDir=build==='current'?'dist-current-test':'dist-test';
+const mode=process.env.HOJA_TEST_ONLY;
+if(mode&&!['network','replay','settlement','explore'].includes(mode))throw Error('Unknown HOJA_TEST_ONLY: '+mode);
 const resultDir=path.join(root,'verification/phase2/harness/results');
 await mkdir(resultDir,{recursive:true});
 const server=createServer(async(req,res)=>{
   try {
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+    if(![`/${prodDir}/`,`/${testDir}/`].some(prefix=>pathname.startsWith(prefix)))throw Error('unsupported root');
     const resolved=path.resolve(root,'.'+pathname);
-    if(!resolved.startsWith(root+path.sep)) throw Error('bad path');
+    if(![prodDir,testDir].some(d=>resolved===path.join(root,d)||resolved.startsWith(path.join(root,d)+path.sep)))throw Error('bad path');
     const file=pathname.endsWith('/')?path.join(resolved,'index.html'):resolved;
     const buf=await readFile(file);
     res.setHeader('Content-Type',file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.js')?'text/javascript':file.endsWith('.json')?'application/json':'application/octet-stream');
@@ -25,8 +32,8 @@ const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/A
 const output={};
 const deny=/(firebase|firestore|googleapis\.com\/.*(?:firestore|identitytoolkit)|script\.google\.com|script\.googleusercontent\.com)/i;
 async function track(page){
-  const requests=[];page.on('request',r=>requests.push({method:r.method(),url:r.url(),type:r.resourceType()}));
-  const responses=[];page.on('response',r=>responses.push({url:r.url(),status:r.status()}));
+  const requests=[],byRequest=new Map();page.on('request',r=>{const record={method:r.method(),url:r.url(),type:r.resourceType(),status:null};requests.push(record);byRequest.set(r,record)});
+  const responses=[];page.on('response',r=>{responses.push({url:r.url(),status:r.status()});const record=byRequest.get(r.request());if(record)record.status=r.status()});
   const failures=[];page.on('requestfailed',r=>failures.push({url:r.url(),error:r.failure()?.errorText}));
   const errors=[];page.on('pageerror',e=>errors.push(String(e)));
   return {requests,responses,failures,errors};
@@ -39,7 +46,7 @@ async function sceneReady(page){
  catch(e){output.sceneDiagnostic=await frame.evaluate(()=>({boot:document.querySelector('#bootStatus')?.textContent,phaser:typeof window.Phaser,app:!!window.HOJA_PHASER_APP,scene:!!window.HOJA_PHASER_APP?.scene(),body:document.body.innerText.slice(0,1000)}));throw e;}
 }
 async function teacher(page){
- await page.goto(base+'/dist/',{waitUntil:'load'});
+ await page.goto(base+'/'+prodDir+'/',{waitUntil:'load'});
  const intro=page.locator('#frame');for(let i=0;i<3;i++)await intro.click();
  await page.getByRole('button',{name:'5학년'}).click();
  await page.getByRole('button',{name:'사회 2개 카트리지'}).click();
@@ -52,27 +59,32 @@ async function teacher(page){
  await page.locator('#hojaQrClose').click();
  await page.getByRole('button',{name:/바로 플레이/}).click();
  await sceneReady(page);
+ await new Promise(resolve=>setTimeout(resolve,500));
  return qr;
 }
 async function network(){
- const context=await browser.newContext();
- const t=await context.newPage();const ta=await track(t);
+ const teacherContext=await browser.newContext();
+ const t=await teacherContext.newPage();const ta=await track(t);
  output.network={teacher:ta};
  const qr=await teacher(t);
- await t.close();
- const s=await context.newPage();const sa=await track(s);
+ await teacherContext.close();
+ const studentContext=await browser.newContext();
+ const s=await studentContext.newPage();const sa=await track(s);
  output.network.student=sa;
  await s.goto(qr,{waitUntil:'domcontentloaded',timeout:60000});
  await s.locator('#hojaStudentStart:not([disabled])').click({timeout:30000});
  await sceneReady(s);
+ await new Promise(resolve=>setTimeout(resolve,500));
  for(const [label,data] of [['teacher',ta],['student',sa]]){
    assert.equal(data.requests.filter(r=>deny.test(r.url)).length,0,`${label} forbidden requests`);
    assert.equal(data.requests.filter(r=>!r.url.startsWith(base+'/')&&!r.url.startsWith('https://cdn.jsdelivr.net/')).length,0,`${label} unexpected external requests`);
    assert.equal(data.failures.length,0,`${label} request failures`);
    assert.equal(data.errors.length,0,`${label} page errors: ${data.errors}`);
+   assert.ok(data.requests.length>0,`${label} no requests captured`);
+   assert.deepEqual(data.requests.filter(r=>r.status===null||r.status<200||r.status>=300),[],`${label} non-2xx or missing HTTP response`);
  }
  output.network={teacher:ta,student:sa};
- await context.close();
+ await studentContext.close();
  console.log('PASS network: teacher single and generated student QR');
 }
 async function replay(mode='replay'){
@@ -88,9 +100,9 @@ async function replay(mode='replay'){
  const page=await context.newPage();
  await page.clock.install({time:new Date('2024-01-01T00:00:00Z')});
  await page.clock.pauseAt(new Date('2024-01-01T00:00:00Z'));
- const info=JSON.parse(await readFile(path.join(root,'dist-test/BUILD.json')));
+ const info=JSON.parse(await readFile(path.join(root,testDir,'BUILD.json')));
  const params=new URLSearchParams({m:'s',c:'test-joseon-a',cv:'19065b1d0fc5',gv:info.gameVersion,s:'spring'});
- await page.goto(`${base}/dist-test/play.html?${params}`,{waitUntil:'load'});
+ await page.goto(`${base}/${testDir}/play.html?${params}`,{waitUntil:'load'});
  await page.locator('#hojaStudentStart:not([disabled])').click({timeout:30000});
  let frame;
  for(let i=0;i<100;i++){
@@ -174,8 +186,9 @@ async function replay(mode='replay'){
 }
 async function deterministic(){
  const a=await replay();const b=await replay();output.replay={a,b};
- // Preserve raw values; normalize only sub-micro-unit floating-point noise for comparison.
- const normalize=x=>typeof x==='number'?Math.round(x*1e6)/1e6:Array.isArray(x)?x.map(normalize):x&&typeof x==='object'?Object.fromEntries(Object.entries(x).map(([k,v])=>[k,normalize(v)])):x;
+ // Only player/enemy coordinates and velocities are rounded; all events, scores,
+ // answer fields and times are compared exactly. Raw values remain in results.
+ const normalize=(x,p='')=>typeof x==='number'&&/\/(?:player|enemies\/\d+)\/(?:x|y|vx|vy)$/.test(p)?Math.round(x*1e6)/1e6:Array.isArray(x)?x.map((v,i)=>normalize(v,`${p}/${i}`)):x&&typeof x==='object'?Object.fromEntries(Object.entries(x).map(([k,v])=>[k,normalize(v,`${p}/${k}`)])):x;
  if(JSON.stringify(normalize(a))!==JSON.stringify(normalize(b)))throw Error('Replay mismatch: see results/last-run.json');
  assert.equal(a[0].seed,314159);
  assert.ok(a.find(s=>s.label==='stop').player.x>a[0].player.x+10,'right input moved player');
@@ -192,5 +205,5 @@ async function natural(){
  assert.ok(result.reason==='finish'&&result.visited.length===5,'natural 5-map finish not reached within bound');
 }
 async function settlement(){output.settlement=await replay('settlement');console.log('PASS induced finish, fruit, duplicate settlement, review and ranking');}
-try {const mode=process.env.HOJA_TEST_ONLY;if(!mode||mode==='network')await network();if(!mode||mode==='replay')await deterministic();if(mode==='explore')await natural();if(!mode||mode==='settlement')await settlement();}
+try {if(!mode||mode==='network')await network();if(!mode||mode==='replay')await deterministic();if(mode==='explore')await natural();if(!mode||mode==='settlement')await settlement();}
 finally {await writeFile(path.join(resultDir,'last-run.json'),JSON.stringify(output,null,2));await browser.close();await new Promise(r=>server.close(r));}

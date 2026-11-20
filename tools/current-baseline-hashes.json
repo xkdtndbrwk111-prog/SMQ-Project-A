@@ -1,0 +1,15 @@
+{
+  "gameVersion": "9fa20fcd03",
+  "files": {
+    "arcade.html": "a1c1626ad9e7ae2b8b3d71f79b7f132bfe87675d23eaac07b5449a5cac11a754",
+    "cartridges/catalog.json": "9e0860d19f221cd02cffbf3013ba09757b250a13e4d7ea1e468a275041a3d88c",
+    "cartridges/test-joseon-a.json": "19065b1d0fc527289df15023284c3dbca5ae26e44448ec0e5c57909819aaa69b",
+    "cartridges/test-joseon-b.json": "f3b20fa250ea29d0aad5f0a77e6711ae24f7521ea4886699788fad5da8d9664e",
+    "index.html": "0ea6efbf63989f7987b624003b432d5e63b2ed1984bf3f472d4791ef3ebb5ecc",
+    "js/student.js": "3831691f4c4e7d81fd17c4ed945814b2e5fe14d0d7b40d670cb1e0e3aa7b067d",
+    "js/teacher_qr.js": "bedaa4bb35278453526bb5f937b5734a8714e3ae2fac263b20700939c360567a",
+    "play.html": "255a7f6604052f521cab9a69fa79252498b8f661df1a97f59ff63d1028c37455",
+    "vendor/README.md": "1d74c67b90500e3ac9dbf4fe1c85062db38c4c1789b844881162577984a6f46d",
+    "vendor/qrcode.js": "18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780"
+  }
+}

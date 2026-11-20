@@ -1,4 +1,20 @@
-# HOJA QUIZ 2.0 — Project A (current source)
+# HOJA QUIZ — Project A
+
+## 신규 웹 개발 정본 (Phase 2B)
+
+신규 웹게임의 직접 개발 소스는 `web/current/`이다. `index.html`(교사), `play.html`(학생), `arcade.html`(게임), `js/`, `cartridges/`, `vendor/`를 포함한다. 공통 내용이 현재 두 HTML에 중복되어 있으므로 양쪽을 함께 확인한다. 기능별 모듈 분리는 이후 단계다.
+
+```sh
+node tools/build_current.mjs                  # 배포용 dist-current/
+HOJA_TEST_PROBE=1 node tools/build_current.mjs # 시험 전용 dist-current-test/ (배포 금지)
+node tools/build_web.mjs                      # 복구·비교용 기존 dist/
+node tools/compare_builds.mjs                 # 기준 전환 시점의 두 빌드 비교
+node tools/check_web.mjs dist-current
+```
+
+기존 `versions/`, `legacy/`, `tools/web_patches/`, `tools/build_web.mjs` 및 Phase 1 기준 해시를 복구·비교용으로 보존한다. 소스 파일을 바꾼 뒤에는 기존 기준판과 다르므로 비교 명령이 실패하는 것이 정상이며, 게임 버전이 변경된다. 시험 전용 훅은 빌드 때만 주입한다. 자세한 시험과 제약은 `verification/phase2b/PHASE2B.md`를 참조한다.
+
+## 보존된 GAS 원본
 
 **2026-11-20 기준 사용자 제공 최신 버그 수정 소스 하나만 유지합니다.** GitHub 소스 갱신은 Google Apps Script 자동 배포가 아닙니다.
 

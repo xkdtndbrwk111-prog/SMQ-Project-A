@@ -1,0 +1,129 @@
+{
+  "before": {
+    "metrics": {
+      "found": 2,
+      "usedFamilies": 2,
+      "answered": 2,
+      "correct": 1,
+      "wrong": 1,
+      "quizPoints": 10,
+      "score": 63,
+      "flowers": 1,
+      "flowerBonus": 5,
+      "timeBonus": 48,
+      "otherPoints": 0,
+      "remainingSeconds": 597
+    },
+    "records": [
+      {
+        "order": 1,
+        "cartridge": "5-사회-조선 시대의 유교 문화 (시험 A)",
+        "familyId": "q_0009",
+        "type": "MC",
+        "question": "토지와 곡식의 신에게 제사를 지내던 곳은 어디입니까?",
+        "choices": [
+          "성균관",
+          "사직단",
+          "경복궁"
+        ],
+        "answerIndex": 1,
+        "answerText": "사직단",
+        "chosenIndex": 1,
+        "chosenText": "사직단",
+        "correct": true,
+        "timedOut": false,
+        "ms": 400
+      },
+      {
+        "order": 2,
+        "cartridge": "5-사회-조선 시대의 유교 문화 (시험 A)",
+        "familyId": "q_0019",
+        "type": "MC",
+        "question": "의학·법률·통역 등 전문적인 일을 한 신분은 무엇입니까?",
+        "choices": [
+          "중인",
+          "상민",
+          "천민"
+        ],
+        "answerIndex": 0,
+        "answerText": "중인",
+        "chosenIndex": 1,
+        "chosenText": "상민",
+        "correct": false,
+        "timedOut": false,
+        "ms": 400
+      }
+    ]
+  },
+  "after": {
+    "metrics": {
+      "found": 2,
+      "usedFamilies": 2,
+      "answered": 2,
+      "correct": 1,
+      "wrong": 1,
+      "quizPoints": 10,
+      "score": 63,
+      "flowers": 1,
+      "flowerBonus": 5,
+      "timeBonus": 48,
+      "otherPoints": 0,
+      "remainingSeconds": 597
+    },
+    "records": [
+      {
+        "order": 1,
+        "cartridge": "5-사회-조선 시대의 유교 문화 (시험 A)",
+        "familyId": "q_0009",
+        "type": "MC",
+        "question": "토지와 곡식의 신에게 제사를 지내던 곳은 어디입니까?",
+        "choices": [
+          "성균관",
+          "사직단",
+          "경복궁"
+        ],
+        "answerIndex": 1,
+        "answerText": "사직단",
+        "chosenIndex": 1,
+        "chosenText": "사직단",
+        "correct": true,
+        "timedOut": false,
+        "ms": 400
+      },
+      {
+        "order": 2,
+        "cartridge": "5-사회-조선 시대의 유교 문화 (시험 A)",
+        "familyId": "q_0019",
+        "type": "MC",
+        "question": "의학·법률·통역 등 전문적인 일을 한 신분은 무엇입니까?",
+        "choices": [
+          "중인",
+          "상민",
+          "천민"
+        ],
+        "answerIndex": 0,
+        "answerText": "중인",
+        "chosenIndex": 1,
+        "chosenText": "상민",
+        "correct": false,
+        "timedOut": false,
+        "ms": 400
+      }
+    ]
+  },
+  "repeat": {
+    "found": 2,
+    "usedFamilies": 2,
+    "answered": 2,
+    "correct": 1,
+    "wrong": 1,
+    "quizPoints": 10,
+    "score": 63,
+    "flowers": 1,
+    "flowerBonus": 5,
+    "timeBonus": 48,
+    "otherPoints": 0,
+    "remainingSeconds": 597
+  },
+  "rank": "HOJA · ADVENTURE\nHIGH SCORE\nYOUR SCORE\nFINISH\n000063\n물음표 2/25\n정답 1\n남은 시간 597초\n\nENTER YOUR NAME\n\n확인 ▶\n\n한글·영문·숫자 2~6자를 입력하세요.\n\n이 카트리지의 HIGH SCORE 기록\n\n결과 화면\n다시 시작"
+}

@@ -1,0 +1,168 @@
+{
+  "teacher": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/",
+        "type": "document",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/vendor/qrcode.js",
+        "type": "script",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/js/teacher_qr.js",
+        "type": "script",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/catalog.json",
+        "type": "fetch",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/test-joseon-a.json",
+        "type": "fetch",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/arcade.html?season=spring",
+        "type": "document",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script",
+        "status": 200
+      }
+    ],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/js/teacher_qr.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/vendor/qrcode.js",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/catalog.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/test-joseon-a.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/arcade.html?season=spring",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      }
+    ],
+    "failures": [],
+    "errors": []
+  },
+  "student": {
+    "requests": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=9fa20fcd03&s=spring",
+        "type": "document",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/js/student.js",
+        "type": "script",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/catalog.json",
+        "type": "fetch",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/test-joseon-a.json",
+        "type": "fetch",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:<port>/dist-current/arcade.html?season=spring",
+        "type": "document",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "type": "script",
+        "status": 200
+      }
+    ],
+    "responses": [
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=9fa20fcd03&s=spring",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/js/student.js",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/catalog.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/cartridges/test-joseon-a.json",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:<port>/dist-current/arcade.html?season=spring",
+        "status": 200
+      },
+      {
+        "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+        "status": 200
+      }
+    ],
+    "failures": [],
+    "errors": []
+  }
+}

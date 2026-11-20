@@ -7,3 +7,6 @@ __pycache__/
 
 /verification/phase2/harness/node_modules/
 /verification/phase2/harness/results/
+
+/dist-current/
+/dist-current-test/

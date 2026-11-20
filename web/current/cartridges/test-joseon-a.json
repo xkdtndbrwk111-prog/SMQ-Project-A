@@ -1,0 +1,416 @@
+{
+ "questionSchemaVersion": 2,
+ "sourceSheetVersion": 2,
+ "cartridgeId": "test-joseon-a",
+ "questions": [
+  {
+   "num": 1,
+   "sourceNum": 1,
+   "familyId": "q_0001",
+   "familyOrder": 1,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "고려 말에는 외적의 침입이 잦고, 일부 지배층이 백성의 땅을 빼앗아 백성의 생활이 어려웠다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 2,
+   "sourceNum": 2,
+   "familyId": "q_0002",
+   "familyOrder": 2,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "고려 말 성리학을 공부하고 과거를 보아 관리가 된 정치 세력을 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "신진 사대부",
+    "권문세족",
+    "호족",
+    "6두품"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 3,
+   "sourceNum": 3,
+   "familyId": "q_0003",
+   "familyOrder": 3,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "이성계와 신진 사대부는 힘을 합쳐 고려 사회를 개혁하려고 하였다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 4,
+   "sourceNum": 4,
+   "familyId": "q_0004",
+   "familyOrder": 4,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "이성계가 위화도에서 군대를 돌린 사건을 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "위화도 회군",
+    "귀주 대첩",
+    "행주 대첩",
+    "정묘호란"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 5,
+   "sourceNum": 5,
+   "familyId": "q_0005",
+   "familyOrder": 5,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선이 세워진 해는 언제입니까?",
+   "answer": "1",
+   "options": [
+    "1392년",
+    "918년",
+    "1592년",
+    "1636년"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 6,
+   "sourceNum": 6,
+   "familyId": "q_0006",
+   "familyOrder": 6,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "태조가 조선의 수도로 옮긴 곳은 어디입니까?",
+   "answer": "1",
+   "options": [
+    "한양",
+    "개경",
+    "평양",
+    "부여"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 7,
+   "sourceNum": 7,
+   "familyId": "q_0007",
+   "familyOrder": 7,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "한양은 큰 강이 없어 교통이 불편했지만, 방어에 유리하여 수도가 되었다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 8,
+   "sourceNum": 8,
+   "familyId": "q_0008",
+   "familyOrder": 8,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "한양의 주요 건물과 성문 배치에 영향을 준 사상은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "유교 사상",
+    "불교 사상",
+    "도교 사상",
+    "천주교 사상"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 9,
+   "sourceNum": 9,
+   "familyId": "q_0009",
+   "familyOrder": 9,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "토지와 곡식의 신에게 제사를 지내던 곳은 어디입니까?",
+   "answer": "1",
+   "options": [
+    "사직단",
+    "종묘",
+    "경복궁",
+    "성균관"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 10,
+   "sourceNum": 10,
+   "familyId": "q_0010",
+   "familyOrder": 10,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "역대 왕과 왕비의 위패를 모시고 제사를 지내던 곳은 어디입니까?",
+   "answer": "1",
+   "options": [
+    "종묘",
+    "사직단",
+    "향교",
+    "서당"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 11,
+   "sourceNum": 11,
+   "familyId": "q_0011",
+   "familyOrder": 11,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "호패는 16세 이상의 여자가 신분을 나타내려고 지니고 다닌 패이다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 12,
+   "sourceNum": 12,
+   "familyId": "q_0012",
+   "familyOrder": 12,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선은 전국을 몇 개의 도로 나누었습니까?",
+   "answer": "1",
+   "options": [
+    "8도",
+    "4도",
+    "6도",
+    "12도"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 13,
+   "sourceNum": 13,
+   "familyId": "q_0013",
+   "familyOrder": 13,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "성종 때 완성한 조선의 기본 법전은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "경국대전",
+    "삼강행실도",
+    "농사직설",
+    "훈민정음"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 14,
+   "sourceNum": 14,
+   "familyId": "q_0014",
+   "familyOrder": 14,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "세종 때 북방에 개척한 지역을 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "4군 6진",
+    "강동 6주",
+    "동북 9성",
+    "한강 유역"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 15,
+   "sourceNum": 15,
+   "familyId": "q_0015",
+   "familyOrder": 15,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "조선은 한양에 성균관을, 지방에 향교를 두어 유교를 가르쳤다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 16,
+   "sourceNum": 16,
+   "familyId": "q_0016",
+   "familyOrder": 16,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선 시대 어린 학생들이 주로 공부하던 곳은 어디입니까?",
+   "answer": "1",
+   "options": [
+    "서당",
+    "벽란도",
+    "사직단",
+    "종묘"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 17,
+   "sourceNum": 17,
+   "familyId": "q_0017",
+   "familyOrder": 17,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선 시대 사람들의 신분 네 가지를 바르게 묶은 것은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "양반·중인·상민·천민",
+    "왕족·귀족·평민·노비",
+    "양인·중인·호족·천민",
+    "관리·농민·상인·승려"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 18,
+   "sourceNum": 18,
+   "familyId": "q_0018",
+   "familyOrder": 18,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "양반은 유교 경전을 공부하거나 관리가 되어 나랏일에 참여하였다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 19,
+   "sourceNum": 19,
+   "familyId": "q_0019",
+   "familyOrder": 19,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "의학·법률·통역 등 전문적인 일을 한 신분은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "중인",
+    "양반",
+    "상민",
+    "천민"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 20,
+   "sourceNum": 20,
+   "familyId": "q_0020",
+   "familyOrder": 20,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "상민은 세금과 군역을 내지 않아도 되는 신분이었다.",
+   "answer": "X",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 21,
+   "sourceNum": 21,
+   "familyId": "q_0021",
+   "familyOrder": 21,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선 시대 가장 낮은 신분은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "천민",
+    "양반",
+    "중인",
+    "상민"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 22,
+   "sourceNum": 22,
+   "familyId": "q_0022",
+   "familyOrder": 22,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "조선이 나라의 기본 정신으로 삼은 사상은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "유교",
+    "불교",
+    "도교",
+    "천주교"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 23,
+   "sourceNum": 23,
+   "familyId": "q_0023",
+   "familyOrder": 23,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "유교의 가르침을 글과 그림으로 설명한 책은 무엇입니까?",
+   "answer": "1",
+   "options": [
+    "삼강행실도",
+    "경국대전",
+    "농사직설",
+    "직지심체요절"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 24,
+   "sourceNum": 24,
+   "familyId": "q_0024",
+   "familyOrder": 24,
+   "variantType": "ox",
+   "type": "OX",
+   "question": "조선은 유교 가르침을 잘 실천한 사람을 찾아 상을 주었다.",
+   "answer": "O",
+   "options": [
+    "O",
+    "X"
+   ],
+   "isNull": false
+  },
+  {
+   "num": 25,
+   "sourceNum": 25,
+   "familyId": "q_0025",
+   "familyOrder": 25,
+   "variantType": "multiple",
+   "type": "MULTIPLE",
+   "question": "관례·혼례·상례·제례를 합쳐 무엇이라고 합니까?",
+   "answer": "1",
+   "options": [
+    "관혼상제",
+    "과거제",
+    "골품제",
+    "호패법"
+   ],
+   "isNull": false
+  }
+ ]
+}

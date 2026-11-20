@@ -1,0 +1,29 @@
+{
+ "about": "HOJA 내장 카트리지 목록 (Phase 1). name은 기존 카탈로그 화면의 이름 규칙(학년-과목-단원)을 따른다. version은 카트리지 파일 내용의 SHA-256 앞 12자리: QR이 담은 버전과 다르면 학생 화면이 접속을 막는다. test: true는 시험 카트리지(마리오 2.0 시험판 문제 50개를 둘로 나눈 것).",
+ "cartridges": [
+  {
+   "id": "test-joseon-a",
+   "name": "5-사회-조선 시대의 유교 문화 (시험 A)",
+   "grade": 5,
+   "semester": 2,
+   "subject": "사회",
+   "unit": "조선 시대의 유교 문화 (시험 A)",
+   "count": 25,
+   "path": "cartridges/test-joseon-a.json",
+   "version": "19065b1d0fc5",
+   "test": true
+  },
+  {
+   "id": "test-joseon-b",
+   "name": "5-사회-조선 시대의 유교 문화 (시험 B)",
+   "grade": 5,
+   "semester": 2,
+   "subject": "사회",
+   "unit": "조선 시대의 유교 문화 (시험 B)",
+   "count": 25,
+   "path": "cartridges/test-joseon-b.json",
+   "version": "f3b20fa250ea",
+   "test": true
+  }
+ ]
+}

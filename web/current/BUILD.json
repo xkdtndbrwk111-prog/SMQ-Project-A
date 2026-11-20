@@ -1,0 +1,70 @@
+{
+ "gameVersion": "9fa20fcd03",
+ "testProbe": false,
+ "builtAt": "2026-11-20T08:48:38.579Z",
+ "source": "4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6",
+ "patches": [
+  {
+   "file": "01_remove_team.mjs",
+   "title": "팀전 제거"
+  },
+  {
+   "file": "02_remove_private.mjs",
+   "title": "개인 카트리지 제거"
+  },
+  {
+   "file": "03_remove_tutorial_gate.mjs",
+   "title": "튜토리얼 및 강제 실행 관문 제거"
+  },
+  {
+   "file": "04_remove_tutorial_resources.mjs",
+   "title": "튜토리얼 전용 리소스 제거"
+  },
+  {
+   "file": "05_help.mjs",
+   "title": "H 도움말 (H 키, 키 배치 그림, HUD 안내)"
+  },
+  {
+   "file": "06_builtin_cartridges.mjs",
+   "title": "내장 카트리지 연결"
+  },
+  {
+   "file": "07_single_qr.mjs",
+   "title": "싱글 QR 진입 구조 (교사 화면: 모드 2개 + 학생 QR)"
+  },
+  {
+   "file": "08_student_ui.mjs",
+   "title": "학생용 인터페이스 분리 (play.html)"
+  },
+  {
+   "file": "09_disable_dev.mjs",
+   "title": "개발용 조작 기능 비활성화"
+  },
+  {
+   "file": "10_keyboard.mjs",
+   "title": "키보드 조작 통일 (A·D·W·S·쉼표·마침표·H·Enter, code 기반)"
+  },
+  {
+   "file": "11_review.mjs",
+   "title": "문항별 응답 기록 + 개인 오답 풀이"
+  },
+  {
+   "file": "12_cleanup.mjs",
+   "title": "잔존 코드 정리"
+  }
+ ],
+ "files": {
+  "index.html": {
+   "bytes": 3329018,
+   "sha256": "0ea6efbf63989f7987b624003b432d5e63b2ed1984bf3f472d4791ef3ebb5ecc"
+  },
+  "play.html": {
+   "bytes": 3328973,
+   "sha256": "255a7f6604052f521cab9a69fa79252498b8f661df1a97f59ff63d1028c37455"
+  },
+  "arcade.html": {
+   "bytes": 1970840,
+   "sha256": "a1c1626ad9e7ae2b8b3d71f79b7f132bfe87675d23eaac07b5449a5cac11a754"
+  }
+ }
+}
