@@ -1349,6 +1349,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/world/surface-generator.js"></script>
 <script src="js/arcade-host.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/physics.js"></script>
 <script src="js/keyboard.js"></script>
 <script src="js/quiz-normalizer.js"></script>
 <script src="js/run-record.js"></script>
@@ -1826,50 +1827,14 @@ function measureLogicalViewport(){
   const r=el.getBoundingClientRect();
   return {...computeLogicalViewport(r.width,r.height),cssW:r.width,cssH:r.height};
 }
-const P_CFG={
-  walkTop:4.2*60,
-  runTop:7.2*60,
-  accel:0.22*3600,
-  decel:0.264*3600,
-  skid:0.55*3600,
-  airAccel:0.16*3600,
-  jumpHeight:140,
-  runJumpBonus:0.12,
-  gravityUp:(2*140/(24*24))*3600,
-  gravityDown:(2*140/(24*24))*1.7*3600,
-  maxFall:13*60,
-  cutMul:0.45
-};
-// R3.15: moving-platform side contact is distinct from commanded movement.
-// Physics may alternate velocity 0 / input speed while a platform presses
-// against Hoja; visuals must not restart IDLE/WALK/BRAKE on each tick.
-const HOJA_PLATFORM_PRESS_GRACE_MS=135;
-const HOJA_PLATFORM_GROUNDED_GRACE_MS=150;
-function hojaMovingPlatformContactSide(player,platform){
-  const a=player?.body,b=platform?.body;
-  if(!a||!b)return 0;
-  const verticalOverlap=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);
-  if(verticalOverlap<=4)return 0; // standing on top is NOT side pressure
-  // Contact flags may also be set by nearby world solids, so both
-  // the side flags AND the corresponding platform edge must agree.
-  const edgeTolerance=5;
-  if(Math.abs(a.right-b.left)<=edgeTolerance&&
-     (a.touching?.right||b.touching?.left))return 1;
-  if(Math.abs(a.left-b.right)<=edgeTolerance&&
-     (a.touching?.left||b.touching?.right))return -1;
-  return 0;
-}
-function hojaPressedAgainstMovingPlatform(contact,time,dir){
-  if(!contact||dir===0||contact.side!==dir)return false;
-  const age=time-contact.at;
-  return age>=0&&age<=HOJA_PLATFORM_PRESS_GRACE_MS;
-}
+const { P_CFG, STRONG, HOJA_PLATFORM_GROUNDED_GRACE_MS, hojaMovingPlatformContactSide,
+    hojaPressedAgainstMovingPlatform, overlapBodies, landsOnPlatform, isStomp,
+    applyHorizontalMotion, applyVerticalMotion } = window.HOJA_CREATE_PHYSICS(TILE);
 function hojaGroundAnimationForSpeed(speed,run,pushing,happy,walkTop){
   if(pushing)return 'hoja-walk';
   return speed<20?'hoja-idle':
     (run&&speed>walkTop*.8?'hoja-run':'hoja-walk');
 }
-const STRONG={dropSpeed:11.5*60, shockRadius:8*TILE, verticalRange:2*TILE};
 const CLEAR_CFG={
   firstHopDelayMs:12*(1000/60),
   hopVy:-4.8*60,
@@ -1880,11 +1845,6 @@ const CLEAR_CFG={
   autoAdvanceMs:6500
 };
 
-function approach(current,target,maxDelta){
-  if(current<target)return Math.min(current+maxDelta,target);
-  if(current>target)return Math.max(current-maxDelta,target);
-  return target;
-}
 
 // V0.61 INPUT FIX1: edge-based, direction-specific double-tap running.
 // The second press starts running; holding that press sustains it.
@@ -2915,9 +2875,6 @@ function standingSurfaceBelow(x,startY){
   }
 
   return best===null?startY:best;
-}
-function overlapBodies(a,b){
-  return a.right>b.left&&a.left<b.right&&a.bottom>b.top&&a.top<b.bottom;
 }
 
 // Highest real ground top under x (ignores one-way platforms). Used for
@@ -4097,23 +4054,12 @@ class HojaScene extends Phaser.Scene{
     }
   }
 
-  playerOneWayProcess(playerObj,platformObj){
-    const pb=playerObj.body;
-    const top=platformObj.body.top;
-
-    // Semisolid rule:
-    // - moving upward: pass through
-    // - entering from either side: pass through
-    // - descending from above: stand on the grass top
-    const prevBottom=(pb.prev?.y ?? pb.y)+pb.height;
-    return pb.velocity.y>=0 && prevBottom<=top+7;
+  playerOneWayProcess(player, platform) {
+    return landsOnPlatform(player, platform);
   }
 
-  enemyOneWayProcess(enemyObj,platformObj){
-    const eb=enemyObj.body;
-    const top=platformObj.body.top;
-    const prevBottom=(eb.prev?.y ?? eb.y)+eb.height;
-    return eb.velocity.y>=0 && prevBottom<=top+7;
+  enemyOneWayProcess(enemy, platform) {
+    return landsOnPlatform(enemy, platform);
   }
 
   createMovingPlatforms(){
@@ -6920,35 +6866,7 @@ class HojaScene extends Phaser.Scene{
     this.idleZoomActive=!cameraMotion&&grounded&&
       time-this.lastMoveInputAt>=2500&&!this.dying&&!this.clear;
 
-    const onIce=grounded&&this.isOnIce();
-    if(!this.strongStomp){
-      const top=run?P_CFG.runTop:P_CFG.walkTop;
-      const movingBefore=b.velocity.x;
-      const target=(sitIntent||this.hojaIsSitting)?0:dir*top;
-      let accel=grounded?P_CFG.accel:P_CFG.airAccel;
-      if(dir===0)accel=P_CFG.decel;
-      else if(Math.sign(b.velocity.x)&&Math.sign(b.velocity.x)!==dir)accel=P_CFG.skid;
-      // V0.21 ice: slow to start, long glide to stop, sluggish turn-around.
-      if(onIce)accel*=(dir===0?0.4:(Math.sign(b.velocity.x)&&Math.sign(b.velocity.x)!==dir?0.4:0.6));
-      b.setVelocityX(approach(b.velocity.x,target,accel*dt));
-      if(sitIntent||this.hojaIsSitting)b.setVelocityX(0);
-      if(dir&&!sitIntent&&!this.hojaIsSitting)this.facing=dir;
-      if(!dir&&grounded&&Math.abs(b.velocity.x)<20)b.setVelocityX(0);
-      // Show the supplied 'break' pose only during a fast grounded reversal.
-      // Continue until horizontal momentum changes sign or the key is released.
-      const reversing=grounded&&!this._hojaPressingMovingPlatform&&
-        !sitIntent&&!this.hojaIsSitting&&dir!==0&&
-        Math.sign(movingBefore)===-dir;
-      if(!reversing)this.hojaBraking=false;
-      else if(Math.abs(movingBefore)>=P_CFG.walkTop*1.05)this.hojaBraking=true;
-      if(this.hojaBraking&&Math.sign(b.velocity.x)!==-dir)this.hojaBraking=false;
-      if(onIce&&Math.abs(b.velocity.x)>110&&(dir===0||Math.sign(b.velocity.x)!==dir)&&time>this.iceFxAt){
-        this.iceFxAt=time+100;
-        this.emitIceShards(this.playerBody.x-Math.sign(b.velocity.x)*14,b.bottom,2);
-      }
-    }else{
-      b.setVelocityX(0);
-    }
+    applyHorizontalMotion(this, dt, time, grounded, dir, run, sitIntent);
 
     // ↑/W at a door enters it instead of jumping (Space/Z always jump).
     // Consume both edges independently: short-circuiting JustDown would
@@ -6967,47 +6885,7 @@ class HojaScene extends Phaser.Scene{
     const spacePressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);
     const zPressed=Phaser.Input.Keyboard.JustDown(this.keys.z);
     const jumpPressed=spacePressed||zPressed; // Phase 1C: W 점프 없음
-    if(jumpPressed&&!this.hojaIsSitting){
-      this.jumpPressedAt=this.time.now;
-      this.jumpBufferAt=this.time.now;
-      // pressed just AFTER a spring / STOMP contact still counts
-      if(this.time.now<=(this.bounceWindowUntil||0)&&b.velocity.y<0)this.superBounce();
-    }
-    const jumpHeld=this.keys.jump.isDown;
-    // V0.57: 120ms jump buffer. A press just before landing still jumps
-    // on touchdown instead of being silently dropped.
-    const jumpBuffered=this.time.now-(this.jumpBufferAt??-1e9)<=120;
-    if(!this.hojaIsSitting&&(jumpPressed||jumpBuffered)&&this.coyoteMs>0&&!this.strongStomp&&!this._jumpConsumedAirborne){
-      this.jumpBufferAt=-1e9;
-      this._jumpConsumedAirborne=true;
-      const ratio=Math.min(1,Math.abs(b.velocity.x)/P_CFG.runTop);
-      const H=P_CFG.jumpHeight*(1+P_CFG.runJumpBonus*ratio);
-      b.setVelocityY(-Math.sqrt(2*P_CFG.gravityUp*H));
-      this.coyoteMs=0;this.jumpCut=false;
-      this.emitDust(this.playerBody.x,b.bottom,4,24);
-      this.squash(.84,1.18,170);
-      SFX.jump();
-    }
-    if(!jumpHeld&&!this.jumpCut&&b.velocity.y<0){
-      b.setVelocityY(b.velocity.y*P_CFG.cutMul);this.jumpCut=true;
-    }
-
-    if(downPressed&&!grounded&&!this.strongStomp){
-      this.strongStomp=true;b.setVelocity(0,STRONG.dropSpeed);b.setAccelerationY(0);
-      // R3.2: no strong-STOMP-only enlargement before the SIT pose.
-      this.restoreHojaUnitScale();
-      this.emitBurst(this.playerBody.x,b.center.y,6,0xdff7ff,.8);
-      SFX.strongStart();
-    }
-
-    if(this.strongStomp){
-      b.setAccelerationY(0);b.setVelocityY(Math.max(b.velocity.y,STRONG.dropSpeed));
-    }else{
-      b.setAccelerationY(b.velocity.y>0?P_CFG.gravityDown:P_CFG.gravityUp);
-    }
-    // Upward limit raised for springs; falling is still capped at maxFall.
-    b.setMaxVelocity(P_CFG.runTop,1100);
-    if(b.velocity.y>P_CFG.maxFall)b.setVelocityY(P_CFG.maxFall);
+    applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
 
     this.updateSecrets(time);
     this.checkHeadImpact(time);
@@ -7993,25 +7871,13 @@ class HojaScene extends Phaser.Scene{
 
   handlePlayerEnemyCollisions(time){
     const pb=this.playerBody.body;
-    const STOMP_X_ASSIST=8;
-    const STOMP_Y_ASSIST=14;
 
     for(const e of this.enemies){
       if(!e.alive)continue;
       const eb=e.bodyObj.body;
 
       const bodyOverlap=overlapBodies(pb,eb);
-      const stompHorizontal=
-        pb.right>=eb.left-STOMP_X_ASSIST &&
-        pb.left<=eb.right+STOMP_X_ASSIST;
-      const stompVertical=
-        pb.bottom>=eb.top-STOMP_Y_ASSIST &&
-        pb.bottom<=eb.center.y+STOMP_Y_ASSIST;
-
-      const stomp=
-        pb.velocity.y>35 &&
-        stompHorizontal &&
-        stompVertical;
+      const stomp=isStomp(pb,eb);
 
       // Stomp assist may resolve just before strict body overlap.
       // Ordinary side/body damage still requires true overlap.
