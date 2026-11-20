@@ -189,137 +189,7 @@ button:hover{background:#426b7f}#elapsed,#status{color:#a9bdc9;font-size:12px}
 }
 .hcPak.isUnit.isLong .hcFace .hcUnitName{font-size:inherit;}
 </style>
-<style id='hojaV051GameOriginalQuizCSS'>
-#hqOverlay{
-display:none;position:absolute;z-index:20;inset:0;background:rgba(4,8,14,.91);place-items:center;padding:2.2%}
-#hqOverlay.active{display:grid}
-#hqCard{width:96%;height:92%;border:3px solid #f1e3b5;border-radius:14px;background:#121922;
-padding:22px 26px;display:flex;flex-direction:column}
-#hqType{font-size:13px;font-weight:800;color:#8de5a9;letter-spacing:.08em}
-#hqQuestion{font-size:clamp(22px,3.3vw,36px);font-weight:850;line-height:1.28;margin:18px 0 20px;flex:1;
-display:flex;align-items:center;justify-content:center;text-align:center}
-#hqChoices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hqChoice{min-height:58px;border:2px solid #617180;background:#24313d;color:#fff;border-radius:10px;
-font-size:clamp(16px,2vw,22px);font-weight:750;padding:10px 14px;cursor:pointer}
-.hqChoice.focus{border-color:#f1e3b5;box-shadow:0 0 0 3px #f1e3b555}
-.hqChoice.correct{border-color:#71db8d;background:#23482f}.hqChoice.wrong{border-color:#ff7c7c;background:#542828}
-#hqFeedback{height:30px;text-align:center;font-size:18px;font-weight:800;margin-top:10px}
-#hqHint{text-align:center;color:#aebdca;font-size:13px;font-weight:700;margin-top:2px;letter-spacing:.04em}
-#hqOverlay{padding:clamp(5px,.8vmin,12px);overflow:hidden}
-#hqCard.hojaQuizDense{
-  box-sizing:border-box;width:100%;height:100%;max-width:100%;max-height:100%;
-  min-height:0;min-width:0;overflow:hidden!important;
-  display:flex;flex-direction:column;
-  padding:clamp(6px,1.1vmin,16px) clamp(8px,1.3vmin,20px);
-  gap:clamp(3px,.5vmin,8px);
-  border-width:clamp(2px,.25vmin,3px);
-}
-#hqCard.hojaQuizDense #hqType{
-  flex:0 0 auto;line-height:1.1;font-size:clamp(12px,1.35vmin,20px);
-  margin:0;min-height:0;
-}
-#hqCard.hojaQuizDense #hqQuestionArea{
-  box-sizing:border-box;flex:var(--hoja-quiz-q-grow,1) 1 0%;
-  min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;
-  overflow:hidden;margin:0;padding:0 clamp(1px,.2vmin,4px);
-}
-#hqCard.hojaQuizDense #hqQuestion{
-  display:block;box-sizing:border-box;width:100%;max-width:100%;flex:none;
-  margin:0;padding:0;min-height:0;height:auto;
-  font-size:var(--hoja-quiz-q-size,64px);
-  line-height:1.1;letter-spacing:-.025em;
-  text-align:center;overflow:visible;
-  white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
-  font-weight:900;text-wrap:balance;
-}
-/* Multiline questions stay centered; balanced wrapping favors TV readability. */
-#hqCard.hojaQuizDense #hqQuestion.hojaQuizMultiline{text-align:center}
-#hqCard.hojaQuizDense #hqChoices{
-  box-sizing:border-box;flex:var(--hoja-quiz-c-grow,1.55) 1 0%;
-  display:grid;grid-template-columns:minmax(0,1fr);
-  grid-template-rows:repeat(3,minmax(0,1fr));
-  gap:clamp(4px,.7vmin,10px);
-  min-width:0;min-height:0;width:100%;margin:0;
-  overflow:hidden;
-}
-#hqCard.hojaQuizDense .hqChoice{
-  box-sizing:border-box;display:grid;grid-template-columns:max-content minmax(0,1fr);
-  column-gap:clamp(9px,1.35vmin,24px);
-  place-items:center;min-width:0;min-height:0;height:100%;width:100%;
-  padding:clamp(3px,.5vmin,10px) clamp(6px,.8vmin,14px);
-  /* Offset the choice numbers by a fraction of the actual card width. */
-  padding-inline-start:var(--hoja-quiz-number-inset,24px);
-  font-size:var(--hoja-quiz-c-size,40px);font-weight:850;
-  line-height:1.08;text-align:center;
-  border-radius:clamp(5px,.75vmin,11px);
-  overflow:hidden;white-space:normal;
-}
-#hqCard.hojaQuizDense .hqChoiceNumber{
-  display:block;font-size:.8em;line-height:1;justify-self:center;color:#ffe38b;
-}
-#hqCard.hojaQuizDense .hqChoiceLabel{
-  display:block;box-sizing:border-box;width:100%;max-width:100%;
-  margin:0;padding:0;font:inherit;text-align:center;
-  line-height:1.08;white-space:normal;word-break:keep-all;overflow-wrap:anywhere;
-}
-#hqCard.hojaQuizDense #hqFeedback{
-  box-sizing:border-box;flex:0 0 clamp(20px,3.6vmin,36px);
-  height:auto;min-height:0;margin:0;text-align:center;
-  font-size:clamp(13px,2.4vmin,27px);line-height:1.1;
-  display:flex;justify-content:center;align-items:center;
-  overflow:hidden;
-}
-#hqCard.hojaQuizDense #hqHint{
-  flex:0 0 auto;margin:0;padding:0;line-height:1.15;
-  font-size:clamp(10px,1.25vmin,15px);
-  text-align:center;white-space:nowrap;overflow:hidden;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"]{
-  --hoja-quiz-q-grow:1.55;--hoja-quiz-c-grow:1;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] #hqChoices{
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  grid-template-rows:minmax(0,1fr);
-  gap:clamp(8px,1.2vmin,18px);
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice{
-  display:flex;align-items:center;justify-content:center;
-  padding:clamp(4px,1vmin,16px);
-  border-width:clamp(2px,.3vmin,4px);
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoiceNumber{display:none}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoiceLabel{
-  width:auto;max-width:100%;text-align:center;
-  font-size:var(--hoja-quiz-ox-size,140px);
-  line-height:1;
-  font-weight:950;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice[data-answer="O"]{
-  background:#173b36;border-color:#55c6a1;color:#98f5d4;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice[data-answer="X"]{
-  background:#482831;border-color:#e48596;color:#ffb9c6;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.focus{
-  box-shadow:inset 0 0 0 2px #fff9d0,0 0 0 3px #f1e3b5;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.correct{
-  background:#23482f;border-color:#71db8d;color:#c6ffe0;
-}
-#hqCard.hojaQuizDense[data-quiz-kind="OX"] .hqChoice.wrong{
-  background:#542828;border-color:#ff7c7c;color:#ffced2;
-}
-@media(max-width:620px){
-  #hqOverlay{position:fixed;inset:0;padding:clamp(4px,1vmin,9px)}
-  #hqCard.hojaQuizDense{
-    width:100%;height:100%;max-height:100%;overflow:hidden!important;
-    padding:clamp(5px,1.4vmin,10px) clamp(6px,1.5vmin,12px);
-  }
-  #hqCard.hojaQuizDense #hqQuestion{margin:0}
-  #hqCard.hojaQuizDense .hqChoice{min-height:0}
-}
-
-</style><style id='hojaV051GameCSS'>
+<style id='hojaV051GameCSS'>
 
 /* STEP 14-1 V0.5.8 isolated game entries; all back buttons align to the original fixed slot. */
 #hojaGamePlay{position:absolute;inset:0;z-index:130;background:#0a1c2b;color:#f5eedc;display:flex;flex-direction:column;align-items:stretch;overflow:hidden}
@@ -329,30 +199,7 @@ font-size:clamp(16px,2vw,22px);font-weight:750;padding:10px 14px;cursor:pointer}
 #hojaGamePlay .hqBack{position:absolute;left:clamp(10px,2.2%,24px);top:clamp(10px,3.1%,22px);z-index:145;background:#14354a;border:2px solid #e5c78c;color:#fff1cc;min-height:42px;min-width:142px;padding:7px 13px;box-shadow:3px 4px 0 #101e2c;font:850 14px system-ui;cursor:pointer}
 #hqArcadeFrame{width:100%;flex:1;min-height:0;border:0;background:#122e3f}
 #hqArcadeInfo{position:absolute;top:65px;right:12px;background:rgba(8,22,33,.85);border:1px solid #bdab7b;border-radius:7px;padding:7px 10px;z-index:132;font-size:12px}
-#hqStage{width:100%;height:calc(100% - 62px);position:relative;overflow:hidden;isolation:isolate;background:#75bafa;touch-action:manipulation}
-#hqBg{position:absolute;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated}
-#hqCharacter{position:absolute;left:50%;bottom:13%;width:min(22%,192px);aspect-ratio:1/1;transform:translateX(-50%);image-rendering:pixelated;z-index:4;pointer-events:none}
-#hqBalloon{position:absolute;left:50%;bottom:calc(13% + min(27%,235px));width:clamp(52px,8.8%,92px);aspect-ratio:1/1;transform:translateX(-50%);z-index:5;background:transparent;border:0;padding:0;cursor:pointer;filter:drop-shadow(0 7px 0 rgba(21,48,65,.36));animation:hqHover 2.1s ease-in-out infinite}
-#hqBalloon img{width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
-@keyframes hqHover{0%,100%{margin-bottom:0}50%{margin-bottom:6px}}
-#hqBalloon:focus-visible{outline:3px solid #ffdc7c;outline-offset:8px}
-#hqStageHelp{position:absolute;left:50%;transform:translateX(-50%);bottom:7px;padding:7px 18px;background:#102838d9;border-radius:9px;text-align:center;color:#fce9aa;z-index:3;font:750 clamp(11px,1.7vw,18px) system-ui;pointer-events:none}
-#hqStats{position:absolute;right:12px;top:12px;z-index:3;border:2px solid #f1d694;background:#102533d9;border-radius:8px;padding:8px 13px;font:800 15px system-ui}
-#hqOverlay{z-index:18!important}
-#hqOverlay[hidden]{display:none!important}
-#hqOverlay:not([hidden]){display:grid}
-#hqCard{color:#f4f5f9;max-width:100%}
-#hqOverlay #hqChoices{display:grid}
-#hqOverlay button.hqChoice{cursor:pointer}
-#hqOverlay .hqChoice.correct{border-color:#71db8d;background:#23482f}
-#hqOverlay .hqChoice.wrong{border-color:#ff7c7c;background:#542828}
-#hqOverlay .hqChoice.focus{border-color:#f1e3b5;box-shadow:0 0 0 3px #f1e3b555}
-#hqOverlay #hqQuestion{color:#fff}
-#hqOverlay #hqType{color:#8de5a9}
-#hqOverlay #hqHint{color:#aebdca}
-#hqCard.hojaQuizDense{--hoja-quiz-q-size:clamp(22px,5vw,48px);--hoja-quiz-c-size:clamp(19px,3.8vw,36px)}
-#hqCard[data-quiz-kind="OX"] .hqChoiceLabel{--hoja-quiz-ox-size:clamp(40px,10vw,120px)}
-@media(max-width:600px){#hojaGamePlay .hqBack{min-height:32px;min-width:105px;font-size:11px;padding:5px}#hojaGamePlay .hqTop{height:52px;flex-basis:52px}#hqStage{height:calc(100% - 52px)}#hqCharacter{width:27%}#hqBalloon{bottom:calc(13% + 27%)}#hqStageHelp{bottom:5px}}
+@media(max-width:600px){#hojaGamePlay .hqBack{min-height:32px;min-width:105px;font-size:11px;padding:5px}#hojaGamePlay .hqTop{height:52px;flex-basis:52px}}
 
 </style><style id="hojaV053AudioControlsStyle">
  .hojaAudioTop{position:absolute;left:calc(clamp(10px,2.2%,24px) + 165px);top:clamp(10px,3.1%,22px);z-index:152;display:flex;gap:7px;align-items:center;pointer-events:auto}
@@ -393,22 +240,8 @@ font-size:clamp(16px,2vw,22px);font-weight:750;padding:10px 14px;cursor:pointer}
   display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
 }
 #hqModeLabel{font-size:clamp(13px,1.65vw,19px)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-#hojaGamePlay .hqHud{display:flex;align-items:center;gap:7px;flex:0 0 auto}
-#hojaGamePlay .hqHud[hidden]{display:none!important}
-.hqHudCell{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:92px;
-  border:1px solid #557783;background:#143344;border-radius:7px;padding:4px 8px;line-height:1.2}
-.hqHudCell span{font-size:11px;color:#a8c3d2;font-weight:800;white-space:nowrap}
-.hqHudCell b{font-size:19px;color:#ffe5ad;font-weight:900;font-variant-numeric:tabular-nums}
-#hqStage{height:calc(100% - 66px)!important}
-/* Integer pixel scaling: 64 source pixels x2=128, 32 balloon x2=64. */
-#hqCharacter{width:128px!important;height:128px!important;aspect-ratio:1/1!important;
-  bottom:calc(21.2963% - 2px)!important;image-rendering:pixelated!important}
-#hqBalloon{width:64px!important;height:64px!important;aspect-ratio:1/1!important;
-  image-rendering:pixelated!important}
-#hqBalloon img{image-rendering:pixelated!important}
 @media(max-width:940px){
  #hojaGamePlay .hqTop{padding-left:305px!important;padding-right:9px!important;gap:5px!important}
- .hqHudCell{min-width:67px;padding:3px 4px}.hqHudCell span{font-size:10px}.hqHudCell b{font-size:17px}
  #hqModeLabel{font-size:12px!important}
 }
 @media(max-width:660px){
@@ -416,117 +249,16 @@ font-size:clamp(16px,2vw,22px);font-weight:750;padding:10px 14px;cursor:pointer}
  .hojaAudioTop{left:calc(clamp(8px,1.5%,18px) + 82px)!important;gap:4px!important}
  .hojaAudioTop button{min-width:66px!important;width:66px!important;height:30px!important;font-size:10px!important;padding:3px!important}
  #hojaGamePlay .hqTop{height:72px!important;flex-basis:72px!important;min-height:72px!important;padding:33px 5px 2px!important;justify-content:space-between!important}
- .hqHudCell{min-width:59px;padding:2px}.hqHudCell span{font-size:9px}.hqHudCell b{font-size:13px}
  #hqModeLabel{font-size:11px!important}
- #hqStage{height:calc(100% - 72px)!important}
- #hqCharacter{width:64px!important;height:64px!important} /* 1x for narrow screens */
- #hqBalloon{width:32px!important;height:32px!important}
 }
 </style>
-<style id="hojaV055QuizAndArcadeCss">
+<style id="hojaV055ArcadeCss">
 /* Parent top bar not duplicated over the REAL arcade scoreHud. */
 #hojaGamePlay[data-mode="arcade"] .hqTop,#hojaGamePlay[data-mode="arcade"]>.hqBack,
 #hojaGamePlay[data-mode="arcade"]>#hqAudioTop{display:none!important}
 #hojaGamePlay[data-mode="arcade"] #hqArcadeFrame{height:100%!important;flex:1 1 100%!important}
 #hojaGamePlay[data-mode="arcade"] #hqArcadeInfo{display:none!important}
-#hqBalloon{width:128px!important;height:128px!important;image-rendering:pixelated!important;transform:translateX(-50%);}
-#hqBalloon img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
-#hqCharacter{bottom:calc(21.2963% - 6px)!important}
-#hqBalloonBurst{position:absolute;pointer-events:none;left:50%;width:1px;height:1px;z-index:10}
-.hqBurstPix{position:absolute;left:0;top:0;width:8px;height:8px;border-radius:0;background:#ffd449;box-shadow:0 0 0 1px #663b14;animation:hqBurstPop .42s ease-out forwards;--x:0px;--y:0px}
-@keyframes hqBurstPop{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}}
-.hqEnemy{position:absolute;bottom:calc(21.2963% - 3px);width:64px;height:64px;z-index:3;pointer-events:none;image-rendering:pixelated}
-.hqEnemy>img:first-child{display:block;width:100%;height:100%;image-rendering:pixelated;object-fit:contain}
-.hqEnemy-jumpy{left:18%}.hqEnemy-hermie{left:29%}.hqEnemy-roach{right:28%}
-.hqEnemy-owl{right:18%;bottom:calc(21.2963% + 130px)}.hqEnemy-ghost{left:12%;bottom:calc(21.2963% + 128px)}
-.hqEnemy-hermie>img:first-child,.hqEnemy-jumpy>img:first-child,.hqEnemy-ghost>img:first-child{transform:scaleX(-1)}
-.hqEnemy .hqHeart{position:absolute;bottom:95%;left:50%;width:40px;height:40px;transform:translateX(-50%) translateY(4px);opacity:0;image-rendering:pixelated;transition:none}
-.hqEnemy.hqCelebrate>img:first-child{animation:hqHappyHop .42s ease-in-out 2 alternate}
-.hqEnemy-owl.hqCelebrate>img:first-child,.hqEnemy-ghost.hqCelebrate>img:first-child{animation:hqHappyWing .22s ease-in-out 4 alternate}
-.hqEnemy.hqCelebrate .hqHeart{animation:hqHeartShow 1.4s ease-out both}
-@keyframes hqHappyHop{0%,100%{translate:0 0}50%{translate:0 -15px}}
-@keyframes hqHappyWing{from{translate:0 0;scale:1 1}to{translate:0 -6px;scale:1 .94}}
-@keyframes hqHeartShow{0%{opacity:0;transform:translateX(-50%) translateY(8px)}20%,75%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-20px)}}
-.hqResult{position:absolute;inset:0;z-index:24;background:#061a27c9;display:flex;align-items:center;justify-content:center;padding:18px}
-.hqResult[hidden]{display:none!important}
-.hqResultCard{width:min(650px,94%);border:4px solid #d9ba78;border-radius:13px;background:#133a45;color:#fff0cb;text-align:center;padding:25px 20px;box-shadow:6px 7px 0 #06131d}
-.hqResultCard h2{font-size:clamp(24px,3.3vw,42px);margin:2px 0 22px}
-.hqResultMetrics{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.hqResultMetrics span{display:flex;flex-direction:column;min-width:125px;border:1px solid #7bafab;border-radius:6px;padding:9px;font-size:14px}
-.hqResultMetrics b{font-size:28px}
-.hqResultActions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.hqResultActions button{border:2px solid #e4c58c;border-radius:8px;background:#d9b878;color:#17303b;padding:12px 19px;font-weight:850;font-size:17px;cursor:pointer}
-#hqStage[data-quiz-finished="true"] #hqBalloon{visibility:hidden}
-@media(max-width:660px){#hqBalloon{width:64px!important;height:64px!important}#hqCharacter{bottom:calc(21.2963% - 4px)!important}.hqEnemy{width:32px;height:32px}.hqEnemy-owl,.hqEnemy-ghost{bottom:calc(21.2963% + 67px)}}
-/* V0.5.8 QUIZ IDLE: pixel-safe integer enlargement from 32x32 source (4x native).
-   Idle locomotion is on wrapper; sprite mirroring/reaction stays on child, so no transform collision. */
-#hojaGamePlay[data-mode="quiz"] .hqEnemy{
-  width:128px!important;height:128px!important;image-rendering:pixelated!important;
-  transform-origin:center bottom;will-change:translate;
-  bottom:calc(21.2963% - 6px);
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy>img:first-child{
-  width:128px!important;height:128px!important;
-  object-fit:contain;image-rendering:pixelated!important;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy{
-  left:14%;animation:hqV057SlimeJump 1.08s steps(8,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie{
-  left:27%;animation:hqV057GroundBob 1.55s steps(2,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-roach{
-  right:22%;animation:hqV057GroundBob 1.15s steps(2,end) infinite reverse;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-owl{
-  right:10%;bottom:calc(21.2963% + 116px)!important;
-  animation:hqV057OwlHover 1.8s steps(4,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost{
-  left:6%;bottom:calc(21.2963% + 116px)!important;
-  animation:hqV057GhostFloat 3.6s steps(4,end) infinite;
-}
-/* The original sprites retain their exact integer pixels; no fractional X/Y scaling. */
-@keyframes hqV057SlimeJump{
-  0%,100%{translate:0 0}
-  12.5%,87.5%{translate:0 -8px}
-  25%,75%{translate:0 -24px}
-  37.5%,62.5%{translate:0 -36px}
-  50%{translate:0 -40px}
-}
-@keyframes hqV057GroundBob{0%,100%{translate:0 0}50%{translate:0 -4px}}
-@keyframes hqV057OwlHover{0%,100%{translate:0 -8px}50%{translate:0 8px}}
-@keyframes hqV057GhostFloat{0%,100%{translate:0 -4px}50%{translate:0 4px}}
-/* Correct answer: every enemy accelerates briefly while the Kenney heart emote is shown. */
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy.hqCelebrate{
-  animation:hqV057SlimeJump .34s steps(8,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie.hqCelebrate,
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-roach.hqCelebrate{
-  animation:hqV057GroundBob .27s steps(2,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-owl.hqCelebrate{
-  animation:hqV057OwlHover .42s steps(4,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost.hqCelebrate{
-  animation:hqV057GhostFloat .72s steps(4,end) infinite;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy .hqHeart{
-  width:64px;height:64px;bottom:103%;z-index:5;
-}
-#hojaGamePlay[data-mode="quiz"] .hqEnemy.hqCelebrate .hqHeart{
-  animation:hqHeartShow 1.45s steps(6,end) both;
-}
-/* Responsive cards are reflowed without silently reducing sprite pixels. */
-@media(max-width:800px){
-  #hojaGamePlay[data-mode="quiz"] .hqEnemy-jumpy{left:5%}
-  #hojaGamePlay[data-mode="quiz"] .hqEnemy-hermie{left:20%}
-  #hojaGamePlay[data-mode="quiz"] .hqEnemy-roach{right:18%}
-  #hojaGamePlay[data-mode="quiz"] .hqEnemy-owl{right:4%}
-  #hojaGamePlay[data-mode="quiz"] .hqEnemy-ghost{left:1%}
-}
-
-</style><meta name="hoja-test-contract" content="HOJA_STEP09_TEST V057 UI_ONLY">
+</style>
 
 <style id="hojaV059FullscreenStudentUI">
 /* V0.6.1: public repository errors are visible independently of private-code panel. */
@@ -902,43 +634,13 @@ body:has(#hojaGamePlay[data-mode="arcade"]:not([hidden])) #hojaAudioTop{
 <section id="hojaGamePlay" aria-label="호자 게임 실행" hidden>
  <div class="hqTop">
   <strong id="hqModeLabel">호자 게임</strong>
-  <div id="hqHud" class="hqHud" aria-label="게임 진행 상황" aria-live="polite" hidden>
-    <div class="hqHudCell"><span>전체 문제</span><b id="hqHudTotal">—</b></div>
-    <div class="hqHudCell"><span>푼 문제</span><b id="hqHudAnswered">0</b></div>
-    <div class="hqHudCell"><span>맞힌 문제</span><b id="hqHudCorrect">0</b></div>
-  </div>
-</div>
+ </div>
  <button class="hqBack" id="hqPlayBack" type="button">◀ 이전</button><div id="hqAudioTop" class="hojaAudioTop" role="group" aria-label="음악과 효과음 설정">
  <button type="button" class="hojaMusicToggle" aria-label="배경음악 켜고 끄기" aria-pressed="true">♫ 음악</button>
  <button type="button" class="hojaSfxToggle" aria-label="효과음 켜고 끄기" aria-pressed="true">♪ 효과음</button>
 </div>
  <iframe id="hqArcadeFrame" title="HOJA STEP13-7 아케이드 게임" hidden allow="autoplay;fullscreen" referrerpolicy="no-referrer"></iframe>
  <div id="hqArcadeInfo" hidden>Project B 공개 문제 연결</div>
- <div id="hqStage" hidden>
-   <canvas id="hqBg" width="960" height="540" aria-hidden="true"></canvas>
-   
-   <img id="hqCharacter" alt="점프하는 호자"/>
-<div class="hqEnemy hqEnemy-jumpy" data-enemy="jumpy" aria-hidden="true"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAA60lEQVR42mP8//8/w0ACJoYBBqMOGHXAqANGHTDqgFEHjDpg1AGjDhhwB7CQq1FGVB6lNfvk9UNGujgAZjFr03qs4qQ6hIlUy1mb1jM8eniZ4W68CgMDAwODnaMSAwMDA8Ojh5cZHj28jBEyBMH///+JwtIicv8Vpp39//frx//SInL/pUXk/v/9+hGrmLSI3H9izSU5ESY++ofBxiZGLGAkpmcEC3oYgAX7of33cIr9rgskKj2QlQuQLcYnRtNsaOeoxDBfDjUGlRfeoU9BhM1y5GigiQPYziCCGJvluNRSJRFiK/kIAWILJADmkKFReS01ngAAAABJRU5ErkJggg==" alt=""><img class="hqHeart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAABGdBTUEAALGPC/xhBQAAAAxQTFRFAAAA5ubm/wBU////+R9lFwAAAAF0Uk5TAEDm2GYAAABJSURBVAjXY2Co/8vAwP7//wUG+f//vzDYv379h6F+1aq/DP9XrfoPJV6t/s9Q/2v9Xwb7f/v/QNSBdYD1MoiGAAl2II+B0YEBANyFJnvDLNIbAAAAAElFTkSuQmCC" alt=""></div>
-<div class="hqEnemy hqEnemy-hermie" data-enemy="hermie" aria-hidden="true"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABE0lEQVR42u2XPQqEMBCFJ4tXECzEgL1gJ9jsETxBPIaH8BqeJI1gF7AXXCwED5GtIpnoin+sTaaSTPR9eZkMkUgp4cl4wcNhASyABbAAFsACWAAL8DiAs2eS79L53jZMPfkrgO9SKYpxAXMXiHNkctukIIp64coVILJ1KzZXr4NESY3G4tJDEHudco4Sm+Jx6SHgYeqJ71L56Vs0dhmgbVIAgFVxJRbQCJR4QKM5twXhnBE2xXUx9XxbEZrCa/tvBs8z5MrWFuwqwi379S3geYbeZ7y7vwj1qN7hQpjxDuVu6QO/LGe8g+odzvm2SZGwKMZrp0AdKfUxPUQxQlx6wHgHIsGrP+IA2ft7bna+NcgzjegLMQCjLENH2IAAAAAASUVORK5CYII=" alt=""><img class="hqHeart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAABGdBTUEAALGPC/xhBQAAAAxQTFRFAAAA5ubm/wBU////+R9lFwAAAAF0Uk5TAEDm2GYAAABJSURBVAjXY2Co/8vAwP7//wUG+f//vzDYv379h6F+1aq/DP9XrfoPJV6t/s9Q/2v9Xwb7f/v/QNSBdYD1MoiGAAl2II+B0YEBANyFJnvDLNIbAAAAAElFTkSuQmCC" alt=""></div>
-<div class="hqEnemy hqEnemy-roach" data-enemy="roach" aria-hidden="true"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABRElEQVR42mP8//8/w0ACJoYBBqMOGHXAqANGHTDqgKHrABlR+f+kiFPdAU9eP2Qk1TKaR4GMqPz/J68fMpKih4XSKKA0FBhJbZAQYyEpocBCruU1VtoMDAwMDC3HrjKgi5EUFf///ycKS4vI/b/QEPFfWkTuv7SI3P8zB/f9//v14/8zB/dh5UuLyP0nxlySHDDdzxPFMmkROaw0zBHEmMtEbNDXWGnDg9vQxBivekLyZGVDSyN+OFtOXpeBgYGB4dHDy3C2nLwuw6OHl1HkaZoNsVmCLkZMYiTLARvXLmBgYGBg8A9OgKd8GEDOFcQ4gmgHHD/3EW65f3ACTguxFdf4HEFyCCBbju57bI4iFAVEl4TIhRB6KFBSKrKQE/8wy7GFAMz3xAQ/yXUBsRUPKXUB2ZURuiW4xKnaHsBnCUyM1OoZABOLNaXjSq0tAAAAAElFTkSuQmCC" alt=""><img class="hqHeart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAABGdBTUEAALGPC/xhBQAAAAxQTFRFAAAA5ubm/wBU////+R9lFwAAAAF0Uk5TAEDm2GYAAABJSURBVAjXY2Co/8vAwP7//wUG+f//vzDYv379h6F+1aq/DP9XrfoPJV6t/s9Q/2v9Xwb7f/v/QNSBdYD1MoiGAAl2II+B0YEBANyFJnvDLNIbAAAAAElFTkSuQmCC" alt=""></div>
-<div class="hqEnemy hqEnemy-owl" data-enemy="owl" aria-hidden="true"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABwUlEQVR42u1XLWzCQBR+XdCkoqiSIjDIIioqR/AYRCuWIIZbUkOCmEZMINBFlCBA1MxMFokgARIMpqIEh4A1mVxuYrnLXfnr8RNMX9L07uXlve/9fQUBIQSPlCd4sCQAEgAPB5CKa5jN5Mi+rjeBcKnNVRUwVQtsw2EC4XM2k0O24YBtOPepwHoTCP/BWBCmapHgAAD1YS129gAAQlwmzGZyyFQtKBWKROctZ1AqFMkb6wbzzn1aQAen77Q+anMTANES65oIuiaCt5wx1dA1EerD2t6cnBSE0NlHlhT09eYhWVLQtjdFvz/f5Nwot1Gj3Ebb3pToZElBsqSgOL65WmAbDqSreXI/dE5X81ybkOIljtD1IV3NwypYQLPShY/PVwhdH5qVLqyCBYSuz+Xv7BbQvYxmpmsiyTx0fRhPdmRO4pLRSQD08GHHh1YRTz9eQR5OONsCetKxY1oXtTtlc3ELTNXa23NvOYP3l2emBa3+iKnE1S04BgIAmOD0gLb6o9sz4XoTCIN5h9GNJztm4vEQ8gTn+hYcq0RUeAHEYsIoK257U4bx6DuvP+GS/wWYG3Cm0ftNiSj5UZoASADcW/4AZQST9K26RQkAAAAASUVORK5CYII=" alt=""><img class="hqHeart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAABGdBTUEAALGPC/xhBQAAAAxQTFRFAAAA5ubm/wBU////+R9lFwAAAAF0Uk5TAEDm2GYAAABJSURBVAjXY2Co/8vAwP7//wUG+f//vzDYv379h6F+1aq/DP9XrfoPJV6t/s9Q/2v9Xwb7f/v/QNSBdYD1MoiGAAl2II+B0YEBANyFJnvDLNIbAAAAAElFTkSuQmCC" alt=""></div>
-<div class="hqEnemy hqEnemy-ghost" data-enemy="ghost" aria-hidden="true"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAA6ElEQVR42mP8//8/w0ACJoYBBqMOGHXAqAMG3AEs5GoMzp6JUoKtnZrOSI45jKSWhDCLV3dHooiHli4nzyH///8nGgdlzfj/9+tHvDgoa8Z/UsykquXkOGLAEyFFvkcWR1dDbCiQFQLvahrIkiMrFwRnz/yPnuKJARUrdjDcPfueYK5gooXlMKBsLIhRXlBUElas2EH1NEhUFCgbCzIwMDAwdER4UD0KqF4GlM5dSZtcgB78+KKDlKgiui5AjgoYQI4SZEuJCnpyKiPkFI3umLtn35NVMzKS2y8YsOp4tEk26oBRB1AbAAAe2/h8U7XcdwAAAABJRU5ErkJggg==" alt=""><img class="hqHeart" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAABGdBTUEAALGPC/xhBQAAAAxQTFRFAAAA5ubm/wBU////+R9lFwAAAAF0Uk5TAEDm2GYAAABJSURBVAjXY2Co/8vAwP7//wUG+f//vzDYv379h6F+1aq/DP9XrfoPJV6t/s9Q/2v9Xwb7f/v/QNSBdYD1MoiGAAl2II+B0YEBANyFJnvDLNIbAAAAAElFTkSuQmCC" alt=""></div>
-<div id="hqBalloonBurst" aria-hidden="true"></div>
-   <button id="hqBalloon" type="button" aria-label="풍선에 점프하여 문제 풀기"><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABBElEQVR42mP8//8/w0ACJoYBBgPuABZyNcqIyqPE3ZPXDxnp4gCYxU+22mEXJ9EhjKQkQhlR+f/IFv/TmQqJxyvZCDXeh0hyBNEOQLccr1oSHDHgiZCoEMDlexnvQ4hEiJ4miAwF8nOB9yEUS9H5NC8HyLGMqiGAHg3kOogqiZCS0Bj62RA5J9A0BIgNBZqVhMiOuFD2goGBgYFBxD6MgYGBgeHNwVUMDAwMDAZdErStC7A5AgbIsZxsB6BHB6nBTjUHUKM9wEhJm1BGVP4/uRZTnA2pYfnQbZRSy/ejzXKyHfDk9UNG9GxIl7oAZxOdgvTASI2+ISWJcugnQkqzJONAd88Bb9mkDn2ruLQAAAAASUVORK5CYII="/></button>
-   <div id="hqResult" class="hqResult" hidden role="dialog" aria-modal="true" aria-labelledby="hqResultTitle">
- <section class="hqResultCard"><h2 id="hqResultTitle">문제 풀이 완료!</h2>
- <div class="hqResultMetrics"><span>푼 문제 <b id="hqResultAnswered">0</b></span><span>맞힌 문제 <b id="hqResultCorrect">0</b></span><span>정답률 <b id="hqResultPercent">0%</b></span></div>
- <p>모든 문제를 풀었어요. 문제 풀이 모드는 랭킹을 등록하지 않아요.</p>
- <div class="hqResultActions"><button id="hqResultRetry" type="button">다시 풀기</button><button id="hqResultBack" type="button">◀ 모드 선택</button></div></section></div>
-<div id="hqStageHelp">풍선을 클릭하거나 스페이스 바를 눌러 점프하세요</div>
-   <div id="hqOverlay" role="dialog" aria-modal="true" aria-label="문제" hidden>
-    <div id="hqCard" class="hojaQuizDense" data-quiz-kind="MC">
-     <div id="hqType">객관식</div><div id="hqQuestionArea"><div id="hqQuestion"></div></div>
-     <div id="hqChoices"></div><div id="hqFeedback"></div>
-     <div id="hqHint">숫자 1~3 · 방향키로 고르고 Enter · O/X 문제는 O·X 키</div>
-    </div>
-   </div>
- </div>
 </section>
 
 </div></section>
@@ -1271,12 +973,6 @@ function attachHojaEyeOverlay(scene,moodProvider){
   scene.events.once('shutdown',cleanup);
   scene.events.once('destroy',cleanup);
 }
-function makeHojaEyeFullCanvas(frame,eye){
- const c=makeHojaCanvas(frame);
- if(eye)c.getContext('2d').drawImage(makeHojaEyeOverlayCanvas(frame,eye),0,0);
- return c;
-}
-
 class HojaSharedScene extends Phaser.Scene {
   constructor(){super({key:'HojaAttractScene'});}
   applyLightBackground(){/* production LIGHT_BACKGROUND default is false */}
@@ -2800,10 +2496,6 @@ window.addEventListener('DOMContentLoaded',()=>window.HOJA_FLOW.enterIntro());
 <script id='hojaV051Gameplay'>
 
 "use strict";
-/* V0.5.7 entry wiring. Arcade loads unmodified gameplay scene from isolated STEP13-7 copy.
-   Infinite QUIZ practice uses STEP13-7 balloonStatic + original quiz markup and style.
-   Only mock quiz pool is currently available, NOT a Project B production question payload. */
-/* HOJA Phase 1B: 아케이드는 빌드 때 조립한 arcade.html로 연다(tools/build_web.mjs). */
 window.HOJA_V051_FIT_INFO=()=>{
  const el=document.getElementById('hcUnitInfoName');if(!el||!el.getBoundingClientRect().width)return;
  const raw=String(el.dataset.fullTitle||el.textContent||'').replace(/\s+/g,' ').trim();
@@ -2828,15 +2520,8 @@ window.addEventListener('resize',()=>{if(!document.getElementById('hcUnitInfoPan
 window.HOJA_GAMEPLAY=(()=>{
  const host=()=>document.getElementById('hojaGamePlay');
  const frame=()=>document.getElementById('hqArcadeFrame');
- const stage=()=>document.getElementById('hqStage');
- const canvas=()=>document.getElementById('hqBg');
  const img=id=>document.getElementById(id);
- const SEASONS={
-  spring:{sky:'#50bbff',ground:'#885a45',family:0,bg:['sgSky','sgCloud1','sgCloud2','sgHills','sgForeground']},
-  summer:{sky:'#50bbff',ground:'#b27c57',family:0,bg:['thTroSky','thTroCloudsBG','thTroClouds','thTroWaters']},
-  autumn:{sky:'#fff3d8',ground:'#743e45',family:4,bg:['thAutDistant','thAutRow2','thAutRow1','thAutPiles','thAutTrees','thAutLeafTop']},
-  winter:{sky:'#fff8ff',ground:'#a66567',family:8,bg:['thWinMountain','thWinHills','thWinFore']}
- };
+ const seasons=['spring','summer','autumn','winter'];
  let questions=[];
  function setServerQuestions(sources){
   const familyMap=new Map(), sourceNames=new Set();
@@ -2888,226 +2573,33 @@ window.HOJA_GAMEPLAY=(()=>{
   questions=picked;
  }
 
- // Actual 32x32 source frame strips: 2 / 2 / 2 / 3 / 4 frames.
- // Cache once, then switch only the displayed image at each animation beat.
- const ENEMY_FRAME_SOURCES={
-  jumpy:{source:'enJumpyIdle',fps:3,frames:2},
-  hermie:{source:'enHermieCrawl',fps:3,frames:2},
-  roach:{source:'enRoachRun',fps:4,frames:2},
-  owl:{source:'enOwlFly',fps:6,frames:3},
-  ghost:{source:'enBlankeyFloat',fps:3,frames:4}
- };
- const enemyFrameCache=new Map();let enemyFrameTimer=0;
- function prepareEnemyFrames(){
-  Object.entries(ENEMY_FRAME_SOURCES).forEach(([kind,spec])=>{
-   if(enemyFrameCache.has(kind))return;
-   const sheet=img(spec.source);
-   if(!sheet?.complete||sheet.naturalWidth<32*spec.frames)return;
-   const tile=document.createElement('canvas');tile.width=tile.height=32;
-   const ctx=tile.getContext('2d',{alpha:true});ctx.imageSmoothingEnabled=false;
-   const frames=[];
-   for(let index=0;index<spec.frames;index++){
-    ctx.clearRect(0,0,32,32);
-    ctx.drawImage(sheet,index*32,0,32,32,0,0,32,32);
-    frames.push(tile.toDataURL('image/png'));
-   }
-   enemyFrameCache.set(kind,frames);
-  });
- }
- function tickEnemyFrames(){
-  if(page!=='quiz'||host().hidden||document.hidden)return;
-  prepareEnemyFrames();
-  const t=performance.now();
-  stage().querySelectorAll('.hqEnemy').forEach(enemy=>{
-   const kind=enemy.dataset.enemy,spec=ENEMY_FRAME_SOURCES[kind],frames=enemyFrameCache.get(kind);
-   if(!spec||!frames?.length)return;
-   const speed=enemy.classList.contains('hqCelebrate')?2.4:1;
-   const index=Math.floor(t*spec.fps*speed/1000)%frames.length;
-   if(enemy.dataset.spriteFrame===kind+':'+index)return;
-   enemy.querySelector('img:first-child').src=frames[index];
-   enemy.dataset.spriteFrame=kind+':'+index;
-  });
-  tickQuizHojaEyes();
- }
- function startEnemyFrames(){
-  if(enemyFrameTimer)clearInterval(enemyFrameTimer);
-  enemyFrameTimer=setInterval(tickEnemyFrames,80);tickEnemyFrames();
- }
- function stopEnemyFrames(){if(enemyFrameTimer){clearInterval(enemyFrameTimer);enemyFrameTimer=0;}}
  function clearServerQuestions(){questions=[];}
- let page='',season='spring',jumping=false,activeQuiz=false,answered=0,correct=0,deck=[],anim=0,questionHandler=null,doneTimer=0,loadId=0,original='',resumeIntroAudio=false,finished=false,lastCorrect=false;
- const updateQuizHud=()=>{img('hqHudTotal').textContent=questions.length+'종';img('hqHudAnswered').textContent=String(answered);img('hqHudCorrect').textContent=String(correct);};
- const player=()=>img('hqCharacter');
- const quizHojaCache=new Map();
- let quizEyeHappyUntil=0,quizEyeFailUntil=0,quizHappyEye='twinkle';
- function quizHojaEyeSrc(group,eye){
-  const key=group+'|'+(eye||'base');
-  if(!quizHojaCache.has(key)){
-   const frame=RAW_GROUPS[group]?.[0];
-   quizHojaCache.set(key,frame?makeHojaEyeFullCanvas(frame,eye).toDataURL('image/png'):'');
-  }
-  return quizHojaCache.get(key);
- }
- function tickQuizHojaEyes(){
-  if(page!=='quiz'||host().hidden)return;
-  const now=performance.now();
-  const mood=now<quizEyeHappyUntil?quizHappyEye:now<quizEyeFailUntil?'blank':null;
-  const eye=hojaEyeNameAt(now,mood);
-  const group=jumping?'JUMP':'IDLE',key=group+'|'+(eye||'base');
-  if(player().dataset.hojaEyeKey===key)return;
-  player().src=quizHojaEyeSrc(group,eye);player().dataset.hojaEyeKey=key;
- }
- function sprite(name){const fr=(typeof RAW_GROUPS!=='undefined'?RAW_GROUPS[name]:[])?.[0];return fr?makeHojaCanvas(fr).toDataURL('image/png'):img('hojaModeWalk')?.src;}
- let idle='',jump='';
- function nextQuestion(){if(!deck.length)return null;return questions[deck.pop()];}
- function placeBalloon(){
-  // Source 64x64 HOJA at INTEGER 2x (128px); sprite contact aligned to G=425/540.
-  // Source 32x32 balloon at INTEGER 2x (64px); keep jumping collision gap stable.
-  const h=stage().clientHeight,ph=player().getBoundingClientRect().height;
-  const groundFromBottom=h*(1-425/540);
-  const gap=Math.max(18,Math.min(36,h*.055));
-  img('hqBalloon').style.bottom=Math.round(groundFromBottom+ph+gap)+'px';player().style.bottom=Math.round(groundFromBottom-(player().getBoundingClientRect().height*3/64))+'px';
-}
- function drawBackground(){
-  const c=canvas();if(!c)return;const ctx=c.getContext('2d');const w=c.width,h=c.height,G=425;
-  const t=SEASONS[season]||SEASONS.spring;ctx.imageSmoothingEnabled=false;ctx.fillStyle=t.sky;ctx.fillRect(0,0,w,h);
-  t.bg.forEach(name=>{const im=img(name);if(!im?.naturalWidth)return;const ww=im.naturalWidth*2,hh=im.naturalHeight*2,y=G-hh+20;
-    for(let x=0;x<w;x+=ww)ctx.drawImage(im,x,y,ww,hh);
-  });
-  const terrain=img('paV2Terrain');ctx.fillStyle=t.ground;ctx.fillRect(0,G,w,h-G);
-  if(terrain?.naturalWidth)for(let x=0;x<w;x+=32){ctx.drawImage(terrain,112,t.family*16,16,16,x,G,32,32);for(let y=G+32;y<h;y+=32)ctx.drawImage(terrain,112,(t.family+1)*16,16,16,x,y,32,32)}
- }
- /* HOJA Phase 1C: 실행 때 아케이드 조립 코드는 제거(빌드 때 tools/assemble_arcade.mjs로 조립). */
+ let page='',season='spring',loadId=0;
  async function launch(which,requested){
-  if(which!=='arcade')return; // Phase 1C: 문제 풀이 모드 없음
+  if(which!=='arcade')return;
   if(!window.HOJA_B_LIVE?.sources||!questions.length){window.alert('Project B 문제를 먼저 선택하고 불러와야 합니다.');return;}
-  stop();const own=++loadId;page=which;season=SEASONS[requested]?requested:window.HOJA_SEASON_SESSION?.current?.()||'spring';
+  stop();const own=++loadId;page=which;season=seasons.includes(requested)?requested:window.HOJA_SEASON_SESSION?.current?.()||'spring';
   window.HOJA_MODE_PREVIEW?.hide?.();host().hidden=false;
-  host().dataset.mode=which;frame().hidden=which!=='arcade';stage().hidden=which!=='quiz';
-  img('hqArcadeInfo').hidden=true;img('hqHud').hidden=which!=='quiz';img('hqModeLabel').textContent=which==='arcade'?'아케이드 모드 · 호자 모험':'문제 풀이 모드 · Project B 문제';
-  if(which==='arcade'){
-   if(new Set(window.HOJA_B_LIVE.sources.flatMap(e=>e.data.questions.filter(q=>q.type==='OX'||q.type==='MULTIPLE').map(q=>e.sheetName+'::'+q.familyId))).size<25){img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드는 고유 문제 묶음 25개 이상이 필요합니다. 다른 단원을 추가로 선택해 주세요.';return;}
-   window.HOJA_AUDIO_CONTROL?.syncArcade?.();
-   try{
-    if(own!==loadId)return;const f=frame();f.src='arcade.html?season='+encodeURIComponent(season)+(window.HOJA_ARCADE_QUERY||'');window.HOJA_V055_WATCH_ARCADE?.(f);window.HOJA_USAGE?.track?.('SOLO',1);f.addEventListener('load',()=>{window.HOJA_AUDIO_CONTROL?.syncArcade?.();window.HOJA_V055_BIND_ARCADE?.(f)},{once:true});
-   }catch(err){if(own!==loadId)return;img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드 실행 준비 실패: '+err.message;}
-  }else{
-   answered=0;correct=0;deck=questions.map((_,i)=>i);for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}activeQuiz=false;jumping=false;finished=false;lastCorrect=false;stage().dataset.quizFinished='false';img('hqResult').hidden=true;
-   img('hqOverlay').hidden=true;updateQuizHud();
-   quizEyeHappyUntil=0;quizEyeFailUntil=0;player().dataset.hojaEyeKey='';
-   idle=sprite('IDLE');jump=sprite('JUMP');player().src=idle||img('hojaModeWalk')?.src;
-   player().style.transform='translateX(-50%) translateY(0px)';img('hqBalloon').hidden=false;placeBalloon();drawBackground();startEnemyFrames();window.HOJA_USAGE?.track?.('SOLO',1);
-  }
+  host().dataset.mode=which;frame().hidden=false;
+  img('hqArcadeInfo').hidden=true;img('hqModeLabel').textContent='아케이드 모드 · 호자 모험';
+  if(new Set(window.HOJA_B_LIVE.sources.flatMap(e=>e.data.questions.filter(q=>q.type==='OX'||q.type==='MULTIPLE').map(q=>e.sheetName+'::'+q.familyId))).size<25){img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드는 고유 문제 묶음 25개 이상이 필요합니다. 다른 단원을 추가로 선택해 주세요.';return;}
+  window.HOJA_AUDIO_CONTROL?.syncArcade?.();
+  try{
+   if(own!==loadId)return;const f=frame();f.src='arcade.html?season='+encodeURIComponent(season)+(window.HOJA_ARCADE_QUERY||'');window.HOJA_V055_WATCH_ARCADE?.(f);window.HOJA_USAGE?.track?.('SOLO',1);f.addEventListener('load',()=>{window.HOJA_AUDIO_CONTROL?.syncArcade?.();window.HOJA_V055_BIND_ARCADE?.(f)},{once:true});
+  }catch(err){if(own!==loadId)return;img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드 실행 준비 실패: '+err.message;}
  }
  function stop(){
-  stopEnemyFrames();
-  loadId++;if(anim){cancelAnimationFrame(anim);anim=0;}
-  if(doneTimer){clearTimeout(doneTimer);doneTimer=0;}
-  if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
-  activeQuiz=false;jumping=false;img('hqOverlay').hidden=true;img('hqResult').hidden=true;
+  loadId++;
   frame().removeAttribute('srcdoc');frame().removeAttribute('src');frame().hidden=true;
  }
  function back(){if(typeof window.HOJA_STUDENT_BACK==='function'){stop();page='';host().hidden=true;window.HOJA_STUDENT_BACK();window.HOJA_AUDIO_CONTROL?.render?.();return;}stop();page='';host().hidden=true;window.HOJA_MODE_PREVIEW.show(season);window.HOJA_AUDIO_CONTROL?.render?.();}
- function collide(){const p=player().getBoundingClientRect(),b=img('hqBalloon').getBoundingClientRect();return p.top<b.bottom-4&&p.bottom>b.top+10&&p.left<b.right&&p.right>b.left;}
- function triggerJump(){
-  if(page!=='quiz'||activeQuiz||jumping||finished||host().hidden)return;
-  window.HOJA_INTRO_AUDIO?.play?.('hop',.65,1,0);
-  jumping=true;player().src=jump||idle;
-  const t0=performance.now(),duration=800,amplitude=Math.min(stage().clientHeight*.25,125);
-  function tick(now){
-   if(page!=='quiz'){jumping=false;return;}
-   const t=Math.min(1,(now-t0)/duration),height=4*amplitude*t*(1-t);
-   player().style.transform='translateX(-50%) translateY(-'+height.toFixed(1)+'px)';
-   if(t<.75&&collide()){
-    jumping=false;player().style.transform='translateX(-50%) translateY(0px)';player().src=idle;
-    openQuestion();return;
-   }
-   if(t<1){anim=requestAnimationFrame(tick)}else{jumping=false;player().src=idle;player().style.transform='translateX(-50%) translateY(0px)';}
-  }
-  anim=requestAnimationFrame(tick);
- }
- function closeQuestion(){
-  img('hqOverlay').hidden=true;activeQuiz=false;if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
-  const justCorrect=lastCorrect;lastCorrect=false;
-  if(justCorrect)celebrate();
-  if(answered>=questions.length){
-   if(justCorrect){const epoch=loadId;window.setTimeout(()=>{if(page==='quiz'&&loadId===epoch)showQuizResults()},1350);}
-   else showQuizResults();return;
-  }
-  img('hqBalloon').hidden=false;
- }
- function showQuizResults(){
-  finished=true;stage().dataset.quizFinished='true';img('hqBalloon').hidden=true;
-  img('hqResultAnswered').textContent=String(answered);img('hqResultCorrect').textContent=String(correct);
-  img('hqResultPercent').textContent=String(Math.round(correct*100/Math.max(1,answered)))+'%';
-  img('hqResult').hidden=false;window.HOJA_INTRO_AUDIO?.play?.('clear',.7,1,0);
- }
- function celebrate(){
-  document.querySelectorAll('#hqStage .hqEnemy').forEach((en,i)=>{
-   en.classList.remove('hqCelebrate');void en.offsetWidth;
-   window.setTimeout(()=>en.classList.add('hqCelebrate'),i*65);
-   window.setTimeout(()=>en.classList.remove('hqCelebrate'),2000);
-  });
- }
- function popBalloon(){
-  const b=img('hqBalloon').getBoundingClientRect(),s=stage().getBoundingClientRect(),fx=img('hqBalloonBurst');
-  fx.style.left=(b.left+b.width/2-s.left)+'px';fx.style.top=(b.top+b.height*.43-s.top)+'px';fx.replaceChildren();
-  for(let i=0;i<13;i++){const part=document.createElement('i');part.className='hqBurstPix';
-   const a=2*Math.PI*i/13;part.style.setProperty('--x',Math.round(Math.cos(a)*(27+i%3*10))+'px');
-   part.style.setProperty('--y',Math.round(Math.sin(a)*(27+i%3*10))+'px');
-   if(i%3===0)part.style.background='#fff9bf';fx.append(part);}
-  window.HOJA_INTRO_AUDIO?.play?.('collect',.75,1,0);
- }
- function openQuestion(){
-  if(page!=='quiz'||activeQuiz)return;
-  if(finished)return;const q=nextQuestion();if(!q){showQuizResults();return;}activeQuiz=true;popBalloon();img('hqBalloon').hidden=true;const overlay=img('hqOverlay'),card=img('hqCard'),choices=img('hqChoices'),feedback=img('hqFeedback');
-  card.dataset.quizKind=q.type==='OX'?'OX':'MC';img('hqType').textContent=q.type==='OX'?'O / X':'객관식';img('hqQuestion').textContent=q.q;
-  choices.replaceChildren();feedback.textContent='';overlay.hidden=false;
-  let locked=false,focus=-1;
-  function choose(i){
-   if(locked||i<0||i>=q.choices.length)return;locked=true;answered++;
-   for(let k=0;k<choices.children.length;k++)if(k===q.answer)choices.children[k].classList.add('correct');
-   if(i===q.answer){correct++;feedback.textContent='정답!  +10';window.HOJA_V055_SFX?.('correct');lastCorrect=true;quizHappyEye=hojaPickHappyEye();quizEyeHappyUntil=performance.now()+1400;quizEyeFailUntil=0;}else{choices.children[i].classList.add('wrong');feedback.textContent='오답 · 0점';window.HOJA_V055_SFX?.('wrong');lastCorrect=false;quizEyeFailUntil=performance.now()+950;quizEyeHappyUntil=0;}
-   updateQuizHud();
-   if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
-   doneTimer=setTimeout(()=>{doneTimer=0;if(page==='quiz')closeQuestion()},950);
-  }
-  q.choices.forEach((text,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='hqChoice';btn.dataset.answer=q.type==='OX'?text:'';
-   const num=document.createElement('span');num.className='hqChoiceNumber';num.textContent=(i+1)+'.';const label=document.createElement('span');label.className='hqChoiceLabel';label.textContent=text;
-   btn.append(num,label);btn.addEventListener('click',()=>choose(i));choices.append(btn);
-  });
-  const opened=performance.now();questionHandler=e=>{
-   if(page!=='quiz'||!activeQuiz)return;
-   const maps={Digit1:0,Digit2:1,Digit3:2,Numpad1:0,Numpad2:1,Numpad3:2,KeyO:0,KeyX:1};
-   if(!(e.code in maps)&&!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Enter','Space'].includes(e.code))return;
-   e.preventDefault();e.stopPropagation();if(e.repeat||performance.now()-opened<250)return;
-   if(e.code in maps){if(q.type==='OX'&&e.code==='KeyO')choose(q.choices.indexOf('O'));else if(q.type==='OX'&&e.code==='KeyX')choose(q.choices.indexOf('X'));else choose(maps[e.code]);return;}
-   if(e.code.startsWith('Arrow')){focus=(focus+1)%q.choices.length;[...choices.children].forEach((b,k)=>b.classList.toggle('focus',k===focus));return;}
-   if(focus>=0)choose(focus);else{focus=0;choices.children[0].classList.add('focus');}
-  };
-  window.addEventListener('keydown',questionHandler,true);
- }
- img('hqBalloon').addEventListener('click',triggerJump);
  img('hqPlayBack').addEventListener('click',back);
- img('hqResultRetry').addEventListener('click',()=>launch('quiz',season));
- img('hqResultBack').addEventListener('click',back);
- window.addEventListener('keydown',e=>{
-  if(page!=='quiz'||host().hidden||activeQuiz)return;
-  if(e.code==='Space'){e.preventDefault();triggerJump();}
- },true);
  window.addEventListener('message',e=>{if(e.source===frame().contentWindow&&e.data?.type==='HOJA_V051_ARCADE_EXIT'&&page==='arcade')back();});
- window.addEventListener('resize',()=>{if(page==='quiz'&&!host().hidden){placeBalloon();drawBackground();}},{passive:true});
- return {launch,back,stop,setServerQuestions,clearServerQuestions,get state(){return {page,season,answered,correct,activeQuiz,jumping}}};
+ // The arcade parent exposes progress inside its iframe; retain the parent state shape for callers.
+ return {launch,back,stop,setServerQuestions,clearServerQuestions,
+  get state(){return {page,season,answered:0,correct:0,activeQuiz:false,jumping:false}}};
 })();
 
-</script><audio id="hqSfx_correct" src="data:audio/mpeg;base64,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" preload="none" aria-hidden="true"></audio>
-<audio id="hqSfx_wrong" src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2LjEwMAAAAAAAAAAAAAAA//NwwAAAAAAAAAAAAEluZm8AAAAPAAAACAAABZwAPDw8PDw8PDw8PDw8WFhYWFhYWFhYWFhYdHR0dHR0dHR0dHR0dJCQkJCQkJCQkJCQkKysrKysrKysrKysrKzIyMjIyMjIyMjIyMjk5OTk5OTk5OTk5OTk////////////////AAAAAExhdmM2MC4zMQAAAAAAAAAAAAAAACQDwAAAAAAAAAWcim0g4AAAAAAAAAAAAAAAAAD/82DEABdwzrQPSTAAEAXwTBMNisnb1RAKxWK0aMjFYrFYoFAoFAoFCBASAMBkyZMmTJkyBAgQIECBBAmTJkyaYPg4CAIAgCAPg+D4PygIO/93T5zgM/pBDlz/d+XD4IAgc/8uD4Ph///wfVIAEALVUhILvAG51awxx0AzSS/ayy1MaYi7pduB46pipkOcgj4x2DJ+mjd7IQtmUEr/82LEMSwyrrxNmHgBhrLmsGxxrhCGltZaQbMUF6wnIhDEhjhFfZwxQnzFBevYTA4ZZKx3D2fYtbD59BevbPn1YceZ/HzH3e2bbr819a4tbNa+2/90j4iT0iWpqlK1zX51j+3xr//4/z/bNa+Jq8SOjLnj0WTT/Nx7wKikgqKSCsTfLCREDBxi0+fu+3EwtEIghKYKN4WACqJuMYjj//NixBAkAeKwAZh4ADFA1YVDd3oJTPUEJmT4fjeqVMYR2sxfD1OOEzMKOaFGdaIWEZBit0jOrGNWp+MtpyWd7XUJmcIj94sq+A5Mj97a9c434Uto00e8d5Civ5bRIGf7Z+seBmttavTEse8mol9zhEBjyQovWWAaheZBIBhsIAuLAAn/nGv+OQfNINXoRxe0uOAEIDXtVWfBO8HBcP/zYsQQIsKipAGYaAClUrliXSOEzHi8bFYTgE7CoEkfPGaBmFuElG5BImnWSYL8LQOePc6gdRWcU7CeDvHCPYsZVFLXrWQSGOQkCTJhJJVKddn1eXT5SKBLmZgZl2tGv//5ePHjcuIGajJFz56pX9f//5umEQWMAQRiIN///pAYkEpAycFhVJlc6hjJYqiOCiM0Wo6UQLltzZHIpPH/82DEFSGBxrABmGABldi7wzBonPeXFcRAbjqP4kMX4/LBPJR6T0/WhqrNC2qTKDw7tVq36iVqlMao8XrY1kGz/7PrltlzNmmX32KxP0tO71vmZZxqGmXpkT8YAHpA1/8+/+GKiFlUIRBD7I4SOp3////+S7TVf/wukmSWfZULlNFEXU4U4ztpPDpeHRvRfj/1cwxwXAIgoEQs8bf/82LEHh7B+rQBj0AAQNQeBuLi/pKg2EEPAah+yW8ulEHh0WOIpE6d3ikDkw4oeKkmd09vNvFJ3ZpUHEyaMp973io+P//9hoMgiDYVBEQABxy0P7k3YGDwaCgFJMCperd//CRZrQkOQ0dpCAkBnCEuCkvv83G06UJWP+biZgARJh3+BseBbIAMCkOcOdwbwhZcAoopE8nwxcAEILpg//NixDMsq26EI5mYACQKSWj4c4BwRCwjELmWWul8V0LhRWgYhEGhkIVrpKdJX8bgfMRwfEOMR0KWFCitn69f/kPEKmYhKQgs0WSNYWaTgrY1HK////xkhZwlIZ8UkQopEiw6RmSGigSACzR2jHf////5ASUGaMhlifHKHEOkgRfGVWQEtENIKShATQgSTEFNRTMuMTAwqqqqqqqqqv/zYsQQAAADSAHAAACqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqo=" preload="none" aria-hidden="true"></audio><script id="hojaV055QuizSfx">
-window.HOJA_V055_SFX=(name)=>{
- if(!window.HOJA_AUDIO_CONTROL?.sfxOn)return;
- const source=document.getElementById('hqSfx_'+name);if(!source)return;
- const sound=source.cloneNode(true);sound.volume=.65;
- sound.play().catch(()=>{});sound.addEventListener('ended',()=>sound.remove(),{once:true});
-};
 </script>
 <script id="hojaV055ArcadeParentBinder">
 window.HOJA_V055_BIND_ARCADE=(frame)=>{
