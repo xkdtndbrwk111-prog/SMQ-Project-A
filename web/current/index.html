@@ -1281,7 +1281,6 @@ window.HOJA_AUDIO_CONTROL=(()=>{
   if(sfxOn){unlocked=true;window.HOJA_INTRO_AUDIO?.enable?.();}
   else window.HOJA_INTRO_AUDIO?.disable?.();
   render();syncArcade();
-   if(!sfxOn)window.HOJA_TUTORIAL_AUDIO_BRIDGE?.stopSnore();
  }
  function toggleMusic(){setMusic(!musicOn)}
  function toggleSfx(){setSfx(!sfxOn)}
