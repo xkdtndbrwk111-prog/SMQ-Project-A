@@ -1,3 +1,4 @@
+import {profilerSource,profilerHandler} from './current-test-profiler.mjs';
 import {caveRenderTestSource,caveRenderProductionSource} from './current-test-cave-render.mjs';
 import {benchmarkSource,benchmarkHandlers} from './current-test-benchmarks.mjs';
 // Test-only instrumentation for the materialized Phase 2B source. Never emitted to a production build.
@@ -18,7 +19,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
-  A.edit("    const profileBtn=document.getElementById('hojaCpuProfileBtn');", benchmarkHandlers+"    const profileBtn=document.getElementById('hojaCpuProfileBtn');");
+  A.edit("    document.getElementById('v055ChunkBtn').onclick=", benchmarkHandlers+profilerHandler+"    document.getElementById('v055ChunkBtn').onclick=");
+  A.edit('async function boot(){',profilerSource+'async function boot(){');
   A.edit('// V0.32 PALETTE SHIFTS', `window.HOJA_V2_TOGGLE_CAVE_VISIBILITY=function(){
     if(STAGE.theme!=='cave'||!ACTIVE_SCENE)return;
     const scene=ACTIVE_SCENE;
@@ -60,6 +62,9 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
     TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <button id="hojaCpuProfileBtn" type="button" aria-pressed="false">CPU 성능 진단: 끔</button>
+    <div id="hojaPerfPanel" style="display:none" aria-label="상세 성능 분석"></div>
+    <style>#hojaPerfPanel[style*="block"]{display:block!important;white-space:pre-wrap;color:#000;background:#fff}</style>
     <button id="v055BenchBtn" type="button">지형 청크 자동 비교</button>
     <button id="scaleBenchBtn" type="button">배율 자동 측정</button>
     <button id="scaleQuickBtn" type="button">배율 수동 비교</button>
