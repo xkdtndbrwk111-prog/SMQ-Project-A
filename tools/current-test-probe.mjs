@@ -1,6 +1,7 @@
+import {caveRenderTestSource,caveRenderProductionSource} from './current-test-cave-render.mjs';
 import {benchmarkSource,benchmarkHandlers} from './current-test-benchmarks.mjs';
 // Test-only instrumentation for the materialized Phase 2B source. Never emitted to a production build.
-export function instrumentArcade(input) {
+export function instrumentArcade(input, {keepProductionCave=false}={}) {
   let arcade = input;
   const A = {
     edit(before, after) {
@@ -27,12 +28,15 @@ export function instrumentArcade(input) {
   };
   // V0.32 PALETTE SHIFTS`);
   A.edit('window.HOJA_CONNECT_ARCADE_HOST({', 'window.HOJA_STEP134_DIAG=HOJA_STEP134_DIAG;window.HOJA_STEP135_DIAG=HOJA_STEP135_DIAG;window.HOJA_STEP136_DIAG=HOJA_STEP136_DIAG;\nwindow.HOJA_CONNECT_ARCADE_HOST({');
+  if(!keepProductionCave)A.edit(caveRenderProductionSource,caveRenderTestSource);
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
     'stopLoop(){ACTIVE_SCENE.game.loop.stop();},step(){ACTIVE_SCENE.game.step(performance.now(),16);},' +
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
     'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
+    'caveRenderState(){const s=ACTIVE_SCENE;return {stage:STAGE_INDEX,collision:(s.hojaStep136CollisionOnly||[]).filter(o=>o?.active).map(o=>!!o.visible),culled:(s.hojaStep136Cullables||[]).filter(o=>o?.active).length};},' +
+
     'cameraInfo(){const c=ACTIVE_SCENE.cameras.main;return {scrollX:c.scrollX,scrollY:c.scrollY,zoom:c.zoom,width:c.width,height:c.height};},' +
     'bankInfo(){return (ACTIVE_SCENE.waterBankForeground||[]).map(o=>({x:o.x,y:o.y,w:o.width,h:o.height,depth:o.depth,visible:o.visible}));},' +
     'coverInfo(){return (ACTIVE_SCENE.caveCovers||[]).map(({cover})=>{const source=cover.texture.getSourceImage();const ctx=source.getContext("2d");const pixels=ctx.getImageData(0,0,source.width,source.height).data;let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)transparent++;return {x:cover.x,y:cover.y,w:source.width,h:source.height,alpha:cover.alpha,transparent};});},' +
