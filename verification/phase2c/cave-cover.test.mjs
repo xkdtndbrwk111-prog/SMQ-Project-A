@@ -63,6 +63,9 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   const vision=await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision());
   await frame.locator('#hojaTestCaveVision').click();
   assert.equal(await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision()),!vision,'test build cave vision toggle');
+  assert.equal(await game.evaluate(()=>typeof window.HOJA_STEP134_DIAG?.setZoom),'function');
+  assert.equal(await game.evaluate(()=>typeof window.HOJA_STEP135_DIAG?.setMode),'function');
+  assert.equal(await game.evaluate(()=>typeof window.HOJA_STEP136_DIAG?.setMode),'function');
   await frame.locator('#scaleQuickBtn').click();
   await frame.locator('#scaleQuickBtn').click();
 

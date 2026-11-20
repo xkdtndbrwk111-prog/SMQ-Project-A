@@ -88,6 +88,8 @@ if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(count(/HOJA_PHASER_APP|HOJA_STEP09_3_TEST|HOJA_STEP12_6_HUD_TEST|HOJA_STEP10_RANK_UI|HOJA_V064_PERF_|HOJA_V049_QA|HOJA_V050_QA|HOJA_STEP12_3_QUIZ_LAYOUT|HOJA_V2_TOGGLE_CAVE_VISIBILITY|HOJA_V2_SYNC_CAVE_VISIBILITY|HOJA_V053_BENCH|HOJA_V054_RENDER_AB|HOJA_V055_BENCH|HOJA_V056_BENCH_LOG|HOJA_V054_LAST_RESULT/g)===0, '과거 시험용 게임 조작 API 없음(배포본)');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/stageBtns|data-stage=["']/.test(arc), '숨은 단계별 강제 이동 버튼 없음');
+if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
+  ok(!/window\.HOJA_STEP13[456]_DIAG/.test(arc), '동굴 렌더 진단 전역 조작 없음');
 
 // 6
 ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');

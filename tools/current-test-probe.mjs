@@ -22,6 +22,7 @@ export function instrumentArcade(input) {
     if(scene.caveVisionEnabled)scene.updateCaveVisibility(true);
   };
   // V0.32 PALETTE SHIFTS`);
+  A.edit('window.HOJA_CONNECT_ARCADE_HOST({', 'window.HOJA_STEP134_DIAG=HOJA_STEP134_DIAG;window.HOJA_STEP135_DIAG=HOJA_STEP135_DIAG;window.HOJA_STEP136_DIAG=HOJA_STEP136_DIAG;\nwindow.HOJA_CONNECT_ARCADE_HOST({');
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
     'stopLoop(){ACTIVE_SCENE.game.loop.stop();},step(){ACTIVE_SCENE.game.step(performance.now(),16);},' +
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +

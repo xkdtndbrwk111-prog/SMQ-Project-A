@@ -2923,7 +2923,7 @@ class HojaScene extends Phaser.Scene{
     visionViewport?.classList.toggle('visionCircle',this.caveVisionMode==='circle');
       this.registerEmbeddedTextures();
     // STEP13-4: no diagnostic render state persists across a stage restart.
-    window.HOJA_STEP134_DIAG?.resetOnStageChange();
+    HOJA_STEP134_DIAG.resetOnStageChange();
     ACTIVE_SCENE=this;
     document.getElementById('gameViewport').dataset.boot='ready';
 
@@ -9274,7 +9274,6 @@ const HOJA_STEP134_DIAG=(()=>{
   return {setZoom,setRender,restoreOriginal,resetOnStageChange,metrics,
     mode:()=>({zoom:activeZoom,render:renderTest})};
 })();
-window.HOJA_STEP134_DIAG=HOJA_STEP134_DIAG;
 
 const HOJA_STEP135_DIAG=(()=>{
   // All changes are visual (GameObject.visible). No SOLIDS/physics modifications.
@@ -9352,7 +9351,6 @@ const HOJA_STEP135_DIAG=(()=>{
   }
   return {isTerrainHidden,isExtraHidden,setMode,metrics,resetIfStageChanged,mode:()=>mode};
 })();
-window.HOJA_STEP135_DIAG=HOJA_STEP135_DIAG;
 
 const HOJA_STEP136_DIAG=(()=>{
   let scene=null, optimized=false, culled=0, collisionHidden=0;
@@ -9412,7 +9410,6 @@ const HOJA_STEP136_DIAG=(()=>{
   }
   return {isOptimized,applyVisibility,setMode,metrics,resetIfStageChanged};
 })();
-window.HOJA_STEP136_DIAG=HOJA_STEP136_DIAG;
 
 const movingPlatformSystem=window.HOJA_CREATE_MOVING_PLATFORMS({TILE,HOJA_MAKER_IMAGES,hojaV2CaveRow,HOJA_V2_SURFACE_START,HOJA_V2_ATLAS_COLS,HOJA_CAVE_AMBIENT_TINT});
 const raftSystem=window.HOJA_CREATE_RAFTS({TILE,waterAtX,SFX});
