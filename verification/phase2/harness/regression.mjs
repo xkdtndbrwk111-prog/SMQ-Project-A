@@ -106,6 +106,8 @@ async function network(){
  const staleGame = await checkStaleQr(qr, 'gv', '게임이 새 버전');
  const staleCartridge = await checkStaleQr(qr, 'cv', '단원 문제가 바뀌어');
  output.network = {teacher:ta, student:sa, staleGame, staleCartridge};
+ assert.ok(!sa.requests.some(r=>/\/(?:teacher_qr\.js|qrcode\.js)(?:\?|$)/.test(r.url)),'student does not load teacher-only scripts');
+ assert.ok(!ta.requests.some(r=>/\/student\.js(?:\?|$)/.test(r.url)),'teacher does not load student-only script');
  for(const [label,data] of Object.entries(output.network)){
    assert.equal(data.requests.filter(r=>deny.test(r.url)).length,0,`${label} forbidden requests`);
    assert.equal(data.requests.filter(r=>!r.url.startsWith(base+'/')&&!r.url.startsWith('https://cdn.jsdelivr.net/')).length,0,`${label} unexpected external requests`);
