@@ -18,11 +18,12 @@ const server=createServer(async(req,res)=>{try{
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const base=`http://127.0.0.1:${server.address().port}`;
 const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader']});
-const out={method:`Chrome CDP encodedDataLength; loopback server ${process.env.HOJA_MEASURE_GZIP==='1'?'gzip text':'uncompressed'}, HTML no-cache, other files max-age=3600; CDN uses its own headers; warm is same browser context`,build:JSON.parse(await readFile(path.join(dir,'BUILD.json'),'utf8')).gameVersion,files:{},runs:[]};
+const out={method:`Chrome CDP encodedDataLength; loopback server ${process.env.HOJA_MEASURE_GZIP==='1'?'gzip text':'uncompressed'}, HTML no-cache, other files max-age=3600; CDN uses its own headers; fixed Math.random seed 314159 for comparable track choice; warm is same browser context`,build:JSON.parse(await readFile(path.join(dir,'BUILD.json'),'utf8')).gameVersion,files:{},runs:[]};
 async function walk(d,prefix=''){for(const x of await readdir(d,{withFileTypes:true})){const n=path.posix.join(prefix,x.name);if(x.isDirectory())await walk(path.join(d,x.name),n);else out.files[n]=(await stat(path.join(d,x.name))).size}}
 await walk(dir);
 async function run(kind,context,warm){
  const page=await context.newPage(),cdp=await context.newCDPSession(page), entries=new Map(), failures=[],errors=[];
+ await page.addInitScript(()=>{let x=314159;Math.random=()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}});
  page.on('requestfailed',r=>failures.push(r.url()+': '+r.failure()?.errorText));page.on('pageerror',e=>errors.push(String(e)));
  await cdp.send('Network.enable');
  cdp.on('Network.requestWillBeSent',e=>{if(!e.request.url.startsWith('data:'))entries.set(e.requestId,{url:e.request.url,type:e.type,bytes:0,cache:false})});
@@ -55,4 +56,4 @@ async function run(kind,context,warm){
 try{for(const kind of ['teacher','student']){const ctx=await browser.newContext();await run(kind,ctx,false);await run(kind,ctx,true);await ctx.close()}
  const name=process.argv[2];if(!/^[a-z0-9-]+$/.test(name||''))throw Error('측정 이름 필요');await writeFile(path.join(root,'verification/phase2d',name+'.json'),JSON.stringify(out,null,2)+'\n');
  console.log(JSON.stringify(out.runs.map(({resources,...r})=>r),null,2));
-}finally{await browser.close();await new Promise(r=>server.close(r))}
+}finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r))}

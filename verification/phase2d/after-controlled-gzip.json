@@ -1,0 +1,1246 @@
+{
+  "method": "Chrome CDP encodedDataLength; loopback server gzip text, HTML no-cache, other files max-age=3600; CDN uses its own headers; fixed Math.random seed 314159 for comparable track choice; warm is same browser context",
+  "build": "709c147ace",
+  "files": {
+    "BUILD.json": 7172,
+    "arcade.html": 1762257,
+    "assets/audio/hojaBgm.878e2113ecc7846d.ogg": 635917,
+    "assets/audio/hojaTrackAfternoon.633de3ef4920eaab.ogg": 525342,
+    "assets/audio/hojaTrackMeadow.3043e6a79f00454e.ogg": 531354,
+    "cartridges/catalog.json": 1033,
+    "cartridges/test-joseon-a.json": 8832,
+    "cartridges/test-joseon-b.json": 8554,
+    "index.html": 655230,
+    "js/arcade-host.js": 2052,
+    "js/audio.js": 12187,
+    "js/crumbles.js": 2717,
+    "js/enemies/ballooney.js": 751,
+    "js/enemies/blankey.js": 1416,
+    "js/enemies/circuit.js": 1399,
+    "js/enemies/hermie.js": 1395,
+    "js/enemies/jumpy.js": 973,
+    "js/enemies/martian.js": 1602,
+    "js/enemies/owl.js": 1734,
+    "js/enemies/roach.js": 1006,
+    "js/enemies/robot.js": 1282,
+    "js/enemies/system.js": 4154,
+    "js/hud.js": 8194,
+    "js/intro-shared.js": 366970,
+    "js/keyboard.js": 3073,
+    "js/moving-platforms.js": 5393,
+    "js/parent-gameplay.js": 6270,
+    "js/parent-services.js": 3664,
+    "js/physics.js": 6493,
+    "js/quiz-normalizer.js": 4715,
+    "js/rafts.js": 3480,
+    "js/review.js": 6363,
+    "js/run-record.js": 1913,
+    "js/settlement.js": 3856,
+    "js/springs.js": 1010,
+    "js/student.js": 7106,
+    "js/teacher_qr.js": 6536,
+    "js/world/cave-layout.js": 13352,
+    "js/world/cave-variation.js": 7311,
+    "js/world/surface-generator.js": 13132,
+    "js/world/surface-templates.js": 17886,
+    "js/world/themes.js": 2968,
+    "play.html": 655164,
+    "vendor/README.md": 297,
+    "vendor/qrcode.js": 56694
+  },
+  "runs": [
+    {
+      "kind": "teacher",
+      "warm": false,
+      "pageLoadMs": 1053.468916,
+      "sceneReadyMs": 2512.219833,
+      "requests": 42,
+      "transferredBytes": 2315171,
+      "cached": 1,
+      "resources": [
+        {
+          "url": "http://127.0.0.1:59173/",
+          "type": "Document",
+          "bytes": 417754,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 283777,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/intro-shared.js?v=97e8abcb2d956ab4",
+          "type": "Script",
+          "bytes": 24743,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-services.js?v=5583080b9a0d8d72",
+          "type": "Script",
+          "bytes": 1912,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-gameplay.js?v=b152ef85812cc987",
+          "type": "Script",
+          "bytes": 2875,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/vendor/qrcode.js?v=18ae399f81182bc9",
+          "type": "Script",
+          "bytes": 12067,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/teacher_qr.js?v=bedaa4bb35278453",
+          "type": "Script",
+          "bytes": 3458,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/favicon.ico",
+          "type": "Other",
+          "bytes": 143,
+          "cache": false,
+          "status": 404
+        },
+        {
+          "url": "http://127.0.0.1:59173/assets/audio/hojaTrackAfternoon.633de3ef4920eaab.ogg",
+          "type": "Media",
+          "bytes": 525531,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/favicon.ico",
+          "type": "Other",
+          "bytes": 143,
+          "cache": false,
+          "status": 404
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/catalog.json",
+          "type": "Fetch",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/test-joseon-a.json",
+          "type": "Fetch",
+          "bytes": 2344,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/arcade.html?season=winter&gv=709c147ace",
+          "type": "Document",
+          "bytes": 981489,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-layout.js?v=2c04591ecb0f2736",
+          "type": "Script",
+          "bytes": 5729,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-variation.js?v=1d86010cabfe7d94",
+          "type": "Script",
+          "bytes": 3705,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/themes.js?v=87f641ee51b2aef6",
+          "type": "Script",
+          "bytes": 1184,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-templates.js?v=a1591deac4751772",
+          "type": "Script",
+          "bytes": 5849,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-generator.js?v=9e23d9cad99ecc34",
+          "type": "Script",
+          "bytes": 4988,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/arcade-host.js?v=a5af97e3eea20528",
+          "type": "Script",
+          "bytes": 1229,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/audio.js?v=ab5d1c474a77c952",
+          "type": "Script",
+          "bytes": 4320,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/physics.js?v=e6172aae1cdc895a",
+          "type": "Script",
+          "bytes": 2702,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/springs.js?v=458add271e3520fa",
+          "type": "Script",
+          "bytes": 788,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/moving-platforms.js?v=cabddec9d20f348b",
+          "type": "Script",
+          "bytes": 2362,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/rafts.js?v=da8af997d85e9845",
+          "type": "Script",
+          "bytes": 1689,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/crumbles.js?v=5973d079fcf57ff6",
+          "type": "Script",
+          "bytes": 1375,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/system.js?v=bc84b653e1278ce9",
+          "type": "Script",
+          "bytes": 1975,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/jumpy.js?v=366125bf98332c70",
+          "type": "Script",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/owl.js?v=5c9a90e844955b10",
+          "type": "Script",
+          "bytes": 1083,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/hermie.js?v=11d5521f02ba5233",
+          "type": "Script",
+          "bytes": 885,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/roach.js?v=e41cce636c305f0c",
+          "type": "Script",
+          "bytes": 792,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/blankey.js?v=f3b6eb57c181b9df",
+          "type": "Script",
+          "bytes": 990,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/ballooney.js?v=255a9906c2b79e11",
+          "type": "Script",
+          "bytes": 672,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/martian.js?v=080aec7e3b3db61b",
+          "type": "Script",
+          "bytes": 931,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/robot.js?v=9a0ced88c26ab7ae",
+          "type": "Script",
+          "bytes": 829,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/circuit.js?v=ed7b283919995d56",
+          "type": "Script",
+          "bytes": 965,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/keyboard.js?v=50d70e0f1aa7e8a7",
+          "type": "Script",
+          "bytes": 1818,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/quiz-normalizer.js?v=4c2b6a21246db9b2",
+          "type": "Script",
+          "bytes": 2102,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/hud.js?v=dbef9f4300a693f3",
+          "type": "Script",
+          "bytes": 2629,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/run-record.js?v=7029935b68e1015f",
+          "type": "Script",
+          "bytes": 1234,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/settlement.js?v=0da3caabc3cfb474",
+          "type": "Script",
+          "bytes": 1702,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/review.js?v=737bf4f5fbecfd18",
+          "type": "Script",
+          "bytes": 2866,
+          "cache": false,
+          "status": 200
+        }
+      ],
+      "failures": [],
+      "errors": []
+    },
+    {
+      "kind": "teacher",
+      "warm": true,
+      "pageLoadMs": 118.67025000000012,
+      "sceneReadyMs": 2564.337583999999,
+      "requests": 41,
+      "transferredBytes": 1402501,
+      "cached": 36,
+      "resources": [
+        {
+          "url": "http://127.0.0.1:59173/",
+          "type": "Document",
+          "bytes": 417754,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/intro-shared.js?v=97e8abcb2d956ab4",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-services.js?v=5583080b9a0d8d72",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-gameplay.js?v=b152ef85812cc987",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/vendor/qrcode.js?v=18ae399f81182bc9",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/teacher_qr.js?v=bedaa4bb35278453",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/assets/audio/hojaTrackAfternoon.633de3ef4920eaab.ogg",
+          "type": "Media",
+          "bytes": 0,
+          "cache": true,
+          "status": 206
+        },
+        {
+          "url": "http://127.0.0.1:59173/favicon.ico",
+          "type": "Other",
+          "bytes": 143,
+          "cache": false,
+          "status": 404
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/catalog.json",
+          "type": "Fetch",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/test-joseon-a.json",
+          "type": "Fetch",
+          "bytes": 2344,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/arcade.html?season=winter&gv=709c147ace",
+          "type": "Document",
+          "bytes": 981489,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-layout.js?v=2c04591ecb0f2736",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-variation.js?v=1d86010cabfe7d94",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/themes.js?v=87f641ee51b2aef6",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-templates.js?v=a1591deac4751772",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-generator.js?v=9e23d9cad99ecc34",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/arcade-host.js?v=a5af97e3eea20528",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/audio.js?v=ab5d1c474a77c952",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/physics.js?v=e6172aae1cdc895a",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/springs.js?v=458add271e3520fa",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/moving-platforms.js?v=cabddec9d20f348b",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/rafts.js?v=da8af997d85e9845",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/crumbles.js?v=5973d079fcf57ff6",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/system.js?v=bc84b653e1278ce9",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/jumpy.js?v=366125bf98332c70",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/owl.js?v=5c9a90e844955b10",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/hermie.js?v=11d5521f02ba5233",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/roach.js?v=e41cce636c305f0c",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/blankey.js?v=f3b6eb57c181b9df",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/ballooney.js?v=255a9906c2b79e11",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/martian.js?v=080aec7e3b3db61b",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/robot.js?v=9a0ced88c26ab7ae",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/circuit.js?v=ed7b283919995d56",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/keyboard.js?v=50d70e0f1aa7e8a7",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/quiz-normalizer.js?v=4c2b6a21246db9b2",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/hud.js?v=dbef9f4300a693f3",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/run-record.js?v=7029935b68e1015f",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/settlement.js?v=0da3caabc3cfb474",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/review.js?v=737bf4f5fbecfd18",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        }
+      ],
+      "failures": [],
+      "errors": []
+    },
+    {
+      "kind": "student",
+      "warm": false,
+      "pageLoadMs": 308.22741700000006,
+      "sceneReadyMs": 1381.5263329999998,
+      "requests": 40,
+      "transferredBytes": 2302922,
+      "cached": 1,
+      "resources": [
+        {
+          "url": "http://127.0.0.1:59173/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=709c147ace&s=spring",
+          "type": "Document",
+          "bytes": 417725,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 283752,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/intro-shared.js?v=97e8abcb2d956ab4",
+          "type": "Script",
+          "bytes": 24743,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-services.js?v=5583080b9a0d8d72",
+          "type": "Script",
+          "bytes": 1912,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-gameplay.js?v=b152ef85812cc987",
+          "type": "Script",
+          "bytes": 2875,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/student.js?v=3831691f4c4e7d81",
+          "type": "Script",
+          "bytes": 3473,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/catalog.json",
+          "type": "Fetch",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/test-joseon-a.json",
+          "type": "Fetch",
+          "bytes": 2344,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/arcade.html?season=spring&gv=709c147ace",
+          "type": "Document",
+          "bytes": 981489,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/assets/audio/hojaTrackAfternoon.633de3ef4920eaab.ogg",
+          "type": "Media",
+          "bytes": 525531,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-layout.js?v=2c04591ecb0f2736",
+          "type": "Script",
+          "bytes": 5729,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-variation.js?v=1d86010cabfe7d94",
+          "type": "Script",
+          "bytes": 3705,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/themes.js?v=87f641ee51b2aef6",
+          "type": "Script",
+          "bytes": 1184,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-templates.js?v=a1591deac4751772",
+          "type": "Script",
+          "bytes": 5849,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-generator.js?v=9e23d9cad99ecc34",
+          "type": "Script",
+          "bytes": 4988,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/arcade-host.js?v=a5af97e3eea20528",
+          "type": "Script",
+          "bytes": 1229,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/audio.js?v=ab5d1c474a77c952",
+          "type": "Script",
+          "bytes": 4320,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/physics.js?v=e6172aae1cdc895a",
+          "type": "Script",
+          "bytes": 2702,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/springs.js?v=458add271e3520fa",
+          "type": "Script",
+          "bytes": 788,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/moving-platforms.js?v=cabddec9d20f348b",
+          "type": "Script",
+          "bytes": 2362,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/rafts.js?v=da8af997d85e9845",
+          "type": "Script",
+          "bytes": 1689,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/crumbles.js?v=5973d079fcf57ff6",
+          "type": "Script",
+          "bytes": 1375,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/system.js?v=bc84b653e1278ce9",
+          "type": "Script",
+          "bytes": 1975,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/jumpy.js?v=366125bf98332c70",
+          "type": "Script",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/owl.js?v=5c9a90e844955b10",
+          "type": "Script",
+          "bytes": 1083,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/hermie.js?v=11d5521f02ba5233",
+          "type": "Script",
+          "bytes": 885,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/roach.js?v=e41cce636c305f0c",
+          "type": "Script",
+          "bytes": 792,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/blankey.js?v=f3b6eb57c181b9df",
+          "type": "Script",
+          "bytes": 990,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/ballooney.js?v=255a9906c2b79e11",
+          "type": "Script",
+          "bytes": 672,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/martian.js?v=080aec7e3b3db61b",
+          "type": "Script",
+          "bytes": 931,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/robot.js?v=9a0ced88c26ab7ae",
+          "type": "Script",
+          "bytes": 829,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/circuit.js?v=ed7b283919995d56",
+          "type": "Script",
+          "bytes": 965,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/keyboard.js?v=50d70e0f1aa7e8a7",
+          "type": "Script",
+          "bytes": 1818,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/quiz-normalizer.js?v=4c2b6a21246db9b2",
+          "type": "Script",
+          "bytes": 2102,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/hud.js?v=dbef9f4300a693f3",
+          "type": "Script",
+          "bytes": 2629,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/run-record.js?v=7029935b68e1015f",
+          "type": "Script",
+          "bytes": 1234,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/settlement.js?v=0da3caabc3cfb474",
+          "type": "Script",
+          "bytes": 1702,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/review.js?v=737bf4f5fbecfd18",
+          "type": "Script",
+          "bytes": 2866,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/favicon.ico",
+          "type": "Other",
+          "bytes": 143,
+          "cache": false,
+          "status": 404
+        }
+      ],
+      "failures": [],
+      "errors": []
+    },
+    {
+      "kind": "student",
+      "warm": true,
+      "pageLoadMs": 254.20116699999926,
+      "sceneReadyMs": 1887.4029999999984,
+      "requests": 40,
+      "transferredBytes": 1402472,
+      "cached": 35,
+      "resources": [
+        {
+          "url": "http://127.0.0.1:59173/play.html?m=s&c=test-joseon-a&cv=19065b1d0fc5&gv=709c147ace&s=spring",
+          "type": "Document",
+          "bytes": 417725,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/intro-shared.js?v=97e8abcb2d956ab4",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-services.js?v=5583080b9a0d8d72",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/parent-gameplay.js?v=b152ef85812cc987",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/student.js?v=3831691f4c4e7d81",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/catalog.json",
+          "type": "Fetch",
+          "bytes": 771,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/cartridges/test-joseon-a.json",
+          "type": "Fetch",
+          "bytes": 2344,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/arcade.html?season=spring&gv=709c147ace",
+          "type": "Document",
+          "bytes": 981489,
+          "cache": false,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/assets/audio/hojaTrackAfternoon.633de3ef4920eaab.ogg",
+          "type": "Media",
+          "bytes": 0,
+          "cache": true,
+          "status": 206
+        },
+        {
+          "url": "https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-layout.js?v=2c04591ecb0f2736",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/cave-variation.js?v=1d86010cabfe7d94",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/themes.js?v=87f641ee51b2aef6",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-templates.js?v=a1591deac4751772",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/world/surface-generator.js?v=9e23d9cad99ecc34",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/arcade-host.js?v=a5af97e3eea20528",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/audio.js?v=ab5d1c474a77c952",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/physics.js?v=e6172aae1cdc895a",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/springs.js?v=458add271e3520fa",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/moving-platforms.js?v=cabddec9d20f348b",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/rafts.js?v=da8af997d85e9845",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/crumbles.js?v=5973d079fcf57ff6",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/system.js?v=bc84b653e1278ce9",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/jumpy.js?v=366125bf98332c70",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/owl.js?v=5c9a90e844955b10",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/hermie.js?v=11d5521f02ba5233",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/roach.js?v=e41cce636c305f0c",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/blankey.js?v=f3b6eb57c181b9df",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/ballooney.js?v=255a9906c2b79e11",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/martian.js?v=080aec7e3b3db61b",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/robot.js?v=9a0ced88c26ab7ae",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/enemies/circuit.js?v=ed7b283919995d56",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/keyboard.js?v=50d70e0f1aa7e8a7",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/quiz-normalizer.js?v=4c2b6a21246db9b2",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/hud.js?v=dbef9f4300a693f3",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/run-record.js?v=7029935b68e1015f",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/settlement.js?v=0da3caabc3cfb474",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/js/review.js?v=737bf4f5fbecfd18",
+          "type": "Script",
+          "bytes": 0,
+          "cache": true,
+          "status": 200
+        },
+        {
+          "url": "http://127.0.0.1:59173/favicon.ico",
+          "type": "Other",
+          "bytes": 143,
+          "cache": false,
+          "status": 404
+        }
+      ],
+      "failures": [],
+      "errors": []
+    }
+  ]
+}
