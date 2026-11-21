@@ -79,6 +79,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'caveRandom(){return CAVE_EXPERIMENT_ENABLED;},' +
     'caveRenderState(){const s=ACTIVE_SCENE;return {stage:STAGE_INDEX,collision:(s.hojaStep136CollisionOnly||[]).filter(o=>o?.active).map(o=>!!o.visible),culled:(s.hojaStep136Cullables||[]).filter(o=>o?.active).length};},' +
 
+    'cameraSafe(o){return hojaCameraSafeView(o);},visualAt(ms){const s=ACTIVE_SCENE;s.updateCamera(s.hojaCloudStartAt+ms);return (s.bgLayers||[]).map(l=>({key:l.key,x:l.sprite.tilePositionX,y:l.sprite.y,drift:l.cloudDrift,visible:l.sprite.visible,displayWidth:l.sprite.displayWidth,displayHeight:l.sprite.displayHeight}));},' +
+    'moveVisual(x,y){ACTIVE_SCENE.playerBody.body.reset(x,y);ACTIVE_SCENE.updateCamera(ACTIVE_SCENE.time.now);},' +
     'cameraInfo(){const c=ACTIVE_SCENE.cameras.main;return {scrollX:c.scrollX,scrollY:c.scrollY,zoom:c.zoom,width:c.width,height:c.height};},' +
     'bankInfo(){return (ACTIVE_SCENE.waterBankForeground||[]).map(o=>({x:o.x,y:o.y,w:o.width,h:o.height,depth:o.depth,visible:o.visible}));},' +
     'coverInfo(){return (ACTIVE_SCENE.caveCovers||[]).map(({cover})=>{const source=cover.texture.getSourceImage();const ctx=source.getContext("2d");const pixels=ctx.getImageData(0,0,source.width,source.height).data;let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)transparent++;return {x:cover.x,y:cover.y,w:source.width,h:source.height,alpha:cover.alpha,transparent};});},' +

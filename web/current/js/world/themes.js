@@ -6,8 +6,8 @@ window.HOJA_CREATE_THEMES = function () {
       terrain:'terrain',entities:'entities',
       bg:[
         {key:'bgSky',        xFactor:0.000, yFactor:0.000},
-        {key:'bgCloud1',     xFactor:0.028, yFactor:0.010},
-        {key:'bgCloud2',     xFactor:0.055, yFactor:0.020},
+        {key:'bgCloud1',     xFactor:0.028, yFactor:0.010, cloudDrift:0.12},
+        {key:'bgCloud2',     xFactor:0.055, yFactor:0.020, cloudDrift:0.18},
         {key:'bgHills',      xFactor:0.100, yFactor:0.040},
         {key:'bgForeground', xFactor:0.180, yFactor:0.070}
       ],
@@ -48,8 +48,8 @@ window.HOJA_CREATE_THEMES = function () {
       terrain:'thTroTerrain',entities:'thTroEntities',
       bg:[
         {key:'thTroSky',      xFactor:0.000, yFactor:0.000},
-        {key:'thTroCloudsBG', xFactor:0.028, yFactor:0.012},
-        {key:'thTroClouds',   xFactor:0.055, yFactor:0.022},
+        {key:'thTroCloudsBG', xFactor:0.028, yFactor:0.012, cloudDrift:0.12},
+        {key:'thTroClouds',   xFactor:0.055, yFactor:0.022, cloudDrift:0.18},
         {key:'thTroWaters',   xFactor:0.100, yFactor:0.040}
       ],
       decor:{
