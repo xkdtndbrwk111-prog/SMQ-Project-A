@@ -1,3 +1,4 @@
+import {controlMethods,c1ButtonUpdate,seamTimer} from './current-test-control-methods.mjs';
 import {dialogueButtons,dialoguePreviewBindings} from './current-test-dialogue.mjs';
 import {controlsBeforeSound,controlsAfterSound,controlButtons} from './current-test-controls.mjs';
 import {actionHandlers,emergencyReturnMethod} from './current-test-actions.mjs';
@@ -26,10 +27,16 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
-  A.edit('    this.hojaDoubleTap=hojaNewDoubleTapState();\n    this.hojaUpdateSeamButtons();','    this.hojaDoubleTap=hojaNewDoubleTapState();\n'+benchmarkHandlers+profilerHandler+actionHandlers+controlsBeforeSound);
+  A.edit('    this.hojaDoubleTap=hojaNewDoubleTapState();','    this.hojaDoubleTap=hojaNewDoubleTapState();\n'+benchmarkHandlers+profilerHandler+actionHandlers+controlsBeforeSound);
   A.edit("    document.getElementById('soundBtn').onclick=()=>this.toggleSound();", "    document.getElementById('soundBtn').onclick=()=>this.toggleSound();"+controlsAfterSound);
   A.edit('async function boot(){',profilerSource+'async function boot(){');
   A.edit('  respawnNow(){',emergencyReturnMethod+'  respawnNow(){');
+  A.edit('  prepareStaticCulling(){',controlMethods+'\n  prepareStaticCulling(){');
+  A.edit('class HojaScene extends Phaser.Scene{',c1ButtonUpdate+'\nclass HojaScene extends Phaser.Scene{');
+  A.edit('    this.createQuestionRadar();',seamTimer+'    this.createQuestionRadar();');
+  A.edit('    cam.setZoom(current);\n    this.applyC1ManualCamera();','    cam.setZoom(current);\n    this.hojaUpdatePixelExperimentStatus();\n    this.applyC1ManualCamera();');
+  A.edit('    <div id="phaserRoot"></div>','    <div id="phaserRoot"></div>\n    <canvas id="hojaSeamMeasureCanvas" aria-hidden="true"></canvas>');
+
   A.edit('<main>',dialogueButtons+'\n<main>');
   A.edit("  nextEl.addEventListener('click',advance);",dialoguePreviewBindings+"  nextEl.addEventListener('click',advance);");
 
@@ -76,6 +83,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
     TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <div id="hojaSeamMeasurePanel" style="display:none" role="status"></div>
+    <style>#hojaSeamMeasurePanel[style*="block"]{display:block!important;pointer-events:none}</style>
     ${controlButtons}
     <button id="resetBtn" type="button">처음부터</button>
     <button id="escapeCaveBtn" type="button">동굴 비상 복귀</button>

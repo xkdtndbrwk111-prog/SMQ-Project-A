@@ -98,6 +98,8 @@ if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/id="(?:hojaTerrainSplitBtn|hojaCameraSafeGuideBtn|hojaSnorePreviewBtn|hojaPixelExperimentBtn|hojaRenderScaleBtn|c1CameraBtn|qualityBtn|v055ChunkBtn|hojaSeamDiagBtn|hojaZoomProbeBtn|bgPerfBtn|lampPerfBtn|cullPerfBtn|colliderBtn)"|class="cleanZoomGroup"/.test(arc), '숨은 화면·카메라 진단 조작 없음');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/id="(?:hojaDialoguePreviewBtn|mixedDialoguePreviewBtn|nahanDialoguePreviewBtn)"|MIXED_R23_SAMPLE|NAHAN_SAMPLE/.test(arc), '대화 미리보기 조작은 시험 빌드에만');
+if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
+  ok(!/hojaMeasureChunkSeams|_hojaSeamTimer|id="hojaSeamMeasure(?:Canvas|Panel)"|^  (?:toggleLightBackground|toggleStaticCulling|toggleSurfaceChunks|hojaToggleTerrainSplit|hojaToggleSeamDiagnostic|hojaCycleZoomProbe|hojaSetManualZoom|cycleSurfaceLampMode)\(/m.test(arc), '화면 진단 메서드와 경계 측정은 시험 빌드에만');
 
 // 6
 ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');
