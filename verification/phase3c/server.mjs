@@ -39,6 +39,7 @@ async function api(req,res){
   case 'create':{teacherOnly();const c=catalog.find(x=>x.id===d.cartridgeId);if(!c)throw Error('INVALID_CARTRIDGE');out=await service.createRoom(who.token,{gameVersion:build.gameVersion,cartridgeId:c.id,cartridgeVersion:c.version,durationSeconds:d.durationSeconds});await service.publish(who.token,out.sessionId);break;}
   case 'join':{if(who.role!=='student')throw Object.assign(new Error('STUDENT_ONLY'),{code:'STUDENT_ONLY'});const c=catalog.find(x=>x.id===d.cartridgeId);if(!c)throw Error('INVALID_CARTRIDGE');out=await service.join(who.token,d.sessionId,{inviteToken:d.inviteToken,name:d.name,gameVersion:build.gameVersion,cartridgeVersion:c.version});break;}
   case 'view':out=await service.roomView(who.token,d.sessionId,d.participantId);if(who.role==='student'&&d.participantId){await service.heartbeat(who.token,d.sessionId,d.participantId);}break;
+  case 'duration':teacherOnly();out=await service.setDuration(who.token,d.sessionId,d.durationSeconds);break;
   case 'team':teacherOnly();out=await service.assignTeam(who.token,d.sessionId,d.participantId,d.team);break;
   case 'exclude':teacherOnly();out=await service.exclude(who.token,d.sessionId,d.participantId);break;
   case 'rerun':teacherOnly();out=await service.rerun(who.token,d.sessionId,d.participantId);break;

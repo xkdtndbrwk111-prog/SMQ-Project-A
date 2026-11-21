@@ -14,6 +14,10 @@ unset FIREBASE_TOKEN FIREBASE_CONFIG CLOUDSDK_AUTH_ACCESS_TOKEN FIRESTORE_EMULAT
 export GCLOUD_PROJECT=demo-hoja-phase3a GOOGLE_CLOUD_PROJECT=demo-hoja-phase3a
 export XDG_CONFIG_HOME="$SCRATCH/config" CLOUDSDK_CONFIG="$SCRATCH/gcloud"
 export FIREBASE_EMULATORS_PATH="${HOJA_EMULATOR_CACHE:-$SCRATCH/emulators}"
+if [ -z "${HOJA_CLASS_HOST:-}" ]; then
+  HOJA_CLASS_HOST=$(node -e "const n=require('node:os').networkInterfaces();for(const k of ['en0',...Object.keys(n).filter(x=>x!=='en0')])for(const a of n[k]||[]){if(a.family==='IPv4'&&!a.internal&&/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(a.address)){console.log(a.address);process.exit()}}console.log('127.0.0.1')")
+  export HOJA_CLASS_HOST
+fi
 export PATH="$JAVA_HOME/bin:$PATH" HOJA_CLASS_SERVER="$ROOT/verification/phase3c/server.mjs"
 cd "$SCRATCH"
 "$TOOLS" emulators:exec --config "$SCRATCH/firebase.json" --project demo-hoja-phase3a --only auth,firestore 'node "$HOJA_CLASS_SERVER"'
