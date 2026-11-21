@@ -32,7 +32,12 @@ test('teacher and student load the same offline service before the cartridge sel
     const html = await readFile(new URL(page + '.html', source), 'utf8');
     const tags = [...html.matchAll(/<script src="js\/parent-services.js"><\/script>/g)];
     assert.equal(tags.length, 1);
-    assert.ok(tags[0].index < html.indexOf('const HOJA_CATALOG='));
+    if (page === 'index') assert.ok(tags[0].index < html.indexOf('const HOJA_CATALOG='));
+    else {
+      assert.equal(html.includes('const HOJA_CATALOG='),false,'student has no teacher catalog');
+      assert.equal(html.includes('window.HOJA_REPOSITORY=(()=>'),false,'student has no teacher repository');
+      assert.equal(html.includes('window.HOJA_MODE_PREVIEW=(()=>'),false,'student has no teacher mode selector');
+    }
   }
 });
 
