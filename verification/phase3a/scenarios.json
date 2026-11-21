@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "scope": "specification-only; all expected results are future acceptance criteria, not observed results",
+  "projectId": "demo-hoja-phase3a",
+  "scenarios": [
+    {"id":"iso-01","area":"isolation","action":"single mode runs from start to settlement with all outbound requests observed","expected":"zero Firebase and operating Apps Script requests"},
+    {"id":"iso-02","area":"isolation","action":"an emulator service is absent","expected":"fail closed without production fallback"},
+    {"id":"auth-01","area":"access","action":"anonymous student attempts teacher session control","expected":"denied"},
+    {"id":"auth-02","area":"access","action":"student reads another participant private response document","expected":"denied"},
+    {"id":"auth-03","area":"access","action":"student writes score, aggregate, role or team directly","expected":"denied"},
+    {"id":"auth-04","area":"access","action":"unrelated teacher tries to control an existing class session","expected":"denied"},
+    {"id":"join-01","area":"joining","action":"same credential concurrently requests the same seat and operation id","expected":"one seat, one participant and stable replay response"},
+    {"id":"join-02","area":"joining","action":"different credentials use the same display name","expected":"no automatic identity merge; require teacher decision or reject by policy"},
+    {"id":"join-03","area":"joining","action":"join request races the session freeze transaction","expected":"serialized as included before freeze or explicitly rejected after freeze"},
+    {"id":"join-04","area":"joining","action":"expired or revoked admission ticket is replayed","expected":"denied and no membership created"},
+    {"id":"net-01","area":"reconnect","action":"temporary loss while original game tab remains alive","expected":"same identity and run; do not reset local timer or replay submitted actions"},
+    {"id":"net-02","area":"reconnect","action":"reload or switch device after active run begins","expected":"no claim of restoring game state; teacher-mediated exception, excluded or fresh run"},
+    {"id":"net-03","area":"reconnect","action":"older tab sends with a replaced connection epoch","expected":"reject stale epoch and retain one active connection"},
+    {"id":"net-04","area":"reconnect","action":"offline queue reconnects after session closes","expected":"no implicit backdating or automatic late acceptance"},
+    {"id":"score-01","area":"settlement","action":"same run and idempotency key and identical result are submitted twice","expected":"one result and aggregate counted once; replay original receipt"},
+    {"id":"score-02","area":"settlement","action":"same run and key carry conflicting result payloads","expected":"conflict; preserve first committed result"},
+    {"id":"score-03","area":"settlement","action":"two submit attempts race session closure","expected":"transaction serialization determines acceptance; no partial or duplicate aggregate"},
+    {"id":"score-04","area":"settlement","action":"transaction callback retries following contention","expected":"no external side effects in callback and one final result"},
+    {"id":"score-05","area":"settlement","action":"client forges score or answer data","expected":"reject structural violations; mark remaining client-origin result unverified and never claim anti-cheat proof"},
+    {"id":"time-01","area":"timing","action":"quiz, pause, death and Enter continue under class session","expected":"existing single-engine 600-second pause and continue semantics preserved"},
+    {"id":"time-02","area":"timing","action":"late and out-of-order session events arrive","expected":"monotonic session revision prevents state rollback"},
+    {"id":"version-01","area":"versions","action":"game or cartridge version differs from locked session","expected":"reject launch before gameplay"},
+    {"id":"reg-01","area":"regression","action":"existing phase 1 and 2 suite, trace, finish and QR tests","expected":"retain unchanged baseline and pass without weakening"},
+    {"id":"device-01","area":"field","action":"interactive board, physical keyboard, tablet, real sound and school network","expected":"separate future gate; NOT RUN until observed"}
+  ]
+}
