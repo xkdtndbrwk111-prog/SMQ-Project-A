@@ -1041,7 +1041,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
       <div class="hudMetric quiz"><div class="hudLabel">전체 문제</div><div class="hudValue" id="domQuiz">00/25</div></div>
       <div class="hudMetric flower"><div class="hudLabel">과일</div><div class="hudValue" id="domFlower">0/3</div></div>
       <div class="hudMetric units"><div class="hudLabel">선택 단원</div><div id="domUnits" class="hudUnitsList" aria-label="현재 선택된 단원"></div></div>
-      <div class="hudMetric clock"><div class="hudLabel">남은 시간</div><div class="hudValue" id="domTime">600</div></div>
+      <div class="hudMetric clock"><div class="hudLabel">남은 시간</div><div class="hudValue" id="domTime">900</div></div>
     </div>
     <nav id="hojaStudentTools" aria-label="게임 설정">
       <button id="hojaStudentSound" class="hojaHudIcon" type="button" title="음량 조절" aria-label="음량 조절" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button>
@@ -1185,7 +1185,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <section class="card"><h3>V0.36 — 미로 동굴 · 한글 HUD · 탐험 점수 정산</h3><ul>
 <li>지상 4개 랜덤 맵 + 128×128 타일 탐험형 동굴. 다양한 높이의 발판, 샛길, 장애물, 4개 지상 연결 토관.</li>
 <li>각 맵 물음표 5개(총 25개) · 토관은 옆으로 통과 불가 · 지상 정적 지형의 화면 밖 컬링.</li>
-<li>시간: 모든 맵에서 600초 공유(문제 풀이·일시정지 중 시간 정지).</li>
+<li>시간: 모든 맵에서 900초 공유(문제 풀이·일시정지 중 시간 정지).</li>
 <li>사망/충격 VFX: HUD 고정 · 화면 좌우 경계 밖 이동 방지</li>
 <li>기본 균형 화질(배율 최대 1.5×) · FPS 낮으면 자동 성능 모드(1×) · 고화질 수동 선택</li>
 <li>Shift 달리기 점프가 버튼(전체 화면 등)을 다시 누르던 문제 수정</li>
@@ -2228,9 +2228,14 @@ function stageQuestionCount(st){
     st.bricks.filter(b=>b.hiddenQuiz).length+(st.secrets||[]).length;
 }
 const TOTAL_QUESTIONS=5*STAGES.length;  // 4 surfaces + 1 cave = 25
-const RUN_TIME_LIMIT_MS=600*1000; // ONE shared 600s clock; quiz/pause stop it
+// One pause-aware game clock; room UI and remote settings are not exposed here.
+function hojaCreateTimeSettings(durationSeconds=900){
+  if(!Number.isInteger(durationSeconds)||durationSeconds<300||durationSeconds>1800||durationSeconds%60!==0)throw Error('잘못된 게임 시간 설정');
+  return Object.freeze({durationSeconds,sunsetSeconds:Math.round(durationSeconds*2/9),nightSeconds:Math.round(durationSeconds/9),guideSeconds:Math.round(durationSeconds/9)});
+}
+let RUN_TIME_SETTINGS=hojaCreateTimeSettings();
 const FLOWER_BONUS_PER_ITEM=5; // Paid once when the entire run ends.
-const RUN={score:0,correctQuiz:0,quizAnswered:0,found:0,deaths:0,remainingMs:RUN_TIME_LIMIT_MS};
+const RUN={score:0,correctQuiz:0,quizAnswered:0,found:0,deaths:0,remainingMs:RUN_TIME_SETTINGS.durationSeconds*1000};
 
 const ENEMY_TYPES = window.HOJA_ENEMIES.types;
 
@@ -2646,10 +2651,11 @@ function exitDoorX(){return hojaDoorX(GOAL_X);}
 
 let PENDING_SEED=null;
 let USE_FIXED_MAPS=false;   // true → the hand-made layouts (demo / testing)
-function startStage(index,fresh,spawn='start'){
+function startStage(index,fresh,spawn='start',durationSeconds=900){
   if(fresh){
+    RUN_TIME_SETTINGS=hojaCreateTimeSettings(durationSeconds);
     ACTIVE_SCENE?.hideHojaDeathDialog?.();
-    RUN.score=0;RUN.correctQuiz=0;RUN.quizAnswered=0;RUN.found=0;RUN.deaths=0;RUN.remainingMs=RUN_TIME_LIMIT_MS;RUN.stages=[];RUN.flowerBonusGiven=false;RUN.flowerBonus=0;
+    RUN.score=0;RUN.correctQuiz=0;RUN.quizAnswered=0;RUN.found=0;RUN.deaths=0;RUN.remainingMs=RUN_TIME_SETTINGS.durationSeconds*1000;RUN.stages=[];RUN.flowerBonusGiven=false;RUN.flowerBonus=0;
     if(EXTERNAL_QUESTIONS?.length){
       QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
       RUN.step09Families=new Set();RUN.step09History=[];
@@ -2715,13 +2721,14 @@ const HOJA_SEASON_SKIES={
 };
 function hojaPaletteBand(ms,theme){
   if(theme==='cave')return 16;
-  if(ms>100000)return 0;
-  if(ms>100000-HOJA_FADE_MS){
-    return Math.max(1,Math.ceil(HOJA_FADE_STEPS*(100000-ms)/HOJA_FADE_MS));
+  const sunset=RUN_TIME_SETTINGS.sunsetSeconds*1000,night=RUN_TIME_SETTINGS.nightSeconds*1000;
+  if(ms>sunset)return 0;
+  if(ms>sunset-HOJA_FADE_MS){
+    return Math.max(1,Math.ceil(HOJA_FADE_STEPS*(sunset-ms)/HOJA_FADE_MS));
   }
-  if(ms>50000)return 8;
-  if(ms>50000-HOJA_FADE_MS){
-    return 8+Math.max(1,Math.ceil(HOJA_FADE_STEPS*(50000-ms)/HOJA_FADE_MS));
+  if(ms>night)return 8;
+  if(ms>night-HOJA_FADE_MS){
+    return 8+Math.max(1,Math.ceil(HOJA_FADE_STEPS*(night-ms)/HOJA_FADE_MS));
   }
   return 16;
 }
@@ -4519,11 +4526,11 @@ class HojaScene extends Phaser.Scene{
   updateSurfaceStreetLamps(){
     if(STAGE.theme==='cave'||!this.surfaceStreetLamps?.length)return 0;
     const band=hojaPaletteBand(this.remainingMs,STAGE.theme);
-    const k=Math.max(0,Math.min(1,band/8));
+    const k=Math.max(0,Math.min(1,(band-8)/8));
     if(this.lampSurfaceMode===band)return k;
     this.lampSurfaceMode=band;
     for(const lamp of this.surfaceStreetLamps){
-      lamp.art.setTexture(band>0?'hojaStreetLampOn':'hojaStreetLampOff');
+      lamp.art.setTexture(band>8?'hojaStreetLampOn':'hojaStreetLampOff');
       // Alpha changes only when the evening/night palette step changes.
       // V0.52 diagnostic: isolate 300px ADD halo overdraw from night palette cost.
       // The lantern artwork remains identical in all three modes.
@@ -5130,7 +5137,7 @@ class HojaScene extends Phaser.Scene{
   updateQuestionRadar(time){
     const root=this.questionRadarRoot;
     if(!root)return;
-    if(this.remainingMs>50000||this.remainingMs<=0||this.clear||this.dying||
+    if(this.remainingMs>RUN_TIME_SETTINGS.guideSeconds*1000||this.remainingMs<=0||this.clear||this.dying||
        this.timeUp||this.transitioning||this.quizActive||this.manualPaused){
       if(root.style.display!=='none')root.style.display='none';
       return;
@@ -7691,7 +7698,7 @@ class HojaScene extends Phaser.Scene{
 
   applyUrgencyState(){
     this.updateWorldPalette();
-    const mode=this.remainingMs<=50000?2:this.remainingMs<=100000?1:0;
+    const mode=this.remainingMs<=RUN_TIME_SETTINGS.nightSeconds*1000?2:this.remainingMs<=RUN_TIME_SETTINGS.sunsetSeconds*1000?1:0;
     if(this.lastUrgencyApplied===mode)return;
     this.lastUrgencyApplied=mode;
     const vp=document.getElementById('gameViewport');

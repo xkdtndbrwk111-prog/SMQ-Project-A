@@ -126,7 +126,7 @@ async function replay(mode='replay'){
    Object.defineProperty(performance,'now',{value:()=>Date.now()-1704067200000});
    const raf=window.requestAnimationFrame.bind(window);
    window.requestAnimationFrame=callback=>raf(()=>callback(performance.now()));
-   if(location.hostname==='127.0.0.1'){sessionStorage.setItem('HOJA_TEST_SEED','314159');sessionStorage.setItem('HOJA_TEST_PAUSE_START','1');}
+   if(location.hostname==='127.0.0.1'){sessionStorage.setItem('HOJA_TEST_SEED','314159');sessionStorage.setItem('HOJA_TEST_PAUSE_START','1');sessionStorage.setItem('HOJA_TEST_LEGACY_TIME','1');}
  });
  const page=await context.newPage();
  await page.clock.install({time:new Date('2024-01-01T00:00:00Z')});

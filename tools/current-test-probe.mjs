@@ -26,6 +26,9 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     A.edit("this.caveVisionMode='terrain';","this.caveVisionMode=window.HOJA_V046_PREFERRED_VISION||'terrain';");
     A.edit('this.caveFovSoft=true;','this.caveFovSoft=window.HOJA_V047_FOV_SOFT!==false;');
   }
+  // Legacy reference is selected only inside the instrumented test build.
+  A.edit("function startStage(index,fresh,spawn='start',durationSeconds=900){", "function startStage(index,fresh,spawn='start',durationSeconds=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?600:900){");
+  A.edit('RUN_TIME_SETTINGS=hojaCreateTimeSettings(durationSeconds);', "RUN_TIME_SETTINGS=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?Object.freeze({durationSeconds:600,sunsetSeconds:100,nightSeconds:50,guideSeconds:50}):hojaCreateTimeSettings(durationSeconds);");
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
   A.edit('    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();', '    this.showStageBanner();\n    this.updateHUD();\n    syncBgm();\n    if(sessionStorage.getItem(\'HOJA_TEST_PAUSE_START\')===\'1\')this.scene.pause();');
   A.edit('const arcadeHud=window.HOJA_CREATE_HUD({', benchmarkSource+'\nconst arcadeHud=window.HOJA_CREATE_HUD({');
@@ -62,6 +65,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   A.edit('window.HOJA_CONNECT_ARCADE_HOST({', 'window.HOJA_STEP134_DIAG=HOJA_STEP134_DIAG;window.HOJA_STEP135_DIAG=HOJA_STEP135_DIAG;window.HOJA_STEP136_DIAG=HOJA_STEP136_DIAG;\nwindow.HOJA_CONNECT_ARCADE_HOST({');
   if(!keepProductionCave)A.edit(caveRenderProductionSource,caveRenderTestSource);
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
+    'timePolicy(n){return hojaCreateTimeSettings(n);},timeSettings(){return {...RUN_TIME_SETTINGS};},setDuration(n){startStage(0,true,"start",n);},palette(ms){return hojaPaletteBand(ms,STAGE.theme);},' +
     'stopLoop(){ACTIVE_SCENE.game.loop.stop();},step(){ACTIVE_SCENE.game.step(performance.now(),16);},' +
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
