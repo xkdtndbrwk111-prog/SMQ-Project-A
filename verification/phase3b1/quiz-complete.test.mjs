@@ -18,12 +18,12 @@ for(const finalCorrect of [false,true]) test(`24th answer continues and 25th ${f
  await f.evaluate(()=>window.HOJA_TEST_PROBE.raceEnd());
  await f.locator('#hojaReviewOverlay:not([hidden])').waitFor({timeout:5000});assert.match(await f.locator('#hojaReviewCard').innerText(),/문제 25개 완료/);
  const before=await f.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD(),reason:window.HOJA_TEST_PROBE.endReason()}));
- assert.equal(before.metrics.answered,25);assert.equal(before.metrics.usedFamilies,25);assert.equal(before.metrics.flowerBonus,5);assert.equal(before.metrics.quizPoints,finalCorrect?20:10);assert.equal(before.metrics.score,finalCorrect?25:15);assert.equal(before.metrics.timeBonus,0);assert.equal(before.reason,'QUIZ_25');
+ assert.equal(before.metrics.answered,25);assert.equal(before.metrics.usedFamilies,25);assert.equal(before.metrics.flowerBonus,5);assert.equal(before.metrics.quizPoints,finalCorrect?20:10);assert.equal(before.metrics.timeBonus,before.metrics.remainingSeconds);assert.equal(before.metrics.score,(finalCorrect?25:15)+before.metrics.timeBonus);assert.equal(before.reason,'QUIZ_25');
  // Comparison only: the existing FINISH formula would add this much, pending policy approval.
  const hypotheticalFinishBonus=Math.round(before.metrics.remainingSeconds*before.metrics.found/25);assert.ok(hypotheticalFinishBonus>0);
  assert.deepEqual(await f.evaluate(()=>window.HOJA_TEST_PROBE.repeatSettlement()),before.metrics);
  await f.locator('#hojaReviewActions button').nth(1).click();
- assert.match(await f.locator('#hojaRankOverlay').innerText(),/25문항 완료 랭킹 정책 확인 중/);
+ assert.match(await f.locator('#hojaRankOverlay').innerText(),/25문항 완료/);
  await f.evaluate(data=>window.HOJA_REVIEW.open({reason:'문제 25개 완료',metrics:data.metrics,rows:data.records},()=>{}),before);
  await f.locator('#hojaReviewActions button').first().click();const rec=before.records.find(r=>r.correct===false);await f.locator('#hojaReviewChoices button').nth(rec.answerIndex).click();
  const after=await f.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD(),reason:window.HOJA_TEST_PROBE.endReason()}));assert.deepEqual(after,before);

@@ -73,9 +73,9 @@ export class ClassModel{
   if(!['FINISH','TIME_UP','QUIZ_25'].includes(result.reason)||!integer(result.found,0,25)||!integer(result.answered,0,result.found)||!integer(result.correct,0,result.answered)||!integer(result.flowers,0,10000)||!integer(result.remainingSeconds,0,this.#s.settings.durationSeconds)||!integer(result.otherPoints,0,10000000)||!integer(result.score,0,10000000))fail('INVALID_RESULT');
   if(result.reason==='TIME_UP'&&result.remainingSeconds!==0)fail('INVALID_RESULT');
   if(result.reason==='QUIZ_25'&&result.answered!==25)fail('INVALID_RESULT');
-  // The current game has no confirmed 25-answer settlement path; do not invent its scoring.
-  if(result.reason==='QUIZ_25')fail('SCORING_POLICY_UNRESOLVED');
-  const bonus=result.reason==='FINISH'?Math.round(result.remainingSeconds*result.found/25):0;
+  // User-approved policy: QUIZ_25 uses the existing FINISH bonus.
+  if(result.reason==='QUIZ_25'&&result.found!==25)fail('INVALID_RESULT');
+  const bonus=result.reason!=='TIME_UP'?Math.round(result.remainingSeconds*result.found/25):0;
   if(result.score!==result.correct*10+result.flowers*5+result.otherPoints+bonus)fail('INVALID_SCORE');
   const receipt={receiptId:'receipt-'+(this.#receipts.size+1),pid,runId,requestId,score:result.score,verification:'client_reported',replayed:false};
   this.#receipts.set(key,{payload,receipt});run.accepted=copy(receipt);run.status='ACCEPTED';run.counted=true;p.status='SUBMITTED';this.#s.revision++;

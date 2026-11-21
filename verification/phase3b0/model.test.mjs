@@ -76,7 +76,7 @@ test('team average uses frozen team size and ties share rank',()=>{
 test('bad score, invalid timer, fake quiz and invented 25-answer settlement are rejected',()=>{
  const {s,p}=setup();
  for(const bad of [{...result,score:999},{...result,remainingSeconds:901},{...result,correct:3},{...result,reason:'TIME_UP'}])denied(()=>s.submit(req(p,{result:bad})),bad.score===999?'INVALID_SCORE':'INVALID_RESULT');
- denied(()=>s.submit(req(p,{result:{...result,reason:'QUIZ_25',found:25,answered:25}})),'SCORING_POLICY_UNRESOLVED');
+ assert.equal(s.submit(req(p,{result:{...result,reason:'QUIZ_25',found:25,answered:25}})).score,63);
 });
 test('demo-only, both emulators alive, loopback allowlist; single does not initialize Firebase',()=>{
  const env={projectId:DEMO_PROJECT,authHost:'127.0.0.1:19099',firestoreHost:'127.0.0.1:18080',authAlive:true,firestoreAlive:true,actualTarget:'127.0.0.1:18080',mode:'class'};

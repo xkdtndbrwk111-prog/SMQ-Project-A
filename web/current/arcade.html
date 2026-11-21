@@ -2234,6 +2234,7 @@ function hojaCreateTimeSettings(durationSeconds=900){
   return Object.freeze({durationSeconds,sunsetSeconds:Math.round(durationSeconds*2/9),nightSeconds:Math.round(durationSeconds/9),guideSeconds:Math.round(durationSeconds/9)});
 }
 let RUN_TIME_SETTINGS=hojaCreateTimeSettings();
+let HOJA_CLASS_SESSION=null;
 const FLOWER_BONUS_PER_ITEM=5; // Paid once when the entire run ends.
 const RUN={score:0,correctQuiz:0,quizAnswered:0,found:0,deaths:0,remainingMs:RUN_TIME_SETTINGS.durationSeconds*1000};
 
@@ -7319,8 +7320,8 @@ class HojaScene extends Phaser.Scene{
     document.getElementById('hojaBgm')?.pause();
     document.getElementById('gameViewport')?.classList.remove('inCave');
     SFX.clear();this.emitClearSparkle(this.playerBody.x,b.bottom-40,20);
-    const {flowers,bonus}=this.finalizeFlowerBonus();
-    this.clearText.setText(`문제 25개 완료 · 점수 정산\n물음표 ${RUN.found}/${TOTAL_QUESTIONS} · 정답 ${this.correctQuizCount}\n과일 ${flowers}개 × ${FLOWER_BONUS_PER_ITEM}점 = +${bonus}\n시간 보너스 및 랭킹 정책 확인 중`);
+    settlement.finalizeFinish(this);
+    this.clearText.setText(`문제 25개 완료 · 점수 정산\n물음표 ${RUN.found}/${TOTAL_QUESTIONS} · 정답 ${this.correctQuizCount}\n과일 ${this.finalFlowerCount}개 × ${FLOWER_BONUS_PER_ITEM}점 = +${this.finalFlowerBonus}\n시간 보너스 +${this.timeBonus}`);
     hojaStep09_3ShowResult_(this,'문제 25개 완료');
     this.nextText.setText('R · 처음부터 다시');
   }
@@ -7907,7 +7908,7 @@ async function boot(){
 
   // Decode SFX in the background; the game does not wait for audio.
   preloadSampleSfx().catch(err=>console.warn('SFX preload failed',err));
-  startStage(0,true,'start'); // V0.5.6: canonical level 1 for every intro theme
+  startStage(0,true,'start',HOJA_CLASS_SESSION?.durationSeconds??900); // shared engine, class setting fixed at start
 
   const status=document.getElementById('bootStatus');
   if(status)status.textContent='Phaser · 게임 월드 생성 중…';
@@ -8185,7 +8186,16 @@ window.HOJA_RUN_RECORD=()=>hojaRecordRows_();
 const settlement=window.HOJA_CREATE_SETTLEMENT({
   run:RUN, activeScene:()=>ACTIVE_SCENE, hasQuestions:()=>!!EXTERNAL_QUESTIONS?.length,
   pointsPerFlower:FLOWER_BONUS_PER_ITEM, totalQuestions:TOTAL_QUESTIONS,
-  closeRanking:hojaRankClose_, showRanking:hojaRankShow_
+  closeRanking:hojaRankClose_, showRanking:(scene,reason)=>{
+    if(HOJA_CLASS_SESSION&&!HOJA_CLASS_SESSION.submitted){
+      HOJA_CLASS_SESSION.submitted=true;
+      const m=hojaStep09_3Metrics_(scene);
+      parent.postMessage({type:'HOJA_CLASS_RESULT',reason:reason==='시간 종료'?'TIME_UP':reason==='문제 25개 완료'?'QUIZ_25':'FINISH',metrics:m},location.origin);
+      window.HOJA_REVIEW.open({reason,metrics:m,rows:window.HOJA_RUN_RECORD()},()=>{});
+      return;
+    }
+    if(!HOJA_CLASS_SESSION)hojaRankShow_(scene,reason);
+  }
 });
 const {hojaStep09_3Metrics_,hojaStep09_3RenderProgress_,hojaStep09_3ResetDisplay_,hojaStep09_3ShowResult_}=settlement;
 document.getElementById('step09RunRestart')?.addEventListener('click',()=>{
@@ -8345,8 +8355,7 @@ function hojaRankShowAfterReview_(scene, reason){
   if(!Number.isFinite(m.score)||m.score<0)return;
   const verified=document.getElementById('step09RunResult')?.dataset.verified==='true';
   const failures=[];
-  if(reason==='문제 25개 완료')failures.push('25문항 완료 랭킹 정책 확인 중');
-  else if(reason!=='전체 스테이지 완료')failures.push('완주 아님: '+reason);
+  if(reason!=='전체 스테이지 완료'&&reason!=='문제 25개 완료')failures.push('완주 아님: '+reason);
   if(!verified){const why=[];if(m.usedFamilies!==m.found)why.push('고유 문제 수 불일치');if(m.answered>m.found||m.found>25)why.push('문제 수 범위 오류');if(m.quizPoints!==m.correct*10)why.push('문제 점수 불일치');if(!(m.otherPoints>=0))why.push('기타 점수 오류');failures.push('정산 검증 실패: '+(why.join(', ')||'검증 상태 없음'));}
   if(!HOJA_RANK_CARTRIDGE_)failures.push('단일 공용 카트리지 아님');
   if(HOJA_RANK_TEST_MODE_)failures.push('시험용 스테이지 이동');
@@ -8670,7 +8679,8 @@ const movingPlatformSystem=window.HOJA_CREATE_MOVING_PLATFORMS({TILE,HOJA_MAKER_
 const raftSystem=window.HOJA_CREATE_RAFTS({TILE,waterAtX,SFX});
 const crumbleSystem=window.HOJA_CREATE_CRUMBLES({TILE,HOJA_V2_SURFACE_START,HOJA_V2_ATLAS_COLS,SFX});
 window.HOJA_CONNECT_ARCADE_HOST({
-  prepare(sources,names){
+  prepare(sources,names,classSettings){
+    if(classSettings){const config=hojaCreateTimeSettings(classSettings.durationSeconds);HOJA_CLASS_SESSION={...config,submitted:false};}
     const normalized=hojaStep09Normalize_(sources);
     EXTERNAL_QUESTIONS=normalized.questions;QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
     HOJA_RANK_CARTRIDGE_=names.length===1?names[0]:'';

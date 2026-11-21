@@ -1,0 +1,22 @@
+import {chromium} from '../phase2/harness/node_modules/playwright/index.mjs';
+import assert from 'node:assert/strict';
+import {mkdir} from 'node:fs/promises';
+const url=process.env.HOJA_TEACHER_URL;if(!url)throw Error('HOJA_TEACHER_URL required');
+const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader']});
+const contexts=[];const page=async()=>{const c=await browser.newContext({viewport:{width:1280,height:900}});contexts.push(c);const p=await c.newPage();p.on('pageerror',e=>console.error('PAGE ERROR',e));return p;};
+await mkdir('verification/phase3c/screenshots',{recursive:true});
+try{
+ const t=await page();await t.goto(url);await t.getByText('대결 방 만들기').click();await t.locator('#qr img').waitFor({timeout:30000});const link=await t.locator('#qr .link').innerText();assert.ok(link.includes('#s='));
+ const students=[];for(const name of ['하나','둘','셋']){const p=await page();students.push(p);await p.goto(link);await p.locator('#name').fill(name);await p.locator('#join').click();await p.getByText('선생님이 팀을 정하고 있어요.').waitFor({timeout:30000});}
+ await t.getByText('참가 학생 3명', {exact:false}).waitFor({timeout:30000});
+ for(const [i,name] of ['하나','둘','셋'].entries()){const row=t.locator('.person').filter({hasText:name});await row.getByRole('button',{name:i===2?'B팀':'A팀'}).click();}
+ await t.screenshot({path:'verification/phase3c/screenshots/teacher-lobby.png',fullPage:true});await students[0].screenshot({path:'verification/phase3c/screenshots/student-lobby.png',fullPage:true});await t.locator('#start').click();
+ for(const p of students){await p.locator('#play').click({timeout:30000});await p.frameLocator('iframe').locator('#scoreHud').waitFor({state:'visible',timeout:60000});}
+ const frames=students.map(p=>p.frames().find(f=>f.url().includes('/arcade.html')));for(const f of frames){await f.waitForFunction(()=>!!window.HOJA_TEST_PROBE?.state(),null,{timeout:30000});assert.ok((await f.evaluate(()=>window.HOJA_TEST_PROBE.state().sec))>880);}
+ await students[0].screenshot({path:'verification/phase3c/screenshots/student-game.png'});
+ assert.equal(await students[0].locator('#results').count(),0);await students[0].reload();await students[0].getByText('새로고침으로 게임 진행이 중단됐어요.',{exact:false}).waitFor();await t.locator('.person').filter({hasText:'하나'}).getByRole('button',{name:'다시 시작 허용'}).click();await students[0].locator('#play').click({timeout:30000});await students[0].frameLocator('iframe').locator('#scoreHud').waitFor({state:'visible',timeout:60000});frames[0]=students[0].frames().find(f=>f.url().includes('/arcade.html'));await frames[0].waitForFunction(()=>!!window.HOJA_TEST_PROBE?.state());
+ await frames[0].evaluate(()=>window.HOJA_TEST_PROBE.setTime(.01));
+ await frames[1].evaluate(()=>window.HOJA_TEST_PROBE.stage(3));await frames[1].waitForFunction(()=>window.HOJA_TEST_PROBE.state()?.stage===3);await frames[1].waitForTimeout(2000);assert.equal(await frames[1].evaluate(()=>window.HOJA_TEST_PROBE.finish()),true);
+ await frames[2].evaluate(()=>window.HOJA_TEST_PROBE.primeAnswers(24));assert.equal(await frames[2].evaluate(()=>window.HOJA_TEST_PROBE.quiz()),true);const rec=await frames[2].evaluate(()=>window.HOJA_RUN_RECORD().at(-1));await frames[2].locator('#quizChoices button').nth(rec.answerIndex).click();
+ await t.getByText('완료 3명',{exact:false}).waitFor({timeout:60000});for(const p of students){await p.locator('#submission').waitFor();await p.getByRole('button',{name:'내 결과 보기'}).click();}await t.locator('#finalize').click();await t.locator('#results').waitFor();await t.screenshot({path:'verification/phase3c/screenshots/teacher-results.png',fullPage:true});for(const p of students)await p.getByText('내 점수:',{exact:false}).waitFor({timeout:30000});console.log('PASS: 3 independent browsers, QR, teams, game, TIME_UP, FINISH, QUIZ_25, submitted, results');console.log(await t.locator('#results').innerText());
+}finally{await Promise.all(contexts.map(c=>c.close()));await browser.close();}

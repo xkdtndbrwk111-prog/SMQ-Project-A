@@ -45,7 +45,8 @@ window.HOJA_CONNECT_ARCADE_HOST = function ({prepare, launch, showStatus}) {
           names.some((name, index) => name !== sources[index]?.sheetName)) {
         throw new Error('카트리지 이름 불일치');
       }
-      prepare(sources, names);
+      if(message.classSettings && event.origin!==location.origin)throw new Error('학급 세션 출처 오류');
+      prepare(sources, names, message.classSettings);
       started = true;
       launch();
     } catch (error) {

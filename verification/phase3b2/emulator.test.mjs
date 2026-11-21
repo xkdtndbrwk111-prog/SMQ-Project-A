@@ -59,7 +59,7 @@ test('stale epoch, idempotency, version, spoofed result and post-close receipt',
  await throwsCode(service.submit(student.token,x.sessionId,request(p,state)),'STALE_EPOCH');const valid=request(p,{...state,connectionEpoch:newConn.connectionEpoch});
  await throwsCode(service.submit(student2.token,x.sessionId,valid),'FORBIDDEN');await throwsCode(service.submit(student.token,x.sessionId,{...valid,gameVersion:'old'}),'VERSION_MISMATCH');
  await throwsCode(service.submit(student.token,x.sessionId,{...valid,result:{...result,score:999}}),'INVALID_SCORE');
- await throwsCode(service.submit(student.token,x.sessionId,{...valid,result:{...result,reason:'QUIZ_25'}}),'SCORING_POLICY_UNRESOLVED');
+ await throwsCode(service.submit(student.token,x.sessionId,{...valid,result:{...result,reason:'QUIZ_25'}}),'INVALID_RESULT');
  const first=await service.submit(student.token,x.sessionId,valid);assert.equal(first.score,63);assert.equal(first.verification,'client_reported');
  const same=await service.submit(student.token,x.sessionId,valid);assert.equal(same.replayed,true);assert.equal(same.runId,first.runId);
  await throwsCode(service.submit(student.token,x.sessionId,{...valid,result:{...result,score:64}}),'REQUEST_CONFLICT');
