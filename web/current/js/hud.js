@@ -74,22 +74,7 @@ window.HOJA_CREATE_HUD=function(state){
       align:'center',stroke:'#263340',strokeThickness:7
     }).setOrigin(.5).setScrollFactor(0).setDepth(201);
 
-    // V0.51: draw performance text in a real DOM overlay above the FOV,
-    // never as a Phaser object that could be covered by cave darkness.
-    scene.fpsDisplay=document.getElementById('hojaFpsDisplay');
-    if(scene.fpsDisplay)scene.fpsDisplay.style.display=state.fpsVisible?'block':'none';
     scene.fpsSamples=[];scene.fpsShownAt=0;scene.lowFpsWindows=0;
-    // F9 diagnostics keep a true five-second window separately from the
-    // legacy 60-frame HUD sample.  The legacy array is intentionally left
-    // unchanged because quality fallback and older QA modules depend on it.
-    scene.hojaFps5sSamples=[];
-    scene.hojaPerfLastNow=performance.now();
-    scene.hojaPerfLastPlayerX=scene.playerBody?.x??null;
-    scene.hojaPerfLastPlayerY=scene.playerBody?.y??null;
-    scene.hojaDiagStartedAt=scene.time?.now??0;
-    scene.hojaDiagMinFps=null;
-    // STEP13-1: per-map minimum based on stable half-second sample windows.
-    scene.hojaStep131MinFps=null;
 
     scene.stageBanner=scene.add.text(state.width/2,state.height*0.36,'',{
       fontFamily:'monospace',fontStyle:'bold',fontSize:'30px',color:'#ffffff',

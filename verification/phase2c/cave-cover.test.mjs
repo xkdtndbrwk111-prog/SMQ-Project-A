@@ -32,6 +32,8 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   await frame.locator('#scoreHud').waitFor({state:'visible',timeout:30000});
   const game=page.frames().find(f=>f.url().includes('/arcade.html'));
   await game.waitForFunction(()=>!!window.HOJA_TEST_PROBE?.state(),null,{timeout:30000});
+  await game.waitForFunction(()=>window.HOJA_TEST_PROBE.fpsDiagnostic().count>0,null,{timeout:10000});
+  assert.equal((await game.evaluate(()=>window.HOJA_TEST_PROBE.fpsDiagnostic())).display,true,'test FPS display is connected');
   assert.equal(await game.evaluate(()=>typeof window.HOJA_V053_BENCH?.toggle),'function');
   assert.equal(await game.evaluate(()=>typeof window.HOJA_V054_RENDER_AB?.toggle),'function');
   for(const id of ['v055BenchBtn','scaleBenchBtn','scaleQuickBtn','renderBenchBtn'])

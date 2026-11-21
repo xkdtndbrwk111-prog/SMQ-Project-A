@@ -102,6 +102,8 @@ if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/hojaMeasureChunkSeams|_hojaSeamTimer|id="hojaSeamMeasure(?:Canvas|Panel)"|^  (?:toggleLightBackground|toggleStaticCulling|toggleSurfaceChunks|hojaToggleTerrainSplit|hojaToggleSeamDiagnostic|hojaCycleZoomProbe|hojaSetManualZoom|cycleSurfaceLampMode)\(/m.test(arc), '화면 진단 메서드와 경계 측정은 시험 빌드에만');
 if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/updateVisionBenchmark|visionCompareReport|visionFrameStats|id="visionMetric"/.test(arc), '동굴 시야 성능 측정은 시험 빌드에만');
+if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
+  ok(!/hojaFps5sSamples|hojaDiagMinFps|id="hojaFpsDisplay"|id="hojaDebugLayer"/.test(arc+read('js/hud.js')), 'FPS 진단 표시는 시험 빌드에만');
 
 // 6
 ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');

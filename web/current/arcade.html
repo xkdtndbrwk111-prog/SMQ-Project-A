@@ -1066,13 +1066,6 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
     </section>
     <!-- V0.59: screen-fixed combo announcement above cave FOV. -->
     <div id="hojaComboBanner" role="status" aria-live="off" aria-hidden="true"></div>
-    <!-- Screen-space diagnostics above cave vision; independent of Phaser camera. -->
-    <div id="hojaDebugLayer" aria-label="성능 정보">
-      <div id="hojaFpsDisplay" role="status" aria-live="off"></div>
-
-
-    </div>
-
     <!-- STEP13-7: in-game TEST performance panel removed; regular game HUD retained. -->
     <div id="bootStatus">Phaser · 내장 애셋 준비 중…</div>
     <div id="quizOverlay" role="dialog" aria-modal="true" aria-label="문제">
@@ -1436,7 +1429,6 @@ const arcadeHud=window.HOJA_CREATE_HUD({
   get width(){return VIEW_W;},
   get height(){return VIEW_H;},
   get renderScale(){return RS;},
-  get fpsVisible(){return FPS_VISIBLE;},
   get stageIndex(){return STAGE_INDEX;},
   get stageCount(){return STAGES.length;},
   get run(){return RUN;},
@@ -6023,37 +6015,10 @@ class HojaScene extends Phaser.Scene{
   updateFps(time,delta){
     this.fpsSamples.push(delta);
     if(this.fpsSamples.length>60)this.fpsSamples.shift();
-    // Phaser Arcade runs with fixedStep=true, so `delta` can remain 16.7ms
-    // even when rendering is far below 60 FPS.  Measure wall-clock intervals
-    // between real Scene.update calls for the F9 diagnostic instead.
-    const wallNow=performance.now();
-    const wallDelta=wallNow-(this.hojaPerfLastNow??wallNow);
-    this.hojaPerfLastNow=wallNow;
-    if(Number.isFinite(wallDelta)&&wallDelta>0&&wallDelta<=1000){
-      this.hojaFps5sSamples=this.hojaFps5sSamples||[];
-      const body=this.playerBody?.body;
-      const px=this.playerBody?.x,py=this.playerBody?.y;
-      const positionMoved=Number.isFinite(px)&&Number.isFinite(py)&&
-        Number.isFinite(this.hojaPerfLastPlayerX)&&Number.isFinite(this.hojaPerfLastPlayerY)&&
-        (Math.abs(px-this.hojaPerfLastPlayerX)>.05||Math.abs(py-this.hojaPerfLastPlayerY)>.05);
-      const moving=!!(positionMoved||(body&&
-        (Math.abs(body.velocity?.x||0)>5||Math.abs(body.velocity?.y||0)>5)));
-      this.hojaPerfLastPlayerX=Number.isFinite(px)?px:this.hojaPerfLastPlayerX;
-      this.hojaPerfLastPlayerY=Number.isFinite(py)?py:this.hojaPerfLastPlayerY;
-      this.hojaFps5sSamples.push({time:wallNow,delta:wallDelta,moving});
-      const cutoff=wallNow-5000;
-      while(this.hojaFps5sSamples.length&&this.hojaFps5sSamples[0].time<cutoff){
-        this.hojaFps5sSamples.shift();
-      }
-      const instant=1000/wallDelta;
-      this.hojaDiagMinFps=this.hojaDiagMinFps===null?instant:
-        Math.min(this.hojaDiagMinFps,instant);
-    }
     if(!FPS_VISIBLE||time<this.fpsShownAt)return;
     this.fpsShownAt=time+500;
     const avg=this.fpsSamples.reduce((a,b)=>a+b,0)/this.fpsSamples.length;
     const fps=Math.round(1000/Math.max(1,avg));
-    const worst=Math.round(1000/Math.max(...this.fpsSamples));
     if(!QUALITY_MANUAL&&RS>1.01&&time>4000){
       this.lowFpsWindows=fps<38?(this.lowFpsWindows||0)+1:0;
       if(this.lowFpsWindows>=6){
@@ -6061,78 +6026,7 @@ class HojaScene extends Phaser.Scene{
         changeQualityMode(1,false);
       }
     }
-    if(this.fpsDisplay){
-      this.fpsDisplay.textContent=`${fps} FPS  (최저 ${worst})  ×${RS.toFixed(2)}  ${Math.round(VIEW_W*RS)}×${Math.round(VIEW_H*RS)}px  정적 ${this.staticVisibleCount||0}/${this.staticScenery?.length||0}${LIGHT_BACKGROUND?"  배경:경량":""}${STAGE.theme!=="cave"?"  광원:"+["원본","경량","끔"][HOJA_SURFACE_LAMP_MODE]:""}`;
-      this.fpsDisplay.style.color=fps>=55?'#9ff7b4':fps>=40?'#ffe58a':'#ff9a8a';
-    }
-    // STEP13-1: update the always-visible TEST badge at 2Hz, using the
-    // existing game-loop deltas. No extra animation frame, timer or GPU read.
-    const diagFps=document.getElementById('hojaStep131FpsNumbers');
-    const diagInfo=document.getElementById('hojaStep131FpsDetails');
-    if(diagFps&&diagInfo){
-      if(this.fpsSamples.length>=30&&time>2500&&Number.isFinite(fps)){
-        this.hojaStep131MinFps=this.hojaStep131MinFps===null?fps:
-          Math.min(this.hojaStep131MinFps,fps);
-      }
-      const low=this.hojaStep131MinFps===null?'--':String(this.hojaStep131MinFps);
-      diagFps.textContent=`FPS ${fps} · 최저 ${low}`;
-      diagFps.dataset.fpsState=fps>=55?'ok':fps>=40?'warning':'slow';
-      diagInfo.textContent=`${avg.toFixed(1)}ms/프레임 · ${STAGE.theme==='cave'?'지하':'지상'} · ×${RS.toFixed(2)}`;
-    }
-    // STEP13-3: no additional timers/RAF loops. Reflect the actual cave
-    // vision state in the existing 500-ms FPS update, not a second observer.
-    const fovTools=document.getElementById('hojaStep133CaveCompare');
-    if(fovTools){
-      const inCave=STAGE.theme==='cave';
-      fovTools.style.display=inCave?'flex':'none';
-      if(inCave){
-        const fovButton=document.getElementById('hojaStep133FovButton');
-        const fovStatus=document.getElementById('hojaStep133FovStatus');
-        if(fovButton){
-          fovButton.textContent=this.caveVisionEnabled?'시야 잠시 끄기 · 비교':'시야 다시 켜기 · 복원';
-          fovButton.setAttribute('aria-pressed',String(!this.caveVisionEnabled));
-        }
-        if(fovStatus)fovStatus.textContent=this.caveVisionEnabled?
-          '시야 ON (기본) · 정지 상태 FPS 기록':'시야 OFF (진단용) · 다시 켜서 복원';
-      }
-    }
 
-    // STEP13-4: read counters at the existing 2Hz FPS cadence. No extra RAF.
-    const comparison=document.getElementById('hojaStep134Panel');
-    if(comparison){
-      const inCave=STAGE.theme==='cave';
-      comparison.style.display=inCave?'flex':'none';
-      if(inCave){
-        const m=HOJA_STEP134_DIAG.metrics();
-        const stats=document.getElementById('hojaStep134Stats');
-        if(m&&stats)stats.textContent=
-          `카메라 ${m.zoom}× · 화면에 보이는 월드 ${m.visibleWorld}
-`+
-          `출력 ${m.buffer}px (${m.megapixels} MP) · 배율 ${m.scale}×
-`+
-          `동굴 지형 이미지 ${m.caveChunks} · FPS ${fps}`;
-      }
-    }
-    // STEP13-5: metrics piggyback on the existing ~2Hz FPS refresh.
-    const step135=document.getElementById('hojaStep135Panel');
-    if(step135){
-      const inCave=STAGE.theme==='cave';
-      step135.style.display=inCave?'flex':'none';
-      if(inCave){
-        const metrics=HOJA_STEP135_DIAG.metrics();
-        const target=document.getElementById('hojaStep135Stats');
-        if(target&&metrics)target.textContent=metrics;
-      }
-    }
-    const panel136=document.getElementById('hojaStep136Panel');
-    if(panel136){
-      const inCave=STAGE.theme==='cave';
-      panel136.style.display=inCave?'flex':'none';
-      if(inCave){
-        const target=document.getElementById('hojaStep136Stats');
-        if(target)target.textContent=HOJA_STEP136_DIAG.metrics();
-      }
-    }
   }
 
   applyTextResolution(){

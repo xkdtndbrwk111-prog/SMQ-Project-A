@@ -1,3 +1,4 @@
+import {fpsInit,fpsWall,fpsWorst,fpsUi} from './current-test-fps.mjs';
 import {visionMetricsMethods,visionMetricsInit} from './current-test-vision-metrics.mjs';
 import {controlMethods,c1ButtonUpdate,seamTimer} from './current-test-control-methods.mjs';
 import {dialogueButtons,dialoguePreviewBindings} from './current-test-dialogue.mjs';
@@ -39,6 +40,11 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
 
   A.edit('class HojaScene extends Phaser.Scene{',c1ButtonUpdate+'\nclass HojaScene extends Phaser.Scene{');
   A.edit('    this.createQuestionRadar();',seamTimer+'    this.createQuestionRadar();');
+  A.edit('    this.createHUD();','    this.createHUD();\n'+fpsInit);
+  A.edit('    if(!FPS_VISIBLE||time<this.fpsShownAt)return;',fpsWall+'    if(!FPS_VISIBLE||time<this.fpsShownAt)return;');
+  A.edit('    const fps=Math.round(1000/Math.max(1,avg));','    const fps=Math.round(1000/Math.max(1,avg));\n'+fpsWorst);
+  A.edit('  }\n\n  applyTextResolution(){',fpsUi+'\n  }\n\n  applyTextResolution(){');
+
   A.edit('    cam.setZoom(current);\n    this.applyC1ManualCamera();','    cam.setZoom(current);\n    this.hojaUpdatePixelExperimentStatus();\n    this.applyC1ManualCamera();');
   A.edit('    <div id="phaserRoot"></div>','    <div id="phaserRoot"></div>\n    <canvas id="hojaSeamMeasureCanvas" aria-hidden="true"></canvas>');
 
@@ -62,6 +68,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
     'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
     'visionSamples(){return ACTIVE_SCENE?.visionFrameStats?.terrain?.length||0;},' +
+    'fpsDiagnostic(){return {count:ACTIVE_SCENE?.hojaFps5sSamples?.length||0,display:!!ACTIVE_SCENE?.fpsDisplay};},' +
     'caveSettings(){return {mode:ACTIVE_SCENE?.caveVisionMode,soft:ACTIVE_SCENE?.caveFovSoft};},' +
     'caveRandom(){return CAVE_EXPERIMENT_ENABLED;},' +
     'caveRenderState(){const s=ACTIVE_SCENE;return {stage:STAGE_INDEX,collision:(s.hojaStep136CollisionOnly||[]).filter(o=>o?.active).map(o=>!!o.visible),culled:(s.hojaStep136Cullables||[]).filter(o=>o?.active).length};},' +
@@ -89,6 +96,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   // These call actual game paths; they do not establish that a natural route is reachable.
   A.beforeBodyEnd(`<div id="hojaTestControls" style="position:fixed;left:0;bottom:0;z-index:2147483647;background:#fff;color:#000;padding:8px">
     TEST ONLY · <button id="hojaTestDeath">쓰러짐 유도</button>
+    <div id="hojaFpsDisplay" role="status" aria-live="off"></div>
+    <style>#hojaFpsDisplay[style*="block"]{display:block!important;pointer-events:none}</style>
     <span id="visionMetric">시야 A/B</span>
     <div id="hojaSeamMeasurePanel" style="display:none" role="status"></div>
     <style>#hojaSeamMeasurePanel[style*="block"]{display:block!important;pointer-events:none}</style>
