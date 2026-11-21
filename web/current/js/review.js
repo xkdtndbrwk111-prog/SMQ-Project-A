@@ -19,7 +19,7 @@
     var msg=st.all===0?'이번 게임에서는 푼 문제가 없습니다.':
       n?(first?'틀린 문제가 '+n+'개 있습니다. 다시 풀어 볼까요?':'아직 틀린 문제가 '+n+'개 남았습니다.'):
       (first?'틀린 문제 없이 모두 맞혔습니다!':'오답을 모두 맞혔습니다!');
-    card().innerHTML='<p class="rvTop">결산</p><h2>'+(st.data.reason==='시간 종료'?'시간 종료':'모든 스테이지 완료')+'</h2>'+
+    card().innerHTML='<p class="rvTop">결산</p><h2>'+(st.data.reason==='시간 종료'?'시간 종료':st.data.reason==='문제 25개 완료'?'문제 25개 완료':'모든 스테이지 완료')+'</h2>'+
       '<div class="rvScore">'+esc(String(Math.floor(m.score||0)).padStart(6,'0'))+'</div>'+
       '<div class="rvStats"><span>물음표 '+m.found+'/25</span><span>정답 '+m.correct+'</span><span>오답 '+m.wrong+'</span><span>남은 시간 '+m.remainingSeconds+'초</span></div>'+
       '<p class="rvMsg">'+esc(msg)+'</p><div id="hojaReviewActions"></div>';

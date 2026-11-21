@@ -2655,7 +2655,7 @@ function startStage(index,fresh,spawn='start',durationSeconds=900){
   if(fresh){
     RUN_TIME_SETTINGS=hojaCreateTimeSettings(durationSeconds);
     ACTIVE_SCENE?.hideHojaDeathDialog?.();
-    RUN.score=0;RUN.correctQuiz=0;RUN.quizAnswered=0;RUN.found=0;RUN.deaths=0;RUN.remainingMs=RUN_TIME_SETTINGS.durationSeconds*1000;RUN.stages=[];RUN.flowerBonusGiven=false;RUN.flowerBonus=0;
+    RUN.score=0;RUN.correctQuiz=0;RUN.quizAnswered=0;RUN.found=0;RUN.deaths=0;RUN.remainingMs=RUN_TIME_SETTINGS.durationSeconds*1000;RUN.endReason=null;RUN.stages=[];RUN.flowerBonusGiven=false;RUN.flowerBonus=0;
     if(EXTERNAL_QUESTIONS?.length){
       QUIZ_DECK=[];QUIZ_DECK_SOURCE=null;
       RUN.step09Families=new Set();RUN.step09History=[];
@@ -4753,7 +4753,7 @@ class HojaScene extends Phaser.Scene{
   }
 
   enterDoor(d){
-    if(this.transitioning)return;
+    if(this.transitioning||RUN.endReason)return;
     this.transitioning=true;
     const b=this.playerBody.body;
     b.setVelocity(0,0);b.setAcceleration(0,0);
@@ -6801,7 +6801,7 @@ class HojaScene extends Phaser.Scene{
   }
 
   showQuiz(e){
-    if(this.quizActive)return;
+    if(this.quizActive||this.timeUp||this.clear||RUN.endReason)return;
     // STEP 09-3: check the 25-question deck BEFORE consuming an in-world ?.
     if(EXTERNAL_QUESTIONS?.length && (RUN.found>=25||RUN.step09Families?.size>=25)){
       hojaStep09_3SetStatus_('25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.');
@@ -6879,6 +6879,11 @@ class HojaScene extends Phaser.Scene{
         SFX.wrong();
       }
 
+      // Reserve the terminal outcome as soon as the final distinct response is recorded.
+      const allAnswered=EXTERNAL_QUESTIONS?.length && RUN.step09Families?.size===TOTAL_QUESTIONS &&
+        RUN.step09History?.filter(row=>row.correct!==null).length===TOTAL_QUESTIONS;
+      const completeQuiz=!!allAnswered&&!RUN.endReason;
+      if(completeQuiz)RUN.endReason='QUIZ_25';
       const token=this.quizToken;
       window.setTimeout(()=>{
         // A stage change / restart during the 650ms result display already
@@ -6888,6 +6893,7 @@ class HojaScene extends Phaser.Scene{
         overlay.classList.remove('active','hojaQuizSuccess');
         this.quizActive=false;
         HOJA_P1C_INPUT.releaseAll();
+        if(completeQuiz){this.finishQuizRun();return;}
         this.scene.resume();
         if(correct)this.celebrateCorrect();
       },650);
@@ -7276,7 +7282,8 @@ class HojaScene extends Phaser.Scene{
   }
 
   startTimeUp(){
-    if(this.timeUp||this.clear)return;
+    if(this.timeUp||this.clear||RUN.endReason)return;
+    RUN.endReason='TIME_UP';
     this.timeUp=true;
     this.stompCombo=0;
     this.remainingMs=0;RUN.remainingMs=0;
@@ -7297,8 +7304,26 @@ class HojaScene extends Phaser.Scene{
     this.nextText.setText('R · 처음부터 다시');
   }
 
+  finishQuizRun(){
+    if(this.timeUp||this.clear||RUN.endReason!=='QUIZ_25')return;
+    this.timeUp=true;
+    this.stompCombo=0;
+    const b=this.playerBody.body;
+    b.setVelocity(0,0);b.setAcceleration(0,0);b.enable=false;
+    this.hoja.setAlpha(1).setFlipX(false).setAngle(0).setScale(1);
+    this.visualState='TIME_CLEAR';this.hoja.play('hoja-idle',true);
+    document.getElementById('hojaBgm')?.pause();
+    document.getElementById('gameViewport')?.classList.remove('inCave');
+    SFX.clear();this.emitClearSparkle(this.playerBody.x,b.bottom-40,20);
+    const {flowers,bonus}=this.finalizeFlowerBonus();
+    this.clearText.setText(`문제 25개 완료 · 점수 정산\n물음표 ${RUN.found}/${TOTAL_QUESTIONS} · 정답 ${this.correctQuizCount}\n과일 ${flowers}개 × ${FLOWER_BONUS_PER_ITEM}점 = +${bonus}\n시간 보너스 및 랭킹 정책 확인 중`);
+    hojaStep09_3ShowResult_(this,'문제 25개 완료');
+    this.nextText.setText('R · 처음부터 다시');
+  }
+
   startClear(){
-    if(this.clear||this.dying||this.timeUp)return;
+    if(this.clear||this.dying||this.timeUp||RUN.endReason)return;
+    if(STAGE_INDEX===3)RUN.endReason='FINISH';
     this.clear=true;
     this.hojaClearEye=hojaPickHappyEye();
     this.setHojaSitting(false);
@@ -8316,7 +8341,8 @@ function hojaRankShowAfterReview_(scene, reason){
   if(!Number.isFinite(m.score)||m.score<0)return;
   const verified=document.getElementById('step09RunResult')?.dataset.verified==='true';
   const failures=[];
-  if(reason!=='전체 스테이지 완료')failures.push('완주 아님: '+reason);
+  if(reason==='문제 25개 완료')failures.push('25문항 완료 랭킹 정책 확인 중');
+  else if(reason!=='전체 스테이지 완료')failures.push('완주 아님: '+reason);
   if(!verified){const why=[];if(m.usedFamilies!==m.found)why.push('고유 문제 수 불일치');if(m.answered>m.found||m.found>25)why.push('문제 수 범위 오류');if(m.quizPoints!==m.correct*10)why.push('문제 점수 불일치');if(!(m.otherPoints>=0))why.push('기타 점수 오류');failures.push('정산 검증 실패: '+(why.join(', ')||'검증 상태 없음'));}
   if(!HOJA_RANK_CARTRIDGE_)failures.push('단일 공용 카트리지 아님');
   if(HOJA_RANK_TEST_MODE_)failures.push('시험용 스테이지 이동');
@@ -8327,7 +8353,7 @@ function hojaRankShowAfterReview_(scene, reason){
   HOJA_RANK_RUN_ID_='run_'+Date.now()+'_'+Math.random().toString(36).slice(2,14);
   const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
   put('hojaRankScore',String(Math.floor(m.score)).padStart(6,'0'));
-  put('hojaRankResultType',reason==='시간 종료'?'TIME UP':'FINISH');
+  put('hojaRankResultType',reason==='시간 종료'?'TIME UP':reason==='문제 25개 완료'?'25문항 완료':'FINISH');
   put('hojaRankFound','물음표 '+m.found+'/25');
   put('hojaRankCorrect','정답 '+m.correct);
   put('hojaRankTime','남은 시간 '+m.remainingSeconds+'초');

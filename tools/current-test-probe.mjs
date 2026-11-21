@@ -82,6 +82,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'coverInfo(){return (ACTIVE_SCENE.caveCovers||[]).map(({cover})=>{const source=cover.texture.getSourceImage();const ctx=source.getContext("2d");const pixels=ctx.getImageData(0,0,source.width,source.height).data;let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)transparent++;return {x:cover.x,y:cover.y,w:source.width,h:source.height,alpha:cover.alpha,transparent};});},' +
     'state(){const s=ACTIVE_SCENE;if(!s||!s.playerBody)return null;const b=s.playerBody.body;return {x:Math.round(s.playerBody.x),y:Math.round(s.playerBody.y),vx:Math.round(b.velocity.x),vy:Math.round(b.velocity.y),' +
     'grounded:!!(b.blocked.down||b.touching.down),sitting:!!s.hojaIsSitting,quiz:!!s.quizActive,paused:!!s.manualPaused,timeUp:!!s.timeUp,clear:!!s.clear,sec:Math.ceil(s.remainingMs/1000),found:RUN.found,stage:STAGE_INDEX};},' +
+    'primeAnswers(n){const s=ACTIVE_SCENE;for(let i=0;i<n;i++){const q=drawQuestion();if(!q||!hojaStep09_3Open_(q))throw Error("prime question failed");const wrong=(q.answer+1)%q.choices.length;hojaStep09_3Answer_(q,false,0,wrong);RUN.found++;s.quizAnswered++;}return hojaStep09_3Metrics_();},' +
+    'endReason(){return RUN.endReason||null;},raceEnd(){ACTIVE_SCENE.startTimeUp();ACTIVE_SCENE.startClear();},' +
     'quiz(){const s=ACTIVE_SCENE;const e=(s.enemies||[]).find(x=>x&&x.type===\'BALLOONEY\'&&!x.dead&&x.bodyObj&&x.bodyObj.active!==false);if(!e)return false;s.showQuiz(e);return true;},' +
     'setTime(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;},' +
     'death(){ACTIVE_SCENE.startDeath(\'pit\');},' +
