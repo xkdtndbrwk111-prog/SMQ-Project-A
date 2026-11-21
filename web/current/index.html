@@ -1785,10 +1785,10 @@ window.HOJA_MODE_PREVIEW=(()=>{
    r.append(button('바로 플레이','이 기기에서 아케이드 시작',()=>{selection='arcade';window.HOJA_GAMEPLAY.launch('arcade',season)}));
    r.append(button('학생 QR 만들기','학생이 QR을 찍으면 바로 아케이드',()=>{selection='qr';window.HOJA_SINGLE_QR?.open(season)}));
   }else if(stage==='class'){
-   title().textContent='학급 대결';hint().textContent='학급 대결은 다음 단계(Phase 3)에서 연결됩니다.';
-   const soon=document.createElement('button');soon.type='button';soon.className='hmPick';soon.disabled=true;
-   const st=document.createElement('strong');st.textContent='준비 중';const sm=document.createElement('small');sm.textContent='학급 QR · 실시간 순위 · 결과 분석';
-   soon.append(st,sm);r.append(soon);
+   title().textContent='학급 개인 대전';hint().textContent='선택한 단원으로 친구들과 함께 플레이해요.';
+   r.append(button('학급 방 만들기','학생 QR · 개인 순위 · 결과 분석',async()=>{
+     try{if(!new URLSearchParams(location.search).has('classHost'))throw Error('학급 대전은 교사용 시험판 주소에서 시작해 주세요.');const catalog=await window.HOJA_B_LIVE.catalog();const ids=window.HOJA_B_LIVE.names.map(n=>catalog.find(c=>c.name===n)?.id);if(!ids.length||ids.some(x=>!x))throw Error('카트리지 선택을 확인해 주세요.');sessionStorage.removeItem('hojaClass');location.href='class.html?teacher=1&c='+encodeURIComponent(ids.join(','));}catch(e){window.alert(e.message);}
+   }));
   }
   if(deal){
    // Measure the *new* buttons after layout: each travels from the SAME center

@@ -2,7 +2,7 @@
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-import {randomBytes,randomUUID} from 'node:crypto';
+import {randomBytes,randomUUID,createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
 const require=createRequire(new URL('../phase3b2/package.json',import.meta.url));
@@ -26,9 +26,10 @@ const teacherToken=await token(u.email,'preview-test-only-password');
 async function student(){const r=await fetch('http://127.0.0.1:19099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({returnSecureToken:true})});if(!r.ok)throw Error('AUTH_FAILED');return (await r.json()).idToken;}
 function cookie(req){const raw=(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('hoja_local='));return raw?sessions.get(raw.slice(11)):null;}
 function establish(res,who){const key=randomBytes(24).toString('base64url');sessions.set(key,who);res.setHeader('Set-Cookie',`hoja_local=${key}; HttpOnly; SameSite=Strict; Path=/`);return who;}
-const body=async req=>{let text='';for await(const chunk of req){text+=chunk;if(text.length>20000)throw Error('TOO_LARGE');}return JSON.parse(text||'{}');};
+const body=async req=>{let text='';for await(const chunk of req){text+=chunk;if(text.length>150000)throw Error('TOO_LARGE');}return JSON.parse(text||'{}');};
 const reply=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
 const catalog=JSON.parse(await readFile(path.join(dist,'cartridges/catalog.json'),'utf8')).cartridges;
+function chosen(ids){if(!Array.isArray(ids)||ids.length<1||ids.length>5||new Set(ids).size!==ids.length)throw Error('INVALID_CARTRIDGE');const items=ids.map(id=>catalog.find(x=>x.id===id));if(items.some(x=>!x))throw Error('INVALID_CARTRIDGE');return {items,version:createHash('sha256').update(JSON.stringify(items.map(x=>[x.id,x.version]))).digest('hex').slice(0,16)};}
 const build=JSON.parse(await readFile(path.join(dist,'BUILD.json'),'utf8'));
 async function api(req,res){
  if(req.headers.origin&&req.headers.origin!==origin)return reply(res,403,{error:'ORIGIN'});
@@ -36,9 +37,10 @@ async function api(req,res){
  let out;const teacherOnly=()=>{if(who.role!=='teacher')throw Object.assign(new Error('FORBIDDEN'),{code:'FORBIDDEN'});};
  switch(d.action){
   case 'catalog':teacherOnly();out=catalog.map(({id,name,unit,version})=>({id,name,unit,version}));break;
-  case 'create':{teacherOnly();const c=catalog.find(x=>x.id===d.cartridgeId);if(!c)throw Error('INVALID_CARTRIDGE');out=await service.createRoom(who.token,{gameVersion:build.gameVersion,cartridgeId:c.id,cartridgeVersion:c.version,durationSeconds:d.durationSeconds});await service.publish(who.token,out.sessionId);break;}
-  case 'join':{if(who.role!=='student')throw Object.assign(new Error('STUDENT_ONLY'),{code:'STUDENT_ONLY'});const c=catalog.find(x=>x.id===d.cartridgeId);if(!c)throw Error('INVALID_CARTRIDGE');out=await service.join(who.token,d.sessionId,{inviteToken:d.inviteToken,name:d.name,gameVersion:build.gameVersion,cartridgeVersion:c.version});break;}
+  case 'create':{teacherOnly();const ids=d.cartridgeIds;const c=chosen(ids);out=await service.createRoom(who.token,{gameVersion:build.gameVersion,cartridgeId:ids[0],cartridgeIds:ids,cartridgeVersion:c.version,individual:true,durationSeconds:d.durationSeconds});await service.publish(who.token,out.sessionId);break;}
+  case 'join':{if(who.role!=='student')throw Object.assign(new Error('STUDENT_ONLY'),{code:'STUDENT_ONLY'});const c=chosen(d.cartridgeIds);out=await service.join(who.token,d.sessionId,{inviteToken:d.inviteToken,name:d.name,gameVersion:build.gameVersion,cartridgeVersion:c.version});break;}
   case 'view':out=await service.roomView(who.token,d.sessionId,d.participantId);if(who.role==='student'&&d.participantId){await service.heartbeat(who.token,d.sessionId,d.participantId);}break;
+  case 'analysis':teacherOnly();out=await service.analysisRecords(who.token,d.sessionId);break;
   case 'duration':teacherOnly();out=await service.setDuration(who.token,d.sessionId,d.durationSeconds);break;
   case 'team':teacherOnly();out=await service.assignTeam(who.token,d.sessionId,d.participantId,d.team);break;
   case 'exclude':teacherOnly();out=await service.exclude(who.token,d.sessionId,d.participantId);break;
@@ -54,7 +56,7 @@ async function api(req,res){
 }
 const server=createServer(async(req,res)=>{try{
  const url=new URL(req.url,origin);
- if(req.method==='GET'&&url.pathname==='/teacher'&&url.searchParams.get('key')===teacherSecret){establish(res,{role:'teacher',token:teacherToken});res.writeHead(303,{Location:'/class.html?teacher=1','Cache-Control':'no-store'});return res.end();}
+ if(req.method==='GET'&&url.pathname==='/teacher'&&url.searchParams.get('key')===teacherSecret){establish(res,{role:'teacher',token:teacherToken});res.writeHead(303,{Location:'/index.html?classHost=1','Cache-Control':'no-store'});return res.end();}
  if(req.method==='POST'&&url.pathname==='/api/class')return await api(req,res);
  if(req.method!=='GET')return reply(res,405,{error:'METHOD'});
  const name=decodeURIComponent(url.pathname).replace(/^\//,'')||'index.html',file=path.resolve(dist,name);if(!file.startsWith(dist+path.sep))return reply(res,403,{error:'PATH'});

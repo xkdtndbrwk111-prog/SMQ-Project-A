@@ -8194,7 +8194,7 @@ const settlement=window.HOJA_CREATE_SETTLEMENT({
     if(HOJA_CLASS_SESSION&&!HOJA_CLASS_SESSION.submitted){
       HOJA_CLASS_SESSION.submitted=true;
       const m=hojaStep09_3Metrics_(scene);
-      parent.postMessage({type:'HOJA_CLASS_RESULT',reason:reason==='시간 종료'?'TIME_UP':reason==='문제 25개 완료'?'QUIZ_25':'FINISH',metrics:m},location.origin);
+      parent.postMessage({type:'HOJA_CLASS_RESULT',reason:reason==='시간 종료'?'TIME_UP':reason==='문제 25개 완료'?'QUIZ_25':'FINISH',metrics:m,records:window.HOJA_RUN_RECORD()},location.origin);
       window.HOJA_REVIEW.open({reason,metrics:m,rows:window.HOJA_RUN_RECORD()},()=>{});
       return;
     }
