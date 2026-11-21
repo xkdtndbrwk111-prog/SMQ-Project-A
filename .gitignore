@@ -10,3 +10,5 @@ __pycache__/
 
 /dist-current/
 /dist-current-test/
+
+/verification/phase3b2/node_modules
