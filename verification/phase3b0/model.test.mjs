@@ -4,7 +4,7 @@ import {ClassModel,settings,isolatedEnvironment,DEMO_PROJECT,ProductClockModel,a
 const join=(s,uid='s1',name='fox',team='red')=>s.join({sessionId:'session-demo',uid,name,team,gameVersion:'game-a',cartridgeVersion:'cart-a'});
 const setup=()=>{const s=new ClassModel();s.open('teacher');const p=join(s);s.start('teacher');return {s,p:s.snapshot.participants.find(x=>x.id===p.id)}};
 const result={reason:'FINISH',found:25,answered:2,correct:1,flowers:1,remainingSeconds:48,otherPoints:0,score:63};
-const req=(p,over={})=>({sessionId:'session-demo',uid:p.uid,pid:p.id,runId:p.runId,epoch:p.epoch,requestId:'req1',result,...over});
+const req=(p,over={})=>({sessionId:'session-demo',gameVersion:'game-a',cartridgeVersion:'cart-a',uid:p.uid,pid:p.id,runId:p.runId,epoch:p.epoch,requestId:'req1',result,...over});
 const denied=(fn,code)=>assert.throws(fn,e=>e.code===code);
 test('900 seconds, 10 minute rounding and proposed range boundaries',()=>{
  assert.deepEqual(settings(),{durationSeconds:900,sunsetThresholdSeconds:200,nightThresholdSeconds:100,questionGuideThresholdSeconds:100,settingsRevision:1});
@@ -104,4 +104,13 @@ test('session ID and monotonic revisions prevent cross-session or stale event ac
  const {s,p}=setup();denied(()=>s.submit(req(p,{sessionId:'other-session'})),'SESSION_MISMATCH');
  assert.equal(applyRevision(10,8),10);assert.equal(applyRevision(10,10),10);assert.equal(applyRevision(10,11),11);
  denied(()=>applyRevision(10,-1),'INVALID_REVISION');
+});
+
+test('a forged submitted duration or version cannot replace locked session settings',()=>{
+ const {s,p}=setup();const view=s.snapshot;view.settings.durationSeconds=1800;
+ assert.equal(s.snapshot.settings.durationSeconds,900);
+ denied(()=>s.submit(req(p,{gameVersion:'old'})),'VERSION_MISMATCH');
+ denied(()=>s.submit(req(p,{cartridgeVersion:'old'})),'VERSION_MISMATCH');
+ denied(()=>s.submit(req(p,{result:{...result,durationSeconds:1800}})),'INVALID_RESULT');
+ denied(()=>s.submit(req(p,{result:undefined})),'INVALID_RESULT');
 });

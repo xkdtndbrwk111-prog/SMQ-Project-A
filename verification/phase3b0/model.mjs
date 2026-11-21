@@ -15,7 +15,9 @@ export function isolatedEnvironment({projectId,authHost,firestoreHost,authAlive,
  return {network:'local-demo-only'};
 }
 const canonical=x=>{
- if(x===null||typeof x!=='object')return JSON.stringify(x);
+ if(x===null||typeof x==='boolean'||typeof x==='string')return JSON.stringify(x);
+ if(typeof x==='number'&&Number.isFinite(x))return JSON.stringify(x);
+ if(typeof x!=='object')fail('INVALID_RESULT');
  if(Array.isArray(x))return '['+x.map(canonical).join(',')+']';
  return '{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+canonical(x[k])).join(',')+'}';
 };
@@ -58,15 +60,17 @@ export class ClassModel{
   const old=this.#runs.get(p.runId);old.status='INVALIDATED';old.counted=false;p.status='EXCLUDED';p.epoch++;
   this.#audit.push({action:'EXCLUDE',participantId:pid,oldRunId:old.id});this.#s.revision++;return copy(p);
  }
- submit({sessionId,uid,pid,runId,epoch,requestId,result}){
+ submit({sessionId,uid,pid,runId,epoch,requestId,gameVersion,cartridgeVersion,result}){
   if(sessionId!==this.#s.sessionId)fail('SESSION_MISMATCH');
+  if(gameVersion!==this.#s.gameVersion||cartridgeVersion!==this.#s.cartridgeVersion)fail('VERSION_MISMATCH');
   const p=this.#participant(uid,pid),run=this.#runs.get(runId);if(!run||run.participantId!==pid)fail('FORBIDDEN');
   if(typeof requestId!=='string'||!requestId)fail('INVALID_REQUEST');
   const key=pid+'\0'+runId+'\0'+requestId, payload=hash(result),old=this.#receipts.get(key);
   // Authentication and ownership precede replay; identical receipts remain retrievable after close or reconnect.
   if(old){if(old.payload!==payload)fail('REQUEST_CONFLICT');return {...copy(old.receipt),replayed:true};}
   this.#state('RUNNING');if(epoch!==p.epoch)fail('STALE_EPOCH');if(runId!==p.runId||run.status!=='RUNNING')fail('INVALID_RUN');
-  if(!result||!['FINISH','TIME_UP','QUIZ_25'].includes(result.reason)||!integer(result.found,0,25)||!integer(result.answered,0,result.found)||!integer(result.correct,0,result.answered)||!integer(result.flowers,0,10000)||!integer(result.remainingSeconds,0,this.#s.settings.durationSeconds)||!integer(result.otherPoints,0,10000000)||!integer(result.score,0,10000000))fail('INVALID_RESULT');
+  if(!result||typeof result!=='object'||Array.isArray(result)||Object.keys(result).some(k=>!['reason','found','answered','correct','flowers','remainingSeconds','otherPoints','score'].includes(k)))fail('INVALID_RESULT');
+  if(!['FINISH','TIME_UP','QUIZ_25'].includes(result.reason)||!integer(result.found,0,25)||!integer(result.answered,0,result.found)||!integer(result.correct,0,result.answered)||!integer(result.flowers,0,10000)||!integer(result.remainingSeconds,0,this.#s.settings.durationSeconds)||!integer(result.otherPoints,0,10000000)||!integer(result.score,0,10000000))fail('INVALID_RESULT');
   if(result.reason==='TIME_UP'&&result.remainingSeconds!==0)fail('INVALID_RESULT');
   if(result.reason==='QUIZ_25'&&result.answered!==25)fail('INVALID_RESULT');
   // The current game has no confirmed 25-answer settlement path; do not invent its scoring.
