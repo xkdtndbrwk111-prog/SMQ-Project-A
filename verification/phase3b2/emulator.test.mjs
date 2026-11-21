@@ -159,3 +159,9 @@ test('disabled teacher cannot reuse a previously issued token',async()=>{
  const disabled=await fakeUser('teacher');await auth.updateUser(disabled.uid,{disabled:true});
  await throwsCode(service.createRoom(disabled.token,{gameVersion:'g',cartridgeVersion:'c'}),'UNAUTHENTICATED');
 });
+test('live classroom progress belongs to the participant and does not settle a run',async()=>{
+ const {x,p}=await running();const run=await service.reconnect(student.token,x.sessionId,p.participantId);const payload={participantId:p.participantId,runId:run.runId,connectionEpoch:run.connectionEpoch,score:23};
+ await throwsCode(service.progress(student2.token,x.sessionId,payload),'FORBIDDEN');
+ await throwsCode(service.progress(student.token,x.sessionId,{...payload,connectionEpoch:run.connectionEpoch-1}),'INVALID_RUN');
+ await service.progress(student.token,x.sessionId,payload);const view=await service.roomView(teacher.token,x.sessionId);const person=view.participants.find(q=>q.id===p.participantId);assert.equal(person.progressScore,23);assert.equal(person.score,null);assert.equal(person.status,'PLAYING');
+});

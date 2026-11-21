@@ -44,6 +44,7 @@ async function api(req,res){
   case 'rerun':teacherOnly();out=await service.rerun(who.token,d.sessionId,d.participantId);break;
   case 'start':teacherOnly();out=await service.start(who.token,d.sessionId);break;
   case 'reconnect':out=await service.reconnect(who.token,d.sessionId,d.participantId);break;
+  case 'progress':out=await service.progress(who.token,d.sessionId,d.payload);break;
   case 'submit':out=await service.submit(who.token,d.sessionId,{...d.payload,gameVersion:build.gameVersion});break;
   case 'finalize':teacherOnly();await service.close(who.token,d.sessionId);out=await service.finalize(who.token,d.sessionId);break;
   default:throw Error('UNKNOWN_ACTION');

@@ -5599,6 +5599,10 @@ class HojaScene extends Phaser.Scene{
   }
 
   update(time,delta){
+    if(HOJA_CLASS_SESSION&&!HOJA_CLASS_SESSION.submitted&&Date.now()-(HOJA_CLASS_SESSION.lastProgressAt||0)>=3000){
+      HOJA_CLASS_SESSION.lastProgressAt=Date.now();
+      parent.postMessage({type:'HOJA_CLASS_PROGRESS',score:Math.max(0,Math.floor(this.score||0))},location.origin);
+    }
     // CLEAN LAB: no hidden diagnostic shortcuts, auto tests, reset, pause or
     // system-option keys. Existing input objects are retained for other code.
     // Gameplay arrows, WASD, Shift/X, Space/Z and quiz keys remain functional.
