@@ -1,0 +1,9 @@
+{
+  "description": "Approved 900-second product targets; independent of the retained Phase 2 600-second baseline",
+  "durationSeconds": 900,
+  "sunsetSeconds": 200,
+  "nightSeconds": 100,
+  "guideSeconds": 100,
+  "paletteSamples": {"200001": 0, "200000": 1, "100001": 8, "100000": 9},
+  "provisional600": {"durationSeconds": 600, "sunsetSeconds": 133, "nightSeconds": 67, "guideSeconds": 67}
+}

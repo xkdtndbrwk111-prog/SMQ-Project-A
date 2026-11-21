@@ -66,6 +66,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
   if(!keepProductionCave)A.edit(caveRenderProductionSource,caveRenderTestSource);
   A.edit('let ACTIVE_SCENE=null;', 'let ACTIVE_SCENE=null;window.HOJA_TEST_PROBE=Object.freeze({' +
     'timePolicy(n){return hojaCreateTimeSettings(n);},timeSettings(){return {...RUN_TIME_SETTINGS};},setDuration(n){startStage(0,true,"start",n);},palette(ms){return hojaPaletteBand(ms,STAGE.theme);},' +
+    'clockStep(ms,kind){const s=ACTIVE_SCENE,old=[s.manualPaused,s.quizActive,s.dying];s.manualPaused=kind==="pause";s.quizActive=kind==="quiz";s.dying=kind==="death";try{s.update(s.time.now,ms);return {ms:s.remainingMs,timeUp:s.timeUp,reason:RUN.endReason||null};}finally{[s.manualPaused,s.quizActive,s.dying]=old;}},' +
+    'clockVisual(sec){const s=ACTIVE_SCENE;s.remainingMs=sec*1000;RUN.remainingMs=s.remainingMs;s.radarLastDrawAt=-1e9;s.updateQuestionRadar(s.time.now);s.updateSurfaceStreetLamps();return {radar:s.questionRadarRoot?.style.display,lamps:(s.surfaceStreetLamps||[]).map(x=>({key:x.art.texture.key,visible:x.glow.visible}))};},' +
     'stopLoop(){ACTIVE_SCENE.game.loop.stop();},step(){ACTIVE_SCENE.game.step(performance.now(),16);},' +
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
