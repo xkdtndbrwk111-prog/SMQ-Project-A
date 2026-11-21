@@ -28,7 +28,7 @@ export function checkModuleOrder(pages) {
  if(main<0)errors.push('arcade.html: 게임 초기화 위치를 찾을 수 없습니다');
  ordered('arcade.html',arcadeBeforeMain,main);
  for(const page of ['index.html','play.html'])
-  ordered(page,['js/parent-services.js','js/parent-gameplay.js',page==='index.html'?'js/teacher_qr.js':'js/student.js']);
+  ordered(page,['js/intro-shared.js','js/parent-services.js','js/parent-gameplay.js',page==='index.html'?'js/teacher_qr.js':'js/student.js']);
  const review=pages['arcade.html'].indexOf('src="js/review.js"');
  if(review<main)errors.push('arcade.html: 오답 복습 로드 위치 오류');
  return errors;
