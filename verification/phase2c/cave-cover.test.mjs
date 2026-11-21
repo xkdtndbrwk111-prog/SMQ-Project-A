@@ -65,6 +65,7 @@ test('hidden cave cover masks bank edges and restores water occlusion on entry',
   await game.waitForFunction(()=>window.HOJA_TEST_PROBE.state()?.stage===4,null,{timeout:30000});
   await game.waitForTimeout(250);
   assert.equal((await game.evaluate(()=>window.HOJA_TEST_PROBE.caveSettings())).soft,false,'test build retains soft-vision override');
+  await game.waitForFunction(()=>window.HOJA_TEST_PROBE.visionSamples()>0,null,{timeout:10000});
   const vision=await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision());
   await frame.locator('#hojaTestCaveVision').click();
   assert.equal(await game.evaluate(()=>window.HOJA_TEST_PROBE.caveVision()),!vision,'test build cave vision toggle');

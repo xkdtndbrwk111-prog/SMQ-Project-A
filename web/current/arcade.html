@@ -1156,7 +1156,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
     <button id="soundBtn" type="button">소리 켬</button>
     <button id="fullscreenBtn" type="button">전체 화면</button>
   </div>
-  <div class="internalControls" style="display:none!important" aria-hidden="true"><span><kbd>V</kbd> 원형/지형 · <kbd>G</kbd> 부드러움/선명함 · <kbd>Shift+V</kbd> OFF</span> <span id="visionMetric">시야 A/B</span>
+  <div class="internalControls" style="display:none!important" aria-hidden="true"><span><kbd>V</kbd> 원형/지형 · <kbd>G</kbd> 부드러움/선명함 · <kbd>Shift+V</kbd> OFF</span>
     <span class="spacer"></span>
     <span id="mapCode" style="opacity:.6;font:11px ui-monospace,monospace"></span>
 
@@ -5590,7 +5590,6 @@ class HojaScene extends Phaser.Scene{
     // system-option keys. Existing input objects are retained for other code.
     // Gameplay arrows, WASD, Shift/X, Space/Z and quiz keys remain functional.
     this.updateFps(time,delta);
-    this.updateVisionBenchmark(time,delta);
     // STEP13-2: do not snapshot the light-copy before the actor moves/animates.
     // The normal path syncs lampHero AFTER updatePlayerVisual (below).
     this.updateQuestionRadar(time);
@@ -7590,8 +7589,6 @@ class HojaScene extends Phaser.Scene{
   }
 
   initCaveFov(){
-    this.visionFrameStats={circle:[],terrain:[],off:[]};
-    this.visionModeChangedAt=this.time.now;
     if(STAGE.theme!=='cave'){this.caveFov=null;return;}
     const w=128,h=128,grid=new Uint8Array(w*h);
     // Cave ground is fully blocking; one-way platform faces are traversable
@@ -7784,34 +7781,7 @@ class HojaScene extends Phaser.Scene{
     f.renderCount++;f.lastViewKey=key;
   }
 
-  updateVisionBenchmark(time,delta){
-    if(STAGE.theme!=='cave'||this.manualPaused||this.quizActive)return;
-    if(!this.visionFrameStats)return;
-    const mode=!this.caveVisionEnabled?'off':this.caveVisionMode;
-    if(time-this.visionModeChangedAt<1200)return;
-    const values=this.visionFrameStats[mode];
-    if(Number.isFinite(delta)&&delta>0&&delta<500){
-      values.push(delta);if(values.length>600)values.shift();
-    }
-    const label=document.getElementById('visionMetric');
-    if(label&&time>(this.visionBenchmarkNext||0)){
-      this.visionBenchmarkNext=time+950;
-      const avg=a=>a.length>=25?(1000/(a.reduce((s,n)=>s+n,0)/a.length)).toFixed(1):'측정 중';
-      label.textContent='시야 '+({terrain:'지형',circle:'원형',off:'꺼짐'}[mode])+
-        (mode==='terrain'?(this.caveFovSoft?' · 부드러움':' · 선명함'):'')+': '+avg(values)+' FPS'+
-        ' · 원형 '+avg(this.visionFrameStats.circle)+' / 지형 '+avg(this.visionFrameStats.terrain);
-    }
-  }
 
-  visionCompareReport(){
-    const r={};for(const [mode,values] of Object.entries(this.visionFrameStats||{})){
-      const sorted=values.slice().sort((a,b)=>a-b);
-      r[mode]={samples:values.length,
-        avgFps:values.length?1000/(values.reduce((a,b)=>a+b,0)/values.length):null,
-        worstFrameMs:sorted.length?sorted[sorted.length-1]:null};
-    }
-    return r;
-  }
 
 
   applyUrgencyState(){
