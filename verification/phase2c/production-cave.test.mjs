@@ -10,7 +10,8 @@ import {instrumentArcade} from '../../tools/current-test-probe.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 test('production cave culling creates and runs its default rendering path',async()=>{
  const dir=path.join(root,'dist-current-test');
- const source=await readFile(path.join(root,'web/current/arcade.html'),'utf8');
+ const info=JSON.parse(await readFile(path.join(dir,'BUILD.json'),'utf8'));
+ const source=(await readFile(path.join(root,'web/current/arcade.html'),'utf8')).replace('__HOJA_ARCADE_BUILD_VERSION__',info.gameVersion);
  const arcade=instrumentArcade(source,{keepProductionCave:true});
  const server=createServer(async(req,res)=>{
   try {
@@ -28,7 +29,6 @@ test('production cave culling creates and runs its default rendering path',async
   const page=await browser.newPage();
   const errors=[];page.on('pageerror',error=>errors.push(String(error)));
   await page.addInitScript(()=>{sessionStorage.setItem('HOJA_TEST_SEED','314159');window.HOJA_V047_FOV_SOFT=false;window.HOJA_V046_PREFERRED_VISION='probe';});
-  const info=JSON.parse(await readFile(path.join(dir,'BUILD.json'),'utf8'));
   const params=new URLSearchParams({m:'s',c:'test-joseon-a',cv:'19065b1d0fc5',gv:info.gameVersion,s:'spring'});
   await page.goto('http://127.0.0.1:'+server.address().port+'/play.html?'+params,{waitUntil:'load'});
   await page.locator('#hojaStudentStart:not([disabled])').click({timeout:30000});

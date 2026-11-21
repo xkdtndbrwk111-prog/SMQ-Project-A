@@ -66,6 +66,10 @@ for (const page of ['index', 'play']) {
     assert.equal(frame.src, undefined);
     assert.equal(frame.hidden, true);
     assert.deepEqual(returnedTo, [page === 'play' ? 'gate' : 'summer']);
+    window.HOJA_BUILD = {gameVersion:'0123456789'};
+    await game.launch('arcade', 'winter');
+    assert.equal(frame.src, 'arcade.html?season=winter&gv=0123456789');
+    game.stop();
     game.clearServerQuestions();
     await game.launch('arcade', 'summer');
     assert.equal(alerts.length, 2);

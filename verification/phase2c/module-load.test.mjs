@@ -21,13 +21,13 @@ test('missing raft module produces visible specific startup error',async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});
  try {
   const page=await browser.newPage();
-  await page.route('**/js/rafts.js',route=>route.abort());
+  await page.route(/\/js\/rafts\.js(?:\?.*)?$/,route=>route.abort());
   await page.goto('http://127.0.0.1:'+server.address().port+'/arcade.html',{waitUntil:'load'});
   const error=page.locator('#bootError');
   await error.waitFor({state:'visible',timeout:30000});
   assert.match(await error.innerText(),/HOJA_CREATE_RAFTS/);
-  await page.unroute('**/js/rafts.js');
-  await page.route('**/js/parent-services.js',route=>route.abort());
+  await page.unroute(/\/js\/rafts\.js(?:\?.*)?$/);
+  await page.route(/\/js\/parent-services\.js(?:\?.*)?$/,route=>route.abort());
   for(const name of ['index.html','play.html']){
    await page.goto('http://127.0.0.1:'+server.address().port+'/'+name,{waitUntil:'load'});
    const alert=page.getByRole('alert');

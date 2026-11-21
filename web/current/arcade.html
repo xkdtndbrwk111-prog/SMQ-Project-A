@@ -1352,6 +1352,17 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 (() => {
 'use strict';
 
+const hojaArcadeVersion='__HOJA_ARCADE_BUILD_VERSION__';
+const hojaRequestedVersion=new URLSearchParams(location.search).get('gv');
+let hojaParentVersion=null;
+try{if(window.parent!==window)hojaParentVersion=window.parent.HOJA_BUILD?.gameVersion||null;}catch(_){}
+if([hojaRequestedVersion,hojaParentVersion].some(v=>v&&v!==hojaArcadeVersion)){
+  const status=document.getElementById('bootStatus'),error=document.getElementById('bootError');
+  if(status)status.classList.add('hidden');
+  if(error){error.style.display='block';error.textContent='게임이 새 버전으로 변경되었습니다. 화면을 새로고침해 주세요.';}
+  return;
+}
+
 const requiredModules={
   Phaser:window.Phaser, HojaCave43:window.HojaCave43, HojaCave44:window.HojaCave44,
   HOJA_CREATE_THEMES:window.HOJA_CREATE_THEMES,

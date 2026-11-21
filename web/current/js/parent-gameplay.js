@@ -67,7 +67,7 @@ window.HOJA_GAMEPLAY=(()=>{
   if(new Set(window.HOJA_B_LIVE.sources.flatMap(e=>e.data.questions.filter(q=>q.type==='OX'||q.type==='MULTIPLE').map(q=>e.sheetName+'::'+q.familyId))).size<25){img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드는 고유 문제 묶음 25개 이상이 필요합니다. 다른 단원을 추가로 선택해 주세요.';return;}
   window.HOJA_AUDIO_CONTROL?.syncArcade?.();
   try{
-   if(own!==loadId)return;const f=frame();f.src='arcade.html?season='+encodeURIComponent(season)+(window.HOJA_ARCADE_QUERY||'');window.HOJA_V055_WATCH_ARCADE?.(f);window.HOJA_USAGE?.track?.('SOLO',1);f.addEventListener('load',()=>{window.HOJA_AUDIO_CONTROL?.syncArcade?.();window.HOJA_V055_BIND_ARCADE?.(f)},{once:true});
+   if(own!==loadId)return;const f=frame();f.src='arcade.html?season='+encodeURIComponent(season)+(window.HOJA_BUILD?.gameVersion?'&gv='+encodeURIComponent(window.HOJA_BUILD.gameVersion):'')+(window.HOJA_ARCADE_QUERY||'');window.HOJA_V055_WATCH_ARCADE?.(f);window.HOJA_USAGE?.track?.('SOLO',1);f.addEventListener('load',()=>{window.HOJA_AUDIO_CONTROL?.syncArcade?.();window.HOJA_V055_BIND_ARCADE?.(f)},{once:true});
   }catch(err){if(own!==loadId)return;img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드 실행 준비 실패: '+err.message;}
  }
  function stop(){

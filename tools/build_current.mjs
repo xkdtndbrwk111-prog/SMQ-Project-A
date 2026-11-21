@@ -52,7 +52,16 @@ for(const name of ['index.html','play.html']){
  if(matches.length!==1)throw Error(`${name}: 빌드 버전 표지가 정확히 하나여야 합니다`);
  pages[name]=input.replace(re,`$1${version}$2`);
 }
-pages['arcade.html']=arcade;
+if((arcade.match(/__HOJA_ARCADE_BUILD_VERSION__/g)||[]).length!==1)throw Error('아케이드 버전 표지가 정확히 하나여야 합니다');
+pages['arcade.html']=arcade.replace('__HOJA_ARCADE_BUILD_VERSION__',version);
+// Content-address local scripts so an old HTTP cache cannot supply a different build.
+for(const name of Object.keys(pages)){
+ pages[name]=pages[name].replace(/(<script\b[^>]*\bsrc=["'])(?:(js|vendor)\/)([^"'?]+)(["'])/g,(tag,start,folder,tail,end)=>{
+  const file=folder+'/'+tail;
+  if(!files[file])throw Error(name+': 스크립트 파일이 없습니다: '+file);
+  return start+file+'?v='+files[file].slice(0,16)+end;
+ });
+}
 const template=JSON.parse(fs.readFileSync(path.join(source,'BUILD.json'),'utf8'));
 // Hash the exact bytes served, including every external module and cartridge.
 const artifacts = production.map(name => {

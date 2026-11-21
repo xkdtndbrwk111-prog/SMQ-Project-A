@@ -106,8 +106,8 @@ if(fs.existsSync(path.join(dist,'js/arcade-host.js')))
   ok(!/hojaFps5sSamples|hojaDiagMinFps|id="hojaFpsDisplay"|id="hojaDebugLayer"/.test(arc+read('js/hud.js')), 'FPS 진단 표시는 시험 빌드에만');
 
 // 6
-ok(/src="js\/student\.js"/.test(ply) && !/src="js\/student\.js"/.test(idx), 'student.js는 play.html에만');
-ok(/src="js\/teacher_qr\.js"/.test(idx) && !/src="js\/teacher_qr\.js"/.test(ply), 'teacher_qr.js는 index.html에만');
+ok(/src="js\/student\.js(?:\?v=[0-9a-f]{16})?"/.test(ply) && !/src="js\/student\.js(?:\?v=[0-9a-f]{16})?"/.test(idx), 'student.js는 play.html에만');
+ok(/src="js\/teacher_qr\.js(?:\?v=[0-9a-f]{16})?"/.test(idx) && !/src="js\/teacher_qr\.js(?:\?v=[0-9a-f]{16})?"/.test(ply), 'teacher_qr.js는 index.html에만');
 const b = JSON.parse(read('BUILD.json'));
 ok(idx.includes(`gameVersion:'${b.gameVersion}'`) && ply.includes(`gameVersion:'${b.gameVersion}'`), `두 화면의 게임 버전 일치 (${b.gameVersion})`);
 const cat = JSON.parse(read('cartridges/catalog.json'));

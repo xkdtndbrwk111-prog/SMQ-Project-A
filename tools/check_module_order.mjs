@@ -15,7 +15,7 @@ export function checkModuleOrder(pages) {
   const tags=[...html.matchAll(/<script\b([^>]*)>/g)];
   let previous=-1;
   for(const src of names) {
-   const matches=tags.filter(m=>new RegExp('\\bsrc=["\']'+src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'["\']').test(m[1]));
+   const matches=tags.filter(m=>new RegExp('\\bsrc=["\']'+src.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:\\?v=[0-9a-f]{16})?["\']').test(m[1]));
    if(matches.length!==1) {errors.push(page+': '+src+' 태그가 정확히 하나여야 합니다');continue;}
    const tag=matches[0];
    if(/\b(async|defer)\b/i.test(tag[1]))errors.push(page+': '+src+' 동기 로드 필요');
@@ -29,7 +29,7 @@ export function checkModuleOrder(pages) {
  ordered('arcade.html',arcadeBeforeMain,main);
  for(const page of ['index.html','play.html'])
   ordered(page,['js/intro-shared.js','js/parent-services.js','js/parent-gameplay.js',page==='index.html'?'js/teacher_qr.js':'js/student.js']);
- const review=pages['arcade.html'].indexOf('src="js/review.js"');
+ const review=pages['arcade.html'].search(/src="js\/review\.js(?:\?v=[0-9a-f]{16})?"/);
  if(review<main)errors.push('arcade.html: 오답 복습 로드 위치 오류');
  return errors;
 }
