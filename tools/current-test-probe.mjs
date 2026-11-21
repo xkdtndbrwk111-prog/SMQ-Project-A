@@ -27,6 +27,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     A.edit('this.caveFovSoft=true;','this.caveFovSoft=window.HOJA_V047_FOV_SOFT!==false;');
   }
   // Legacy reference is selected only inside the instrumented test build.
+  A.edit("    const isGround=!HOJA_MAKER_MODE&&!isCave&&s.kind==='ground'&&!s.cave;","    const isGround=!HOJA_MAKER_MODE&&!isCave&&s.kind==='ground'&&!s.cave&&sessionStorage.getItem('HOJA_TEST_OLD_GROUND')!=='1';");
   A.edit("function startStage(index,fresh,spawn='start',durationSeconds=900){", "function startStage(index,fresh,spawn='start',durationSeconds=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?600:900){");
   A.edit('RUN_TIME_SETTINGS=hojaCreateTimeSettings(durationSeconds);', "RUN_TIME_SETTINGS=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?Object.freeze({durationSeconds:600,sunsetSeconds:100,nightSeconds:50,guideSeconds:50}):hojaCreateTimeSettings(durationSeconds);");
   A.edit('let PENDING_SEED=null;', "let PENDING_SEED=Number(sessionStorage.getItem('HOJA_TEST_SEED'))||null;");
@@ -72,6 +73,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'coverSites(){return CAVES.map(([a,b])=>({a,b,floor:F,stage:STAGE_INDEX,solids:SOLIDS.filter(o=>o.x<b&&o.x+o.w>a).map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,slab:o.slab,cave:o.cave,kind:o.kind}))}));},' +
     'moveForCover(x,y){const s=ACTIVE_SCENE;clearInterval(window.__coverHold);window.__coverHold=setInterval(()=>s.playerBody.body.reset(x,y),16);},' +
     'freezeCover(){clearInterval(window.__coverHold);ACTIVE_SCENE.scene.pause();},' +
+    'inHiddenCave(){return ACTIVE_SCENE.inCave();},' +
+    'goalInfo(){const d=ACTIVE_SCENE?.doors?.find(d=>d.kind!=="entry");if(!d)return null;return {x:d.x,y:d.y,kind:d.kind,goal:GOAL_X,worldWidth:WORLD_W,frame:d.house?.frame?.name,houseHasBody:!!d.house?.body,flipped:!!d.house?.flipX,bubble:!!d.bubble,text:d.comeIn?.text,textVisible:d.comeIn?.visible,bubbleAlpha:d.bubble?.alpha};},' +
     'caveVision(){return !!ACTIVE_SCENE?.caveVisionEnabled;},' +
     'visionSamples(){return ACTIVE_SCENE?.visionFrameStats?.terrain?.length||0;},' +
     'fpsDiagnostic(){return {count:ACTIVE_SCENE?.hojaFps5sSamples?.length||0,display:!!ACTIVE_SCENE?.fpsDisplay};},' +
@@ -83,6 +86,8 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     'moveVisual(x,y){ACTIVE_SCENE.playerBody.body.reset(x,y);ACTIVE_SCENE.updateCamera(ACTIVE_SCENE.time.now);},' +
     'cameraInfo(){const c=ACTIVE_SCENE.cameras.main;return {scrollX:c.scrollX,scrollY:c.scrollY,zoom:c.zoom,width:c.width,height:c.height};},' +
     'bankInfo(){return (ACTIVE_SCENE.waterBankForeground||[]).map(o=>({x:o.x,y:o.y,w:o.width,h:o.height,depth:o.depth,visible:o.visible}));},' +
+    'waterInfo(){return {visuals:(ACTIVE_SCENE.waterVisuals||[]).map(x=>({...x})),zones:(ACTIVE_SCENE.waterZones||[]).map(x=>({...x}))};},' +
+    'terrainInfo(){const s=ACTIVE_SCENE;return {theme:STAGE.theme,solids:SOLIDS.map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,kind:o.kind,cave:!!o.cave,slab:!!o.slab})),physics:s.solidGroup.getChildren().map(o=>({x:o.x-o.width/2,y:o.y-o.height/2,w:o.width,h:o.height})),art:(s._v055TerrainArt||[]).filter(o=>o.__hojaV2Solid).map(o=>({x:o.x,y:o.y,w:o.width,h:o.height,kind:o.__hojaTerrainKind,ground:!!o.__hojaGroundRenderer}))};},' +
     'coverInfo(){return (ACTIVE_SCENE.caveCovers||[]).map(({cover})=>{const source=cover.texture.getSourceImage();const ctx=source.getContext("2d");const pixels=ctx.getImageData(0,0,source.width,source.height).data;let transparent=0;for(let i=3;i<pixels.length;i+=4)if(pixels[i]!==255)transparent++;return {x:cover.x,y:cover.y,w:source.width,h:source.height,alpha:cover.alpha,transparent};});},' +
     'state(){const s=ACTIVE_SCENE;if(!s||!s.playerBody)return null;const b=s.playerBody.body;return {x:Math.round(s.playerBody.x),y:Math.round(s.playerBody.y),vx:Math.round(b.velocity.x),vy:Math.round(b.velocity.y),' +
     'grounded:!!(b.blocked.down||b.touching.down),sitting:!!s.hojaIsSitting,quiz:!!s.quizActive,paused:!!s.manualPaused,timeUp:!!s.timeUp,clear:!!s.clear,sec:Math.ceil(s.remainingMs/1000),found:RUN.found,stage:STAGE_INDEX};},' +

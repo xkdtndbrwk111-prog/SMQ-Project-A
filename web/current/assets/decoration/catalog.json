@@ -1,0 +1,667 @@
+{
+  "version": 1,
+  "license": "CC0-1.0",
+  "licenseFile": "assets/decoration/LICENSE.txt",
+  "loading": "on-demand",
+  "defaultEffects": null,
+  "atlases": [
+    {
+      "id": "grassland-entities",
+      "season": "grassland",
+      "path": "assets/decoration/grassland/Grassland_entities (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/1 - Grassland/Grassland_entities (16 x 16).png",
+      "sheetSize": [
+        320,
+        112
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "tree-round",
+          "rect": [
+            16,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "tree-pine",
+          "rect": [
+            80,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "tree-flowering",
+          "rect": [
+            144,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "sign",
+          "rect": [
+            48,
+            80,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "wood-fence-a",
+          "rect": [
+            80,
+            80,
+            48,
+            16
+          ],
+          "spriteSize": [
+            48,
+            16
+          ]
+        },
+        {
+          "id": "wood-fence-b",
+          "rect": [
+            144,
+            80,
+            64,
+            16
+          ],
+          "spriteSize": [
+            64,
+            16
+          ]
+        },
+        {
+          "id": "railing",
+          "rect": [
+            240,
+            32,
+            48,
+            16
+          ],
+          "spriteSize": [
+            48,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grassland-extra-plants",
+      "season": "grassland",
+      "path": "assets/decoration/grassland/Extra_plants (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/1 - Grassland/Extra_plants (16 x 16).png",
+      "sheetSize": [
+        160,
+        80
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "flowering-tree",
+          "rect": [
+            16,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "flower-bed",
+          "rect": [
+            80,
+            32,
+            64,
+            32
+          ],
+          "spriteSize": [
+            64,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "autumn-entities",
+      "season": "autumn",
+      "path": "assets/decoration/autumn/Autumn_entities (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/2 - Autumn Forest/Autumn_entities (16 x 16).png",
+      "sheetSize": [
+        320,
+        112
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "autumn-tree",
+          "rect": [
+            16,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "evergreen",
+          "rect": [
+            80,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "wooden-structure",
+          "rect": [
+            224,
+            48,
+            80,
+            32
+          ],
+          "spriteSize": [
+            80,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tropics-entities",
+      "season": "tropics",
+      "path": "assets/decoration/tropics/Tropics_entities (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/3 - Tropics/Tropics_entities (16 x 16).png",
+      "sheetSize": [
+        272,
+        144
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "palm-tree",
+          "rect": [
+            16,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "wood-fence",
+          "rect": [
+            80,
+            48,
+            48,
+            16
+          ],
+          "spriteSize": [
+            48,
+            16
+          ]
+        },
+        {
+          "id": "small-rock",
+          "rect": [
+            144,
+            48,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "wooden-structure",
+          "rect": [
+            176,
+            32,
+            80,
+            32
+          ],
+          "spriteSize": [
+            80,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "winter-entities",
+      "season": "winter",
+      "path": "assets/decoration/winter/Winter_entities (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/4 - Winter World/Winter_entities (16 x 16).png",
+      "sheetSize": [
+        224,
+        112
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "snow-tree",
+          "rect": [
+            16,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "evergreen",
+          "rect": [
+            80,
+            16,
+            48,
+            48
+          ],
+          "spriteSize": [
+            48,
+            48
+          ]
+        },
+        {
+          "id": "fence",
+          "rect": [
+            144,
+            16,
+            48,
+            16
+          ],
+          "spriteSize": [
+            48,
+            16
+          ]
+        },
+        {
+          "id": "snow-rock",
+          "rect": [
+            16,
+            80,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flowers",
+      "season": "universal",
+      "path": "assets/decoration/universal/Flowers (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/Flowers (16 x 16).png",
+      "sheetSize": [
+        64,
+        16
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "flower-1",
+          "rect": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "flower-2",
+          "rect": [
+            16,
+            0,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "flower-3",
+          "rect": [
+            32,
+            0,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        },
+        {
+          "id": "flower-4",
+          "rect": [
+            48,
+            0,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "metal-fence",
+      "season": "universal",
+      "path": "assets/decoration/universal/Metal_Wire_fence (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/Metal_Wire_fence (16 x 16).png",
+      "sheetSize": [
+        224,
+        48
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "fence-sheet",
+          "rect": [
+            0,
+            0,
+            224,
+            48
+          ],
+          "spriteSize": [
+            224,
+            48
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rock",
+      "season": "universal",
+      "path": "assets/decoration/universal/Rock_shape (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/Rock_shape (16 x 16).png",
+      "sheetSize": [
+        16,
+        16
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "rock",
+          "rect": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "spriteSize": [
+            16,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "houses",
+      "season": "universal",
+      "path": "assets/decoration/universal/House (112 x 96).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/House (112 x 96).png",
+      "sheetSize": [
+        240,
+        96
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "house-a",
+          "rect": [
+            0,
+            0,
+            112,
+            96
+          ],
+          "spriteSize": [
+            112,
+            96
+          ]
+        },
+        {
+          "id": "house-b",
+          "rect": [
+            128,
+            0,
+            112,
+            96
+          ],
+          "spriteSize": [
+            112,
+            96
+          ]
+        }
+      ]
+    },
+    {
+      "id": "street-furniture",
+      "season": "universal",
+      "path": "assets/decoration/universal/Snack_machine_Bench_Trash_bin (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/Snack_machine_Bench_Trash_bin (16 x 16).png",
+      "sheetSize": [
+        128,
+        64
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "vending-machine",
+          "rect": [
+            16,
+            16,
+            32,
+            32
+          ],
+          "spriteSize": [
+            32,
+            32
+          ]
+        },
+        {
+          "id": "bench",
+          "rect": [
+            48,
+            16,
+            48,
+            32
+          ],
+          "spriteSize": [
+            48,
+            32
+          ]
+        },
+        {
+          "id": "trash-bin",
+          "rect": [
+            96,
+            16,
+            16,
+            32
+          ],
+          "spriteSize": [
+            16,
+            32
+          ]
+        }
+      ]
+    },
+    {
+      "id": "decorative-blocks",
+      "season": "universal",
+      "path": "assets/decoration/universal/Blocks (16 x 16).png",
+      "originalPath": "Seasonal Tilesets/5 - Misc. universal tiles/Blocks (16 x 16).png",
+      "sheetSize": [
+        176,
+        96
+      ],
+      "cellSize": [
+        16,
+        16
+      ],
+      "anchor": [
+        0.5,
+        1
+      ],
+      "recommendedLayer": "behind-player",
+      "defaultCollision": false,
+      "objects": [
+        {
+          "id": "block-sheet",
+          "rect": [
+            0,
+            0,
+            176,
+            96
+          ],
+          "spriteSize": [
+            176,
+            96
+          ]
+        }
+      ]
+    }
+  ]
+}
