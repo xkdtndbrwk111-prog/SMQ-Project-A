@@ -21,6 +21,7 @@ test('game initializes 900 seconds and applies configured palette and radar boun
  assert.ok(lightBefore.lamps.length>0);assert.ok(lightBefore.lamps.every(x=>x.key==='hojaStreetLampOff'));assert.ok(lightAt.lamps.every(x=>x.key==='hojaStreetLampOn'));
  assert.equal(lightBefore.radar,'none');assert.equal(lightAt.radar,'block');
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.setTime(0.01));const ended=await frame.evaluate(()=>window.HOJA_TEST_PROBE.clockStep(16,'normal'));assert.equal(ended.ms,0);assert.equal(ended.timeUp,true);assert.equal(ended.reason,'TIME_UP');
+ const beforeRace=await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()}));await frame.evaluate(()=>{window.HOJA_TEST_PROBE.raceEnd();window.HOJA_TEST_PROBE.quiz();});assert.deepEqual(await frame.evaluate(()=>({metrics:window.HOJA_TEST_PROBE.metrics(),records:window.HOJA_RUN_RECORD()})),beforeRace);assert.equal(await frame.evaluate(()=>window.HOJA_TEST_PROBE.endReason()),'TIME_UP');
  await frame.evaluate(()=>window.HOJA_TEST_PROBE.setDuration(600));await frame.waitForFunction(()=>window.HOJA_TEST_PROBE.state()?.sec===600,null,{timeout:30000});assert.equal((await frame.evaluate(()=>window.HOJA_TEST_PROBE.timeSettings())).guideSeconds,67);
  }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 });
