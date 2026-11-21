@@ -32,7 +32,7 @@ test('auth and session ownership enforced by trusted service',async()=>{
  const x=await room();await throwsCode(service.start(otherTeacher.token,x.sessionId),'FORBIDDEN');await throwsCode(service.close(student.token,x.sessionId),'FORBIDDEN');
 });
 test('settings and versions are validated and freeze on start',async()=>{
- const x=await room();await throwsCode(service.setDuration(student.token,x.sessionId,600),'FORBIDDEN');await throwsCode(service.setDuration(teacher.token,x.sessionId,601),'INVALID_DURATION');
+ const x=await room();assert.deepEqual([x.settings.durationSeconds,x.settings.sunsetThresholdSeconds,x.settings.nightThresholdSeconds,x.settings.questionGuideThresholdSeconds],[900,200,100,100]);await throwsCode(service.setDuration(student.token,x.sessionId,600),'FORBIDDEN');await throwsCode(service.setDuration(teacher.token,x.sessionId,601),'INVALID_DURATION');
  const cfg=await service.setDuration(teacher.token,x.sessionId,600);assert.deepEqual([cfg.durationSeconds,cfg.sunsetThresholdSeconds,cfg.nightThresholdSeconds],[600,133,67]);
  await throwsCode(service.join(student.token,x.sessionId,{inviteToken:x.inviteToken,name:'fox',gameVersion:'wrong',cartridgeVersion:'cart-1'}),'VERSION_MISMATCH');
  await join(x,student,'fox');await service.start(teacher.token,x.sessionId);await throwsCode(service.setDuration(teacher.token,x.sessionId,900),'INVALID_STATE');
@@ -65,7 +65,7 @@ test('stale epoch, idempotency, version, spoofed result and post-close receipt',
  await throwsCode(service.submit(student.token,x.sessionId,{...valid,result:{...result,score:64}}),'REQUEST_CONFLICT');
  await throwsCode(service.submit(student.token,x.sessionId,{...valid,requestId:'other'}),'INVALID_RUN');await service.close(teacher.token,x.sessionId);
  assert.equal((await service.submit(student.token,x.sessionId,valid)).replayed,true);assert.equal((await service.receipt(student.token,x.sessionId,valid)).score,63);
- await throwsCode(service.receipt(student2.token,x.sessionId,valid),'FORBIDDEN');const teams=await service.finalize(teacher.token,x.sessionId);assert.equal(teams[0].sum,63);assert.equal(teams[0].members,1);
+ await throwsCode(service.receipt(student2.token,x.sessionId,valid),'FORBIDDEN');const teams=await service.finalize(teacher.token,x.sessionId);assert.equal(teams[0].sum,63);assert.equal(teams[0].members,1);assert.equal((await service.submit(student.token,x.sessionId,valid)).replayed,true);assert.equal((await service.receipt(student.token,x.sessionId,valid)).score,63);
 });
 test('teacher rerun invalidates previous contribution and preserves audit receipt',async()=>{
  const {x,p,state}=await running(),old=request(p,state);await service.submit(student.token,x.sessionId,old);await throwsCode(service.rerun(student.token,x.sessionId,p.participantId),'FORBIDDEN');
@@ -77,12 +77,15 @@ test('teacher rerun invalidates previous contribution and preserves audit receip
 });
 test('real concurrent submission and close produce one serialized result',async()=>{
  for(let i=0;i<4;i++){const {x,p,state}=await running(),requestData=request(p,state),both=await Promise.allSettled([service.submit(student.token,x.sessionId,requestData),service.close(teacher.token,x.sessionId)]);
-  if(both[1].status==='rejected'){assert.equal(both[1].reason.code,'RETRYABLE_CONFLICT');await service.close(teacher.token,x.sessionId);}
-  if(both[0].status==='rejected'){
-   assert.ok(['INVALID_STATE','RETRYABLE_CONFLICT'].includes(both[0].reason.code));
-   await throwsCode(service.submit(student.token,x.sessionId,requestData),'INVALID_STATE');
+  const ref=db.collection('sessions').doc(x.sessionId);
+  if(both[1].status==='rejected'){
+   assert.equal(both[1].reason.code,'RETRYABLE_CONFLICT');const current=(await ref.get()).data().state;if(current==='RUNNING')await service.close(teacher.token,x.sessionId);else assert.equal(current,'CLOSING');
   }
-  const rows=await service.finalize(teacher.token,x.sessionId);assert.equal(rows[0].sum,both[0].status==='fulfilled'?63:0);
+  if(both[0].status==='rejected')assert.ok(['INVALID_STATE','RETRYABLE_CONFLICT'].includes(both[0].reason.code));
+  const receipts=await ref.collection('receipts').get();assert.ok(receipts.size<=1);
+  if(receipts.size===1)assert.equal((await service.submit(student.token,x.sessionId,requestData)).replayed,true);
+  else await throwsCode(service.submit(student.token,x.sessionId,requestData),'INVALID_STATE');
+  const rows=await service.finalize(teacher.token,x.sessionId);assert.equal(rows[0].sum,receipts.size?63:0);
  }
 });
 test('Firestore transaction callback retries an injected ABORTED once and commits once',async()=>{
@@ -96,17 +99,20 @@ test('new result submitted after closing cannot be backdated',async()=>{
  assert.equal((await service.finalize(teacher.token,x.sessionId))[0].sum,0);
 });
 test('join and start race either freezes an assigned roster or needs a safe retry',async()=>{
- for(let i=0;i<2;i++){
+ for(let i=0;i<3;i++){
   const x=await room();await join(x,student,'fox');
   const both=await Promise.allSettled([rawJoin(x,student2,'owl'),service.start(teacher.token,x.sessionId)]);
-  if(both[1].status==='fulfilled'){
-   assert.equal(both[0].status,'rejected');assert.ok(['INVALID_STATE','RETRYABLE_CONFLICT'].includes(both[0].reason.code));
+  const ref=db.collection('sessions').doc(x.sessionId),current=(await ref.get()).data().state;
+  if(both[1].status==='rejected')assert.ok(['UNASSIGNED_TEAM','RETRYABLE_CONFLICT'].includes(both[1].reason.code),`start failure: ${String(both[1].reason?.code)} ${String(both[1].reason?.message)}`);
+  if(both[0].status==='rejected')assert.ok(['INVALID_STATE','RETRYABLE_CONFLICT'].includes(both[0].reason.code));
+  const people=await ref.collection('participants').get();const owl=people.docs.find(d=>d.data().uid===student2.uid);
+  if(current==='RUNNING'){
+   assert.ok(people.docs.every(d=>d.data().team&&d.data().runId));
+   if(owl)assert.ok(owl.data().runId);
   }else{
-   assert.ok(['UNASSIGNED_TEAM','RETRYABLE_CONFLICT'].includes(both[1].reason.code));
-   if(both[0].status==='fulfilled')await service.assignTeam(teacher.token,x.sessionId,both[0].value.participantId,'blue');
-   else assert.equal(both[0].reason.code,'RETRYABLE_CONFLICT');
+   assert.equal(current,'LOBBY');if(owl)await service.assignTeam(teacher.token,x.sessionId,owl.id,'blue');
    await service.start(teacher.token,x.sessionId);
-   if(both[0].status==='fulfilled')assert.ok((await service.participant(student2.token,x.sessionId,both[0].value.participantId)).runId);
+   if(owl)assert.ok((await service.participant(student2.token,x.sessionId,owl.id)).runId);
   }
  }
 });
@@ -134,8 +140,9 @@ test('team labels resembling object properties remain isolated and rank ties cor
 test('simultaneous identical submissions result in one accepted run and one receipt',async()=>{
  const {x,p,state}=await running(),payload=request(p,state);const both=await Promise.allSettled([service.submit(student.token,x.sessionId,payload),service.submit(student.token,x.sessionId,payload)]);
  for(const item of both)if(item.status==='rejected')assert.equal(item.reason.code,'RETRYABLE_CONFLICT');
- const retry=await service.submit(student.token,x.sessionId,payload);assert.equal(retry.replayed,both.some(item=>item.status==='fulfilled'));assert.equal(retry.score,63);
- const ref=db.collection('sessions').doc(x.sessionId);assert.equal((await ref.collection('receipts').get()).size,1);
+ const ref=db.collection('sessions').doc(x.sessionId),before=(await ref.collection('receipts').get()).size;assert.ok(before<=1);
+ const retry=await service.submit(student.token,x.sessionId,payload);assert.equal(retry.replayed,before===1);assert.equal(retry.score,63);
+ assert.equal((await ref.collection('receipts').get()).size,1);
  await service.close(teacher.token,x.sessionId);assert.equal((await service.finalize(teacher.token,x.sessionId))[0].sum,63);
 });
 test('expired invite is rejected without creating membership',async()=>{

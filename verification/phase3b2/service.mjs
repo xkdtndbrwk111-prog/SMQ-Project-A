@@ -89,5 +89,5 @@ export async function createLocalService(){
  async dispose(){await deleteApp(app);}
  };
  // Check environment and local emulator health before every operation; dispose must work after shutdown.
- return Object.freeze(Object.fromEntries(Object.entries(methods).map(([name,fn])=>[name,name==='dispose'?fn:async(...args)=>{await assertReady();try{return await fn(...args);}catch(e){if(e?.code===10)err('RETRYABLE_CONFLICT');throw e;}}])));
+ return Object.freeze(Object.fromEntries(Object.entries(methods).map(([name,fn])=>[name,name==='dispose'?fn:async(...args)=>{await assertReady();try{return await fn(...args);}catch(e){if(e?.code===10||(e?.code===3&&/Transaction is invalid or closed/i.test(e.message||'')))err('RETRYABLE_CONFLICT');throw e;}}])));
 }
