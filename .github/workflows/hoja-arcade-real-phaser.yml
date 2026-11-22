@@ -33,4 +33,4 @@ jobs:
           python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.PHASER.TEST.html"
       - name: Browser real Phaser boot and original showQuiz/finish synthetic-balloon smoke
         run: |
-          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_arcade_phaser_chromium.py --html "$RUNNER_TEMP/Game.PHASER.TEST.html" --phaser package/dist/phaser.min.js --rounds 25 --collision-first --finish-check --keyboard-smoke
+          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_arcade_phaser_chromium.py --html "$RUNNER_TEMP/Game.PHASER.TEST.html" --phaser package/dist/phaser.min.js --rounds 25 --collision-first --finish-check --control-smoke
