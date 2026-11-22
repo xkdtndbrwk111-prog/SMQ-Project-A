@@ -87,6 +87,14 @@ async def run():
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
   if args.keyboard_smoke:
+   async def focus_game_keys():
+    # QA-only focus steering, actual keys always delivered by Chromium.
+    return await page.evaluate("""()=>{
+      const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow;
+      w.document.body.tabIndex=-1;
+      w.focus();w.document.body.focus({preventScroll:true});
+      return {outer:document.activeElement?.id,inner:w.document.activeElement?.tagName};
+    }""")
    # These are real Chromium keyboard events in the active arcade iframe.
    # A/D movement and S crouch MUST flow through original Phaser update().
    arcade=page.frame_locator('#hqArcadeFrame')
@@ -100,6 +108,7 @@ async def run():
      return {x:s.playerBody.x,frame:s.game.loop.frame,stage:0};
    }""")
    try:
+    await focus_game_keys()
     await page.keyboard.down('d')
     await page.wait_for_function("""x=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -109,6 +118,7 @@ async def run():
     await page.keyboard.up('d')
    after_d=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__().playerBody.x")
    try:
+    await focus_game_keys()
     await page.keyboard.down('a')
     await page.wait_for_function("""x=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -122,6 +132,7 @@ async def run():
      return !!(b?.blocked?.down||b?.touching?.down);
    }""",timeout=7000)
    try:
+    await focus_game_keys()
     await page.keyboard.down('s')
     await page.wait_for_function("""()=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -150,7 +161,8 @@ async def run():
        flags:{dying:s.dying,clear:s.clear,timeUp:s.timeUp,transitioning:s.transitioning,quizActive:s.quizActive,manualPaused:s.manualPaused}};
    }""")
    print('ARCADE_H_HELP_PRECHECK',pre_help,flush=True)
-   await arcade.locator('body').press('h',timeout=12000)
+   await focus_game_keys()
+   await page.keyboard.press('h')
    help_probe=await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return {seen:w.__QA_H_KEY_LOG__,display:w.document.getElementById('hojaTrialControlsHelp')?.style.display,
@@ -162,14 +174,17 @@ async def run():
      return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='grid' &&
        w.__QA_ACTIVE_SCENE__()?.manualPaused===true;
    }""",timeout=9000)
-   await arcade.locator('body').press('h',timeout=12000)
+   await focus_game_keys()
+   await page.keyboard.press('h')
    await page.wait_for_function("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='none' &&
        w.__QA_ACTIVE_SCENE__()?.manualPaused===false;
    }""",timeout=9000)
    try:
+    await focus_game_keys()
     await page.keyboard.down(',')
+    await focus_game_keys()
     await page.keyboard.down('d')
     await page.wait_for_function("""()=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -183,6 +198,7 @@ async def run():
      return !!(b?.blocked?.down||b?.touching?.down);
    }""",timeout=9000)
    try:
+    await focus_game_keys()
     await page.keyboard.down('.')
     await page.wait_for_function("""()=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -212,6 +228,7 @@ async def run():
        Math.abs(b.bottom-d.y)<6&&(b.blocked.down||b.touching.down);
    }""",timeout=9000)
    try:
+    await focus_game_keys()
     await page.keyboard.down('w')
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
@@ -234,6 +251,7 @@ async def run():
       return w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open') &&
         w.__QA_ACTIVE_SCENE__()?._hojaDeathDialogOpen===true;
     }""",timeout=10000)
+    await focus_game_keys()
     await page.keyboard.press(death_key)
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
