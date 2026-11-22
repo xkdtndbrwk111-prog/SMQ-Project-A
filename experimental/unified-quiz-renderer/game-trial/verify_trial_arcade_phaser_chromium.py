@@ -134,6 +134,51 @@ async def run():
      return s?.hojaIsSitting===false && s.playerBody.body.height>=40;
    }""",timeout=7000)
    print('ARCADE_REAL_KEYBOARD_ADS_PHASER_PASS',{'startX':start['x'],'rightX':after_d,'leftX':after_a},flush=True)
+   # Live Phaser key bindings: COMMA run and PERIOD jump, not Shift/X/Space/Z.
+   mapping=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),K=w.Phaser.Input.Keyboard.KeyCodes;
+     return {run:s.keys.run.keyCode,comma:K.COMMA,jump:s.keys.jump.keyCode,period:K.PERIOD};
+   }""")
+   assert mapping['run']==mapping['comma'] and mapping['jump']==mapping['period'],mapping
+   await page.keyboard.press('h')
+   await page.wait_for_function("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='grid' &&
+       w.__QA_ACTIVE_SCENE__()?.manualPaused===true;
+   }""",timeout=9000)
+   await page.keyboard.press('h')
+   await page.wait_for_function("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='none' &&
+       w.__QA_ACTIVE_SCENE__()?.manualPaused===false;
+   }""",timeout=9000)
+   try:
+    await page.keyboard.down(',')
+    await page.keyboard.down('d')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s?.keys.run.isDown && s?.keys.d.isDown && s.playerBody.body.velocity.x>0;
+    }""",timeout=9000)
+   finally:
+    await page.keyboard.up('d')
+    await page.keyboard.up(',')
+   await page.wait_for_function("""()=>{
+     const b=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.playerBody?.body;
+     return !!(b?.blocked?.down||b?.touching?.down);
+   }""",timeout=9000)
+   try:
+    await page.keyboard.down('.')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s?.keys.jump.isDown && s.playerBody.body.velocity.y< -100;
+    }""",timeout=9000)
+   finally:
+    await page.keyboard.up('.')
+   await page.wait_for_function("""()=>{
+     const b=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.playerBody?.body;
+     return !!(b?.blocked?.down||b?.touching?.down) && b.velocity.y>=0;
+   }""",timeout=14000)
+   print('ARCADE_REAL_2_0_HELP_RUN_JUMP_KEYS_PASS',mapping,flush=True)
    # QA positions the hero near the real stage exit, then emits an ACTUAL W key.
    # Stage change is performed exclusively by original updateDoors()->enterDoor().
    await page.evaluate("""()=>{
@@ -160,6 +205,33 @@ async def run():
    finally:
     await page.keyboard.up('w')
    print('ARCADE_REAL_W_EXIT_STAGE_TRANSITION_PASS',flush=True)
+   # Each death uses the original scene death dialog and original respawn routine.
+   # No QA call to continueHojaAfterDeath: send real Chromium keyboard events.
+   for death_key in ['w','a','s','d',',','.','Enter']:
+    before=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
+      return {score:s.score,found:r.found,history:r.step09History.length,deaths:r.deaths||0};
+    }""")
+    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__().startDeath('pit')")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open') &&
+        w.__QA_ACTIVE_SCENE__()?._hojaDeathDialogOpen===true;
+    }""",timeout=10000)
+    await page.keyboard.press(death_key)
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      return s && s.dying===false && !s._hojaDeathDialogOpen &&
+        !w.document.getElementById('hojaDeathOverlay').classList.contains('is-open');
+    }""",timeout=10000)
+    after=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
+      return {score:s.score,found:r.found,history:r.step09History.length,deaths:r.deaths||0,
+        invuln:s.invulnUntil>s.time.now};
+    }""")
+    assert after['deaths']==before['deaths']+1 and after['invuln'],(death_key,before,after)
+    assert all(after[k]==before[k] for k in ['score','found','history']),(death_key,before,after)
+   print('ARCADE_REAL_DEATH_7_KEYS_RESPAWN_PASS',flush=True)
    # Restore stage 1 and the fresh 600s run before the existing full 25 quiz QA.
    await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
