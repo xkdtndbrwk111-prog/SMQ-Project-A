@@ -57,7 +57,7 @@ test('Project B original U2 payload keys preserved in honest single-date shadow 
 test('with a COMPLETE V1 combo facet, 2 selected cartridges still rank as one original group',()=>{
  const r=project(report(newer),{accessRole:'CREATOR',asOf:'2026-11-20'});
  assert.equal(r.preview.totals.today,581);
- assert.deepEqual(r.preview.topCartridges.map(x=>[x.label,x.count]),[
+ assert.deepEqual(JSON.parse(JSON.stringify(r.preview.topCartridges.map(x=>[x.label,x.count]))),[
   ['영어 10단원 | 영어 11단원',300],['영어 12단원',281]
  ]);
  assert.equal(r.preview.teamCount.find(x=>x.label==='7팀전').count,7);
