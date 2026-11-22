@@ -17,6 +17,7 @@ async def run():
  p.add_argument('--rounds',type=int,choices=[2,25],default=2)
  p.add_argument('--collision-first',action='store_true')
  p.add_argument('--finish-check',action='store_true')
+ p.add_argument('--keyboard-smoke',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -85,6 +86,93 @@ async def run():
   print('ARCADE_REAL_PHASER_BOOT_PASS version',
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
+  if args.keyboard_smoke:
+   # These are real Chromium keyboard events in the active arcade iframe.
+   # A/D movement and S crouch MUST flow through original Phaser update().
+   arcade=page.frame_locator('#hqArcadeFrame')
+   await arcade.locator('#gameViewport').click(position={'x':160,'y':150},timeout=12000)
+   await page.wait_for_function("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+     return s?.scene?.isActive?.()===true && !!s?.playerBody && !s.transitioning && !s.quizActive;
+   }""",timeout=10000)
+   start=await page.evaluate("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return {x:s.playerBody.x,frame:s.game.loop.frame,stage:0};
+   }""")
+   try:
+    await page.keyboard.down('d')
+    await page.wait_for_function("""x=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s?.keys.d.isDown && s.playerBody.x>x+12;
+    }""",arg=start['x'],timeout=9000)
+   finally:
+    await page.keyboard.up('d')
+   after_d=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__().playerBody.x")
+   try:
+    await page.keyboard.down('a')
+    await page.wait_for_function("""x=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s?.keys.a.isDown && s.playerBody.x<x-12;
+    }""",arg=after_d,timeout=9000)
+   finally:
+    await page.keyboard.up('a')
+   after_a=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__().playerBody.x")
+   await page.wait_for_function("""()=>{
+     const b=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.playerBody?.body;
+     return !!(b?.blocked?.down||b?.touching?.down);
+   }""",timeout=7000)
+   try:
+    await page.keyboard.down('s')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s?.keys.s.isDown && s.hojaIsSitting===true && s.playerBody.body.height<=23;
+    }""",timeout=7000)
+   finally:
+    await page.keyboard.up('s')
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return s?.hojaIsSitting===false && s.playerBody.body.height>=40;
+   }""",timeout=7000)
+   print('ARCADE_REAL_KEYBOARD_ADS_PHASER_PASS',{'startX':start['x'],'rightX':after_d,'leftX':after_a},flush=True)
+   # QA positions the hero near the real stage exit, then emits an ACTUAL W key.
+   # Stage change is performed exclusively by original updateDoors()->enterDoor().
+   await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+     const d=s.doors.find(x=>x.kind==='exit');
+     if(!d)throw Error('ARCADE_STAGE_EXIT_DOOR_MISSING');
+     const b=s.playerBody.body;
+     b.reset(d.x,d.y-b.height/2);
+     b.setVelocity(0,0);
+   }""")
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     const d=s?.doors?.find(x=>x.kind==='exit'),b=s?.playerBody?.body;
+     return !!d&&!!b&&Math.abs(s.playerBody.x-d.x)<24&&
+       Math.abs(b.bottom-d.y)<6&&(b.blocked.down||b.touching.down);
+   }""",timeout=9000)
+   try:
+    await page.keyboard.down('w')
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.__QA_STAGE_INDEX__()===1 &&
+        w.__QA_ACTIVE_SCENE__()?.scene.isActive()===true;
+    }""",timeout=18000)
+   finally:
+    await page.keyboard.up('w')
+   print('ARCADE_REAL_W_EXIT_STAGE_TRANSITION_PASS',flush=True)
+   # Restore stage 1 and the fresh 600s run before the existing full 25 quiz QA.
+   await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     w.__QA_START_STAGE__(0,true);
+   }""")
+   await page.wait_for_function("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return w.__QA_STAGE_INDEX__()===0 &&
+       w.__QA_ACTIVE_SCENE__()?.scene.isActive()===true &&
+       w.__QA_RUN__().found===0 &&
+       w.__QA_RUN__().step09History.length===0 &&
+       !w.__QA_ACTIVE_SCENE__().transitioning;
+   }""",timeout=16000)
   # Drive actual original showQuiz(e) method, not a synthetic callback.
   for i in range(args.rounds):
    before=await page.evaluate('''()=>{
