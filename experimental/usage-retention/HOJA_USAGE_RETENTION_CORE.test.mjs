@@ -152,3 +152,28 @@ test('snapshot is deterministic regardless of original row order',()=>{
  assert.deepEqual(json(first.totals),json(second.totals));
  assert.deepEqual(json(first.dimensions),json(second.dimensions));
 });
+
+test('daily-to-monthly eligibility uses only completely expired calendar months',()=>{
+ const months=['2025-10','2025-11','2026-10'];
+ const props={asOf:'2026-11-23',dailyMonths:months,
+  summaryReadersReady:true,backupVerified:true,
+  monthlyManifests:{'2025-10':{status:'COMPLETE',verified:true,dailyStarts:100,
+   monthlyStarts:100,contentDigest:'a'.repeat(64)}}};
+ const rows=api.previewDailyCompaction(props);
+ assert.equal(rows.find(x=>x.month==='2025-10').eligibleForFutureApprovedCompaction,true);
+ assert.ok(rows.find(x=>x.month==='2025-11').holds.includes('RECENT_12_MONTHS'));
+ assert.ok(rows.find(x=>x.month==='2026-10').holds.includes('RECENT_12_MONTHS'));
+});
+
+test('monthly count mismatch, missing manifest and unverified digest hold daily compaction',()=>{
+ for(const manifest of [
+  {},
+  {'2025-10':{status:'COMPLETE',verified:true,dailyStarts:5,monthlyStarts:4,contentDigest:'a'.repeat(64)}},
+  {'2025-10':{status:'COMPLETE',verified:true,dailyStarts:5,monthlyStarts:5,contentDigest:'invalid'}}
+ ]){
+  const p=api.previewDailyCompaction({asOf:'2026-11-23',dailyMonths:['2025-10'],
+   summaryReadersReady:true,backupVerified:true,monthlyManifests:manifest});
+  assert.equal(p[0].eligibleForFutureApprovedCompaction,false);
+  assert.ok(p[0].holds.length>=1);
+ }
+});
