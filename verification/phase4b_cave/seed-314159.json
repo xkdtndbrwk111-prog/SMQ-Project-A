@@ -1,0 +1,117 @@
+{
+  "machines": [
+    {
+      "id": "machine:0",
+      "x": 624,
+      "groundY": 976,
+      "room": 5,
+      "support": "ground",
+      "scale": 2,
+      "machineBody": false,
+      "lightAlpha": 0,
+      "glowAlpha": 0.85,
+      "glowKey": "hojaWarmRadialGlowV48"
+    },
+    {
+      "id": "machine:1",
+      "x": 1024,
+      "groundY": 1456,
+      "room": 10,
+      "support": "ground",
+      "scale": 2,
+      "machineBody": false,
+      "lightAlpha": 0.6454727578168435,
+      "glowAlpha": 0.85,
+      "glowKey": "hojaWarmRadialGlowV48"
+    }
+  ],
+  "portals": [
+    {
+      "x": 176,
+      "groundY": 496,
+      "anchor": {
+        "x": 232,
+        "groundY": 496
+      },
+      "id": "portal:0"
+    },
+    {
+      "x": 1872,
+      "groundY": 496,
+      "anchor": {
+        "x": 1816,
+        "groundY": 496
+      },
+      "id": "portal:1"
+    },
+    {
+      "x": 176,
+      "groundY": 1936,
+      "anchor": {
+        "x": 232,
+        "groundY": 1936
+      },
+      "id": "portal:2"
+    },
+    {
+      "x": 1872,
+      "groundY": 1936,
+      "anchor": {
+        "x": 1816,
+        "groundY": 1936
+      },
+      "id": "portal:3"
+    }
+  ],
+  "flowers": [
+    {
+      "x": 432,
+      "y": 1904
+    },
+    {
+      "x": 432,
+      "y": 464
+    },
+    {
+      "x": 912,
+      "y": 944
+    }
+  ],
+  "enemies": [
+    {
+      "type": "BALLOONEY",
+      "x": 176,
+      "y": 944,
+      "min": 160,
+      "max": 192
+    },
+    {
+      "type": "BALLOONEY",
+      "x": 912,
+      "y": 1424,
+      "min": 896,
+      "max": 928
+    },
+    {
+      "type": "BALLOONEY",
+      "x": 176,
+      "y": 1424,
+      "min": 160,
+      "max": 192
+    },
+    {
+      "type": "BALLOONEY",
+      "x": 656,
+      "y": 1904,
+      "min": 640,
+      "max": 672
+    },
+    {
+      "type": "BALLOONEY",
+      "x": 1136,
+      "y": 1424,
+      "min": 1120,
+      "max": 1152
+    }
+  ]
+}

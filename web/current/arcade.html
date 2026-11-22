@@ -1334,6 +1334,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/world/surface-generator.js"></script>
 <script src="js/world/ground-autotile.js"></script>
 <script src="js/world/stage-decor.js"></script>
+<script src="js/world/cave-checkpoints.js"></script>
 <script src="js/arcade-host.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/physics.js"></script>
@@ -2910,10 +2911,10 @@ let HOJA_C1_MANUAL_CAMERA=true;
 class HojaScene extends Phaser.Scene{
   constructor(){super('HojaScene');}
   preload(){
-    if(HOJA_MAKER_MODE||STAGE.theme==='cave')return;
+    if(HOJA_MAKER_MODE)return;
     const api=window.HOJA_STAGE_DECOR;if(!api)throw new Error('Stage decoration module missing');
     this.load.imageLoadType='HTMLImageElement';
-    for(const id of new Set([...api.atlasList(STAGE.theme),'street'])){
+    for(const id of new Set([...(STAGE.theme==='cave'?[]:api.atlasList(STAGE.theme)),'street'])){
       const key='hojaStageDecor_'+id;
       if(!this.textures.exists(key))this.load.image(key,api.ATLASES[id].path);
     }
@@ -2944,6 +2945,7 @@ class HojaScene extends Phaser.Scene{
     this.bgLayers=null;
     this.weather=null;
     this.hojaCheckpoint=null;
+    this.hojaCaveCheckpoint=null;
     this.closeQuizOverlay();
     this.hideHojaDeathDialog();
     // Clear short-lived combo UI state on Scene.restart.
@@ -2998,6 +3000,7 @@ class HojaScene extends Phaser.Scene{
     this.createDoors();
     this.createPlayer();
     this.createPipes();
+    if(!HOJA_MAKER_MODE&&STAGE.theme==='cave')this.createCaveCheckpoint();
     this.createStreetLamps();
     this.createEnemies();
     if(HOJA_MAKER_MODE)this.createMakerExtraObjects();
@@ -3587,11 +3590,68 @@ class HojaScene extends Phaser.Scene{
       return this.add.image(x,y,tex.key,frame).setOrigin(.5,1).setScale(spec.scale||2).setDepth(-1).setFlipX(!!spec.flip);
     };
     for(const prop of props){const art=sprite(prop,prop.x,prop.y);art.__hojaV2Decor=true;}
-    const machine=sprite({...api.item('street:vending-machine'),scale:2},plan.mid,plan.midY).setDepth(-.25);
-    // Fixed-pixel lamp and a gentle rock are visual only; no body or trigger.
-    const light=this.add.rectangle(plan.mid,plan.midY-48,12,5,0xfff078,1).setDepth(-.2).setAlpha(0);
-    this.hojaCheckpoint={...plan,stage:STAGE_INDEX,active:'start',previousX:null,machine,light};
+    const visual=this.createCheckpointMachine(plan.mid,plan.midY,false);
+    this.hojaCheckpoint={...plan,stage:STAGE_INDEX,active:'start',previousX:null,...visual};
     this.hojaPhase4bProps=props;
+  }
+
+  // Shared visual-only vending checkpoint, also used in the cave.
+  createCheckpointMachine(x,y,cave,scale=2){
+    const spec=window.HOJA_STAGE_DECOR.item('street:vending-machine');
+    const tex=this.textures.get('hojaStageDecor_street'),frame='stage_'+spec.name;
+    if(!tex||!tex.getSourceImage())throw Error('Checkpoint machine texture unavailable');
+    if(!tex.has(frame))tex.add(frame,0,...spec.rect);
+    const machine=this.add.image(x,y,tex.key,frame).setOrigin(.5,1).setScale(scale).setDepth(-.25);
+    if(cave)machine.setTint(HOJA_CAVE_AMBIENT_TINT);
+    const light=this.add.rectangle(x,y-24*scale,6*scale,2.5*scale,0xfff078,1).setDepth(-.2).setAlpha(0);
+    return {machine,light};
+  }
+
+  updateCheckpointMachine(visual,active){
+    visual.machine.setAngle(active?Math.sin(this.time.now*.012)*1.5:0);
+    visual.light.setAlpha(active?.55+.45*Math.sin(this.time.now*.012)**2:0);
+  }
+
+  createCaveCheckpoint(){
+    const planner=window.HOJA_CAVE_CHECKPOINTS;
+    if(!planner)throw Error('Cave checkpoint module missing');
+    const positions=planner.choosePair({solids:SOLIDS,portals:CAVE_PORTALS,offsets:CAVE_EXPERIMENT_SPAWN_OFFSETS,
+      flowers:FLOWERS,enemies:ENEMY_SPAWNS,moving:MOVING_PLATFORMS,crumbles:CRUMBLES,
+      springs:SPRINGS,secrets:CAVE_SECRET_WALLS});
+    const index=this.spawnKind.startsWith('fromSurface:')?Number(this.spawnKind.split(':')[1]):0;
+    const initial=Math.max(0,Math.min(3,Number.isFinite(index)?index:0));
+    const portals=CAVE_PORTALS.map((p,i)=>({x:p.x,groundY:p.groundY,
+      anchor:{x:p.x+CAVE_EXPERIMENT_SPAWN_OFFSETS[i],groundY:p.groundY},id:'portal:'+i}));
+    const machines=positions.map((point,i)=>{
+      const visual=this.createCheckpointMachine(point.x,point.groundY,true,point.scale);
+      // Reuse the cave's additive lantern and actor lighting; the existing
+      // screen-space visibility mask remains above the entire scene.
+      const lightY=point.groundY-20*point.scale;
+      const glow=this.add.image(point.x,lightY,this.createRadialLampTexture()).setDisplaySize(260,260)
+        .setBlendMode(Phaser.BlendModes.ADD).setDepth(16).setAlpha(.85);
+      this.caveLanterns.push({x:point.x,y:lightY,glow});
+      this.hojaStep136Cullables?.push(glow);
+      return {...point,...visual,glow,id:'machine:'+i};
+    });
+    this.hojaCaveCheckpoint={machines,portals,active:'portal:'+initial};
+    this.caveRespawnAnchor={...portals[initial].anchor};
+  }
+
+  updateCaveCheckpoint(){
+    const c=this.hojaCaveCheckpoint;if(!c)return;
+    const feet=this.playerBody.body.bottom,x=this.playerBody.x,near=window.HOJA_CAVE_CHECKPOINTS.nearby;
+    let next=null,anchor=null;
+    for(const p of c.portals){
+      // Approaching at floor level or landing on the pipe both count; a
+      // different cave floor at the same X still remains outside the zone.
+      if(Math.abs(x-p.x)<=100&&feet>=p.groundY-100&&feet<=p.groundY+40){next=p.id;anchor=p.anchor;break;}
+    }
+    for(const machine of c.machines){if(near(x,feet,machine,60,40)){next=machine.id;anchor=machine;break;}}
+    if(next&&next!==c.active){
+      c.active=next;this.caveRespawnAnchor={x:anchor.x,groundY:anchor.groundY};
+      this.showHojaToast(next.startsWith('machine:')?'자판기 체크포인트 저장!':'토관 체크포인트 저장!');
+    }
+    for(const machine of c.machines)this.updateCheckpointMachine(machine,c.active===machine.id);
   }
 
   createTerrain(){
@@ -7134,9 +7194,9 @@ class HojaScene extends Phaser.Scene{
         c.active='mid';this.mem.surfaceCheckpoint='mid';
       }
       c.previousX=x;
-      const active=c.active==='mid';
-      c.machine.setAngle(active?Math.sin(this.time.now*.012)*1.5:0);
-      c.light.setAlpha(active?.55+.45*Math.sin(this.time.now*.012)**2:0);
+      this.updateCheckpointMachine(c,c.active==='mid');
+    }else if(this.hojaCaveCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme==='cave'){
+      this.updateCaveCheckpoint();
     }else{
       let ci=0;
       for(let i=0;i<CHECKPOINTS.length;i++)if(this.playerBody.x>=CHECKPOINTS[i])ci=i;
