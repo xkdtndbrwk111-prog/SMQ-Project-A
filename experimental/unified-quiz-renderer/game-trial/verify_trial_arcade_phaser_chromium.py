@@ -283,12 +283,11 @@ async def run():
    assert running['speed']>normal['speed']*1.08,(normal,running)
    print('ARCADE_REAL_2_0_PHYSICS_S_CROUCH_PERIOD_JUMP_COMMA_RUN_PASS',
     {'normalSpeed':normal['speed'],'runSpeed':running['speed'],'startX':stage['x']},flush=True)
-   # QA input smoke is deliberately isolated from the normal 25-balloon test.
-   await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_START_STAGE__(0,true)")
-   await page.wait_for_function("""()=>{
-     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-     return s?.playerBody && s?.scene?.isActive?.() && !s.transitioning;
-   }""",timeout=12000)
+   # Stop after this independent real-key physics smoke. The second CI step
+   # boots a fresh game for 25 quiz balloons and FINISH; cross-contamination
+   # between these tests caused false timeouts after QA stage resets.
+   await browser.close()
+   return
   if args.keyboard_smoke:
    async def focus_game_keys():
     # QA-only focus steering, actual keys always delivered by Chromium.
