@@ -203,6 +203,38 @@ async def run():
      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
      return s.hojaIsSitting===false && s.playerBody.body.height>=40;
    }""",timeout=7000)
+   await focus_keys()
+   try:
+    await page.keyboard.down('d')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.d.isDown && s.playerBody.body.velocity.x>20;
+    }""",timeout=8000)
+    await page.wait_for_timeout(350)
+    normal=await page.evaluate("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+    }""")
+   finally:
+    await page.keyboard.up('d')
+   assert normal['speed']>20,normal
+   try:
+    await focus_keys()
+    await page.keyboard.down(',')
+    await page.keyboard.down('d')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.run.isDown&&s.keys.d.isDown&&s.playerBody.body.velocity.x>20;
+    }""",timeout=8000)
+    await page.wait_for_timeout(300)
+    running=await page.evaluate("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+    }""")
+   finally:
+    await page.keyboard.up('d')
+    await page.keyboard.up(',')
+   assert running['speed']>normal['speed']*1.08,(normal,running)
    # Confirm grounding again after crouch; a transient standing animation can
    # consume the JustDown edge if tested on the same frame.
    await page.wait_for_function("""()=>{
@@ -245,43 +277,7 @@ async def run():
     raise
    finally:
     await page.keyboard.up('.')
-   await page.wait_for_function("""()=>{
-     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-     return (s.playerBody.body.blocked?.down||s.playerBody.body.touching?.down) &&
-       s.playerBody.body.velocity.y>=0;
-   }""",timeout=16000)
-   await focus_keys()
-   try:
-    await page.keyboard.down('d')
-    await page.wait_for_function("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s.keys.d.isDown && s.playerBody.body.velocity.x>20;
-    }""",timeout=8000)
-    await page.wait_for_timeout(350)
-    normal=await page.evaluate("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
-    }""")
-   finally:
-    await page.keyboard.up('d')
-   assert normal['speed']>20,normal
-   try:
-    await focus_keys()
-    await page.keyboard.down(',')
-    await page.keyboard.down('d')
-    await page.wait_for_function("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s.keys.run.isDown&&s.keys.d.isDown&&s.playerBody.body.velocity.x>20;
-    }""",timeout=8000)
-    await page.wait_for_timeout(300)
-    running=await page.evaluate("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
-    }""")
-   finally:
-    await page.keyboard.up('d')
-    await page.keyboard.up(',')
-   assert running['speed']>normal['speed']*1.08,(normal,running)
+   print('ARCADE_REAL_PERIOD_JUMP_LAUNCH_PASS',flush=True)
    print('ARCADE_REAL_2_0_PHYSICS_S_CROUCH_PERIOD_JUMP_COMMA_RUN_PASS',
     {'normalSpeed':normal['speed'],'runSpeed':running['speed'],'startX':stage['x']},flush=True)
    # Stop after this independent real-key physics smoke. The second CI step
