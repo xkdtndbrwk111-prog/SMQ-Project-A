@@ -661,7 +661,7 @@
 ### 40-1/40-2. 2026-11-23 새 통계 엔진 V4 처음부터 재작성 — 운영 미변경
 - [x] 사용자가 기존 파일을 참고하되 전면 재작성 허용. `UsageU2.gs`는 OWNER/유효 GOOGLE CREATOR 인증 및 Manager 통계 응답 계약의 **참고 기준**으로만 사용. 운영 `getUsageStatisticsU2()`와 `EVENT_LOG`, TOP25 랭킹, Project A/B 배포본 불변.
 - [x] 실제 격리 원본 복사본의 `EVENT_LOG` 날짜/범위 전수 읽기 점검: **17,672건 전부 PUBLIC**, 2026-09-23~2026-11-22, **57개 기록 존재 날짜**, 날짜 역행 0건. 개별 값/시트 ID는 공용 GitHub에 기록하지 않음. 미래 append가 계속 정렬된다는 운영 보장은 별도로 필요.
-- [x] `experimental/usage-retention/HOJA_USAGE_V4_CORE.js` 신규 제작. 1행=1플레이, PROJECT B 기존 다중 단원 결합 이름 TOP20을 단원 ID 선택 횟수와 분리, TEAM 2~7 + 미확인, PUBLIC-only, 개인정보 집계 금지, 옛날 11열 호환. 중복 ID 충돌, 날짜 누락/미인증, 0회 날짜 인증, SHA-256 원본·요약 검증 안 되면 합계 차단.
+- [x] `experimental/usage-retention/HOJA_USAGE_V4_CORE.js` 신규 제작. 1행=1플레이, PROJECT B 기존 다중 단원 결합 이름 TOP20을 단원 ID 선택 횟수와 분리, TEAM 2~7 + 미확인, PUBLIC-only, 개인정보 집계 금지, 옛날 11열 호환. 같은 ID 재전송 중복 제거·게임 내용 충돌 거부, 날짜 누락/미인증, 0회 날짜 인증, SHA-256 원본·요약 검증 안 되면 합계 차단.
 - [x] V4 기존 UI 응답 계약(today, days7, days30, all, daily, mode, teamCount, repositoryKind, grade, subject, publisher, topCartridges) 기반 순수 계산 함수 구현. 전체 기간 첫 날짜부터 **매일**(0회 포함) COMPLETE + 양쪽 SHA-256 검증 필요. 임의의 0/전체 통계 만들어 보여 주기 금지.
 - [x] `experimental/usage-retention/HOJA_USAGE_V4_TRIAL_GAS.gs` 신규 제작. 별도 스크립트 속성으로 **운영 원본 ID와 복사본 ID가 상이함을 필수 확인**, 기존 _HOJA_USAGE_TRIAL_ONLY 표식·수동 WRITE_ACK 확인. 날짜 전체 C:E 정렬 검사 → 하루 A:O만 읽기 → 버킷/원본 각각 SHA-256 → 저장행 재읽기 확인 → COMPLETE 게시. PREPARING 중단 시 수동 확인, 동일 세대의 저장값 재검증 후만 idempotent 재호출.
 - [x] 자료가 없는 0회 날짜에도 `sourcePrefixEndRow`에 직전 확정 원본 끝 행 번호 보존. **오늘 원본 미집계 꼬리만 읽는 증분 통계**에 필요한 경계 메타데이터임. 새 GAS는 오늘의 COMPLETE를 만들지 않도록 거부.
@@ -672,3 +672,10 @@
 - [ ] 원본 복사본의 **전체 57개 사용 날짜 + 0회 날짜** V4 일별 COMPLETE backfill/버킷·원본 SHA 검증 및 최초 이력 시작 인증서는 NOT RUN.
 - [ ] Project A 이벤트 append를 기준으로 오늘 미집계 원본 꼬리만 읽는 실시간 집계·비정렬/늦은 이벤트 검출 및 Project B의 기존 GOOGLE CREATOR 인증을 유지하는 lazy RPC 운영 후보는 후속. 서로 다른 GAS 프로젝트 사이 `ScriptLock`이 공유된다고 가정하지 않음.
 - [ ] Project A/B 운영 조회를 V4로 전환하지 않았고, 원본 보관 30일/일별 12개월/월별 이후 정책의 실제 삭제·자동화·백업/복구는 승인 전까지 HOLD.
+
+### 40-3. 실제 원본 이벤트 ID 중복 감사 (2026-11-23)
+- [x] 격리 복사 시트 `EVENT_LOG` A열 전체 17,672행 검사. 이벤트 ID 빈 칸 0, 고유 ID 17,670, 중복 ID 2쌍. 2026-09-28, 2026-10-29에 각각 1건씩 원본에 반복 저장된 것을 확인.
+- [x] 중복 각 쌍의 15개 열 비교: **timestamp만 서로 다르고 나머지 14개 게임 데이터 필드는 모두 동일**. 원본 전체 행수 기준 U2 통계는 동일 플레이를 두 번 센 것으로 보이며, 새 V4는 의미적으로 같은 이벤트 ID를 하루 1회로 집계하도록 수정. ID는 같으나 모드/카트리지/팀 등 실제 플레이 데이터가 다르면 무조건 HOLD.
+- [x] V4 CORE 및 복사본 전용 GAS preview/writer에 중복 억제 건수 `retriesSuppressed` 기록, `HOJA_V4_DAILY_MANIFEST`에 별도 열 추가. GitHub 테스트에 동일 ID의 타임스탬프만 다른 재전송·내용 충돌 거부 시험 추가.
+- [ ] 17,672 기존 원본 행 vs 17,670 고유 플레이의 **전체 57개 기록 날짜와 0회 날짜**에 대한 V4 실제 GAS 완전 backfill/실 시트 재검증은 NOT RUN. 기존 화면의 행수 통계와 차이나는 2회를 정식 운영 전 관리자에게 명시해야 함.
+- [ ] 전체 이력 시작점 인증·오늘 원본 꼬리 조회·Project A/B 실제 통계 운영 전환·과거 원본 삭제는 HOLD.
