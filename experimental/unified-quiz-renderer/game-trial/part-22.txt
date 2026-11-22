@@ -890,7 +890,7 @@ window.HOJA_TEAM_TEST=(()=>{
        return {...q,rendererQuestion:approvedBinding.rendererQuestion,approvedBinding};
      });
      // Async frame initialization; question screen will await readiness.
-     window.HOJA_TEAM_APPROVED_TRIAL.begin(questions);
+     // Defer host initialization until after the solo/arcade renderer has stopped.
    }catch(error){
      // Published Project B question data is mandatory in Apps Script live play.
      // Keep the selected mode visible rather than switching to an offline TEST page.
@@ -898,6 +898,8 @@ window.HOJA_TEAM_TEST=(()=>{
      return;
    }
    window.HOJA_GAMEPLAY?.stop?.();
+   try{window.HOJA_TEAM_APPROVED_TRIAL.begin(questions);}
+   catch(error){window.alert('팀전 승인 렌더러 준비 실패: '+String(error?.message||error));return;}
    hideBlockingStartLayers();
    const host=$('hojaGamePlay');window.HOJA_MODE_PREVIEW?.hide?.();host.hidden=false;host.dataset.mode='team';
    $('hqArcadeFrame').hidden=true;$('hqStage').hidden=false;$('hqHud').hidden=false;$('hqOverlay').hidden=true;$('hqResult').hidden=true;

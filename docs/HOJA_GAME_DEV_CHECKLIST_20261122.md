@@ -261,3 +261,13 @@
 - [ ] 아케이드 gzip 압축 내부 `quizOverlay/quizCard`, 문제 추출 `drawQuestion()`이 독립적임을 확인. 승인 렌더러를 새로 구현하지 않고 이 iframe의 표시·답변 이벤트 경계를 추가로 연결해야 함.
 
 **다음 작업:** GitHub Chromium CI 결과 확인 → 실패 시 시험 스크립트/앵커부터 복구 → 싱글 아케이드 질문 이벤트와 승인 호스트 간 인터페이스 연결.
+
+## 18. 2026-11-22 실 브라우저 CI 통과와 팀전→싱글 렌더러 전환 순서 수정
+- [x] 브랜치 `d927ca3` GitHub Actions `45021032979` **PASS**: GitHub 정확한 25조각 복원→단위 17건→Chromium 싱글 MCQ 정답 `s6u31:q03`→OX 오답 `s6u31:q27`; 게임 answered 2/correct 1, iframe 중복답변 보호. `main`·운영본 미변경.
+- [x] 압축 아케이드 `HOJA_V051_ARCADE_GZIP` 복원(원본 535,400 bytes gzip/1,246,964 bytes HTML), 독립 `quizOverlay/quizCard` 및 `drawQuestion()` 확인. 실제 아케이드 렌더러 **아직 미이식**.
+- [x] 모드 전환 교차 버그 발견: 팀전 `launch()`의 `begin(questions)`이 `HOJA_GAMEPLAY.stop()`보다 먼저 호출되어, 싱글 모드의 호스트 reset이 팀전 승인 iframe을 제거할 수 있음. 시험판 `game-trial/part-22.txt`에서 **기존 모드 정지 → 승인 팀전 프레임 준비** 순서로 이동. 운영 원본 불변.
+- [x] 로컬 Chromium에서 수정된 순서로 **팀전 첫 풍선 질문 표시 PASS**. 2팀 최종 우승·복습 전체 브라우저 회귀는 이번 변경 이후 아직 미완료.
+- [x] 로컬 교사 체험판 `HOJA_UNIFIED_7MB_SOLO_TEAM_TEACHER_PREVIEW_20261122.html`도 동일 순서 수정 후 재생성. SHA-256 `4ab5719bc7a372b2509002ff66ba8768c40a8efcf585762ddc2daa139950ecbb`. 이 파일은 GitHub 정확 조립본이 아니라 서버 접속 없는 별도 QA 패키지.
+- [ ] 팀전 2/7팀 우승 후 반복 복습·모드 간 왕복 및 7MB 정확 조립본 browser QA, 싱글 아케이드/GAS는 추가 검증 필요.
+
+**다음 작업:** 새 팀전 순서의 실제 GitHub CI 결과 재확인 → 브랜치 전체 HTML의 팀전 첫 문제 및 복습 경로 브라우저 회귀 → 아케이드 메시지 연결 어댑터.
