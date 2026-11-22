@@ -313,3 +313,18 @@
 - [x] 인트로→카트리지/모드 전환의 구형 코드는 `pausedByUser=true`를 의도적으로 표시함. 이 때는 **사용자가 멈춘 인트로를 임의로 재개하지 않도록** 보호하고, 명시적으로 pausedByUser=false일 때만 재개하도록 시험 기대값 수정. 실제 시험 장면 중첩/소리 제거를 실기기로 확인한 것은 아님.
 - [x] CI의 장면 대체 객체에 Phaser `anims/tweens` 메서드 모사 추가. 테스트 객체 오류와 게임 회귀를 분리함.
 - [ ] 수정된 CI 원격 최종 판정 재확인 필요. 실물 효과음/Phaser 장면 실제 실행 테스트와 GAS 통합 시험은 미실시.
+
+## 22. 2026-11-22 정오답/단축키/인트로 중첩 위험 수정 — 최종 브랜치 자동검증 PASS
+- [x] **정확한 GitHub 개발 브랜치** `119e490b9fabc33ee3d864446cc6d339b46428f6`의 GitHub Actions **`45023732481` PASS**. 전 단계 빌드/단위/Chromium 싱글·팀전 모두 녹색.
+- [x] 시험 조립 HTML **8,559,921바이트**, SHA-256 `a2b681c639002962122e8d024026e60d356805f50c317563b9c65d8eef60d6a3`; 구 7MB 기준 소스 변경 없음, 개발 시험 조각 `part-14/part-22`에만 적용.
+- [x] 싱글 Chromium 실제 클릭/키입력 4시나리오 PASS: MCQ 정답 클릭(`s6u31:q10`), OX 오답 클릭(`s6u31:q24`), MCQ 숫자 키 오답(`s6u31:q04`), OX O/X 키 정답(`s6u31:q26`). **각 답안에서 레이어 정오답 표시를 실제 확인**하고 `answered=4/correct=2` 고정 규칙 PASS.
+- [x] 이전 팀전 최초 풍선 재검증 PASS: 싱글 정지→팀전 2팀 시작→승인 iframe 실제 문항·3보기 표시. `CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS`.
+- [x] 인트로 Phaser 장면 일시정지 호출 모의 시험 PASS. 이미 `pausedByUser=true`인 경우 임의 재개 금지, 명시적으로 해제한 경우 재개 호출 PASS. 기존 공통 BGM·게임 정오답 효과음 코드 변경하지 않음.
+- [x] Node 14건, Python 3건 단위/패처 회귀 PASS. 데이터 64문항, WebP15, C형 좌우11 정적 검사 유지.
+- [x] 로컬 교사용 **독립 체험 HTML** `HOJA_UNIFIED_7MB_SOLO_TEAM_VERDICT_KEYS_AUDIO_QA_20261122.html` 및 ZIP `HOJA_SOLO_VERDICT_KEYS_AUDIO_TEST_20261122.zip` 생성. 로컬 Chromium에서 MCQ 정답 표시/OX 키보드 오답·intro mock pause/resume PASS; 판정 화면 `solo-verdict-fixed-preview.png` 캡처. **GitHub 정확 조립본과 바이트가 같은 파일은 아님.**
+- [x] CI 중간 실패 원인을 **프로그램 회귀와 구분**하여 기록: 변경된 Git blob 해시 핀 값, 불완전한 Phaser 대체 객체, `pausedByUser` 복귀 정책, 비상태적 pause 모의 객체를 차례로 수정. 최종 전체 PASS.
+- [ ] **실제 Phaser + 실제 사운드 출력에서 배경 인트로 음향 중첩이 사라졌는지는 아직 실기 테스트 미실시.** 이 변경은 가능성 있는 원인인 숨겨진 인트로 장면의 실행을 게임 모드에서 정지하도록 한 코드 수정이며, 외부 엔진/학교 스피커의 음향 전체를 검증한 것이 아님.
+- [ ] 싱글 아케이드 압축 별도 iframe, 팀전 2~7팀 자연 완주와 우승/반복 복습, 실제 Apps Script 시험 프로젝트 및 랭킹 보안·Windows 전자칠판은 계속 미완료.
+- [x] 운영 `main`, `versions/2.0.0` 원본 및 GAS 배포 **수정 없음**.
+
+**다음 1개 작업:** Phaser 실제 가동 환경의 SFX 소유권(인트로/싱글/팀전) 실기 검수, 아케이드 압축 엔진의 승인 문항 iframe 이식 및 GitHub 체크리스트 지속 갱신.
