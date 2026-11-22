@@ -33,6 +33,8 @@ jobs:
           node --test experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.test.mjs
           node --test experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_GAS.test.mjs
           node --test experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_WRITER.test.mjs
+          node --check experimental/usage-retention/HOJA_USAGE_SUMMARY_READ_V1.js
+          node --test experimental/usage-retention/HOJA_USAGE_SUMMARY_READ_V1.test.mjs
       - name: Validate exact compressed arcade source bridge (static)
         run: |
           node --check experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_RUNTIME.mjs
