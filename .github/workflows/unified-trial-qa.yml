@@ -27,6 +27,10 @@ jobs:
           node --test experimental/unified-quiz-renderer/frame_host.test.mjs
           node --test experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_MAPPING.test.mjs
           python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'
+      - name: Anonymous game usage retention test suite (no sheet writes)
+        run: |
+          node --check experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.js
+          node --test experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.test.mjs
       - name: Validate exact compressed arcade source bridge (static)
         run: |
           node --check experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_RUNTIME.mjs
