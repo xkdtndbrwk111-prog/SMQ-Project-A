@@ -140,6 +140,7 @@ async def run():
      return {run:s.keys.run.keyCode,comma:K.COMMA,jump:s.keys.jump.keyCode,period:K.PERIOD};
    }""")
    assert mapping['run']==mapping['comma'] and mapping['jump']==mapping['period'],mapping
+   await arcade.locator('#gameViewport').click(position={'x':160,'y':150},timeout=12000)
    pre_help=await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
      w.__QA_H_KEY_LOG__=[];w.addEventListener('keydown',e=>{if(e.code==='KeyH')w.__QA_H_KEY_LOG__.push(e.code)},true);
