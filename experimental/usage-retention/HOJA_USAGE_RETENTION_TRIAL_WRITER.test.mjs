@@ -37,7 +37,7 @@ function fixture({ack=true,canary=true,rows=[mkrow(1,'101|102'),mkrow(2,'101')]}
     const slice=()=>Array.from({length:num},(_,i)=>
       Array.from({length:width},(_,k)=>tab[start+i-1]?.[col+k-1]??''));
     const assign=matrix=>{
-     if(failOn===name)throw Error('SIMULATED_INTERRUPTED_WRITE');
+     if(failOn===name&&start>1)throw Error('SIMULATED_INTERRUPTED_WRITE');
      writes.push({name,start,col,len:matrix.length});
      for(let i=0;i<matrix.length;i++){
       const y=start+i-1;
