@@ -5,7 +5,8 @@ import {runInNewContext} from 'node:vm';
 import {createHash} from 'node:crypto';
 
 const source=readFileSync('experimental/usage-retention/HOJA_USAGE_V4_CORE.js','utf8');
-const v4=runInNewContext(source+';HOJA_USAGE_V4_CORE;');
+const raw=runInNewContext(source+';HOJA_USAGE_V4_CORE;');
+const v4={...raw,report:(days,options)=>raw.report(days,{...options,hashBuckets:digest})};
 const json=x=>JSON.parse(JSON.stringify(x));
 const digest=c=>createHash('sha256').update(c).digest('hex');
 function row(n,{date='2026-11-20',mode='SOLO',repo='PUBLIC',grade='6',subject='영어',
@@ -18,6 +19,7 @@ function published(date,rows,options={}){
  const r=v4.snapshot(date,rows,{coverageVerified:true});
  return {schema:r.schema,date:r.date,starts:r.starts,buckets:json(r.buckets),
    status:'COMPLETE',verified:true,sourceDigest:digest(r.canonicalSource),
+   bucketDigest:digest(JSON.stringify(json(r.buckets))),
    ...options};
 }
 const count=(day,dim,key)=>day.buckets.find(r=>r.dimension===dim&&r.key===key)?.count||0;
@@ -115,8 +117,8 @@ test('corruption in stored summary buckets is rejected before Manager can read',
   patch(d=>d.buckets.find(r=>r.dimension==='GRADE').count=99),
   patch(d=>d.buckets.push({...d.buckets[0]})),
   patch(d=>d.sourceDigest='bad'),
-  patch(d=>d.buckets.find(r=>r.dimension==='TEAM_SIZE')?.count),
- ] .slice(0,3)){
+  patch(d=>d.bucketDigest='bad'),
+ ]){
   assert.throws(()=>v4.report([x],{asOf:'2026-11-20',
    historyStart:'2026-11-20',initialHistoryAudited:true}),/HOJA_V4_/);
  }
