@@ -72,6 +72,7 @@ var HOJA_USAGE_V4_CORE=(function(){
   const opts=options||{};
   assert(opts.coverageVerified===true,'COVERAGE_NOT_VERIFIED');
   const counts=Object.fromEntries(dims.map(k=>[k,new Map()]));
+  const unitLabels=new Map();
   const ids=new Set(),events=[];
   let ignoredPrivate=0,ignoredOtherDay=0,starts=0,unknownUnitStarts=0;
   for(const r of rows){
@@ -86,13 +87,17 @@ var HOJA_USAGE_V4_CORE=(function(){
    if(e.publisher)add(counts.PUBLISHER,e.publisher);
    add(counts.CARTRIDGE_COMBINATION,e.combination);
    if(e.unresolvedUnits)unknownUnitStarts++;
-   else for(const item of e.units)add(counts.UNIT_SELECTION,item.key);
+   else for(const item of e.units){
+    add(counts.UNIT_SELECTION,item.key);
+    unitLabels.set(item.key,item.label);
+   }
   }
   const buckets=[];
   for(const dimension of dims)
    for(const [key,count] of counts[dimension]){
     validInt(count,'BUCKET');
-    buckets.push({dimension,key,count});
+    buckets.push({dimension,key,count,
+     displayLabel:dimension==='UNIT_SELECTION'?(unitLabels.get(key)||key):key});
    }
   buckets.sort((a,b)=>a.dimension.localeCompare(b.dimension)||
    a.key.localeCompare(b.key));
