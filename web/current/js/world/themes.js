@@ -8,8 +8,8 @@ window.HOJA_CREATE_THEMES = function () {
         {key:'bgSky',        xFactor:0.000, yFactor:0.000},
         {key:'bgCloud1',     xFactor:0.028, yFactor:0.010, cloudDrift:0.36},
         {key:'bgCloud2',     xFactor:0.055, yFactor:0.020, cloudDrift:0.54},
-        {key:'bgHills',      xFactor:0.100, yFactor:0.040},
-        {key:'bgForeground', xFactor:0.180, yFactor:0.070}
+        {key:'bgHills',      xFactor:0.100, yFactor:0.040, risePixels:36},
+        {key:'bgForeground', xFactor:0.180, yFactor:0.070, risePixels:36}
       ],
       decor:{
         tree:[
@@ -50,7 +50,7 @@ window.HOJA_CREATE_THEMES = function () {
         {key:'thTroSky',      xFactor:0.000, yFactor:0.000},
         {key:'thTroCloudsBG', xFactor:0.028, yFactor:0.012, cloudDrift:0.36},
         {key:'thTroClouds',   xFactor:0.055, yFactor:0.022, cloudDrift:0.54},
-        {key:'thTroWaters',   xFactor:0.100, yFactor:0.040}
+        {key:'thTroWaters',   xFactor:0.100, yFactor:0.040, risePixels:68}
       ],
       decor:{
         tree:[[[18,19,20],[35,36,37],[52,53,54]]],
@@ -64,8 +64,8 @@ window.HOJA_CREATE_THEMES = function () {
       terrain:'thWinTerrain',entities:'thWinEntities',
       bg:[
         {key:'thWinMountain', xFactor:0.000, yFactor:0.000},
-        {key:'thWinHills',    xFactor:0.055, yFactor:0.022},
-        {key:'thWinFore',     xFactor:0.140, yFactor:0.060}
+        {key:'thWinHills',    xFactor:0.055, yFactor:0.022, risePixels:48},
+        {key:'thWinFore',     xFactor:0.140, yFactor:0.060, risePixels:32}
       ],
       decor:{
         tree:[

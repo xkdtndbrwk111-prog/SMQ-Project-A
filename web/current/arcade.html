@@ -3290,12 +3290,29 @@ class HojaScene extends Phaser.Scene{
     const specs=THEME.bg.map((l,i)=>({...l,depth:-50+i*4}));
 
     this.bgLayers=specs.map(spec=>{
+      // Extend the bottom edge before raising a scenery layer. This prevents
+      // TileSprite wrapping the sky back in beneath the horizon on tall views.
+      let textureKey=spec.key;
+      if(spec.risePixels){
+        textureKey='hojaRaisedBackground_'+spec.key;
+        if(!this.textures.exists(textureKey)){
+          const source=this.textures.get(spec.key).getSourceImage();
+          const canvas=document.createElement('canvas');
+          canvas.width=source.width;canvas.height=source.height*2;
+          const ctx=canvas.getContext('2d');
+          if(!ctx)throw new Error('Background canvas unavailable');
+          ctx.imageSmoothingEnabled=false;
+          ctx.drawImage(source,0,0);
+          ctx.drawImage(source,0,source.height-1,source.width,1,0,source.height,source.width,source.height);
+          if(!this.textures.addCanvas(textureKey,canvas))throw new Error('Background texture unavailable: '+spec.key);
+        }
+      }
       const sprite=this.add.tileSprite(
         VIEW_W*RS/2,
         VIEW_H*RS/2,
         this.bgCoverWidth,
         this.bgCoverHeight,
-        spec.key
+        textureKey
       );
 
       sprite
@@ -3304,7 +3321,7 @@ class HojaScene extends Phaser.Scene{
         .setDepth(spec.depth)
         .setTileScale(this.bgLayerScale,this.bgLayerScale);
 
-      sprite.tilePositionY=0;
+      sprite.tilePositionY=spec.risePixels||0;
 
       return {
         sprite,
@@ -4116,6 +4133,9 @@ class HojaScene extends Phaser.Scene{
       // Keep gameplay water bounds unchanged. Draw a wider backing behind
       // both banks and align its visible surface to the lower bank's top.
       const visual=window.HOJA_GROUND_AUTOTILE.waterVisual(g,2*TILE);
+      // Visual water sits one tile below the old line; collision and hazards
+      // retain their original water position and timing.
+      visual.surfaceY+=TILE;
       const visualHeight=WORLD_H-visual.surfaceY+64;
       const backing=this.add.rectangle(visual.left+visual.width/2,
         visual.surfaceY+visualHeight/2,visual.width,visualHeight,THEME.water.deep,1).setDepth(-.25);
