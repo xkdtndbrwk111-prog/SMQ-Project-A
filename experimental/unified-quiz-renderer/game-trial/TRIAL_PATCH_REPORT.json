@@ -1,0 +1,14 @@
+{
+  "basePart22Sha": "f68cb1c8f6191b25b9facc0ecd9cfc6b442ef2fa",
+  "patchedPart22Blob": "ca1b5be96b06bef0ce19420ed38497945db6eaa8",
+  "originalParts": 25,
+  "trialCopied": 25,
+  "changedPart": "part-22.txt",
+  "sourceByteLength": 300000,
+  "patchedByteLength": 319827,
+  "sourceCodeAnchorsVerified": 12,
+  "scope": "team-only",
+  "gasTest": false,
+  "browserTest": false,
+  "buildInjectedRenderer": false
+}
