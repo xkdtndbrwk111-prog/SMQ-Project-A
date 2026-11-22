@@ -36,6 +36,7 @@ function hojaUsageRetentionWriteTrialU1(){
     const dimHeader=['generation','date','gameId','mode','grade','subject','publisher',
      'cartridgeId','starts','completed','timeUp','otherEnded','unknownEnded',
      'correctTotal','answeredTotal','durationSecondsTotal','durationSamples','teamCountsJson'];
+    const facetHeader=['generation','date','gameId','mode','dimension','dimensionKey','displayLabel','count'];
     const requireTab=(name,header)=>{
       let sh=ss.getSheetByName(name);
       if(!sh)sh=ss.insertSheet(name);
@@ -51,6 +52,7 @@ function hojaUsageRetentionWriteTrialU1(){
     const manifest=requireTab('HOJA_TRIAL_RETENTION_MANIFEST',manifestHeader);
     const totals=requireTab('HOJA_TRIAL_DAILY_TOTALS',totalHeader);
     const dims=requireTab('HOJA_TRIAL_DAILY_DIMENSIONS',dimHeader);
+    const facets=requireTab('HOJA_TRIAL_DAILY_FACETS',facetHeader);
     const num=(r,k)=>Number(r[k]||0);
     const counts=r=>JSON.stringify(r.teamCounts||{});
     const totalRows=preview.totals.map(r=>[
@@ -64,6 +66,15 @@ function hojaUsageRetentionWriteTrialU1(){
       num(r,'unknownEnded'),num(r,'correctTotal'),num(r,'answeredTotal'),
       num(r,'durationSecondsTotal'),num(r,'durationSamples'),counts(r)
     ]);
+    const facetRows=(preview.facets||[]).map(r=>[
+      gen,r.date,r.gameId,r.mode,r.dimension,r.dimensionKey,r.displayLabel,num(r,'count')
+    ]);
+    // GRADE and SUBJECT count each unique session exactly once; unlike
+    // per-cartridge selections, neither may be multiplied by selected units.
+    for(const dimension of ['GRADE','SUBJECT']){
+      if(facetRows.filter(r=>r[4]===dimension).reduce((sum,r)=>sum+r[7],0)!==preview.uniqueStarts)
+        throw Error('HOJA_RETENTION_TRIAL_PLAY_FACET_COUNT_MISMATCH_'+dimension);
+    }
     const checkReplayRows=(sheet,expected,width)=>{
       const n=sheet.getLastRow()-1;
       const actual=n>0?sheet.getRange(2,1,n,width).getValues()
@@ -81,6 +92,7 @@ function hojaUsageRetentionWriteTrialU1(){
           throw Error('HOJA_RETENTION_TRIAL_REPLAY_MANIFEST_MISMATCH');
         checkReplayRows(totals,totalRows,totalHeader.length);
         checkReplayRows(dims,dimRows,dimHeader.length);
+        checkReplayRows(facets,facetRows,facetHeader.length);
         return {ok:true,replayed:true,source:'TRIAL_COPY_ONLY',
           generation:gen,rawRows:preview.rawRows,uniqueStarts:preview.uniqueStarts};
       }
@@ -105,6 +117,7 @@ function hojaUsageRetentionWriteTrialU1(){
     };
     writeVerified(totals,totalRows,totalHeader.length);
     writeVerified(dims,dimRows,dimHeader.length);
+    writeVerified(facets,facetRows,facetHeader.length);
     if(totalRows.reduce((sum,row)=>sum+row[4],0)!==preview.uniqueStarts)
       throw Error('HOJA_RETENTION_TRIAL_TOTAL_COUNT_MISMATCH');
     manifest.getRange(manifestRow,7).setValue(new Date());
@@ -115,7 +128,8 @@ function hojaUsageRetentionWriteTrialU1(){
     if(recorded!=='COMPLETE')throw Error('HOJA_RETENTION_TRIAL_PUBLISH_FAILED');
     return {ok:true,replayed:false,source:'TRIAL_COPY_ONLY',generation:gen,
       rawRows:preview.rawRows,uniqueStarts:preview.uniqueStarts,
-      dailyTotalRows:totalRows.length,dailyDimensionRows:dimRows.length};
+      dailyTotalRows:totalRows.length,dailyDimensionRows:dimRows.length,
+      dailyFacetRows:facetRows.length};
   }finally{
     lock.releaseLock();
   }
