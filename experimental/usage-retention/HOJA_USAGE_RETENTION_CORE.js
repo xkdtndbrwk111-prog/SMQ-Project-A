@@ -111,7 +111,7 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
  }
  function dailySnapshot(rows){
   assert(Array.isArray(rows),'EVENT_ARRAY');
-  const unique=new Map(),totals=new Map(),dims=new Map();
+  const unique=new Map(),totals=new Map(),dims=new Map(),facets=new Map();
   let replayCount=0;
   for(const value of rows){
    const e=normalizeEvent(value);
@@ -123,6 +123,18 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
    unique.set(e.eventId,fingerprint);
    const count=statsFor(e);
    addCounters(createGroup(totals,[e.date,e.gameId,e.mode]),count);
+   // Legacy Project B GRADE/SUBJECT/PUBLISHER charts count each PLAY
+   // once, not once per selected cartridge. Do not derive these from
+   // multi-cartridge selection dimensions (which intentionally overcount).
+   const facetSelections=[
+    ['GRADE',e.grade?e.grade+'학년':'기타'],
+    ['SUBJECT',e.subject||'기타']
+   ];
+   if(e.publisher)facetSelections.push(['PUBLISHER',e.publisher]);
+   for(const [dimension,key] of facetSelections){
+    const g=createGroup(facets,[e.date,e.gameId,e.mode,dimension,key]);
+    g.starts++;
+   }
    // Multi-cartridge sessions reveal selections, NOT which cartridge supplied
    // individual answers or duration. Never duplicate game-wide correct/time
    // totals into every selected cartridge's usage dimension.
@@ -134,9 +146,12 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
   }
   const totalRows=sortedGroup(totals,['date','gameId','mode']);
   const dimensionRows=sortedGroup(dims,['date','gameId','mode','grade','subject','publisher','cartridgeId']);
+  const facetRows=sortedGroup(facets,['date','gameId','mode','dimension','dimensionKey'])
+   .map(r=>({date:r.date,gameId:r.gameId,mode:r.mode,dimension:r.dimension,
+    dimensionKey:r.dimensionKey,displayLabel:r.dimensionKey,count:r.starts}));
   return {schema:'HOJA_USAGE_RETENTION_V1',sourceRows:rows.length,
    uniqueStarts:unique.size,retriesSuppressed:replayCount,
-   totals:totalRows,dimensions:dimensionRows,
+   totals:totalRows,dimensions:dimensionRows,facets:facetRows,
    // Feed canonicalSource to Utilities.computeDigest(SHA_256) when wiring GAS.
    canonicalSource:JSON.stringify([...unique].sort((a,b)=>a[0].localeCompare(b[0])))};
  }
@@ -155,7 +170,7 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
  function monthlySnapshot(daily,month,verifiedDays){
   assert(daily&&daily.schema==='HOJA_USAGE_RETENTION_V1','DAILY_SCHEMA');
   verifiedMonthDays(month,verifiedDays);
-  const totals=new Map(),dims=new Map(),seenTotals=new Set(),seenDims=new Set();
+  const totals=new Map(),dims=new Map(),facets=new Map(),seenTotals=new Set(),seenDims=new Set(),seenFacets=new Set();
   const merge=(rows,map,fields,seen)=>{
    for(const row of rows){
     if(monthKey(row.date)!==month)continue;
@@ -169,9 +184,21 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
   };
   merge(daily.totals,totals,['gameId','mode'],seenTotals);
   merge(daily.dimensions,dims,['gameId','mode','grade','subject','publisher','cartridgeId'],seenDims);
+  for(const r of daily.facets||[]){
+   if(monthKey(r.date)!==month)continue;
+   assert(verifiedDays.includes(r.date),'UNVERIFIED_DAILY_FACET');
+   const key=JSON.stringify([r.date,r.gameId,r.mode,r.dimension,r.dimensionKey]);
+   assert(!seenFacets.has(key),'DUPLICATE_DAILY_FACET');
+   seenFacets.add(key);
+   const g=createGroup(facets,[month,r.gameId,r.mode,r.dimension,r.dimensionKey]);
+   g.starts+=r.count;
+  }
   return {schema:'HOJA_USAGE_RETENTION_MONTHLY_V1',month,
    totals:sortedGroup(totals,['month','gameId','mode']),
    dimensions:sortedGroup(dims,['month','gameId','mode','grade','subject','publisher','cartridgeId']),
+   facets:sortedGroup(facets,['month','gameId','mode','dimension','dimensionKey'])
+    .map(r=>({month:r.month,gameId:r.gameId,mode:r.mode,dimension:r.dimension,
+      dimensionKey:r.dimensionKey,displayLabel:r.dimensionKey,count:r.starts})),
    verifiedDayCount:new Set(verifiedDays.filter(d=>d.slice(0,7)===month)).size};
  }
  function previewRawPurge(args){
