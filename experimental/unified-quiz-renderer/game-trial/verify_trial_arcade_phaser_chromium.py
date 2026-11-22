@@ -150,7 +150,7 @@ async def run():
        flags:{dying:s.dying,clear:s.clear,timeUp:s.timeUp,transitioning:s.transitioning,quizActive:s.quizActive,manualPaused:s.manualPaused}};
    }""")
    print('ARCADE_H_HELP_PRECHECK',pre_help,flush=True)
-   await page.keyboard.press('h')
+   await arcade.locator('body').press('h',timeout=12000)
    help_probe=await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return {seen:w.__QA_H_KEY_LOG__,display:w.document.getElementById('hojaTrialControlsHelp')?.style.display,
@@ -162,7 +162,7 @@ async def run():
      return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='grid' &&
        w.__QA_ACTIVE_SCENE__()?.manualPaused===true;
    }""",timeout=9000)
-   await page.keyboard.press('h')
+   await arcade.locator('body').press('h',timeout=12000)
    await page.wait_for_function("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='none' &&
