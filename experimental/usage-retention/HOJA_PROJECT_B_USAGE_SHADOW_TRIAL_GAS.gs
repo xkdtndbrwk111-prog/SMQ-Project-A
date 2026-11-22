@@ -22,7 +22,8 @@ function getUsageStatisticsU3ShadowTrial(creatorToken,dateKeys,asOf){
   if(typeof HOJA_PROJECT_B_USAGE_SHADOW_V1==='undefined')
     throw Error('HOJA_PROJECT_B_SHADOW_PROJECTOR_MISSING');
   const report=hojaUsageSummaryReadTrialU1(dateKeys);
+  const asOfKst=asOf||Utilities.formatDate(new Date(),'Asia/Seoul','yyyy-MM-dd');
   return HOJA_PROJECT_B_USAGE_SHADOW_V1.project(report,{
-    accessRole:access.role,asOf
+    accessRole:access.role,asOf:asOfKst
   });
 }
