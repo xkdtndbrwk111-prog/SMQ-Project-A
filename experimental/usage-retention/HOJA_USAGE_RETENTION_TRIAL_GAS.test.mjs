@@ -21,11 +21,15 @@ function preview({rows=[row(1),row(2)],props={},header=headers,lastRow}={}){
   getLastRow(){return lastRow??rows.length+1;},
   getLastColumn(){return headers.length;},
   getRange(start,col,num,count){
-   assert.equal(col,1);
-   assert.equal(count,15);
+   assert.ok((col===1&&count===15)||(col===3&&count===1));
    return {
     getDisplayValues(){return [header];},
-    getValues(){return rows.slice(start-2,start-2+num).map(r=>[...r]);}
+    getValues(){
+      return Array.from({length:num},(_,i)=>{
+       const r=rows[start+i-2]||[];
+       return col===3?[r[2]??'']:[...r];
+      });
+    }
    };
   }
  };
@@ -91,7 +95,35 @@ test('full header parity is required and malformed schema fails closed',()=>{
 
 test('preview limit blocks partial snapshots; no silent truncation',()=>{
  const t=preview({lastRow:10002});
- assert.throws(()=>t.value(),/HOJA_USAGE_TRIAL_TOO_MANY_ROWS_FOR_PREVIEW/);
+ assert.throws(()=>t.value(),/HOJA_USAGE_TRIAL_DAY_REQUIRED_FOR_LARGE_SHEET/);
+});
+
+
+test('actual source format allows physical blank K1 while K events retain team count',()=>{
+ const h=[...headers];h[10]='';
+ const r=row(1);r[3]='TEAM';r[10]=7;
+ const out=preview({header:h,rows:[r]}).value();
+ assert.equal(out.totals[0].teamCounts['7'],1);
+});
+
+test('17k sheet selected day scans only date column and does not truncate result',()=>{
+ const rows=Array.from({length:11000},(_,i)=>row(i+1,i>=10996?'2026-11-20':'2026-11-19'));
+ const out=preview({rows,props:{'HOJA_USAGE_TRIAL_DAY':'2026-11-20'}}).value();
+ assert.equal(out.rawRows,4);
+ assert.equal(out.uniqueStarts,4);
+ assert.equal(out.totals[0].date,'2026-11-20');
+});
+
+test('invalid date filter rejects before scan',()=>{
+ assert.throws(()=>preview({props:{'HOJA_USAGE_TRIAL_DAY':'11/20/2026'}}).value(),
+  /HOJA_USAGE_TRIAL_DAY_FORMAT/);
+});
+
+test('legacy row with no stored unit IDs is counted without fake unit attribution',()=>{
+ const r=row(1);r[11]='';r[9]=1;
+ const result=preview({rows:[r]}).value();
+ assert.equal(result.uniqueStarts,1);
+ assert.equal(result.dimensions[0].cartridgeId,'LEGACY_UNRESOLVED');
 });
 
 test('the trial GAS source cannot mutate or delete data',()=>{
