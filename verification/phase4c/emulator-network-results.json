@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-22",
+  "project": "demo-hoja-phase3a",
+  "productionFirebaseUsed": false,
+  "existingFirestorePreserved": "127.0.0.1:18080",
+  "isolatedPorts": {"firestore": "127.0.0.1:18081", "auth": "127.0.0.1:19099", "hub": "127.0.0.1:4401", "classServer": "127.0.0.1:18767"},
+  "setup": "Temporary copy only: changed emulator firebase.json firestore and hub ports, and changed isolation.mjs and emulator.test.mjs to require the same exact alternate loopback ports. Demo project, credentials ban, deny-all rules and endpoint checks remained enforced. No tracked server or security code was changed.",
+  "classIntegration": {"status": "PASS", "build": "test 936823864a", "teacherBrowsers": 1, "studentBrowsers": 3, "screens": "QR join, lobby, separate games, in-progress announcement, answer analysis, final close", "simulatedLayouts": [20, 25, 30], "finishMethod": "induced by test hooks"},
+  "emulatorTests": {"status": "PASS", "count": 21, "scope": "authorization, isolation, duplicate joins and results, reconnect generations, transaction retries and race, post-close receipts, version mismatch, team and individual ranking, student privacy and answer access"},
+  "limitations": ["Actual 20-30 concurrent physical devices NOT RUN", "School network NOT RUN", "Production Firebase NOT RUN", "Reported scores remain client-generated"]
+}

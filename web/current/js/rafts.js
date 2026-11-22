@@ -15,7 +15,22 @@ window.HOJA_CREATE_RAFTS = function ({TILE,waterAtX,SFX}) {
       for(let tx=0;tx<cols;tx++){
         tiles.push(scene.add.image(rcfg.x+tx*TILE+8,rcfg.y+8,'thTroEntities',tx%2?48:46).setDepth(4));
       }
-      const raft={cfg:rcfg,bodyObj,tiles,splashAt:0,touchAt:-1e9,fxWarning:false};
+      // A shallow wooden float closes only the 1–16px visual gap created by
+      // the lowered water artwork. Higher platforms keep their intended height.
+      // It has no body and follows the existing raft, behind the water layer.
+      const surface=waterAtX(rcfg.x+rcfg.w/2);
+      const gap=surface===null?null:surface-(rcfg.y+TILE);
+      let floatArt=null;
+      if(gap>0&&gap<=TILE){
+        floatArt=scene.add.graphics().setDepth(3.9);
+        const top=4,height=TILE+gap-top;
+        floatArt.fillStyle(0x603820).fillRect(2,top,rcfg.w-4,height);
+        floatArt.fillStyle(0x9c5b30).fillRect(4,top+1,rcfg.w-8,height-3);
+        floatArt.fillStyle(0xc58547);
+        for(let x=8;x<rcfg.w-8;x+=TILE)floatArt.fillRect(x,top+3,2,height-6);
+        floatArt.setPosition(rcfg.x,rcfg.y);
+      }
+      const raft={cfg:rcfg,bodyObj,tiles,floatArt,splashAt:0,touchAt:-1e9,fxWarning:false};
       bodyObj.__raft=raft;
       scene.rafts.push(raft);
     }
@@ -80,6 +95,7 @@ window.HOJA_CREATE_RAFTS = function ({TILE,waterAtX,SFX}) {
       if(occupied&&vy>0&&pb.velocity.y<vy)pb.setVelocityY(vy);
       const left=b.left;
       r.tiles.forEach((img,i)=>img.setPosition(left+i*TILE+8,b.top+8));
+      if(r.floatArt)r.floatArt.setPosition(left,b.top);
     }
   }
 

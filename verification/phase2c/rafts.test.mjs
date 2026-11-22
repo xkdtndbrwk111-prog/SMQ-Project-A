@@ -12,7 +12,7 @@ test('16ms raft sequence sinks, disables collision and returns after player clea
  const player={left:5,right:25,top:50,bottom:100,velocity:{y:0},blocked:{down:true},touching:{down:false},setVelocityY(v){this.velocity.y=v}};
  const group={children:[],add(o){this.children.push(o)}};
  const scene={time:{now:0},playerBody:{body:player},movingPlatformGroup:group,
-  add:{rectangle(x,y,w,h){return {x,y,w,h}},image(){return {setDepth(){return this},setTint(){},clearTint(){},setPosition(){}}}},
+  add:{graphics(){return {setDepth(){return this},fillStyle(){return this},fillRect(){return this},setPosition(){return this}}},rectangle(x,y,w,h){return {x,y,w,h}},image(){return {setDepth(){return this},setTint(){},clearTint(){},setPosition(){}}}},
   physics:{add:{existing(o){o.body={top:o.y-o.h/2,left:o.x-o.w/2,right:o.x+o.w/2,height:o.h,center:{x:o.x},checkCollision:{},
     setAllowGravity(){},setImmovable(){},setVelocity(x,y){this.vy=y},reset(x,y){this.top=y-this.height/2}}}}},
   emitBurst(){},cameras:{main:{shake(){}}}};

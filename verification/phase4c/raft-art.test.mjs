@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import vm from 'node:vm';
+const window={};vm.runInNewContext(readFileSync(new URL('../../web/current/js/rafts.js',import.meta.url),'utf8'),{window});
+test('shallow visual floats follow the raft; raised platforms and physics stay intact',()=>{
+ for(const width of [32,48,80,128])for(const gap of [0,8,16,17,32,48]){
+  const graphics=[],system=window.HOJA_CREATE_RAFTS({TILE:16,waterAtX:()=>116+gap,SFX:{raftWarning(){},land(){}}});
+  const scene={time:{now:0},playerBody:{body:{left:-100,right:-80,bottom:0,velocity:{y:0},blocked:{down:false},touching:{down:false},setVelocityY(){}}},movingPlatformGroup:{add(){}},add:{graphics(){const g={x:0,y:0,rects:[],setDepth(v){this.depth=v;return this},fillStyle(){return this},fillRect(...a){this.rects.push(a);return this},setPosition(x,y){this.x=x;this.y=y;return this}};graphics.push(g);return g;},rectangle(x,y,w,h){return {x,y,w,h}},image(){return {setDepth(){return this},setPosition(){},setTint(){},clearTint(){}}}},physics:{add:{existing(o){o.body={top:o.y-o.h/2,left:o.x-o.w/2,right:o.x+o.w/2,height:o.h,center:{x:o.x},checkCollision:{},setAllowGravity(){},setImmovable(){},setVelocity(x,y){this.vy=y},reset(x,y){this.top=y-this.height/2}}}}},emitBurst(){},cameras:{main:{shake(){}}}};
+  system.createRafts(scene,[{x:32,y:100,w:width,sink:12}]);const r=scene.rafts[0];assert.equal(graphics.length,gap>0&&gap<=16?1:0,`width ${width} gap ${gap}`);assert.equal(r.bodyObj.body.top,100);assert.equal(r.bodyObj.body.height,6);if(r.floatArt){assert.equal(r.floatArt.body,undefined);assert.equal(r.floatArt.depth,3.9);assert.equal(r.floatArt.y,100);r.bodyObj.body.top=111;system.updateRafts(scene);assert.equal(r.floatArt.y,111);assert.equal(r.bodyObj.body.top,111);assert.equal(r.bodyObj.body.vy,-60);}
+ }
+});

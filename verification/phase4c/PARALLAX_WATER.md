@@ -14,3 +14,10 @@
 - **FAIL — 뗏목 정지 외관:** 열대 시드 314159의 첫 뗏목 바닥 그림은 y=880, 보이는 수면은 y=896으로 16px 떨어져 떠 보인다. 같은 시드에 더 높은 뗏목도 있다. 그림만 아래로 내리면 호자의 충돌면과 맞지 않으므로 검증되지 않은 시각 보정은 적용하지 않았다. 물 판정·몸체·침몰 속도와 깊이는 보존했다. 탑승 중 몸체 하단과 뗏목 상단은 일치했고 침몰·비활성화·추락·최대 깊이/복귀 상태를 유도 시험으로 확인했다. [수치 기록](raft-visual-results.json), [정지](screenshots/raft/tropics-idle.png), [탑승](screenshots/raft/tropics-onboard.png), [침몰](screenshots/raft/tropics-sinking.png), [추락](screenshots/raft/tropics-fall.png), [최대 깊이](screenshots/raft/tropics-deep.png). 이 시드에서 나머지 세 계절에는 뗏목이 생성되지 않았다. 다른 시드의 다른 계절 뗏목은 NOT RUN이다.
 - **PASS — 배경 회귀(유도):** 사계절 시작·고도·물가, 카메라 이동, 1280×720→960×540 크기 변경, 스테이지 재진입과 구름 속도 유지. 시험 장면에서 배경의 이음새 재노출은 보이지 않았다. [크기 변경 캡처](screenshots/season-regression/). 전체 경로 검증은 아님.
 - **PASS — 물 추락 판정:** 유도 시험에서 수면 접촉만으로 사망하지 않고 화면 아래 기준을 넘은 뒤 사망하는 기존 동작을 재확인했다. 원격 기준 trace는 갱신하지 않았다.
+
+## 2026-11-22 뗏목 시각 보정 후속
+
+- **PASS — 그림 보정:** 물과 가까운 뗏목 중 그림 하단과 수면의 간격이 1~16px인 경우에만 충돌체 없는 나무 부력 장식을 윗면 아래에 추가한다. 더 높이 배치된 뗏목은 기존 모습을 유지한다. 장식은 뗏목 몸체를 따라 움직이고 수면보다 낮은 레이어에 있어 잠기면 물에 가려진다. 원래의 윗면 그림, 충돌체, 수면·사망 판정, 침몰 및 복귀 계산은 바꾸지 않았다. [수정 전후 비교](raft-comparison.html), [탑승](screenshots/raft-after/tropics-onboard.png), [침몰](screenshots/raft-after/tropics-sinking.png), [추락](screenshots/raft-after/tropics-fall.png), [최대 침몰](screenshots/raft-after/tropics-deep.png), [복귀](screenshots/raft-after/tropics-restored.png).
+- **PASS — 실제 장면 유도 시험:** 314159 첫 뗏목에서 플레이어 몸체 하단과 뗏목 상단이 y=864로 일치했고, 장식에는 물리 몸체가 없었다. 침몰 중 장식은 몸체와 함께 y=901.1로 이동했고, 빠진 뒤 물 아래로 가려졌으며, 복귀 시 y=864와 충돌 활성 상태를 회복했다. [상태 기록](raft-after-results.json). 테스트는 무작위 맵과 위치를 유도하고 실제 Phaser 물리를 사용한 것이며 자연 플레이가 아니다.
+- **PASS — 여러 시드·화면:** 0, 1, 42, 314159 시드에서 각 열대 뗏목 11개 중 수면 근접 4개에만 장식 적용, 높은 나머지 7개는 보존. 실제 폭 64·80px과 단위 시험 폭 32·48·80·128px, 간격 0·8·16·17·32·48px 검증. 1280×720 및 960×540과 카메라 위치 변경을 시험했다. [시드 기록](raft-seed-results.json), [근접](screenshots/raft-after/314159-near.png), [높은 뗏목](screenshots/raft-after/314159-high.png), [작은 화면](screenshots/raft-after/314159-resized.png).
+- **NOT RUN:** 실제 기기·학교망과 다른 계절에 뗏목이 생성되는 시드. 이전 미해결 기록은 위 PASS 결과로 갱신하되 과거 관찰과 캡처는 보존한다.
