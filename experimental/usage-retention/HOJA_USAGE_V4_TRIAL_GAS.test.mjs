@@ -94,6 +94,7 @@ test('V4 copied-sheet preview reads real K-empty schema and preserves 7-person t
  assert.equal(p.buckets.find(x=>x.dimension==='TEAM_SIZE').key,'7팀전');
  assert.equal(p.buckets.find(x=>x.dimension==='CARTRIDGE_COMBINATION').count,2);
  assert.match(p.sourceDigest,/^[a-f0-9]{64}$/);
+ assert.match(p.bucketDigest,/^[a-f0-9]{64}$/);
  assert.equal(a.writes.length,0);
 });
 test('V4 copy writer publishes COMPLETE only after row readback, original EVENT_LOG unchanged',()=>{
@@ -103,6 +104,7 @@ test('V4 copy writer publishes COMPLETE only after row readback, original EVENT_
  assert.equal(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][2],'COMPLETE');
  assert.equal(t.tabs.get('HOJA_V4_DAILY_BUCKETS')[1][2],'CARTRIDGE_COMBINATION');
  assert.equal(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][6],2);
+ assert.match(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][12],/^[a-f0-9]{64}$/);
  assert.equal(JSON.stringify(t.tabs.get('EVENT_LOG')),before);
  assert.equal(t.writes.some(x=>x.name==='EVENT_LOG'),false);
 });
