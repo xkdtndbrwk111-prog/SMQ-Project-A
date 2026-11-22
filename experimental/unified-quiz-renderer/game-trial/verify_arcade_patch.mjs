@@ -25,6 +25,7 @@ for(const oldInput of ['this.keys.left.isDown','this.keys.right.isDown','this.ke
 assert(patched.includes("['KeyW','KeyA','KeyS','KeyD','Comma','Period','Enter'].includes(ev.code)"),'Death confirm must accept the seven official keys');
 assert(!patched.includes("if(ev.code!=='Enter'&&ev.code!=='Space')return"),'Old Space death shortcut must be replaced');
 assert(patched.includes('this.continueHojaAfterDeath()'),'Original checkpoint respawn must remain');
+assert(patched.includes("document.getElementById('hojaDeathContinue')?.focus({preventScroll:true});"),'Death dialog must focus the child frame CTA');
 const help=patched.match(/<script id="hojaTrialControlsHelpScript">([\s\S]*?)<\/script>/);
 assert(help&&help[1],'H help script missing');
 assert(help[1].trim().startsWith('(()=>'),'H help source must be executable, not a quoted string');
