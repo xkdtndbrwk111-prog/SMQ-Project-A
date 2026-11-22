@@ -68,6 +68,16 @@ test('existing U3S COMPLETE day provides truthful Project B daily report',()=>{
  assert.equal(x.days[0].unknownTeamSize,7);// never claim 7-person teams from old schema
  assert.equal(x.days[0].cartridgeSelections,663);
 });
+test('current Project B without any V1 tabs can read existing U3S COMPLETE summaries',()=>{
+ const d=demo();const r=api.readDates({old:d.old},['2026-11-20']);
+ assert.equal(r.ok,true);
+ assert.equal(r.starts,581);
+ assert.equal(r.days[0].source,'U3S1_ROLLUP_V1');
+});
+test('partial V1 family installation is not silently ignored',()=>{
+ const d=demo();
+ assert.throws(()=>api.readDates({old:d.old,trial:{manifest:d.trial.manifest}},['2026-11-20']),/MISSING_TAB/);
+});
 test('count-verified connector trial is NOT authoritative and legacy wins',()=>{
  const x=api.readDates(demo(),['2026-11-20'],{allowCountOnly:true});
  assert.equal(x.ok,true);assert.equal(x.days[0].source,'U3S1_ROLLUP_V1');
