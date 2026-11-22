@@ -53,15 +53,21 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
  const facetSum=(facets,dimension)=>sum(facets.filter(x=>x.dimension===dimension).map(x=>x.count));
  const getTables=input=>{
   assert(input&&typeof input==='object','INPUT');
-  const old=input.old||{},trial=input.trial||{};
+  const old=input.old||{},trial=input.trial;
+  // Existing Project B rollup-only deployments have no V1 tables yet.
+  // Absence of the ENTIRE V1 family is valid; a partially configured V1
+  // family is not (and must fail with MISSING_TAB rather than mask a problem).
+  const emptyTrial=trial==null;
   return {
    old:{manifest:table(old.manifest,OLD.manifest,'old.manifest'),
     totals:table(old.totals,OLD.totals,'old.totals'),
     dimensions:table(old.dimensions,OLD.dimensions,'old.dimensions')},
-   trial:{manifest:table(trial.manifest,TRIAL.manifest,'trial.manifest'),
-    totals:table(trial.totals,TRIAL.totals,'trial.totals'),
-    dimensions:table(trial.dimensions,TRIAL.dimensions,'trial.dimensions'),
-    facets:trial.facets?table(trial.facets,TRIAL.facets,'trial.facets'):[]}
+   trial:emptyTrial?
+    {manifest:[],totals:[],dimensions:[],facets:[]}:
+    {manifest:table(trial.manifest,TRIAL.manifest,'trial.manifest'),
+     totals:table(trial.totals,TRIAL.totals,'trial.totals'),
+     dimensions:table(trial.dimensions,TRIAL.dimensions,'trial.dimensions'),
+     facets:trial.facets?table(trial.facets,TRIAL.facets,'trial.facets'):[]}
   };
  };
  function oldDay(rows,day){
