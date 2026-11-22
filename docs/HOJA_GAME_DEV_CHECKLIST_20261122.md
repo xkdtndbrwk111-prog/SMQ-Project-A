@@ -214,3 +214,13 @@
 - [x] 검증 기록: `experimental/unified-quiz-renderer/QA_7MB_LOCAL_CHROMIUM_20261122.md`; PASS/PARTIAL/NOT RUN 구분. **main/운영판 불변**.
 
 **다음 1개 작업:** 개발 브랜치 시험 복원본을 실제 생성해 동일한 브라우저 회귀를 재현하고, 승인 정본 데이터 로더를 시험판에 연결.
+
+## 13. 2026-11-22 사회6 승인 GAS 시험용 내장 로더 생성
+- [x] GitHub 승인 브리지 blob `5a1623b8...`에서 원본 64문항, 각 32문항, WebP 15개, 태그 64개, 교사 지정 C형 좌우 11건 추출·무손실 분리.
+- [x] `experimental/unified-quiz-renderer/gas-test/`에 단원별 `HOJA_QB_UNIT_*.gs`, 자동 생성 카탈로그, **변경하지 않는 공통** `HOJA_QB_EMBEDDED_API.gs`, 시험용 `Code.TEST.gs` 추가.
+- [x] 시험용 Code는 카탈로그·문항 Sheet 읽기를 내장 데이터로 변경하고, **랭킹 쓰기/이용 기록 쓰기 차단**. 운영 Code.gs와 `main` 변경 없음.
+- [x] 로컬 유사 생성물의 Node VM 시험: 2단원/64문항(객관식44/OX12/주관식8), WebP15, C 좌우11, 원본 4보기, 팀전 3보기 매핑, 미승인 선택 거부, 랭킹 쓰기 차단, 운영 외부 읽기 호출0건 PASS.
+- [ ] **GitHub에 생성된 이 특정 GS 바이트 자체의 GAS 실기 실행은 아직 NOT RUN**. 실제 배포·서버 API 시험 미실시. `Code.TEST.gs`는 운영본 교체 목적 아님.
+- [ ] 실제 브랜치 시험 Game.html에 연결한 2팀/7팀 및 두 싱글 실기기 시험 미완료. 서버 무결성·랭킹 허용 정책은 별도 설계·검증 필요.
+
+**다음 1개 작업:** 브랜치의 정확한 25조각 시험 Game.html 복원→시험 전용 GAS 로더 연결→두 싱글 및 팀전 브라우저·GAS 통합 시험.
