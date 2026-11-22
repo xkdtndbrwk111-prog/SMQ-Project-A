@@ -94,12 +94,8 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
  }
  function createGroup(map,fields){
   const id=JSON.stringify(fields);
-  if(!map.has(id)){
-   const o=Object.assign({},fields.reduce((acc,x,i)=>{
-    acc[i]=x;return acc;
-   },{}));
+  if(!map.has(id))
    map.set(id,Object.assign({key:fields},zeroCounters()));
-  }
   return map.get(id);
  }
  function sortedGroup(map,cols){
@@ -181,11 +177,36 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
    if(m&&(!Number.isSafeInteger(m.rawCount)||m.rawCount<0||
       !Number.isSafeInteger(m.summaryCount)||m.rawCount!==m.summaryCount))
     reason.push('COUNT_MISMATCH');
-   if(m&&typeof m.contentDigest!=='string'||m&&m.contentDigest?.length<32)
+   if(m&&!/^[0-9a-f]{64}$/i.test(String(m.contentDigest||'')))
     reason.push('DIGEST_NOT_VERIFIED');
    return {date,daysOld,eligibleForFutureApprovedPurge:reason.length===0,holds:reason};
   });
  }
+ function previewDailyCompaction(args){
+  // Monthly rollup plans, no destructive operations. Retain the last 12 full
+  // calendar months of daily summaries. Compact only older complete months.
+  assert(args&&typeof args==='object','MONTH_PLAN_ARGS');
+  const asOf=dayKey(args.asOf);
+  const ym=asOf.slice(0,7).split('-').map(Number);
+  const first=new Date(Date.UTC(ym[0],ym[1]-1-12,1)).toISOString().slice(0,7);
+  const months=Array.isArray(args.dailyMonths)?args.dailyMonths:[];
+  const manifest=args.monthlyManifests||{};
+  return [...new Set(months)].sort().map(month=>{
+   assert(/^\d{4}-\d{2}$/.test(month),'COMPACT_MONTH_FORMAT');
+   dateMs(month+'-01');
+   const reasons=[],m=manifest[month];
+   if(month>=first)reasons.push('RECENT_12_MONTHS');
+   if(args.summaryReadersReady!==true)reasons.push('MONTHLY_READERS_NOT_READY');
+   if(args.backupVerified!==true)reasons.push('DAILY_BACKUP_NOT_VERIFIED');
+   if(!m||m.status!=='COMPLETE'||m.verified!==true)
+    reasons.push('MONTHLY_SUMMARY_NOT_VERIFIED');
+   if(m&&(!Number.isInteger(m.dailyStarts)||!Number.isInteger(m.monthlyStarts)||
+    m.dailyStarts!==m.monthlyStarts))reasons.push('MONTHLY_COUNT_MISMATCH');
+   if(m&&!/^[0-9a-f]{64}$/i.test(String(m.contentDigest||'')))
+    reasons.push('MONTHLY_DIGEST_NOT_VERIFIED');
+   return {month,eligibleForFutureApprovedCompaction:reasons.length===0,holds:reasons};
+  });
+ }
  return Object.freeze({HEADER:HEADER.slice(),normalizeEvent,dailySnapshot,
-  monthlySnapshot,previewRawPurge});
+  monthlySnapshot,previewRawPurge,previewDailyCompaction});
 })();
