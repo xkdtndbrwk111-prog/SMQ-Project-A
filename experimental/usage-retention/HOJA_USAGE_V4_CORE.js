@@ -119,11 +119,15 @@ var HOJA_USAGE_V4_CORE=(function(){
    canonicalSource
   };
  }
- function validateSnapshot(day){
+ function validateSnapshot(day,hashBuckets){
+  assert(typeof hashBuckets==='function','SHA256_VERIFIER_REQUIRED');
   assert(day&&day.schema===SCHEMA,'SNAPSHOT_SCHEMA');
   const date=str(day.date,32);dateMs(date);
   assert(day.status==='COMPLETE'&&day.verified===true,'SNAPSHOT_UNPUBLISHED');
   assert(/^[a-f0-9]{64}$/i.test(String(day.sourceDigest||'')),'SNAPSHOT_DIGEST');
+  assert(/^[a-f0-9]{64}$/i.test(String(day.bucketDigest||'')),'SNAPSHOT_BUCKET_DIGEST');
+  assert(hashBuckets(JSON.stringify(day.buckets))===day.bucketDigest,
+   'SNAPSHOT_BUCKET_DIGEST_MISMATCH');
   const starts=Number(day.starts);validInt(starts,'STARTS');
   assert(Array.isArray(day.buckets),'SNAPSHOT_BUCKETS');
   const seen=new Set(),totals=new Map();
@@ -157,7 +161,7 @@ var HOJA_USAGE_V4_CORE=(function(){
   assert(Array.isArray(allSnapshots),'SNAPSHOTS');
   const byDate=new Map();
   for(const s of allSnapshots){
-   const valid=validateSnapshot(s);
+   const valid=validateSnapshot(s,opts.hashBuckets);
    assert(valid.date>=historyStart&&valid.date<=asOf,'SNAPSHOT_OUTSIDE_RANGE');
    assert(!byDate.has(valid.date),'DUPLICATE_DATE');
    byDate.set(valid.date,valid);
