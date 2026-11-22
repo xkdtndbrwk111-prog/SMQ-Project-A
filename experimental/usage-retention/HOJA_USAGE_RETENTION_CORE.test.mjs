@@ -41,6 +41,29 @@ test('two selected cartridges count as ONE play, TWO cartridge selections',()=>{
  assert.equal(result.dimensions.reduce((v,x)=>v+x.starts,0),2);
 });
 
+test('Project B legacy TOP20 groups combined cartridge title per game, not per selected unit',()=>{
+ const r=api.dailySnapshot([
+  event(1,{cartridge:'영어 10단원 | 영어 11단원',cartridgeIds:['101','102']}),
+  event(2,{cartridge:'영어 10단원 | 영어 11단원',cartridgeIds:['101','102']}),
+  event(3,{cartridge:'영어 12단원',cartridgeIds:['103']})
+ ]);
+ const combos=r.facets.filter(f=>f.dimension==='CARTRIDGE_COMBINATION');
+ assert.equal(r.uniqueStarts,3);
+ assert.equal(r.dimensions.reduce((n,x)=>n+x.starts,0),5);
+ assert.equal(combos.reduce((n,x)=>n+x.count,0),3);
+ assert.equal(combos.find(x=>x.dimensionKey==='영어 10단원 | 영어 11단원').count,2);
+ assert.equal(combos.find(x=>x.dimensionKey==='영어 12단원').count,1);
+ const monthly=api.monthlySnapshot(
+  api.dailySnapshot([event(1,{date:'2024-02-01',cartridge:'영어 10 | 영어 11',cartridgeIds:['101','102']})]),
+  '2024-02',monthDays(2024,2));
+ assert.equal(monthly.facets.find(f=>f.dimension==='CARTRIDGE_COMBINATION').count,1);
+});
+test('Project B historical empty combined name is explicitly bucketed as unnamed',()=>{
+ const r=api.dailySnapshot([event(1,{cartridge:'',cartridgeIds:['101']})]);
+ assert.equal(r.facets.find(f=>f.dimension==='CARTRIDGE_COMBINATION').dimensionKey,
+  '이름 없는 카트리지');
+});
+
 test('Project B per-play GRADE/SUBJECT/PUBLISHER facets do not multiply multi-unit sessions',()=>{
  const r=api.dailySnapshot([
   event(1,{grade:'6',subject:'사회',publisher:'',cartridgeIds:['101','102','103','104','105']}),
