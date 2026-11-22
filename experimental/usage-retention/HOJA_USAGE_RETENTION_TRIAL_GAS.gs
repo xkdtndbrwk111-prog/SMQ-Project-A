@@ -32,7 +32,7 @@ function hojaUsageRetentionPreviewTrialU1(){
   const count=sh.getLastRow()-1;
   const maxRows=10000; // Never accidentally load an unbounded full sheet.
   const selectedDay=String(properties.getProperty('HOJA_USAGE_TRIAL_DAY')||'').trim();
-  if(selectedDay&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(selectedDay))
+  if(selectedDay&&!/^\d{4}-\d{2}-\d{2}$/.test(selectedDay))
     throw Error('HOJA_USAGE_TRIAL_DAY_FORMAT');
   if(count>maxRows&&!selectedDay)
     throw Error('HOJA_USAGE_TRIAL_DAY_REQUIRED_FOR_LARGE_SHEET');
