@@ -38,7 +38,8 @@ var HOJA_PROJECT_B_USAGE_SHADOW_V1=(function(){
   assert(report&&report.ok===true&&report.authoritative===true&&
    report.completeCoverage===true&&!report.rawRead,'READER_NOT_AUTHORITATIVE');
   assert(Array.isArray(report.days)&&report.days.length>0,'DAY_ROWS');
-  const today=asOf||new Date().toISOString().slice(0,10);
+  // The date must come from the KST-aware GAS wrapper, never UTC midnight.
+  const today=asOf;
   dayMs(today);
   const days=new Map(),mode=new Map(),teamCounts=new Map(),grade=new Map(),
    subject=new Map(),publisher=new Map(),combinations=new Map();
