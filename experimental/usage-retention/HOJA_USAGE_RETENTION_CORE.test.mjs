@@ -41,6 +41,39 @@ test('two selected cartridges count as ONE play, TWO cartridge selections',()=>{
  assert.equal(result.dimensions.reduce((v,x)=>v+x.starts,0),2);
 });
 
+test('Project B per-play GRADE/SUBJECT/PUBLISHER facets do not multiply multi-unit sessions',()=>{
+ const r=api.dailySnapshot([
+  event(1,{grade:'6',subject:'사회',publisher:'',cartridgeIds:['101','102','103','104','105']}),
+  event(2,{grade:'6',subject:'사회',publisher:'천재',cartridgeIds:['101']}),
+  event(3,{grade:'',subject:'',publisher:'',cartridgeIds:['103']})
+ ]);
+ assert.equal(r.totals[0].starts,3);
+ assert.equal(r.dimensions.reduce((n,x)=>n+x.starts,0),7);
+ const sums={};for(const f of r.facets)sums[f.dimension]=(sums[f.dimension]||0)+f.count;
+ assert.equal(sums.GRADE,3);
+ assert.equal(sums.SUBJECT,3);
+ assert.equal(sums.PUBLISHER,1);
+ const lookup=(dim,key)=>r.facets.find(x=>x.dimension===dim&&x.dimensionKey===key)?.count;
+ assert.equal(lookup('GRADE','6학년'),2);
+ assert.equal(lookup('GRADE','기타'),1);
+ assert.equal(lookup('SUBJECT','사회'),2);
+ assert.equal(lookup('SUBJECT','기타'),1);
+ assert.equal(lookup('PUBLISHER','천재'),1);
+});
+
+test('monthly facet counts preserve one game to one grade and subject after daily compression',()=>{
+ const rows=[
+  event(1,{date:'2024-02-01',grade:'6',subject:'사회',cartridgeIds:['101','102']}),
+  event(2,{date:'2024-02-29',grade:'6',subject:'사회',cartridgeIds:['101','102','103']})
+ ];
+ const daily=api.dailySnapshot(rows);
+ const month=api.monthlySnapshot(daily,'2024-02',monthDays(2024,2));
+ assert.equal(month.totals[0].starts,2);
+ assert.equal(month.dimensions.reduce((n,x)=>n+x.starts,0),5);
+ assert.equal(month.facets.find(x=>x.dimension==='GRADE'&&x.dimensionKey==='6학년').count,2);
+ assert.equal(month.facets.find(x=>x.dimension==='SUBJECT'&&x.dimensionKey==='사회').count,2);
+});
+
 test('multiple selected units never inherit game-wide scores or duration without question attribution',()=>{
  const r=api.dailySnapshot([event(1,{
    cartridgeIds:['101','102'],outcome:'COMPLETED',
