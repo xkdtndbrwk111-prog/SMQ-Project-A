@@ -219,8 +219,10 @@ async def run():
       expected=next(r['rendererQuestion']['prompt'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
       await page.wait_for_function("""(x)=>{
         const f=document.getElementById('hojaArcadeApprovedParentFrame'),s=window.HOJA_ARCADE_APPROVED_TRIAL?.state;
+        const bar=document.getElementById('hojaArcadeReviewBar');
         return s?.reviewIndex===x.index && s?.reviewCount===12 &&
           f?.style.visibility==='visible' &&
+          !!bar && f.getBoundingClientRect().top>=bar.getBoundingClientRect().bottom-1 &&
           f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===x.prompt;
       }""",arg={'index':n,'prompt':expected},timeout=20000)
       label=await page.locator('#hojaArcadeReviewLabel').inner_text()

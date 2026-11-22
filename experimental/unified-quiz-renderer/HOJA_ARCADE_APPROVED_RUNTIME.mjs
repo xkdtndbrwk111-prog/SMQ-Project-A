@@ -155,7 +155,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   try{mapping=resolveApprovedArcadeChoice(catalog,msg.question,core)}
   catch(e){error(e);return}
   const local=++epoch;focus=-1;active={id:msg.id,mapping,responded:false,familyKey:msg.question.familyKey,kind:msg.question.type};
-  ensureUI();frame.style.visibility='hidden';overlay.style.display='block';showLoading();
+  ensureUI();frame.style.top='0';frame.style.height='100%';frame.style.visibility='hidden';overlay.style.display='block';showLoading();
   try{
    const h=await ensureHost();
    if(local!==epoch||active?.id!==msg.id)return;
@@ -179,7 +179,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   overlay?.querySelector('#hojaArcadeApprovedJudgment')?.remove();
   overlay?.querySelector('#hojaArcadeApprovedError')?.remove();
   overlay?.querySelector('#hojaArcadeApprovedLoading')?.remove();
-  if(frame)frame.style.visibility='hidden';
+  if(frame){frame.style.visibility='hidden';frame.style.top='0';frame.style.height='100%';}
   if(reviewBar)reviewBar.style.display='none';
   if(overlay)overlay.style.display='none';
  }
@@ -203,6 +203,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   reviewLabel.textContent='오답 복습 '+(current.index+1)+'/'+current.items.length+' · 정답: '+answerText;
   reviewNext.textContent=current.index===current.items.length-1?'복습 마치기':'다음 오답';
   reviewBar.style.display='flex';
+  const barHeight=Math.ceil(reviewBar.getBoundingClientRect().height);
+  frame.style.top=barHeight+'px';frame.style.bottom='0';frame.style.height='auto';
   try{
    const h=await ensureHost();
    if(token!==epoch||review!==current)return;
