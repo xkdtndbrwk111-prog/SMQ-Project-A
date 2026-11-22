@@ -18,6 +18,7 @@ async def run():
  p.add_argument('--collision-first',action='store_true')
  p.add_argument('--finish-check',action='store_true')
  p.add_argument('--keyboard-smoke',action='store_true')
+ p.add_argument('--control-smoke',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -86,6 +87,52 @@ async def run():
   print('ARCADE_REAL_PHASER_BOOT_PASS version',
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
+  if args.control_smoke:
+   body=page.frame_locator('#hqArcadeFrame').locator('body')
+   mapping=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),K=w.Phaser.Input.Keyboard.KeyCodes;
+     return {run:s.keys.run.keyCode,comma:K.COMMA,jump:s.keys.jump.keyCode,period:K.PERIOD};
+   }""")
+   assert mapping['run']==mapping['comma'] and mapping['jump']==mapping['period'],mapping
+   for key in ['w','a','s','d',',','.','Enter']:
+    prior=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
+      return {score:s.score,found:r.found,history:r.step09History.length,deaths:r.deaths||0};
+    }""")
+    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__().startDeath('pit')")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open');
+    }""",timeout=10000)
+    await body.press(key,timeout=12000)
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      return s && !s.dying && !s._hojaDeathDialogOpen &&
+       !w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open');
+    }""",timeout=10000)
+    after=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
+      return {score:s.score,found:r.found,history:r.step09History.length,deaths:r.deaths||0,
+       invuln:s.invulnUntil>s.time.now};
+    }""")
+    assert after['deaths']==prior['deaths']+1 and after['invuln'],(key,prior,after)
+    assert all(after[k]==prior[k] for k in ['score','found','history']),(key,prior,after)
+    print('ARCADE_REAL_DEATH_KEY_PASS',key,flush=True)
+   await body.press('h',timeout=10000)
+   opened=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return [w.document.getElementById('hojaTrialControlsHelp')?.style.display,
+       w.__QA_ACTIVE_SCENE__()?.manualPaused];
+   }""")
+   assert opened==['grid',True],opened
+   await body.press('h',timeout=10000)
+   closed=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return [w.document.getElementById('hojaTrialControlsHelp')?.style.display,
+       w.__QA_ACTIVE_SCENE__()?.manualPaused];
+   }""")
+   assert closed==['none',False],closed
+   print('ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS',mapping,flush=True)
   if args.keyboard_smoke:
    async def focus_game_keys():
     # QA-only focus steering, actual keys always delivered by Chromium.
