@@ -1,0 +1,176 @@
+{
+  "format": "hoja-teacher-review-v1",
+  "courseId": "phase4d-gimmick-course",
+  "buildVersion": "f66772ca8c",
+  "commit": "ead7adaec2a3192d8ce6d1fca5a138be456ba57c",
+  "sourceDirty": false,
+  "seed": 314159,
+  "mode": "course",
+  "label": "수동 자연 입력 — 신규 기믹 시험 코스",
+  "startStage": 0,
+  "interventions": [
+    "시드 지정"
+  ],
+  "startAt": "2026-11-22T23:32:31.918Z",
+  "events": [
+    {
+      "type": "checkpoint",
+      "stage": 0,
+      "checkpoint": null,
+      "x": 96,
+      "y": 331,
+      "at": 1795390353267
+    },
+    {
+      "type": "stage",
+      "stage": 0,
+      "from": null,
+      "at": 1795390353267,
+      "x": 96,
+      "y": 331
+    },
+    {
+      "type": "death",
+      "stage": 0,
+      "x": 409.7698775999995,
+      "y": 301.7240530388176,
+      "reason": "enemy",
+      "gimmick": "saw",
+      "checkpoint": null,
+      "at": 1795390357768
+    },
+    {
+      "type": "death",
+      "stage": 0,
+      "x": 570.6828492000001,
+      "y": 308.41317879719725,
+      "reason": "enemy",
+      "gimmick": "pendulum",
+      "checkpoint": null,
+      "at": 1795390367433
+    },
+    {
+      "type": "course_goal",
+      "stage": 0,
+      "x": 1523.3585196000015,
+      "y": 331,
+      "at": 1795390388300
+    },
+    {
+      "type": "death",
+      "stage": 0,
+      "x": 692.8144575999993,
+      "y": 331,
+      "reason": "enemy",
+      "gimmick": "pendulum",
+      "checkpoint": null,
+      "at": 1795390558184
+    }
+  ],
+  "notes": [],
+  "goalReached": true,
+  "selectedStageExit": false,
+  "endReason": "COURSE_FINISH",
+  "finishedAt": "2026-11-22T23:33:08.419Z",
+  "elapsedSeconds": 277,
+  "lastState": {
+    "seed": 314159,
+    "stage": 0,
+    "x": 137,
+    "y": 331,
+    "deaths": 3,
+    "dying": false,
+    "checkpoint": null,
+    "clear": false,
+    "sceneTime": 275955.6,
+    "gimmickTime": 270198.55333333346,
+    "gimmicks": [
+      {
+        "kind": "saw",
+        "x": 337.06509999999435,
+        "y": 336,
+        "radius": 14,
+        "angle": 179.81400000002031
+      },
+      {
+        "kind": "pendulum",
+        "anchorX": 656,
+        "anchorY": 240,
+        "x": 653.7403065380847,
+        "y": 319.9680797909902,
+        "radius": 14,
+        "angle": -0.028249925638606746
+      },
+      {
+        "kind": "fan",
+        "x": 928,
+        "y": 288,
+        "w": 112,
+        "h": 64,
+        "direction": "left",
+        "power": 180,
+        "active": true
+      },
+      {
+        "kind": "flame",
+        "x": 1264,
+        "y": 288,
+        "w": 32,
+        "h": 64,
+        "phase": "warn",
+        "active": false
+      }
+    ],
+    "endReason": null,
+    "remainingMs": 631925.8833332682,
+    "geometry": [
+      [
+        0,
+        352,
+        1600,
+        32,
+        "ground"
+      ]
+    ],
+    "events": [
+      {
+        "type": "death",
+        "stage": 0,
+        "x": 409.7698775999995,
+        "y": 301.7240530388176,
+        "reason": "enemy",
+        "gimmick": "saw",
+        "checkpoint": null,
+        "at": 1795390357768
+      },
+      {
+        "type": "death",
+        "stage": 0,
+        "x": 570.6828492000001,
+        "y": 308.41317879719725,
+        "reason": "enemy",
+        "gimmick": "pendulum",
+        "checkpoint": null,
+        "at": 1795390367433
+      },
+      {
+        "type": "course_goal",
+        "stage": 0,
+        "x": 1523.3585196000015,
+        "y": 331,
+        "at": 1795390388300
+      },
+      {
+        "type": "death",
+        "stage": 0,
+        "x": 692.8144575999993,
+        "y": 331,
+        "reason": "enemy",
+        "gimmick": "pendulum",
+        "checkpoint": null,
+        "at": 1795390558184
+      }
+    ]
+  },
+  "outcome": "COURSE_FINISH"
+}
