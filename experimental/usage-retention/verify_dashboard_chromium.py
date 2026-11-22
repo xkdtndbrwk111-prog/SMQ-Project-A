@@ -35,6 +35,7 @@ async def main():
    'name':'aggregates.json','mimeType':'application/json',
    'buffer':json.dumps(payload,ensure_ascii=False).encode('utf-8')
   })
+  await page.wait_for_function("document.getElementById('starts').textContent==='3'",timeout=7000)
   assert await page.locator('#starts').inner_text()=='3'
   assert await page.locator('#units tr').count()==1
   assert '<img src=x' in await page.locator('#units tr').first.inner_text()
@@ -43,6 +44,7 @@ async def main():
   await page.locator('#file').set_input_files({
    'name':'wrong.json','mimeType':'application/json','buffer':b'{"schema":"WRONG"}'
   })
+  await page.wait_for_function("document.getElementById('status').textContent.includes('불러오기 실패')",timeout=7000)
   assert '불러오기 실패' in await page.locator('#status').inner_text()
   assert not requests,requests
   assert not errors,errors
