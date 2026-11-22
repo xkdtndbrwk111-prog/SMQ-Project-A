@@ -93,7 +93,21 @@ async def run():
    }''',i)
    await page.wait_for_function('''()=>document.querySelector('#hojaArcadeApprovedParentOverlay')?.style.display==='block' &&
     !!document.querySelector('#hojaArcadeApprovedParentFrame')?.contentDocument?.querySelector('#hqChoices button.hqChoice')''',timeout=30000)
-   await page.frame_locator('#hojaArcadeApprovedParentFrame').locator('button.hqChoice').first.click(timeout=15000)
+   # Choose the original approved answer on first question and a wrong answer on second.
+   family=await page.evaluate("""()=>{
+    const w=document.getElementById('hqArcadeFrame').contentWindow;
+    return w.__QA_RUN__().step09History.at(-1).key.split('\\u0000').at(-1);
+   }""")
+   row=next(r for e in sources for r in e['data']['questions'] if r['familyId']==family)
+   canonical=row['rendererQuestion']
+   answer=canonical['answer']
+   correct_id=str(answer['value']).lower() if row['type']=='OX' else answer['choiceId']
+   choices=await page.evaluate("""()=>{
+    return [...document.querySelector('#hojaArcadeApprovedParentFrame').contentDocument.querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice);
+   }""")
+   assert correct_id in choices,(family,choices,correct_id)
+   choose_id=correct_id if i==0 else next(v for v in choices if v!=correct_id)
+   await page.frame_locator('#hojaArcadeApprovedParentFrame').locator('button.hqChoice[data-choice="'+choose_id+'"]').click(timeout=15000)
    await page.wait_for_function('''(v)=>document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.quizAnswered===v''',arg=i+1,timeout=10000)
    state=await page.evaluate('''()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
@@ -102,10 +116,14 @@ async def run():
    }''')
    assert state['answered']==before['answered']+1,state
    assert state['found']==before['found']+1,state
-   assert state['history'] and state['history']['correct'] is not None,state
+   assert state['history'] and state['history']['correct'] is (i==0),state
    assert state['score']==before['score']+(10 if state['history']['correct'] else 0),(before,state)
    await page.wait_for_function('''()=>document.querySelector('#hojaArcadeApprovedParentOverlay')?.style.display==='none' ''',timeout=10000)
-   print('ARCADE_ORIGINAL_SHOWQUIZ_FINISH_PASS',i+1,state,flush=True)
+   await page.wait_for_function("""()=>{
+    const w=document.getElementById('hqArcadeFrame').contentWindow;
+    return w.__QA_ACTIVE_SCENE__()?.scene.isPaused()===false;
+   }""",timeout=10000)
+   print('ARCADE_ORIGINAL_SHOWQUIZ_FINISH_PASS',i+1,'expectedCorrect',i==0,state,flush=True)
   await browser.close()
 
 if __name__=='__main__':asyncio.run(run())

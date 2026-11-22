@@ -394,3 +394,10 @@
 - [ ] 두 CI 재실행 실제 PASS/FAIL 확인 필요. 실제 Phaser 물리 충돌 25문항 자연 완주는 여전히 별개 시험.
 
 **다음 작업:** Phaser real smoke 재실행 결과 확인 → 초기화/충돌/원본 score path 추가 문제를 분류·수정.
+
+### 27-2. 실제 Phaser 4.2.1 + 원래 출제/채점 2문항 부분 통합시험 PASS
+- [x] QA 데이터 OX 배열 보정 후 실 Phaser GitHub Actions **`45026368451` 전체 PASS**. CDN 의존 없이 `phaser@4.2.1` npm 원본을 Chromium의 부모·압축 자식 프레임에 각각 제공(2요청).
+- [x] `HOJA_V058_ARCADE_START`로 승인 사회6 문항을 실제 원본 로더에 전달해 Phaser Scene 정상 생성. `ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1`.
+- [x] QA가 만든 풍선 2개를 **실제 `HojaScene.showQuiz(e)`**에 전달, 원본 풍선 `consumeQuizBalloon`과 `finish(index)`, `step09History`를 실행. 2문항 모두 오답(점수0, 풀이수2, 풍선수2) PASS. 이전 독립 메시지 시험보다 실제 게임 엔진에 가까움.
+- [x] 다음 보강 시험: 첫 문항 **정답을 명시적으로 선택해 +10점** 확인, 둘째 문항 오답으로 0점 확인, 퀴즈 종료 후 `Phaser.Scene` 재개 검사 추가. 자동 입력이 우연히 오답만 누르는 한계를 제거.
+- [ ] 위 보강 시험의 새 Actions 원격 결과 미확인. **실제 플레이어와 자연 충돌로 풍선을 얻은 시험 아님**(QA 풍선 2개 직접 생성). 25문항 전수·완주/결산·랭킹/음향/실기기 별도.
