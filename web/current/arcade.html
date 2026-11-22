@@ -1342,6 +1342,8 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/moving-platforms.js"></script>
 <script src="js/rafts.js"></script>
 <script src="js/crumbles.js"></script>
+<script src="js/gimmicks/model.js"></script>
+<script src="js/gimmicks/runtime.js"></script>
 <script src="js/enemies/system.js"></script>
 <script src="js/enemies/jumpy.js"></script>
 <script src="js/enemies/owl.js"></script>
@@ -1382,6 +1384,7 @@ const requiredModules={
   HOJA_CREATE_SPRING_SYSTEM:window.HOJA_CREATE_SPRING_SYSTEM,
   HOJA_CREATE_MOVING_PLATFORMS:window.HOJA_CREATE_MOVING_PLATFORMS,
   HOJA_CREATE_RAFTS:window.HOJA_CREATE_RAFTS, HOJA_CREATE_CRUMBLES:window.HOJA_CREATE_CRUMBLES,
+  HOJA_GIMMICK_MODEL:window.HOJA_GIMMICK_MODEL?.normalize, HOJA_CREATE_GIMMICKS:window.HOJA_CREATE_GIMMICKS,
   HOJA_CREATE_INPUT:window.HOJA_CREATE_INPUT, HOJA_CREATE_HUD:window.HOJA_CREATE_HUD,
   HOJA_CREATE_RECORD:window.HOJA_CREATE_RECORD, HOJA_CREATE_SETTLEMENT:window.HOJA_CREATE_SETTLEMENT,
   HOJA_QUIZ_NORMALIZER:window.HOJA_QUIZ_NORMALIZER?.hojaStep09Normalize_
@@ -2095,6 +2098,7 @@ function hojaMakerValidateProject(p){
     if(!Number.isInteger(m.width)||m.width<32||m.width>512||!Number.isInteger(m.height)||m.height<24||m.height>256)throw Error('맵 크기 범위 오류');
     if(!Array.isArray(m.terrain)||!Array.isArray(m.objects)||m.terrain.length>4000||m.objects.length>1200)throw Error('지형/오브젝트 수 초과');
     objectCount+=m.objects.length;
+    for(const o of m.objects)if(o?.type==='gimmick')hojaMakerGimmick(o);
     for(const t of [...m.terrain,...m.objects]){
       if(!t||!Number.isFinite(t.x)||!Number.isFinite(t.y)||!Number.isFinite(t.w)||!Number.isFinite(t.h)||t.w<=0||t.h<=0)throw Error('잘못된 지형/오브젝트 위치');
       if(t.x<0||t.y<0||t.x+t.w>m.width||t.y+t.h>m.height)throw Error(`오브젝트가 맵 밖에 있습니다: ${t.id||'unknown'}`);
@@ -2108,6 +2112,11 @@ function hojaMakerValidateProject(p){
     if(!dst||!dst.objects.some(x=>x.type==='pipe'&&x.id===o.targetPortalId))throw Error(`토관 ${o.id} 연결 대상이 없습니다.`);
   }
   return true;
+}
+// Maker stores object coordinates in tiles; all engines share pixel settings.
+function hojaMakerGimmick(o){
+  if(!o.gimmick||typeof o.gimmick!=='object'||Array.isArray(o.gimmick))throw Error('기믹 설정이 없습니다');
+  return window.HOJA_GIMMICK_MODEL.normalize({...o.gimmick,x:o.x*TILE,y:o.y*TILE,w:o.w*TILE,h:o.h*TILE});
 }
 function hojaMakerCustomTerrain(t){
  const defaultCollision=t.kind==='platform'?'oneway':'solid';
@@ -2131,12 +2140,14 @@ function hojaMakerToStage(m,i){
     water:[],decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
     makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(m.spawn?.y??(m.height-5)),makerObjects:objects,makerCave:m.theme==='cave',
+    gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
     makerEvents:objects.filter(o=>o.type==='trigger')
   };
 }
 async function hojaMakerPreload(p){
   HOJA_MAKER_IMAGES.clear();
   const paths=new Set(['Free/Traps/Saw/On (38x38).png','Free/Traps/Fire/On (16x32).png','Free/Traps/Platforms/Brown On (32x8).png','Free/Traps/Platforms/Grey On (32x8).png','Free/Terrain/Terrain (16x16).png']);
+  if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick')))for(const path of ['Free/Traps/Spiked Ball/Chain.png','Free/Traps/Spiked Ball/Spiked Ball.png','Free/Traps/Fan/Off.png','Free/Traps/Fan/On (24x8).png','Free/Traps/Fire/Off.png'])paths.add(path);
   for(const m of p.maps)for(const o of m.objects||[])if(o.type==='asset'&&o.assetPath)paths.add(o.assetPath);
   for(const path of paths){
     const data=HOJA_V061_PA1_ASSETS[path];if(!data)continue;
@@ -3004,6 +3015,8 @@ class HojaScene extends Phaser.Scene{
     this.createStreetLamps();
     this.createEnemies();
     if(HOJA_MAKER_MODE)this.createMakerExtraObjects();
+    this.hojaGimmicks=STAGE.gimmicks?.length?window.HOJA_CREATE_GIMMICKS(HOJA_MAKER_IMAGES).create(this,STAGE.gimmicks):null;
+    if(this.hojaGimmicks){const gimmicks=this.hojaGimmicks;this.events.once('shutdown',()=>gimmicks.destroy());}
     this.createInput();
     this.keys.chunkToggle=this.keys.chunkBench=this.keys.vision=this.keys.caveLight=HOJA_P1C_INPUT.DEAD; // 개발용 키 없음
     this.createWeather();
@@ -5893,6 +5906,7 @@ class HojaScene extends Phaser.Scene{
     const zPressed=Phaser.Input.Keyboard.JustDown(this.keys.z);
     const jumpPressed=spacePressed||zPressed; // Phase 1C: W 점프 없음
     applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
+    if(this.hojaGimmicks){this.hojaGimmicks.update(delta);if(this.dying)return;}
 
     this.updateSecrets(time);
     this.checkHeadImpact(time);

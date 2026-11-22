@@ -1,7 +1,7 @@
 const arcadeBeforeMain = [
  'js/world/cave-layout.js','js/world/cave-variation.js','js/world/themes.js',
  'js/world/surface-templates.js','js/world/surface-generator.js','js/world/ground-autotile.js','js/world/stage-decor.js','js/world/cave-checkpoints.js','js/arcade-host.js',
- 'js/audio.js','js/physics.js','js/springs.js','js/moving-platforms.js','js/rafts.js','js/crumbles.js',
+ 'js/audio.js','js/physics.js','js/springs.js','js/moving-platforms.js','js/rafts.js','js/crumbles.js','js/gimmicks/model.js','js/gimmicks/runtime.js',
  'js/enemies/system.js','js/enemies/jumpy.js','js/enemies/owl.js','js/enemies/hermie.js',
  'js/enemies/roach.js','js/enemies/blankey.js','js/enemies/ballooney.js','js/enemies/martian.js',
  'js/enemies/robot.js','js/enemies/circuit.js','js/keyboard.js','js/quiz-normalizer.js',
