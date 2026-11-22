@@ -656,3 +656,19 @@
 - [x] `HOJA_PROJECT_B_USAGE_SHADOW_V1.test.mjs`에서 응답 키·2~7팀·원본과 신형의 다중단원 조합 TOP20 구분·검증 없는 기간 HOLD·권한검사 호출 선행·원본 접근 금지 검증을 CI에 추가.
 - [ ] 새 Project B shadow가 실제 Apps Script 테스트 프로젝트에서 실행되었거나 운영 Manager HTML에 연결된 것은 **아님**. 현 실연동은 Google Sheets API 및 GitHub mock/브라우저 CI이며 운영 조회 전환·원본 삭제·트리거 설치는 HOLD.
 - [ ] 원본 이력 전체 기간의 출처/집계 건수·새 V1의 SHA-256 COMPLETE·오늘 실시간 증분(또는 안전한 읽기 모델)·상용 TOP20 성능을 채우기 전 기존 `getUsageStatisticsU2` 교체 금지.
+
+
+### 40-1/40-2. 2026-11-23 새 통계 엔진 V4 처음부터 재작성 — 운영 미변경
+- [x] 사용자가 기존 파일을 참고하되 전면 재작성 허용. `UsageU2.gs`는 OWNER/유효 GOOGLE CREATOR 인증 및 Manager 통계 응답 계약의 **참고 기준**으로만 사용. 운영 `getUsageStatisticsU2()`와 `EVENT_LOG`, TOP25 랭킹, Project A/B 배포본 불변.
+- [x] 실제 격리 원본 복사본의 `EVENT_LOG` 날짜/범위 전수 읽기 점검: **17,672건 전부 PUBLIC**, 2026-09-23~2026-11-22, **57개 기록 존재 날짜**, 날짜 역행 0건. 개별 값/시트 ID는 공용 GitHub에 기록하지 않음. 미래 append가 계속 정렬된다는 운영 보장은 별도로 필요.
+- [x] `experimental/usage-retention/HOJA_USAGE_V4_CORE.js` 신규 제작. 1행=1플레이, PROJECT B 기존 다중 단원 결합 이름 TOP20을 단원 ID 선택 횟수와 분리, TEAM 2~7 + 미확인, PUBLIC-only, 개인정보 집계 금지, 옛날 11열 호환. 중복 ID 충돌, 날짜 누락/미인증, 0회 날짜 인증, SHA-256 원본·요약 검증 안 되면 합계 차단.
+- [x] V4 기존 UI 응답 계약(today, days7, days30, all, daily, mode, teamCount, repositoryKind, grade, subject, publisher, topCartridges) 기반 순수 계산 함수 구현. 전체 기간 첫 날짜부터 **매일**(0회 포함) COMPLETE + 양쪽 SHA-256 검증 필요. 임의의 0/전체 통계 만들어 보여 주기 금지.
+- [x] `experimental/usage-retention/HOJA_USAGE_V4_TRIAL_GAS.gs` 신규 제작. 별도 스크립트 속성으로 **운영 원본 ID와 복사본 ID가 상이함을 필수 확인**, 기존 _HOJA_USAGE_TRIAL_ONLY 표식·수동 WRITE_ACK 확인. 날짜 전체 C:E 정렬 검사 → 하루 A:O만 읽기 → 버킷/원본 각각 SHA-256 → 저장행 재읽기 확인 → COMPLETE 게시. PREPARING 중단 시 수동 확인, 동일 세대의 저장값 재검증 후만 idempotent 재호출.
+- [x] 자료가 없는 0회 날짜에도 `sourcePrefixEndRow`에 직전 확정 원본 끝 행 번호 보존. **오늘 원본 미집계 꼬리만 읽는 증분 통계**에 필요한 경계 메타데이터임. 새 GAS는 오늘의 COMPLETE를 만들지 않도록 거부.
+- [x] `HOJA_USAGE_V4_CORE.test.mjs`·`HOJA_USAGE_V4_TRIAL_GAS.test.mjs` 모의 시험 작성 및 CI 편입. SOURCE_PUBLIC만 포함, U2 TOP20 조합과 독립 단원 수, 7팀, 옛날 11열, 0일, 중복ID, 미게시/손상 세대, 실행 중단, 운영 ID 거부, 원본 미변경.
+- [x] GitHub 승인 렌더러 + 통계 회귀 `45083309977` **PASS** (핵심 V4 SHA-256·순수 엔진·GAS mock 포함). 다음 commit CI 최종 결과 별도 확인.
+- [x] 상세 새 설계 `docs/HOJA_USAGE_V4_REBUILD_PLAN_20261123.md` 기록.
+- [ ] V4 GAS를 **실제 별도의 Apps Script 시험 프로젝트에서 직접 실행**한 것은 아님. 현재 개발 브랜치 mock CI가 통과한 상태이며 구글 시트 실집계는 이전 39단계의 connector-only 검증.
+- [ ] 원본 복사본의 **전체 57개 사용 날짜 + 0회 날짜** V4 일별 COMPLETE backfill/버킷·원본 SHA 검증 및 최초 이력 시작 인증서는 NOT RUN.
+- [ ] Project A 이벤트 append를 기준으로 오늘 미집계 원본 꼬리만 읽는 실시간 집계·비정렬/늦은 이벤트 검출 및 Project B의 기존 GOOGLE CREATOR 인증을 유지하는 lazy RPC 운영 후보는 후속. 서로 다른 GAS 프로젝트 사이 `ScriptLock`이 공유된다고 가정하지 않음.
+- [ ] Project A/B 운영 조회를 V4로 전환하지 않았고, 원본 보관 30일/일별 12개월/월별 이후 정책의 실제 삭제·자동화·백업/복구는 승인 전까지 HOLD.
