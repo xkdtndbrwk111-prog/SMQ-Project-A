@@ -110,6 +110,9 @@ export function patchApprovedArcadeInnerHTML(html){
  "      newValue=(value.slice(0,start)+e.key.toUpperCase()+value.slice(end)).slice(0,3);\n      cursor=Math.min(3,start+1);",
  "      newValue=(value.slice(0,start)+e.key.toUpperCase()+value.slice(end)).slice(0,6);\n      cursor=Math.min(6,start+1);");
  // Trial-only Phaser 2.0 input contract and death continue; original archive stays immutable.
+ s=substituteOnce(s,"↑ 한 번 더: 끝내기","W 한 번 더: 끝내기");
+ s=substituteOnce(s,"Enter / Space ▶ 스테이지 ","Enter ▶ 스테이지 ");
+
  s=substituteOnce(s,"    const acting=this.keys.left.isDown||this.keys.right.isDown||\n      this.keys.a.isDown||this.keys.d.isDown||\n      this.keys.up.isDown||this.keys.w.isDown||\n      this.keys.down.isDown||this.keys.s.isDown||\n      this.keys.jump.isDown||this.keys.z.isDown;","    const acting=this.keys.a.isDown||this.keys.d.isDown||\n      this.keys.w.isDown||this.keys.s.isDown||this.keys.jump.isDown;");
 
  s=substituteOnce(s,"      jump:this.input.keyboard.addKey(K.SPACE),z:this.input.keyboard.addKey(K.Z),\n      run:this.input.keyboard.addKey(K.SHIFT),x:this.input.keyboard.addKey(K.X),","      jump:this.input.keyboard.addKey(K.PERIOD),z:this.input.keyboard.addKey(K.Z),\n      run:this.input.keyboard.addKey(K.COMMA),x:this.input.keyboard.addKey(K.X),");
