@@ -64,3 +64,22 @@
 5. 실제 운영 데이터 삭제는 **프로젝트 A/B 조회 화면 모두 요약을 읽도록 바뀌고, 집계 세대·원본 백업·체크섬·재실행/복원 시험이 완료된 뒤** 별도의 승인으로만 진행한다.
 
 현재 시험 모듈은 삭제할 수 있는 날짜/월을 **미리보기로 계산할 뿐**, 삭제 함수·보관 스케줄·시트 변경 동작은 포함하지 않는다. 원본 EVENT_LOG의 실제 압축은 아직 실행하지 않았다.
+
+## 단계 2: 복사 시험 시트 전용 일별 요약 기록 (운영 적용 금지)
+
+구현: experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_WRITER.gs
+
+읽기 전용 미리보기와 달리 새 HOJA_TRIAL_* 시트에 일별 요약을 기록하지만 **복사된 테스트 스프레드시트에서만** 실행하도록 다중 조건으로 제한한다.
+
+실행 전 조건:
+1. 실제 운영이 아닌 **별도 복사된** Google Spreadsheet와 별도 Apps Script 시험 프로젝트 준비.
+2. 복사본에 이름이 정확히 `_HOJA_USAGE_TRIAL_ONLY`인 탭을 **직접 생성**, 셀 A1에는 `HOJA_RETENTION_SANDBOX_V1`이라고 입력. 스크립트는 이 확인 탭을 자체 생성하지 않는다.
+3. 별도 프로젝트 스크립트 속성 `HOJA_USAGE_TRIAL_SPREADSHEET_ID`에 **복사 시트 ID**, `HOJA_USAGE_TRIAL_WRITE_ACK`에 `COPIED_SHEET_ONLY` 입력. 운영 사용량/랭킹/문제은행 ID와 일치하면 실행 거부.
+4. 시험 프로젝트에 `HOJA_USAGE_RETENTION_CORE.js`, `HOJA_USAGE_RETENTION_TRIAL_GAS.gs`, `HOJA_USAGE_RETENTION_TRIAL_WRITER.gs`를 추가하고 `hojaUsageRetentionWriteTrialU1()` 수동 호출.
+5. 생성 결과: `HOJA_TRIAL_DAILY_TOTALS`, `HOJA_TRIAL_DAILY_DIMENSIONS`, `HOJA_TRIAL_RETENTION_MANIFEST`. 시험 원본 `EVENT_LOG`는 변경/삭제하지 않음.
+
+매니페스트는 `PREPARING` 다음에 원본 합계·일별 집계·단원 집계에 대한 저장값 확인을 마친 경우에만 `COMPLETE`로 게시. 동일 입력 SHA-256 재호출은 **실제 저장된 요약값과 다시 대조한 뒤** 변경하지 않고 재사용한다. 같은 세대가 PREPARING으로 남으면 자동 덮어쓰지 않고 수동 검토를 요구한다. 데이터가 손상된 COMPLETE도 무조건 신뢰하지 않고 오류로 차단한다.
+
+시험 검증: `HOJA_USAGE_RETENTION_TRIAL_WRITER.test.mjs`에서 수동 확인값 누락, 운영 ID 차단, 원본 변경 금지, 중단 후 재실행 차단, 중복 기록 방지, 완료 후 저장행 변조 검출을 모의 스프레드시트로 확인한다. 실제 복사 시트 연결 실험은 아직 수행하지 않았다.
+
+**미지원:** 운영 이전, 실제 자동 스케줄, 요약 조회 화면의 운영 전환, 원본·일별 행 삭제, 스냅샷 영구 복구. 이 기능을 현재 운영 프로젝트에 붙여 넣으면 안 된다.
