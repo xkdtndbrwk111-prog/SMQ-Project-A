@@ -63,7 +63,12 @@ async def run():
                 document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
             }''',arg=choices,timeout=30000)
             loc=page.frame_locator('#hojaArcadeApprovedParentFrame')
-            await loc.locator('button.hqChoice[data-choice="'+answer_id+'"]').click(timeout=15000)
+            if typ=='OX':
+                # Keyboard event must enter the nested approved iframe, not the arcade parent.
+                await loc.locator('button.hqChoice[data-choice="'+answer_id+'"]').focus()
+                await page.keyboard.press('x')
+            else:
+                await loc.locator('button.hqChoice[data-choice="'+answer_id+'"]').click(timeout=15000)
             await page.wait_for_function('''v=>window.__QA_ARCADE_FINISH.length===v''',arg=1 if typ=='MULTIPLE' else 2,timeout=8000)
             observed=await page.evaluate('window.__QA_ARCADE_FINISH.at(-1)')
             assert observed['index']==expected,observed
