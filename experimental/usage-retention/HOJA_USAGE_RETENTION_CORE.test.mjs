@@ -41,6 +41,25 @@ test('two selected cartridges count as ONE play, TWO cartridge selections',()=>{
  assert.equal(result.dimensions.reduce((v,x)=>v+x.starts,0),2);
 });
 
+test('multiple selected units never inherit game-wide scores or duration without question attribution',()=>{
+ const r=api.dailySnapshot([event(1,{
+   cartridgeIds:['101','102'],outcome:'COMPLETED',
+   correctTotal:9,answeredTotal:12,durationSeconds:360
+ })]);
+ assert.equal(r.totals[0].correctTotal,9);
+ assert.equal(r.totals[0].answeredTotal,12);
+ assert.equal(r.totals[0].durationSecondsTotal,360);
+ assert.equal(r.totals[0].completed,1);
+ assert.equal(r.dimensions.length,2);
+ for(const d of r.dimensions){
+  assert.equal(d.starts,1);
+  assert.equal(d.correctTotal,0);
+  assert.equal(d.answeredTotal,0);
+  assert.equal(d.durationSecondsTotal,0);
+  assert.equal(d.completed,0);
+ }
+});
+
 test('same eventId with divergent event content rejects entire archive',()=>{
  assert.throws(()=>api.dailySnapshot([event(1),event(1,{mode:'TEAM',teamCount:2})]),/EVENT_ID_CONFLICT/);
 });
