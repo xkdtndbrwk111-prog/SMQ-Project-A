@@ -118,12 +118,22 @@ async def run():
     assert after['deaths']==prior['deaths']+1 and after['invuln'],(key,prior,after)
     assert all(after[k]==prior[k] for k in ['score','found','history']),(key,prior,after)
     print('ARCADE_REAL_DEATH_KEY_PASS',key,flush=True)
+   preh=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+     w.__QA_H_SEEN__=0;w.addEventListener('keydown',e=>{if(e.code==='KeyH')w.__QA_H_SEEN__++},true);
+     return {active:s?.scene?.isActive?.(),same:w.HOJA_PHASER_APP?.scene?.()===s,
+       focused:document.activeElement?.id,inner:w.document.activeElement?.tagName,
+       dying:s.dying,clear:s.clear,timeUp:s.timeUp,transitioning:s.transitioning,
+       quizActive:s.quizActive,manualPaused:s.manualPaused};
+   }""")
+   print('ARCADE_CONTROL_HELP_PRE',preh,flush=True)
    await body.press('h',timeout=10000)
    opened=await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return [w.document.getElementById('hojaTrialControlsHelp')?.style.display,
        w.__QA_ACTIVE_SCENE__()?.manualPaused];
    }""")
+   print('ARCADE_CONTROL_HELP_AFTER',opened,'seen',await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_H_SEEN__"),flush=True)
    assert opened==['grid',True],opened
    await body.press('h',timeout=10000)
    closed=await page.evaluate("""()=>{
