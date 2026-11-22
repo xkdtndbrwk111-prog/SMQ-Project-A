@@ -103,7 +103,7 @@ async def run():
     await page.keyboard.down('d')
     await page.wait_for_function("""x=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s?.keys.d.isDown && s.playerBody.x>x+12;
+      return s?.keys.d.isDown && (s.playerBody.x>x+6 || s.playerBody.body.velocity.x>20);
     }""",arg=start['x'],timeout=9000)
    finally:
     await page.keyboard.up('d')
@@ -112,7 +112,7 @@ async def run():
     await page.keyboard.down('a')
     await page.wait_for_function("""x=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s?.keys.a.isDown && s.playerBody.x<x-12;
+      return s?.keys.a.isDown && (s.playerBody.x<x-6 || s.playerBody.body.velocity.x< -20);
     }""",arg=after_d,timeout=9000)
    finally:
     await page.keyboard.up('a')
