@@ -14,7 +14,7 @@ APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
 EXPECTED_14='5533a58e849f070023e35a2a3d245775341b8469'
 def gitblob(data):
-    return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\\0'+data).hexdigest()
+    return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():
     originals=[(ORIGINAL/f'part-{i:02}.txt').read_bytes() for i in range(1,26)]
     assert hashlib.sha256(b''.join(originals)).hexdigest()==EXPECTED,'Original 7MB snapshot changed'
