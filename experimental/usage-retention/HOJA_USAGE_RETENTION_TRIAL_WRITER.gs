@@ -51,23 +51,6 @@ function hojaUsageRetentionWriteTrialU1(){
     const manifest=requireTab('HOJA_TRIAL_RETENTION_MANIFEST',manifestHeader);
     const totals=requireTab('HOJA_TRIAL_DAILY_TOTALS',totalHeader);
     const dims=requireTab('HOJA_TRIAL_DAILY_DIMENSIONS',dimHeader);
-    if(manifest.getLastRow()>1){
-      const existing=manifest.getRange(2,1,manifest.getLastRow()-1,manifestHeader.length).getValues();
-      for(const row of existing){
-        if(String(row[0])!==gen)continue;
-        if(row[4]==='COMPLETE')
-          return {ok:true,replayed:true,source:'TRIAL_COPY_ONLY',
-            generation:gen,rawRows:preview.rawRows,uniqueStarts:preview.uniqueStarts};
-        throw Error('HOJA_RETENTION_TRIAL_INCOMPLETE_GENERATION_REVIEW_REQUIRED');
-      }
-    }
-    const createdAt=new Date();
-    const manifestRow=manifest.getLastRow()+1;
-    manifest.getRange(manifestRow,1,1,manifestHeader.length).setValues([[
-      gen,gen,preview.rawRows,preview.uniqueStarts,'PREPARING',createdAt,''
-    ]]);
-    SpreadsheetApp.flush();
-
     const num=(r,k)=>Number(r[k]||0);
     const counts=r=>JSON.stringify(r.teamCounts||{});
     const totalRows=preview.totals.map(r=>[
@@ -81,6 +64,33 @@ function hojaUsageRetentionWriteTrialU1(){
       num(r,'unknownEnded'),num(r,'correctTotal'),num(r,'answeredTotal'),
       num(r,'durationSecondsTotal'),num(r,'durationSamples'),counts(r)
     ]);
+    const checkReplayRows=(sheet,expected,width)=>{
+      const n=sheet.getLastRow()-1;
+      const actual=n>0?sheet.getRange(2,1,n,width).getValues()
+        .filter(row=>String(row[0])===gen):[];
+      if(JSON.stringify(actual)!==JSON.stringify(expected))
+        throw Error('HOJA_RETENTION_TRIAL_REPLAY_READBACK_MISMATCH_'+sheet.getName());
+    };
+    if(manifest.getLastRow()>1){
+      const existing=manifest.getRange(2,1,manifest.getLastRow()-1,manifestHeader.length).getValues();
+      for(const row of existing){
+        if(String(row[0])!==gen)continue;
+        if(row[4]!=='COMPLETE')
+          throw Error('HOJA_RETENTION_TRIAL_INCOMPLETE_GENERATION_REVIEW_REQUIRED');
+        if(Number(row[2])!==preview.rawRows||Number(row[3])!==preview.uniqueStarts)
+          throw Error('HOJA_RETENTION_TRIAL_REPLAY_MANIFEST_MISMATCH');
+        checkReplayRows(totals,totalRows,totalHeader.length);
+        checkReplayRows(dims,dimRows,dimHeader.length);
+        return {ok:true,replayed:true,source:'TRIAL_COPY_ONLY',
+          generation:gen,rawRows:preview.rawRows,uniqueStarts:preview.uniqueStarts};
+      }
+    }
+    const createdAt=new Date();
+    const manifestRow=manifest.getLastRow()+1;
+    manifest.getRange(manifestRow,1,1,manifestHeader.length).setValues([[
+      gen,gen,preview.rawRows,preview.uniqueStarts,'PREPARING',createdAt,''
+    ]]);
+    SpreadsheetApp.flush();
     const writeVerified=(sheet,rows,width)=>{
       if(!rows.length)return;
       const start=sheet.getLastRow()+1;
