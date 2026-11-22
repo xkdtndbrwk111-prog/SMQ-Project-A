@@ -16,6 +16,7 @@ assert(patched.includes('this.awardScore(10'));
 assert(patched.includes('hojaStep09_3Answer_(q,false,0)'));
 assert(patched.includes('this.consumeQuizBalloon(e)'));
 assert(patched.includes('this.scene.resume()'));
+assert(patched.includes('m.found===25&&m.answered===25&&m.usedFamilies===25'),'FINISH rank gate must require 25 completed');
 const child=patched.match(/<script id="hojaArcadeApprovedChildTrial">([\s\S]*?)<\/script>/);
 assert(child&&child[1],'Child bridge script missing');
 new Function(child[1]);

@@ -57,6 +57,9 @@ export function patchApprovedArcadeInnerHTML(html){
  "    return;\n"+
  "    // Original buttons preserved but not reached during the trial.\n"+
  '    q.choices.forEach((label,index)=>{');
+ s=substituteOnce(s,
+ "  const eligible=reason==='전체 스테이지 완료'&&verified&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;",
+ "  const eligible=reason==='전체 스테이지 완료'&&verified&&m.found===25&&m.answered===25&&m.usedFamilies===25&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;");
  return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
 }
 

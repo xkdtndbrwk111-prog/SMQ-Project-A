@@ -16,6 +16,7 @@ async def run():
  p.add_argument('--phaser',type=Path,required=True)
  p.add_argument('--rounds',type=int,choices=[2,25],default=2)
  p.add_argument('--collision-first',action='store_true')
+ p.add_argument('--finish-check',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -49,7 +50,10 @@ async def run():
    assert inner.count(anchor)==1,'Original approved arcade feedback-delay anchor changed'
    inner=inner.replace(anchor,anchor.replace('1100','150'),1)
   inner=inner.replace('window.HOJA_V049_QA=',
-    'window.__QA_ACTIVE_SCENE__=()=>ACTIVE_SCENE;window.__QA_RUN__=()=>RUN;window.HOJA_V049_QA=',1)
+    'window.__QA_ACTIVE_SCENE__=()=>ACTIVE_SCENE;window.__QA_RUN__=()=>RUN;'+
+    'window.__QA_STAGE_INDEX__=()=>STAGE_INDEX;'+
+    'window.__QA_START_STAGE__=(index,fresh)=>{startStage(index,fresh);HOJA_RANK_TEST_MODE_=true;};'+
+    'window.HOJA_V049_QA=',1)
   await page.evaluate('''(inner)=>{
     document.getElementById('hqArcadeFrame').srcdoc=inner;
   }''',inner)
@@ -181,6 +185,71 @@ async def run():
    }""")
    assert not blocked['consumed'] and blocked['alive'] and blocked['found']==25 and blocked['history']==25,blocked
    print('ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS',totals,'blocked26th',blocked,flush=True)
+   if args.finish_check:
+    # Enter the LAST stage through the original game stage transition API.
+    # Mark it test-only, so this run is NEVER eligible for server ranking writes.
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      w.__QA_START_STAGE__(3,false);
+    }""")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      return w.__QA_STAGE_INDEX__()===3 && s?.doors?.some(d=>d.kind==='finish') && !s?.transitioning;
+    }""",timeout=45000)
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      const door=s.doors.find(d=>d.kind==='finish');
+      s.enterDoor(door);
+    }""")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('step09RunResult')?.style.display==='block' &&
+        w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
+    }""",timeout=25000)
+    finish=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      const result=w.HOJA_STEP09_3_TEST.result(),stats=w.HOJA_STEP09_3_TEST.metrics();
+      const rank=w.HOJA_STEP10_RANK_UI.status();
+      return {stage:w.__QA_STAGE_INDEX__(),result,stats,rank,
+        title:w.document.getElementById('step09RunResultTitle')?.textContent,
+        rankLabel:w.document.getElementById('hojaRankResultType')?.textContent,
+        message:w.document.getElementById('hojaRankMessage')?.textContent};
+    }""")
+    assert finish['stage']==3 and finish['result']['verified']=='true',finish
+    assert finish['stats']['found']==25 and finish['stats']['answered']==25 and finish['stats']['quizPoints']==130,finish
+    assert finish['rank']['open'] and finish['rank']['serverSaved'] is False,finish
+    assert finish['rankLabel']=='FINISH' and '전체 스테이지 완료' in finish['title'],finish
+    assert '시험용 이동' in finish['message'],finish
+    print('ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS',finish,flush=True)
+    # Independent TIME UP path: no finish rank even with a valid test scene.
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      w.__QA_START_STAGE__(0,true);
+    }""")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.__QA_STAGE_INDEX__()===0 && !!w.__QA_ACTIVE_SCENE__()?.playerBody;
+    }""",timeout=45000)
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      w.__QA_ACTIVE_SCENE__().startTimeUp();
+    }""")
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('step09RunResult')?.style.display==='block' &&
+        w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
+    }""",timeout=20000)
+    timeout=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return {rank:w.HOJA_STEP10_RANK_UI.status(),
+        title:w.document.getElementById('step09RunResultTitle')?.textContent,
+        type:w.document.getElementById('hojaRankResultType')?.textContent,
+        message:w.document.getElementById('hojaRankMessage')?.textContent};
+    }""")
+    assert timeout['type']=='TIME UP' and '시간 종료' in timeout['title'],timeout
+    assert timeout['rank']['open'] and timeout['rank']['serverSaved'] is False,timeout
+    assert '랭킹 등록은 FINISH로만' in timeout['message'],timeout
+    print('ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS',timeout,flush=True)
   await browser.close()
 
 if __name__=='__main__':asyncio.run(run())
