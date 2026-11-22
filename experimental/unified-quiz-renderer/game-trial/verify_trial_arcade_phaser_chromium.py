@@ -14,6 +14,7 @@ async def run():
  p=argparse.ArgumentParser()
  p.add_argument('--html',type=Path,required=True)
  p.add_argument('--phaser',type=Path,required=True)
+ p.add_argument('--rounds',type=int,choices=[2,25],default=2)
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -41,6 +42,11 @@ async def run():
   }''',sources)
   inner=await page.evaluate('window.HOJA_GAMEPLAY.getCanonicalArcade()')
   assert inner.count('window.HOJA_V049_QA=')==1
+  if args.rounds==25:
+   # Speed only the QA in-memory renderer feedback delay; never edit the game source.
+   anchor="        if(correct)this.celebrateCorrect();\n      },1100);"
+   assert inner.count(anchor)==1,'Original approved arcade feedback-delay anchor changed'
+   inner=inner.replace(anchor,anchor.replace('1100','150'),1)
   inner=inner.replace('window.HOJA_V049_QA=',
     'window.__QA_ACTIVE_SCENE__=()=>ACTIVE_SCENE;window.__QA_RUN__=()=>RUN;window.HOJA_V049_QA=',1)
   await page.evaluate('''(inner)=>{
@@ -75,7 +81,7 @@ async def run():
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
   # Drive actual original showQuiz(e) method, not a synthetic callback.
-  for i in range(2):
+  for i in range(args.rounds):
    before=await page.evaluate('''()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
     return {score:s.score,answered:s.quizAnswered,correct:s.correctQuizCount,found:r.found}
@@ -106,7 +112,7 @@ async def run():
     return [...document.querySelector('#hojaArcadeApprovedParentFrame').contentDocument.querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice);
    }""")
    assert correct_id in choices,(family,choices,correct_id)
-   choose_id=correct_id if i==0 else next(v for v in choices if v!=correct_id)
+   choose_id=correct_id if i%2==0 else next(v for v in choices if v!=correct_id)
    await page.frame_locator('#hojaArcadeApprovedParentFrame').locator('button.hqChoice[data-choice="'+choose_id+'"]').click(timeout=15000)
    await page.wait_for_function('''(v)=>document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.quizAnswered===v''',arg=i+1,timeout=10000)
    state=await page.evaluate('''()=>{
@@ -116,14 +122,39 @@ async def run():
    }''')
    assert state['answered']==before['answered']+1,state
    assert state['found']==before['found']+1,state
-   assert state['history'] and state['history']['correct'] is (i==0),state
+   assert state['history'] and state['history']['correct'] is (i%2==0),state
    assert state['score']==before['score']+(10 if state['history']['correct'] else 0),(before,state)
    await page.wait_for_function('''()=>document.querySelector('#hojaArcadeApprovedParentOverlay')?.style.display==='none' ''',timeout=10000)
    await page.wait_for_function("""()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow;
     return w.__QA_ACTIVE_SCENE__()?.scene.isPaused()===false;
    }""",timeout=10000)
-   print('ARCADE_ORIGINAL_SHOWQUIZ_FINISH_PASS',i+1,'expectedCorrect',i==0,state,flush=True)
+   print('ARCADE_ORIGINAL_SHOWQUIZ_FINISH_PASS',i+1,'expectedCorrect',i%2==0,state,flush=True)
+  if args.rounds==25:
+   totals=await page.evaluate("""()=>{
+    const w=document.getElementById('hqArcadeFrame').contentWindow;
+    const r=w.__QA_RUN__(),s=w.__QA_ACTIVE_SCENE__();
+    return {found:r.found,answered:s.quizAnswered,correct:s.correctQuizCount,
+      score:s.score,unique:r.step09Families.size,history:r.step09History.length,
+      correctHistory:r.step09History.filter(h=>h.correct===true).length,
+      points:r.step09History.reduce((sum,h)=>sum+h.points,0)};
+   }""")
+   assert totals=={'found':25,'answered':25,'correct':13,'score':130,
+      'unique':25,'history':25,'correctHistory':13,'points':130},totals
+   blocked=await page.evaluate("""()=>{
+    const w=document.getElementById('hqArcadeFrame').contentWindow;
+    const s=w.__QA_ACTIVE_SCENE__();
+    const sprite=s.add.rectangle(s.playerBody.x,s.playerBody.y,12,18,0xffd055);
+    const balloon={alive:true,type:'BALLOONEY',memKey:'qa-26-blocked',
+      bodyObj:{x:s.playerBody.x,body:{center:{y:s.playerBody.y},enable:true},setActive(){}},
+      sprite};
+    s.showQuiz(balloon);
+    return {consumed:!!balloon.consumed,alive:balloon.alive,
+      found:w.__QA_RUN__().found,history:w.__QA_RUN__().step09History.length,
+      warning:w.document.getElementById('step09State')?.textContent||''};
+   }""")
+   assert not blocked['consumed'] and blocked['alive'] and blocked['found']==25 and blocked['history']==25,blocked
+   print('ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS',totals,'blocked26th',blocked,flush=True)
   await browser.close()
 
 if __name__=='__main__':asyncio.run(run())
