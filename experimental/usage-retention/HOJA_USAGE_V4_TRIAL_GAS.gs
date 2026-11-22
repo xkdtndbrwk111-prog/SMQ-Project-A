@@ -6,9 +6,14 @@
  */
 const HOJA_V4_MANIFEST_HEADER=['date','generation','status','sourceStartRow',
  'sourceEndRow','sourceRowCount','publicStarts','contentDigest','bucketCount',
- 'createdAt','verifiedAt','sourcePrefixEndRow'];
+ 'createdAt','verifiedAt','sourcePrefixEndRow','bucketDigest'];
 const HOJA_V4_BUCKET_HEADER=['date','generation','dimension','dimensionKey',
  'displayLabel','count'];
+function hojaV4Sha256_(payload){
+ return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
+  String(payload),Utilities.Charset.UTF_8)
+  .map(x=>(x<0?x+256:x).toString(16).padStart(2,'0')).join('');
+}
 function hojaV4KstDay_(value){
  return Utilities.formatDate(value,'Asia/Seoul','yyyy-MM-dd');
 }
@@ -77,12 +82,12 @@ function hojaV4PreviewDailyTrialU1(day){
  const rows=scanned.rawRows?
   sh.getRange(scanned.first,1,scanned.rawRows,15).getDisplayValues():[];
  const snapshot=HOJA_USAGE_V4_CORE.snapshot(date,rows,{coverageVerified:true});
- const hex=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
-  snapshot.canonicalSource,Utilities.Charset.UTF_8)
-  .map(x=>(x<0?x+256:x).toString(16).padStart(2,'0')).join('');
+ const hex=hojaV4Sha256_(snapshot.canonicalSource);
+ const bucketDigest=hojaV4Sha256_(JSON.stringify(snapshot.buckets));
  if(sh.getLastRow()!==scanned.sourceLastRow)
   throw Error('HOJA_V4_TRIAL_SOURCE_CHANGED_DURING_SCAN');
  return {ok:true,source:'ISOLATED_COPY_ONLY',date,sourceDigest:hex,
+  bucketDigest,
   sourceStartRow:scanned.first,sourceEndRow:scanned.end,
   sourcePrefixEndRow:scanned.sourcePrefixEndRow,
   sourceRowCount:scanned.rawRows,publicStarts:snapshot.starts,
@@ -129,7 +134,12 @@ function hojaV4WriteDailyTrialU1(day){
     .filter(row=>row[0]===date&&row[1]===gen);
    if(JSON.stringify(stored)!==JSON.stringify(expected))
     throw Error('HOJA_V4_TRIAL_REPLAY_BUCKET_MISMATCH');
-   if(Number(existing[0][6])!==pvw.publicStarts||
+   if(existing[0][12]!==pvw.bucketDigest||
+     Number(existing[0][3])!==pvw.sourceStartRow||
+     Number(existing[0][4])!==pvw.sourceEndRow||
+     Number(existing[0][5])!==pvw.sourceRowCount||
+     Number(existing[0][11])!==pvw.sourcePrefixEndRow||
+     Number(existing[0][6])!==pvw.publicStarts||
      Number(existing[0][8])!==expected.length)
     throw Error('HOJA_V4_TRIAL_REPLAY_MANIFEST_MISMATCH');
    return {ok:true,replayed:true,date,starts:pvw.publicStarts,
@@ -139,7 +149,7 @@ function hojaV4WriteDailyTrialU1(day){
   const row=m.getLastRow()+1;
   const mr=[date,gen,'PREPARING',pvw.sourceStartRow,pvw.sourceEndRow,
    pvw.sourceRowCount,pvw.publicStarts,gen,expected.length,now,'',
-   pvw.sourcePrefixEndRow];
+   pvw.sourcePrefixEndRow,pvw.bucketDigest];
   m.getRange(row,1,1,mr.length).setValues([mr]);SpreadsheetApp.flush();
   if(expected.length){
    const start=b.getLastRow()+1;
@@ -151,6 +161,10 @@ function hojaV4WriteDailyTrialU1(day){
    .filter(r=>r[0]===date&&r[1]===gen);
   if(JSON.stringify(check)!==JSON.stringify(expected))
    throw Error('HOJA_V4_TRIAL_READBACK_MISMATCH');
+  const readbackCanonical=check.map(r=>({dimension:r[2],key:r[3],
+   count:Number(r[5]),displayLabel:r[4]}));
+  if(hojaV4Sha256_(JSON.stringify(readbackCanonical))!==pvw.bucketDigest)
+   throw Error('HOJA_V4_TRIAL_BUCKET_DIGEST_MISMATCH');
   if(pvw.sourceRowCount<pvw.publicStarts||pvw.buckets.length!==expected.length)
    throw Error('HOJA_V4_TRIAL_COUNT_MISMATCH');
   m.getRange(row,11).setValue(new Date());SpreadsheetApp.flush();
