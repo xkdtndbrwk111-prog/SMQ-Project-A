@@ -57,10 +57,11 @@ window.HOJA_GAMEPLAY=(()=>{
      if(r.options.some(v=>!String(v||'').trim())||new Set(r.options.map(v=>String(v).trim())).size!==4)throw new Error('객관식 보기 오류');
      const wrong=r.options.map((text,i)=>({text:String(text).trim(),correct:false,i})).filter(x=>x.i!==ix);
      for(let i=wrong.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[wrong[i],wrong[j]]=[wrong[j],wrong[i]];}
-     choices=[{text:String(r.options[ix]).trim(),correct:true},...wrong.slice(0,2)];
+     choices=[{text:String(r.options[ix]).trim(),correct:true,i:ix},...wrong.slice(0,2)];
     }
     for(let i=choices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[choices[i],choices[j]]=[choices[j],choices[i]];}
-    family.variants.push({sourceType:r.type,type:r.type==='OX'?'OX':'MC',q:r.question,choices:choices.map(x=>x.text),answer:choices.findIndex(x=>x.correct)});
+    if(r.type==='OX')choices.sort((a,b)=>a.text==='O'?-1:1);
+    family.variants.push({sourceType:r.type,type:r.type==='OX'?'OX':'MC',q:r.question,choices:choices.map(x=>x.text),answer:choices.findIndex(x=>x.correct),sourceChoiceIndices:choices.map(x=>x.i??null),approvedSource:{row:r,bank:entry.data,questionId:String(r.rendererQuestion?.id||'')}});
    }
   }
   if(!familyMap.size)throw new Error('이 카트리지에는 객관식 또는 OX 문제가 없습니다.');
@@ -80,7 +81,13 @@ window.HOJA_GAMEPLAY=(()=>{
    picked.push(option);
   });
   for(let i=picked.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[picked[i],picked[j]]=[picked[j],picked[i]];}
-  questions=picked;
+  // Original A/C/D teacher-approved renderer is authoritative for every picked question.
+  // Type and option mapping are for the HOST scorer only; no CSS reimplementation.
+  questions=picked.map(q=>{
+    if(!q.approvedSource?.row?.rendererQuestion)throw Error('SOLO_APPROVED_RENDERER_SOURCE_REQUIRED');
+    const binding=window.HOJA_UNIFIED_TRIAL_CORE.bindTeamApprovedQuestion({...q,type:q.type==='MC'?'MC3':q.type});
+    return {...q,approvedBinding:binding,rendererQuestion:binding.rendererQuestion};
+  });
  }
 
  // Actual 32x32 source frame strips: 2 / 2 / 2 / 3 / 4 frames.
@@ -231,6 +238,7 @@ window.HOJA_GAMEPLAY=(()=>{
     if(own!==loadId)return;const f=frame();f.srcdoc=src;window.HOJA_V055_WATCH_ARCADE?.(f);window.HOJA_USAGE?.track?.('SOLO',1);f.addEventListener('load',()=>{window.HOJA_AUDIO_CONTROL?.syncArcade?.();window.HOJA_V055_BIND_ARCADE?.(f)},{once:true});
    }catch(err){if(own!==loadId)return;img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드 실행 준비 실패: '+err.message;}
   }else{
+   window.HOJA_TEAM_APPROVED_TRIAL.begin(questions);
    answered=0;correct=0;deck=questions.map((_,i)=>i);for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}activeQuiz=false;jumping=false;finished=false;lastCorrect=false;stage().dataset.quizFinished='false';img('hqResult').hidden=true;
    img('hqOverlay').hidden=true;updateQuizHud();
    quizEyeHappyUntil=0;quizEyeFailUntil=0;player().dataset.hojaEyeKey='';
@@ -239,6 +247,7 @@ window.HOJA_GAMEPLAY=(()=>{
   }
  }
  function stop(){
+  window.HOJA_TEAM_APPROVED_TRIAL?.reset?.();
   stopEnemyFrames();
   loadId++;if(anim){cancelAnimationFrame(anim);anim=0;}
   if(doneTimer){clearTimeout(doneTimer);doneTimer=0;}
@@ -306,11 +315,21 @@ window.HOJA_GAMEPLAY=(()=>{
   function choose(i){
    if(locked||i<0||i>=q.choices.length)return;locked=true;answered++;
    for(let k=0;k<choices.children.length;k++)if(k===q.answer)choices.children[k].classList.add('correct');
-   if(i===q.answer){correct++;feedback.textContent='정답!  +10';window.HOJA_V055_SFX?.('correct');lastCorrect=true;quizHappyEye=hojaPickHappyEye();quizEyeHappyUntil=performance.now()+1400;quizEyeFailUntil=0;}else{choices.children[i].classList.add('wrong');feedback.textContent='오답 · 0점';window.HOJA_V055_SFX?.('wrong');lastCorrect=false;quizEyeFailUntil=performance.now()+950;quizEyeHappyUntil=0;}
+   if(i===q.answer){correct++;feedback.textContent='정답!  +10';window.HOJA_V055_SFX?.('correct');lastCorrect=true;quizHappyEye=hojaPickHappyEye();quizEyeHappyUntil=performance.now()+1400;quizEyeFailUntil=0;}else{choices.children[i]?.classList.add('wrong');feedback.textContent='오답 · 0점';window.HOJA_V055_SFX?.('wrong');lastCorrect=false;quizEyeFailUntil=performance.now()+950;quizEyeHappyUntil=0;}
    updateQuizHud();
    if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
-   doneTimer=setTimeout(()=>{doneTimer=0;if(page==='quiz')closeQuestion()},950);
+   doneTimer=setTimeout(()=>{doneTimer=0;if(page==='quiz'){window.HOJA_TEAM_APPROVED_TRIAL.hide();closeQuestion()}},950);
   }
+  if(!q.approvedBinding){window.HOJA_TEAM_APPROVED_TRIAL.fail(Error('SOLO_APPROVED_BINDING_REQUIRED'));return;}
+  window.HOJA_TEAM_APPROVED_TRIAL.show(q,'solo',d=>{
+    if(page!=='quiz'||!activeQuiz||finished)return;
+    let ix;
+    try{ix=window.HOJA_UNIFIED_TRIAL_CORE.teamRendererAnswerIndex(q.approvedBinding,d.choiceId);}
+    catch(e){window.HOJA_TEAM_APPROVED_TRIAL.fail(e);return;}
+    choose(ix);
+  });
+  return;
+  // Legacy question DOM is kept as an inert rollback reference in the trial.
   q.choices.forEach((text,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='hqChoice';btn.dataset.answer=q.type==='OX'?text:'';
    const num=document.createElement('span');num.className='hqChoiceNumber';num.textContent=(i+1)+'.';const label=document.createElement('span');label.className='hqChoiceLabel';label.textContent=text;
    btn.append(num,label);btn.addEventListener('click',()=>choose(i));choices.append(btn);
