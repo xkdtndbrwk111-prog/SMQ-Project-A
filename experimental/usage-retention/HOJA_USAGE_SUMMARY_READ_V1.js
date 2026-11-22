@@ -191,6 +191,9 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
    });
    assert(!facets.length||facetSum(facets,'PUBLISHER')<=starts,
     'TRIAL_PUBLISHER_OVERCOUNT');
+   // A published generation lacking complete per-play GRADE/SUBJECT
+   // buckets cannot silently fall back to an older source during cutover.
+   if(authorized)assert(facetsReady,'PUBLISHED_FACETS_MISSING_OR_MISMATCH');
    return {available:true,authoritative:authorized,date:day,
     source:authorized?'HOJA_USAGE_RETENTION_V1':'TRIAL_COUNT_VERIFIED_ONLY',
     generation:gen,starts,solo,team,teamCounts,unknownTeamSize:0,
