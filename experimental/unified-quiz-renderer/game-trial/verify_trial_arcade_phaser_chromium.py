@@ -203,38 +203,53 @@ async def run():
      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
      return s.hojaIsSitting===false && s.playerBody.body.height>=40;
    }""",timeout=7000)
-   await focus_keys()
+   # Observe original player Body velocity assignments under real held keys.
+   # Fixed 350ms samples are unreliable on software-rendered CI Phaser frames.
+   await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     const s=w.__QA_ACTIVE_SCENE__(),b=s.playerBody.body;
+     const orig=b.setVelocityX.bind(b);
+     w.__QA_SPEED_PEAKS__={walk:0,run:0};
+     b.setVelocityX=function(v){
+       if(s.keys.d?.isDown&&v>0){
+         const phase=s.keys.run?.isDown?'run':'walk';
+         w.__QA_SPEED_PEAKS__[phase]=Math.max(w.__QA_SPEED_PEAKS__[phase],v);
+       }
+       return orig(v);
+     };
+   }""")
    try:
+    await focus_keys()
     await page.keyboard.down('d')
     await page.wait_for_function("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s.keys.d.isDown && s.playerBody.body.velocity.x>20;
-    }""",timeout=8000)
-    await page.wait_for_timeout(350)
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      return s.keys.d.isDown&&w.__QA_SPEED_PEAKS__?.walk>=39;
+    }""",timeout=16000)
     normal=await page.evaluate("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return {speed:w.__QA_SPEED_PEAKS__.walk,x:w.__QA_ACTIVE_SCENE__().playerBody.x};
     }""")
    finally:
     await page.keyboard.up('d')
-   assert normal['speed']>20,normal
    try:
     await focus_keys()
     await page.keyboard.down(',')
     await page.keyboard.down('d')
     await page.wait_for_function("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s.keys.run.isDown&&s.keys.d.isDown&&s.playerBody.body.velocity.x>20;
-    }""",timeout=8000)
-    await page.wait_for_timeout(300)
+      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+      return s.keys.run.isDown&&s.keys.d.isDown&&
+        w.__QA_SPEED_PEAKS__?.run>Math.max(40,w.__QA_SPEED_PEAKS__?.walk*1.08);
+    }""",timeout=16000)
     running=await page.evaluate("""()=>{
-      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return {speed:w.__QA_SPEED_PEAKS__.run,x:w.__QA_ACTIVE_SCENE__().playerBody.x};
     }""")
    finally:
     await page.keyboard.up('d')
     await page.keyboard.up(',')
    assert running['speed']>normal['speed']*1.08,(normal,running)
+   print('ARCADE_REAL_COMMA_RUN_ACCELERATION_PASS',
+    {'walkMax':normal['speed'],'runMax':running['speed']},flush=True)
    # Confirm grounding again after crouch; a transient standing animation can
    # consume the JustDown edge if tested on the same frame.
    await page.wait_for_function("""()=>{
