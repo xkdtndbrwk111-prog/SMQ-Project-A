@@ -24,3 +24,10 @@
 - `HOJA_TEAM_APPROVED_BINDING.mjs`: 교사 승인 문항의 그림·태그·C 배치와 정답 ID를 확인하고, 기존 팀전에서 섞은 3개 보기의 인덱스로 매핑. 승인 정본 데이터가 없다면 추측·텍스트 대체 금지.
 - 단위시험: `node --test experimental/unified-quiz-renderer/team_binding.test.mjs` (7건), `python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'` (3건).
 - **미완료**: 이 데이터 경로는 아직 실제 7MB 게임 브라우저에 렌더러를 표시하지 않음. Apps Script 공용 로더에서 `row.rendererQuestion` 및 `images/tags/unitMeta`를 공급해야 실사용 가능. 개발 사본으로 패치→전체 세 모드 승인 렌더러 연결→팀전 우승 후 복습→브라우저 및 GAS 시험 순서 유지.
+
+## 2026-11-22 공통 iframe 호스트 / 교사 주관식 판정
+- `HOJA_UNIFIED_FRAME_HOST.mjs`와 `frame_host.test.mjs`: `embed/capture/load/show` 명령, 문항별 선택 단 1회 전달, 복습 재출제시 초기화. 점수·랭킹 판단은 기존 게임이 유지.
+- `HOJA_APPROVED_RENDERER_BRIDGE.html`의 **연결 어댑터 부분만** 수정: SHORT의 정답 확인 클릭 시 답 공개; 교사 정오판정을 `teacher:true`/`teacher:false`로 호스트에 송신. 승인 A/C/D CSS·`selectComposition()/measureAndFit()/fitContent()` 원본 코드는 변경하지 않음.
+- 로컬 Chromium iframe(srcdoc) 실제 브라우저: C형 좌우 q04(3보기)→A형 q01 전환, OX q23, 주관식 q29의 교사 오답 판정, 중복 답변 차단, 브라우저 JS 오류0: PASS. Node host 2개/팀 바인딩 7개/Python 패처 3개 단위테스트 PASS.
+- 사회6 64문항 × HD/FHD/4:3 총 **192건 DOM 배치 측정값 일치**. 192장 픽셀 스크린샷 전수 비교는 미수행.
+- **미완료:** 이 호스트를 실제 분할 7MB Game.html의 싱글 아케이드·싱글 문제풀이·팀전에 붙이는 작업, 우승자 발표 이후 팀전 복습 진입, GAS 실기기 및 랭킹 검증. 위 테스트는 독립 iframe 검증이며 7MB 게임 통합 PASS가 아니다.
