@@ -15,6 +15,7 @@ async def run():
  p.add_argument('--html',type=Path,required=True)
  p.add_argument('--phaser',type=Path,required=True)
  p.add_argument('--rounds',type=int,choices=[2,25],default=2)
+ p.add_argument('--collision-first',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -86,17 +87,37 @@ async def run():
     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
     return {score:s.score,answered:s.quizAnswered,correct:s.correctQuizCount,found:r.found}
    }''')
-   await page.evaluate('''(i)=>{
+   await page.evaluate('''(input)=>{
+    const {i,collisionFirst}=input;
     const w=document.getElementById('hqArcadeFrame').contentWindow;
     const s=w.__QA_ACTIVE_SCENE__();
+    if(i===0 && collisionFirst){
+      const target=s.enemies.find(e=>e.alive&&e.type==='BALLOONEY');
+      if(!target)throw Error('NO_ORIGINAL_BALLOON_IN_WORLD');
+      const original={x:s.playerBody.x,y:s.playerBody.y};
+      const others=s.enemies.filter(e=>e!==target).map(e=>({e,alive:e.alive}));
+      for(const {e} of others)e.alive=false;
+      s.playerBody.body.reset(target.bodyObj.x,target.bodyObj.y);
+      try{s.handlePlayerEnemyCollisions(performance.now())}
+      finally{
+        for(const {e,alive} of others)e.alive=alive;
+        s.playerBody.body.reset(original.x,original.y);
+      }
+      if(!target.consumed||target.alive||!s.quizActive)throw Error('PHASER_COLLISION_BALLOON_NOT_CONSUMED');
+      w.__QA_REAL_BALLOON_COLLISION__={memKey:target.memKey,found:w.__QA_RUN__().found};
+      return;
+    }
     const sprite=s.add.rectangle(s.playerBody.x,s.playerBody.y,12,18,0xffd055);
-    const centerY=s.playerBody.y;
     const e={alive:true,type:'BALLOONEY',memKey:'qa-balloon-'+i,
-      bodyObj:{x:s.playerBody.x,body:{center:{y:centerY},enable:true},setActive(){}},
+      bodyObj:{x:s.playerBody.x,body:{center:{y:s.playerBody.y},enable:true},setActive(){}},
       sprite};
     s.showQuiz(e);
     if(!e.consumed || e.alive)throw Error('ORIGINAL_BALLOON_NOT_CONSUMED');
-   }''',i)
+   }''',{'i':i,'collisionFirst':args.collision_first})
+   if i==0 and args.collision_first:
+    proof=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_REAL_BALLOON_COLLISION__")
+    assert proof and proof['found']==1,proof
+    print('ARCADE_WORLD_BALLOON_COLLISION_HANDLER_PASS',proof,flush=True)
    # Match the ACTIVE canonical question, not stale buttons from the last iframe show().
    family=await page.evaluate("""()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow;
