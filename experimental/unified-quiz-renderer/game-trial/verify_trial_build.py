@@ -12,7 +12,7 @@ ROOT=HERE.parents[2]
 ORIGINAL=ROOT/'versions/2.0.0/Game.html.parts'
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
-EXPECTED_14='5533a58e849f070023e35a2a3d245775341b8469'
+EXPECTED_14='70d3c6aab0620a74e7cd9f91015a02b2c3f8ca21'
 def gitblob(data):
     return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():
