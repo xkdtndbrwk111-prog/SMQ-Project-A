@@ -1333,6 +1333,7 @@ main{max-width:none!important;width:100%!important;height:100dvh!important;
 <script src="js/world/surface-templates.js"></script>
 <script src="js/world/surface-generator.js"></script>
 <script src="js/world/ground-autotile.js"></script>
+<script src="js/world/stage-decor.js"></script>
 <script src="js/arcade-host.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/physics.js"></script>
@@ -2908,6 +2909,15 @@ let HOJA_C1_MANUAL_CAMERA=true;
 
 class HojaScene extends Phaser.Scene{
   constructor(){super('HojaScene');}
+  preload(){
+    if(HOJA_MAKER_MODE||STAGE.theme==='cave')return;
+    const api=window.HOJA_STAGE_DECOR;if(!api)throw new Error('Stage decoration module missing');
+    this.load.imageLoadType='HTMLImageElement';
+    for(const id of new Set([...api.atlasList(STAGE.theme),'street'])){
+      const key='hojaStageDecor_'+id;
+      if(!this.textures.exists(key))this.load.image(key,api.ATLASES[id].path);
+    }
+  }
   create(){
     try{
     // V2 cave-only isolation: start with the DOM black FOV compositor disabled.
@@ -2933,6 +2943,7 @@ class HojaScene extends Phaser.Scene{
     // objects and any quiz overlay left open by a mid-quiz restart.
     this.bgLayers=null;
     this.weather=null;
+    this.hojaCheckpoint=null;
     this.closeQuizOverlay();
     this.hideHojaDeathDialog();
     // Clear short-lived combo UI state on Scene.restart.
@@ -2974,6 +2985,7 @@ class HojaScene extends Phaser.Scene{
     this.createUnderground();
     const v055DecorStart=this.children.list.length;
     this.createDecor();
+    if(!HOJA_MAKER_MODE&&STAGE.theme!=='cave')this.createStageDecorAndCheckpoint();
     this._v055DecorArt=this.children.list.slice(v055DecorStart).filter(o=>
       o&&(o.type==='Image'||o.type==='TileSprite')&&!!o.texture);
     if(HOJA_V2_RENDER){
@@ -3052,6 +3064,10 @@ class HojaScene extends Phaser.Scene{
     this.initCaveFov();
 
     this.checkpointIndex=0;
+    if(this.hojaCheckpoint){
+      const initial=this.spawnKind==='exit'?'end':this.spawnKind==='surfacePipe'?(this.mem.surfaceCheckpoint||'start'):'start';
+      this.hojaCheckpoint.active=initial;this.hojaCheckpoint.previousX=this.playerBody.x;this.mem.surfaceCheckpoint=initial;
+    }
     this.wasGrounded=false;
     this.coyoteMs=0;
     this.jumpCut=false;
@@ -3536,6 +3552,46 @@ class HojaScene extends Phaser.Scene{
       const art=this.add.image(x,y-rows*TILE*k,key).setOrigin(0,0).setDepth(-1);
       art.__hojaV2Decor=true;
     }
+  }
+
+  // Stage props are planned after segment assembly and use no gameplay random calls.
+  createStageDecorAndCheckpoint(){
+    const api=window.HOJA_STAGE_DECOR;
+    const start=STAGE_INDEX>0?entryDoorX():START_X,end=exitDoorX();
+    const pipe=this.surfacePipeX();
+    const blocked=[{x:start,radius:112},{x:end,radius:160},
+      ...(pipe===null?[]:[{x:pipe,radius:100}]),
+      ...FLOWERS.map(o=>({x:o.x,y:o.y,radius:60})),
+      ...ENEMY_SPAWNS.filter(o=>o.type==='BALLOONEY').map(o=>({x:o.x,y:o.y,radius:55})),
+      ...BREAKABLE_BLOCKS.map(o=>({x:o.x+16,y:o.y,radius:64})),
+      ...SECRETS.map(o=>({x:o.x+16,y:o.y,radius:64})),
+      ...DECOR.map(o=>({x:o[0]*TILE,y:groundTopAt(o[0]*TILE),radius:20,legacyDecor:true})),
+      ...CAVES.map(([a,b])=>({x:(a+b)/2,radius:(b-a)/2+32})),
+      ...SOLIDS.filter(o=>o.kind!=='ground').map(o=>({x:o.x+o.w/2,y:o.y,radius:o.w/2+24})),
+      ...WATER_SPANS.map(([a,b])=>({x:(a+b)*TILE/2,radius:(b-a)*TILE/2+24})),
+      ...[...MOVING_PLATFORMS,...CRUMBLES,...RAFTS].map(o=>({x:o.x+(o.w||32)/2,y:o.y,radius:(o.w||32)/2+32}))];
+    const cpBlocked=[{x:start,radius:80},{x:end,radius:100},
+      ...(pipe===null?[]:[{x:pipe,radius:80}]),
+      ...FLOWERS.map(o=>({x:o.x,y:o.y,radius:32})),
+      ...ENEMY_SPAWNS.filter(o=>o.type==='BALLOONEY').map(o=>({x:o.x,y:o.y,radius:40})),
+      ...CAVES.map(([a,b])=>({x:(a+b)/2,radius:(b-a)/2+16})),
+      ...WATER_SPANS.map(([a,b])=>({x:(a+b)*TILE/2,radius:(b-a)*TILE/2+24}))];
+    const plan=api.checkpoint({solids:SOLIDS,start,end,blocked:cpBlocked,
+      clear:(x,y)=>!hojaRectsHit(x-34,y-68,x+34,y)});
+    const props=api.plan({theme:STAGE.theme,solids:SOLIDS,start,end,
+      blocked:[...blocked,{x:plan.mid,y:plan.midY,radius:80}],enemies:ENEMY_SPAWNS,seed:(RUN.seed|0)^STAGE_INDEX});
+    const sprite=(spec,x,y)=>{
+      const tex=this.textures.get('hojaStageDecor_'+spec.sheet),frame='stage_'+spec.name;
+      if(!tex||!tex.getSourceImage())throw Error('Stage decoration texture unavailable: '+spec.sheet);
+      if(!tex.has(frame))tex.add(frame,0,...spec.rect);
+      return this.add.image(x,y,tex.key,frame).setOrigin(.5,1).setScale(spec.scale||2).setDepth(-1).setFlipX(!!spec.flip);
+    };
+    for(const prop of props){const art=sprite(prop,prop.x,prop.y);art.__hojaV2Decor=true;}
+    const machine=sprite({...api.item('street:vending-machine'),scale:2},plan.mid,plan.midY).setDepth(-.25);
+    // Fixed-pixel lamp and a gentle rock are visual only; no body or trigger.
+    const light=this.add.rectangle(plan.mid,plan.midY-48,12,5,0xfff078,1).setDepth(-.2).setAlpha(0);
+    this.hojaCheckpoint={...plan,stage:STAGE_INDEX,active:'start',previousX:null,machine,light};
+    this.hojaPhase4bProps=props;
   }
 
   createTerrain(){
@@ -4417,6 +4473,7 @@ class HojaScene extends Phaser.Scene{
     const lampClear=(tx,ground)=>{
       if(hojaFlatGround(tx,10)!==ground)return false;
       if(doorXs.some(x=>Math.abs(x-tx)<4*TILE))return false;
+      if(this.hojaCheckpoint&&Math.abs(this.hojaCheckpoint.mid-tx)<66)return false;
       if(FLOWERS.some(f=>Math.abs(f.x-tx)<24&&f.y>ground-150&&f.y<=ground+4))return false;
       return true;
     };
@@ -4429,13 +4486,13 @@ class HojaScene extends Phaser.Scene{
         if(solid.kind!=='ground'||solid.w<8*TILE||solid.cave||solid.slab)continue;
         for(let tx=solid.x+3*TILE;tx<=solid.x+solid.w-3*TILE;tx+=TILE){
           const dist=Math.abs(tx-T(goal));
-          if(tx<9*TILE||tx>GOAL_X-8*TILE||dist>32*TILE)continue;
+          if(tx<9*TILE||tx>GOAL_X-8*TILE||(!allowBlocked&&dist>32*TILE))continue;
           if(this.pipes?.some(p=>Math.abs(p.x-tx)<7*TILE))continue;
           if(occupied.some(x=>Math.abs(x-tx)<18*TILE))continue;
           const ground=groundTopAt(tx);
           if(ground!==solid.y||!lampClear(tx,ground))continue;
           const blocked=lampBlocked(tx,ground);
-          if(blocked&&!allowBlocked)continue;
+          if(blocked)continue;
           const score=dist+(blocked?40*TILE:0)+(decorHit(tx)?8*TILE:0);
           if(score<best){site=tx;best=score;}
         }
@@ -4477,7 +4534,7 @@ class HojaScene extends Phaser.Scene{
       this.surfaceStreetLamps.push({x:site,y:bulbY,art,glow,pickup,index:lampIndex});
     };
     // Pass 1: clear spots only. Pass 2: keep at least 5 lamps per map for
-    // the sunset/night lighting, accepting occluded spots only if needed.
+    // the sunset/night lighting, searching more broadly for clear spots.
     const left=[];
     for(const goal of preferred){const site=pick(goal,false);if(site===null)left.push(goal);else place(site);}
     for(const goal of left){
@@ -7070,11 +7127,21 @@ class HojaScene extends Phaser.Scene{
   }
 
   updateCheckpointAndHazards(){
-    // V0.23: Hoja walks both ways between doors; respawn at the nearest
-    // checkpoint at or behind the current position.
-    let ci=0;
-    for(let i=0;i<CHECKPOINTS.length;i++)if(this.playerBody.x>=CHECKPOINTS[i])ci=i;
-    this.checkpointIndex=ci;
+    if(this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'){
+      const c=this.hojaCheckpoint,x=this.playerBody.x;
+      if(window.HOJA_STAGE_DECOR.crossed(c.previousX,x,c.line)){
+        if(c.active!=='mid')this.showHojaToast('중간 체크포인트 저장!');
+        c.active='mid';this.mem.surfaceCheckpoint='mid';
+      }
+      c.previousX=x;
+      const active=c.active==='mid';
+      c.machine.setAngle(active?Math.sin(this.time.now*.012)*1.5:0);
+      c.light.setAlpha(active?.55+.45*Math.sin(this.time.now*.012)**2:0);
+    }else{
+      let ci=0;
+      for(let i=0;i<CHECKPOINTS.length;i++)if(this.playerBody.x>=CHECKPOINTS[i])ci=i;
+      this.checkpointIndex=ci;
+    }
 
     const b=this.playerBody.body;
     const wy=waterAtX(this.playerBody.x);
@@ -7252,7 +7319,9 @@ class HojaScene extends Phaser.Scene{
   respawnNow(){
     const x=STAGE.theme==='cave'&&this.caveRespawnAnchor
       ?this.caveRespawnAnchor.x
-      :CHECKPOINTS[this.checkpointIndex]||START_X;
+      :this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'
+        ?this.hojaCheckpoint[this.hojaCheckpoint.active]
+        :CHECKPOINTS[this.checkpointIndex]||START_X;
 
     // Clear damaging enemies from the checkpoint zone before Hoja returns.
     this.suppressEnemiesNearRespawn(x);

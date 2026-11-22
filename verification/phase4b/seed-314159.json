@@ -1,0 +1,266 @@
+[
+  {
+    "stage": 1,
+    "start": 128,
+    "line": 2280,
+    "mid": 3088,
+    "end": 4432,
+    "props": [
+      {
+        "name": "flower",
+        "x": 304,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "flower-tree",
+        "x": 912,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "bench",
+        "x": 2864,
+        "y": 880,
+        "zone": 1
+      },
+      {
+        "name": "short-fence",
+        "x": 2992,
+        "y": 880,
+        "zone": 1
+      },
+      {
+        "name": "flowers-pink",
+        "x": 3184,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "flowers-yellow",
+        "x": 3360,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "flower-tree",
+        "x": 3552,
+        "y": 928,
+        "zone": 2
+      },
+      {
+        "name": "flowers-pink",
+        "x": 3728,
+        "y": 928,
+        "zone": 2
+      },
+      {
+        "name": "flowers-yellow",
+        "x": 4080,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "flower",
+        "x": 4160,
+        "y": 880,
+        "zone": 2
+      }
+    ]
+  },
+  {
+    "stage": 2,
+    "start": 80,
+    "line": 2328,
+    "mid": 2160,
+    "end": 4576,
+    "props": [
+      {
+        "name": "flowers-yellow",
+        "x": 224,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "rock",
+        "x": 368,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "short-fence",
+        "x": 1872,
+        "y": 816,
+        "zone": 1
+      },
+      {
+        "name": "flower",
+        "x": 3424,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "forest-rail",
+        "x": 3664,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "rock",
+        "x": 3504,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "flower",
+        "x": 3888,
+        "y": 880,
+        "zone": 2
+      }
+    ]
+  },
+  {
+    "stage": 3,
+    "start": 80,
+    "line": 2424,
+    "mid": 2416,
+    "end": 4768,
+    "props": [
+      {
+        "name": "flower",
+        "x": 240,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "shore-rock",
+        "x": 368,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "short-rail",
+        "x": 1856,
+        "y": 880,
+        "zone": 1
+      },
+      {
+        "name": "rock",
+        "x": 4112,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "flowers-yellow",
+        "x": 4208,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "shore-rock",
+        "x": 4272,
+        "y": 880,
+        "zone": 2
+      }
+    ]
+  },
+  {
+    "stage": 4,
+    "start": 80,
+    "line": 2520,
+    "mid": 2528,
+    "end": 4960,
+    "props": [
+      {
+        "name": "short-snow-fence",
+        "x": 208,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "snow-rock",
+        "x": 368,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "snow-fence",
+        "x": 848,
+        "y": 880,
+        "zone": 0
+      },
+      {
+        "name": "short-snow-fence",
+        "x": 1040,
+        "y": 832,
+        "zone": 0
+      },
+      {
+        "name": "snow-rock",
+        "x": 1200,
+        "y": 784,
+        "zone": 0
+      },
+      {
+        "name": "bench",
+        "x": 2240,
+        "y": 928,
+        "zone": 1
+      },
+      {
+        "name": "short-snow-fence",
+        "x": 2384,
+        "y": 928,
+        "zone": 1
+      },
+      {
+        "name": "snow-rock",
+        "x": 2656,
+        "y": 880,
+        "zone": 1
+      },
+      {
+        "name": "bench",
+        "x": 3120,
+        "y": 880,
+        "zone": 1
+      },
+      {
+        "name": "short-snow-fence",
+        "x": 3504,
+        "y": 832,
+        "zone": 1
+      },
+      {
+        "name": "snow-rock",
+        "x": 3632,
+        "y": 832,
+        "zone": 1
+      },
+      {
+        "name": "rock",
+        "x": 3792,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "short-snow-fence",
+        "x": 4496,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "snow-rock",
+        "x": 4560,
+        "y": 880,
+        "zone": 2
+      },
+      {
+        "name": "rock",
+        "x": 4672,
+        "y": 880,
+        "zone": 2
+      }
+    ]
+  }
+]
