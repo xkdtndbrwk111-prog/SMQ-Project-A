@@ -11,6 +11,25 @@ const decoded=gunzipSync(Buffer.from(compressed[1],'base64')).toString('utf8');
 assert(decoded.length>1_200_000,'Arcade source truncated');
 const patched=patchApprovedArcadeInnerHTML(decoded);
 assert(patched.includes('hojaArcadeApprovedChildTrial'));
+assert(patched.includes('hojaTrialControlsHelpScript'),'H help panel must be injected');
+assert(patched.includes('jump:this.input.keyboard.addKey(K.PERIOD)'),'Period must be jump');
+assert(patched.includes('run:this.input.keyboard.addKey(K.COMMA)'),'Comma must be run');
+assert(patched.includes('const left=this.keys.a.isDown;')&&patched.includes('const right=this.keys.d.isDown;'),'Movement must use A/D only');
+assert(patched.includes('const upPressed=Phaser.Input.Keyboard.JustDown(this.keys.w);'),'W must be the sole door key');
+assert(patched.includes('const jumpPressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);'),'Jump must not fire on W/Space/Z');
+assert(patched.includes('const jumpHeld=this.keys.jump.isDown;'),'Variable jump height must use only period');
+assert(patched.includes("const run=this.keys.run.isDown;"),'Double tap/Shift/X run must be disabled');
+assert(!patched.includes('const doubleTapRun='),'Double tap running must be disabled');
+for(const oldInput of ['this.keys.left.isDown','this.keys.right.isDown','this.keys.up.isDown','this.keys.down.isDown','this.keys.z.isDown','this.keys.x.isDown'])
+ assert(!patched.includes(oldInput),'Old gameplay key is still active: '+oldInput);
+assert(patched.includes("['KeyW','KeyA','KeyS','KeyD','Comma','Period','Enter'].includes(ev.code)"),'Death confirm must accept the seven official keys');
+assert(!patched.includes("if(ev.code!=='Enter'&&ev.code!=='Space')return"),'Old Space death shortcut must be replaced');
+assert(patched.includes('this.continueHojaAfterDeath()'),'Original checkpoint respawn must remain');
+const help=patched.match(/<script id="hojaTrialControlsHelpScript">([\s\S]*?)<\/script>/);
+assert(help&&help[1],'H help script missing');
+new Function(help[1]);
+console.log('ARCADE_TRIAL_INPUT_WASD_COMMA_PERIOD_HELP_DEATH_STATIC_PASS');
+
 assert(patched.includes('HOJA_ARCADE_APPROVED_BRIDGE.open'));
 assert(patched.includes('this.awardScore(10'));
 assert(patched.includes('hojaStep09_3Answer_(q,false,0)'));
