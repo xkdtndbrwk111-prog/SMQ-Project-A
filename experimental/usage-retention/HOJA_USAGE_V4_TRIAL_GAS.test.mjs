@@ -13,7 +13,7 @@ const row=(n,date,opts={})=>[
  opts.kind||'PUBLIC','6','영어','천재','영어 10단원 | 영어 11단원',2,opts.team??1,
  '101|102','PUBLIC:TEST','U3S1','["영어10","영어11"]'
 ];
-function make({badCanary=false,ack=true,unsorted=false}={}){
+function make({badCanary=false,ack=true,unsorted=false,duplicateRetry=false}={}){
  const p={HOJA_USAGE_TRIAL_SPREADSHEET_ID:'isolated-copy',
   HOJA_USAGE_PRODUCTION_SPREADSHEET_ID:'live-original',
   HOJA_USAGE_V4_TRIAL_WRITE_ACK:ack?'COPIED_SHEET_ONLY':''};
@@ -21,6 +21,11 @@ function make({badCanary=false,ack=true,unsorted=false}={}){
   [headers,row(1,'2026-11-20'),row(2,'2026-09-23')]:
   [headers,row(1,'2026-09-23'),row(2,'2026-11-20'),
    row(3,'2026-11-20',{mode:'TEAM',team:7}),row(4,'2026-11-22')];
+ if(duplicateRetry){
+  const duplicate=[...row(2,'2026-11-20')];
+  duplicate[1]='2026-11-20T12:00:09Z';
+  source.splice(3,0,duplicate);
+ }
  const tabs=new Map([
   ['EVENT_LOG',source],
   ['_HOJA_USAGE_TRIAL_ONLY',[[badCanary?'INVALID':'HOJA_RETENTION_SANDBOX_V1']]]
@@ -116,6 +121,19 @@ test('V4 copy writer is idempotent after COMPLETE and checks stored dimensions o
  t.tabs.get('HOJA_V4_DAILY_BUCKETS')[1][5]='999';
  assert.throws(()=>t.write('2026-11-20'),/REPLAY_BUCKET_MISMATCH/);
 });
+test('actual timestamp-only duplicate row is suppressed and recorded separately',()=>{
+ const t=make({duplicateRetry:true});
+ const preview=t.preview('2026-11-20');
+ assert.equal(preview.sourceRowCount,3);
+ assert.equal(preview.publicStarts,2);
+ assert.equal(preview.retriesSuppressed,1);
+ const written=t.write('2026-11-20');
+ assert.equal(written.starts,2);
+ assert.equal(written.retriesSuppressed,1);
+ assert.equal(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][13],1);
+ assert.equal(t.write('2026-11-20').replayed,true);
+});
+
 test('zero-event day inside verified full date-column scan produces COMPLETE zero day',()=>{
  const t=make();const r=t.write('2026-11-21');
  assert.equal(r.starts,0);assert.equal(r.buckets,0);
