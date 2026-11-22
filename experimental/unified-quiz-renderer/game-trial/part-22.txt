@@ -291,7 +291,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(header)header.remove();
    frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;
  }
- return Object.freeze({begin,show,hide,reset,error});
+ return Object.freeze({begin,show,reviewFeedback,hide,reset,error});
 })();
 
 window.HOJA_TEAM_TEST=(()=>{

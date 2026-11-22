@@ -5,8 +5,8 @@ Never overwrite the production original nor update an Apps Script project.
 import argparse, hashlib, json
 from pathlib import Path
 BASE = Path(__file__).resolve().parent
-PARTS = BASE/'game-trial'
-RENDER = BASE/'HOJA_APPROVED_RENDERER_BRIDGE.html'
+PARTS = BASE
+RENDER = BASE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 MARK = "/* HOJA_TRIAL_APPROVED_HTML_INLINE */null"
 EXPECTED_ORIGINAL = "4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6"
 def build(output:Path):
