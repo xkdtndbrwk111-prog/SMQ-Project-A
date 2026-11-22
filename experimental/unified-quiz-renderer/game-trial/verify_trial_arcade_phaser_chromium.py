@@ -204,8 +204,40 @@ async def run():
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return w.document.getElementById('step09RunResult')?.style.display==='block' &&
-        w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
+        document.getElementById('hojaArcadeReviewBar')?.style.display==='flex' &&
+        window.HOJA_ARCADE_APPROVED_TRIAL?.state?.reviewCount===12 &&
+        !w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
     }""",timeout=25000)
+    before_review=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return {metrics:w.HOJA_STEP09_3_TEST.metrics(),
+        wrong:w.HOJA_STEP09_3_TEST.history().filter(x=>x.correct===false).map(x=>x.key)};
+    }""")
+    assert len(before_review['wrong'])==12,before_review
+    for n,key in enumerate(before_review['wrong']):
+      family=key.split(chr(0))[-1]
+      expected=next(r['rendererQuestion']['prompt'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
+      await page.wait_for_function("""(x)=>{
+        const f=document.getElementById('hojaArcadeApprovedParentFrame'),s=window.HOJA_ARCADE_APPROVED_TRIAL?.state;
+        return s?.reviewIndex===x.index && s?.reviewCount===12 &&
+          f?.style.visibility==='visible' &&
+          f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===x.prompt;
+      }""",arg={'index':n,'prompt':expected},timeout=20000)
+      label=await page.locator('#hojaArcadeReviewLabel').inner_text()
+      assert ('오답 복습 '+str(n+1)+'/12') in label and '정답:' in label,label
+      await page.locator('#hojaArcadeReviewNext').click(timeout=15000)
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return window.HOJA_ARCADE_APPROVED_TRIAL?.state?.reviewCount===0 &&
+        document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='none' &&
+        w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
+    }""",timeout=20000)
+    after_review=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.HOJA_STEP09_3_TEST.metrics();
+    }""")
+    assert before_review['metrics']==after_review,(before_review,after_review)
+    print('ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS',len(before_review['wrong']),'unchangedScore',after_review['score'],flush=True)
     finish=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       const result=w.HOJA_STEP09_3_TEST.result(),stats=w.HOJA_STEP09_3_TEST.metrics();
@@ -228,7 +260,11 @@ async def run():
     }""")
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
-      return w.__QA_STAGE_INDEX__()===0 && !!w.__QA_ACTIVE_SCENE__()?.playerBody;
+      const s=w.__QA_ACTIVE_SCENE__();
+      return w.__QA_STAGE_INDEX__()===0 && !!s?.playerBody &&
+        !s.clear && !s.timeUp && s.remainingMs>0 &&
+        s.scene?.isActive?.()===true &&
+        w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open')===false;
     }""",timeout=45000)
     await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;

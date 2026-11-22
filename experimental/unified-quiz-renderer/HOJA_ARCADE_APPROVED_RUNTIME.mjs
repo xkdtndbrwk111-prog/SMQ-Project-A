@@ -9,7 +9,7 @@ function substituteOnce(s,oldText,newText) {
 const CHILD_SCRIPT=[
  '<script id="hojaArcadeApprovedChildTrial">',
  "(()=>{'use strict';",
- ' let active=null,serial=0;',
+ ' let active=null,serial=0,review=null;',
  " const send=data=>parent.postMessage(data,'*');",
  ' window.HOJA_ARCADE_APPROVED_BRIDGE=Object.freeze({',
  '  open(question,finish){',
@@ -21,12 +21,26 @@ const CHILD_SCRIPT=[
  '   return true;',
  '  },',
  "  verdict(correct){if(active)send({type:'HOJA_ARCADE_APPROVED_VERDICT',id:active.id,correct:!!correct})},",
- '  close(){if(!active)return;const id=active.id;active=null;send({type:\'HOJA_ARCADE_APPROVED_CLOSE\',id})}',
+ '  close(){if(!active)return;const id=active.id;active=null;send({type:\'HOJA_ARCADE_APPROVED_CLOSE\',id})},',
+ '  startReview(rows,onDone){',
+ "   if(active||review||typeof onDone!=='function'||!Array.isArray(rows))throw Error('ARCADE_REVIEW_BAD_STATE');",
+ "   const wrong=rows.filter(x=>x&&x.correct===false&&(x.type==='MC'||x.type==='OX')&&typeof x.key==='string');",
+   '   if(!wrong.length)return false;',
+ "   const id='hr-'+(++serial);review={id,onDone};",
+ "   send({type:'HOJA_ARCADE_APPROVED_REVIEW_START',id,wrong:wrong.map(x=>({key:x.key,type:x.type}))});",
+   '   return true;',
+   '  }',
  ' });',
  " window.addEventListener('message',ev=>{",
- "  if(ev.source!==parent||ev.data?.type!=='HOJA_ARCADE_APPROVED_SELECT')return;",
- '  if(!active||active.id!==ev.data.id||active.responded||!Number.isInteger(ev.data.index))return;',
- '  active.responded=true;active.finish(ev.data.index);',
+ "  if(ev.source!==parent)return;",
+ "  const d=ev.data;",
+ "  if(d?.type==='HOJA_ARCADE_APPROVED_REVIEW_DONE'){",
+ "   if(!review||review.id!==d.id)return;",
+ "   const done=review.onDone;review=null;done();return;",
+ '  }',
+ "  if(d?.type!=='HOJA_ARCADE_APPROVED_SELECT')return;",
+ '  if(!active||active.id!==d.id||active.responded||!Number.isInteger(d.index))return;',
+ '  active.responded=true;active.finish(d.index);',
  ' });',
  '})();',
  '</scr'+'ipt>'
@@ -60,12 +74,16 @@ export function patchApprovedArcadeInnerHTML(html){
  s=substituteOnce(s,
  "  const eligible=reason==='전체 스테이지 완료'&&verified&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;",
  "  const eligible=reason==='전체 스테이지 완료'&&verified&&m.found===25&&m.answered===25&&m.usedFamilies===25&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;");
+ s=substituteOnce(s,
+ '  hojaStep09_3RenderProgress_();\n  hojaRankShow_(scene,reason);\n}',
+ '  hojaStep09_3RenderProgress_();\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],()=>hojaRankShow_(scene,reason)))\n    hojaRankShow_(scene,reason);\n}');
  return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
 }
 
 export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame,getContainer}){
  if(!core?.createApprovedFrameHost||!core?.teamApprovedPayload)throw Error('ARCADE_APPROVED_CORE_REQUIRED');
- let catalog=null,active=null,overlay=null,frame=null,host=null,loading=null,epoch=0,focus=-1;
+ let catalog=null,active=null,overlay=null,frame=null,host=null,loading=null,epoch=0,focus=-1,review=null,reviewBar=null,reviewLabel=null,reviewNext=null;
+ const wrong=new Map();
  function ensureUI(){
   if(overlay)return;
   const root=getContainer();if(!root)throw Error('ARCADE_APPROVED_CONTAINER_REQUIRED');
@@ -73,7 +91,19 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   overlay.style.cssText='position:absolute;left:0;right:0;top:62px;bottom:0;z-index:5000;background:#071421;display:none;';
   frame=document.createElement('iframe');frame.id='hojaArcadeApprovedParentFrame';frame.title='교사 승인 HOJA 아케이드 문제';
   frame.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:#071421';
-  overlay.append(frame);root.append(overlay);
+  overlay.append(frame);
+  reviewBar=document.createElement('div');reviewBar.id='hojaArcadeReviewBar';
+  reviewBar.style.cssText='position:absolute;left:0;right:0;top:0;z-index:12;min-height:65px;max-height:32%;overflow:auto;display:none;align-items:center;gap:12px;padding:9px 14px;background:#12293e;color:#fff3cc;font:800 16px/1.5 system-ui';
+  reviewLabel=document.createElement('span');reviewLabel.id='hojaArcadeReviewLabel';reviewLabel.style.cssText='flex:1;min-width:0;white-space:normal';
+  reviewNext=document.createElement('button');reviewNext.id='hojaArcadeReviewNext';reviewNext.type='button';
+  reviewNext.style.cssText='flex:none;min-width:120px;padding:7px 12px;border:2px solid #83c9be;border-radius:8px;background:#23555a;color:#fff;font-weight:bold;cursor:pointer';
+  reviewNext.onclick=()=>{
+    if(!review||review.loading)return;
+    ++review.index;
+    if(review.index>=review.items.length)finishReview();
+    else showReviewItem();
+  };
+  reviewBar.append(reviewLabel,reviewNext);overlay.append(reviewBar);root.append(overlay);
  }
  function answer(d){
   const a=active;if(!a||a.responded||d.questionId!==a.mapping.binding.questionId)return;
@@ -124,7 +154,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   let mapping;
   try{mapping=resolveApprovedArcadeChoice(catalog,msg.question,core)}
   catch(e){error(e);return}
-  const local=++epoch;focus=-1;active={id:msg.id,mapping,responded:false};
+  const local=++epoch;focus=-1;active={id:msg.id,mapping,responded:false,familyKey:msg.question.familyKey,kind:msg.question.type};
   ensureUI();frame.style.visibility='hidden';overlay.style.display='block';showLoading();
   try{
    const h=await ensureHost();
@@ -136,6 +166,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
  }
  function verdict(msg){
   if(!active||active.id!==msg.id||!active.responded)return;
+  if(msg.correct===false)wrong.set(active.familyKey+'\u0000'+active.kind,active.mapping);
   const mark=document.createElement('div');mark.id='hojaArcadeApprovedJudgment';
   mark.setAttribute('role','status');mark.setAttribute('aria-live','assertive');
   mark.style.cssText='position:absolute;inset:0;z-index:10;display:grid;place-items:center;pointer-events:none;background:#07142190;color:#fff;font:bold clamp(28px,5vw,54px) system-ui';
@@ -149,9 +180,59 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   overlay?.querySelector('#hojaArcadeApprovedError')?.remove();
   overlay?.querySelector('#hojaArcadeApprovedLoading')?.remove();
   if(frame)frame.style.visibility='hidden';
+  if(reviewBar)reviewBar.style.display='none';
   if(overlay)overlay.style.display='none';
  }
+
+ function finishReview(){
+  const current=review;
+  if(!current)return;
+  review=null;
+  close();
+  getArcadeFrame()?.contentWindow?.postMessage({type:'HOJA_ARCADE_APPROVED_REVIEW_DONE',id:current.id},'*');
+ }
+ async function showReviewItem(){
+  const current=review;
+  if(!current||current.index>=current.items.length)return;
+  const item=current.items[current.index],token=++epoch;
+  current.loading=true;
+  ensureUI();overlay.style.display='block';frame.style.visibility='hidden';showLoading();
+  const binding=item.mapping.binding,q=binding.rendererQuestion;
+  const answerText=q.type==='OX'?(q.answer.value?'O':'X'):
+    (q.choices?.find(x=>x.id===q.answer?.choiceId)?.text||'정답 정보를 확인하세요');
+  reviewLabel.textContent='오답 복습 '+(current.index+1)+'/'+current.items.length+' · 정답: '+answerText;
+  reviewNext.textContent=current.index===current.items.length-1?'복습 마치기':'다음 오답';
+  reviewBar.style.display='flex';
+  try{
+   const h=await ensureHost();
+   if(token!==epoch||review!==current)return;
+   await h.show({questionId:binding.questionId,mode:'review',omitChoiceId:binding.omitChoiceId});
+   if(token!==epoch||review!==current)return;
+   overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();
+   frame.style.visibility='visible';
+   current.loading=false;
+  }catch(e){if(token===epoch)error(e)}
+ }
+ function startReview(msg){
+  if(active||review||!catalog||typeof msg.id!=='string'||!Array.isArray(msg.wrong)){
+   error(Error('ARCADE_REVIEW_BAD_REQUEST'));return;
+  }
+  let items;
+  try{
+   const keys=new Set();
+   items=msg.wrong.map(x=>{
+    if(!x||typeof x.key!=='string'||(x.type!=='MC'&&x.type!=='OX'))throw Error('ARCADE_REVIEW_INVALID_ROW');
+    const key=x.key+'\u0000'+x.type,mapping=wrong.get(key);
+    if(!mapping||keys.has(key))throw Error('ARCADE_REVIEW_WRONG_MAPPING_MISSING_OR_DUPLICATE');
+    keys.add(key);return {key,mapping};
+   });
+   if(!items.length)throw Error('ARCADE_REVIEW_EMPTY_REQUEST');
+  }catch(e){error(e);return}
+  review={id:msg.id,items,index:0,loading:false};
+  showReviewItem();
+ }
  function shortcut(ev){
+  if(review)return;
   if(frame?.style.visibility!=='visible')return;
   if(!active||active.responded||ev.repeat||ev.isComposing||ev.ctrlKey||ev.altKey||ev.metaKey)return;
   if(['INPUT','TEXTAREA','SELECT'].includes(ev.target?.tagName)||ev.target?.isContentEditable)return;
@@ -178,13 +259,14 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   if(ev.data.type==='HOJA_ARCADE_APPROVED_OPEN')open(ev.data);
   else if(ev.data.type==='HOJA_ARCADE_APPROVED_VERDICT')verdict(ev.data);
   else if(ev.data.type==='HOJA_ARCADE_APPROVED_CLOSE')close(ev.data);
+  else if(ev.data.type==='HOJA_ARCADE_APPROVED_REVIEW_START')startReview(ev.data);
  }
  window.addEventListener('message',onMessage);
  window.addEventListener('keydown',shortcut,true);
  return Object.freeze({
-  configure(sources){close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
+  configure(sources){review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
   patchHTML(html){if(!catalog)throw Error('ARCADE_APPROVED_NOT_CONFIGURED');return patchApprovedArcadeInnerHTML(html)},
-  reset(){close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;loading=null},
-  get state(){return {configured:!!catalog,count:catalog?.count||0,activeId:active?.id||null}}
+  reset(){review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
+  get state(){return {configured:!!catalog,count:catalog?.count||0,activeId:active?.id||null,reviewIndex:review?.index??null,reviewCount:review?.items.length??0}}
  });
 }

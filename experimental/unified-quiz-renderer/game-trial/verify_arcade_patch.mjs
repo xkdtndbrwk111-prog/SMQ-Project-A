@@ -17,6 +17,10 @@ assert(patched.includes('hojaStep09_3Answer_(q,false,0)'));
 assert(patched.includes('this.consumeQuizBalloon(e)'));
 assert(patched.includes('this.scene.resume()'));
 assert(patched.includes('m.found===25&&m.answered===25&&m.usedFamilies===25'),'FINISH rank gate must require 25 completed');
+assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_START'));
+assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_DONE'));
+assert(patched.includes('startReview?.(RUN.step09History||[]'));
+
 const child=patched.match(/<script id="hojaArcadeApprovedChildTrial">([\s\S]*?)<\/script>/);
 assert(child&&child[1],'Child bridge script missing');
 new Function(child[1]);
