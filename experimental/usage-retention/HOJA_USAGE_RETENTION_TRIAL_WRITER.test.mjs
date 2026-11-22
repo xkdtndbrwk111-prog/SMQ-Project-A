@@ -103,8 +103,8 @@ test('copied sheet: summary rows + verified manifest; EVENT_LOG untouched',()=>{
  assert.equal(result.uniqueStarts,2);
  assert.equal(result.dailyTotalRows,1);
  assert.equal(result.dailyDimensionRows,2);
- assert.equal(result.dailyFacetRows,2);
- assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').length,3);
+ assert.equal(result.dailyFacetRows,3);
+ assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').length,4);
  assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').slice(1)
    .filter(r=>r[4]==='GRADE').reduce((n,r)=>n+r[7],0),2);
  assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').slice(1)
