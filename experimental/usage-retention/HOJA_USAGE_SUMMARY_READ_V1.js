@@ -122,7 +122,8 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
   const authorized=status==='COMPLETE'&&DIGEST.test(str(m[1]))&&str(m[1])===gen;
   const previewOnly=allowCountOnly&&status==='CONNECTOR_COUNT_VERIFIED';
   if(!authorized&&!previewOnly)
-   return {available:false,reason:'TRIAL_NOT_PUBLISHED_OR_DIGEST_MISSING'};
+   return {available:false,blocked:status==='COMPLETE',
+    reason:'TRIAL_NOT_PUBLISHED_OR_DIGEST_MISSING'};
   let starts,rawRows,solo=0,team=0,complete=0,timeUp=0,unknownResult=0;
   const teamCounts={},buckets=new Map(),facets=[],cartridges=[],observedDims=new Set();
   try{
@@ -195,10 +196,12 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
     facets,cartridges,cartridgeSelections:selections,facetsReady,
     complete,timeUp,unknownResult,rawRows,
     reason:authorized?'':'COUNT_ONLY_NO_SHA256'};
-  }catch(e){return {available:false,reason:String(e.message||e)};}
+  }catch(e){return {available:false,blocked:status==='COMPLETE',
+    reason:String(e.message||e)};}
  }
  function chooseDay(data,day,allowCountOnly){
   const a=oldDay(data.old,day),b=trialDay(data.trial,day,allowCountOnly);
+  if(b.blocked)return {available:false,reason:'PUBLISHED_TRIAL_CORRUPT: '+b.reason};
   // Check overlapping days before choosing a new source-of-truth. Never let
   // a fresh generation silently rewrite previously published play counts.
   if(a.available&&b.available&&(a.starts!==b.starts||a.solo!==b.solo||a.team!==b.team))
