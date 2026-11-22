@@ -19,6 +19,7 @@ async def run():
  p.add_argument('--finish-check',action='store_true')
  p.add_argument('--keyboard-smoke',action='store_true')
  p.add_argument('--control-smoke',action='store_true')
+ p.add_argument('--movement-smoke',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -165,6 +166,92 @@ async def run():
     assert all(after[k]==prior[k] for k in ['score','found','history']),(key,prior,after)
     print('ARCADE_REAL_DEATH_KEY_PASS',key,flush=True)
    print('ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS',mapping,flush=True)
+  if args.movement_smoke:
+   # Actual keypresses through nested iframe -> actual Phaser update() physics.
+   # Test separate from seven deaths so respawn immunity never changes velocity.
+   async def focus_keys():
+    return await page.evaluate("""()=>{
+      const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow;
+      w.document.body.tabIndex=-1;w.focus();w.document.body.focus({preventScroll:true});
+      return {outer:document.activeElement?.id,inner:w.document.activeElement?.tagName};
+    }""")
+   await focus_keys()
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return s?.scene?.isActive?.() && !s.dying && !s.transitioning && !s.quizActive &&
+       !!s.playerBody && !!(s.playerBody.body.blocked?.down||s.playerBody.body.touching?.down);
+   }""",timeout=15000)
+   stage=await page.evaluate("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return {x:s.playerBody.x,sceneFrame:s.game.loop.frame};
+   }""")
+   try:
+    await focus_keys()
+    await page.keyboard.down('s')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.s.isDown && s.hojaIsSitting===true && s.playerBody.body.height<=23;
+    }""",timeout=7000)
+   finally:
+    await page.keyboard.up('s')
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return s.hojaIsSitting===false && s.playerBody.body.height>=40;
+   }""",timeout=7000)
+   try:
+    await focus_keys()
+    await page.keyboard.down('.')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.jump.isDown && s.playerBody.body.velocity.y< -80;
+    }""",timeout=8000)
+   finally:
+    await page.keyboard.up('.')
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return (s.playerBody.body.blocked?.down||s.playerBody.body.touching?.down) &&
+       s.playerBody.body.velocity.y>=0;
+   }""",timeout=16000)
+   await focus_keys()
+   try:
+    await page.keyboard.down('d')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.d.isDown && s.playerBody.body.velocity.x>20;
+    }""",timeout=8000)
+    await page.wait_for_timeout(350)
+    normal=await page.evaluate("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+    }""")
+   finally:
+    await page.keyboard.up('d')
+   assert normal['speed']>20,normal
+   try:
+    await focus_keys()
+    await page.keyboard.down(',')
+    await page.keyboard.down('d')
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s.keys.run.isDown&&s.keys.d.isDown&&s.playerBody.body.velocity.x>20;
+    }""",timeout=8000)
+    await page.wait_for_timeout(300)
+    running=await page.evaluate("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return {speed:Math.abs(s.playerBody.body.velocity.x),x:s.playerBody.x};
+    }""")
+   finally:
+    await page.keyboard.up('d')
+    await page.keyboard.up(',')
+   assert running['speed']>normal['speed']*1.08,(normal,running)
+   print('ARCADE_REAL_2_0_PHYSICS_S_CROUCH_PERIOD_JUMP_COMMA_RUN_PASS',
+    {'normalSpeed':normal['speed'],'runSpeed':running['speed'],'startX':stage['x']},flush=True)
+   # QA input smoke is deliberately isolated from the normal 25-balloon test.
+   await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_START_STAGE__(0,true)")
+   await page.wait_for_function("""()=>{
+     const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+     return s?.playerBody && s?.scene?.isActive?.() && !s.transitioning;
+   }""",timeout=12000)
   if args.keyboard_smoke:
    async def focus_game_keys():
     # QA-only focus steering, actual keys always delivered by Chromium.
