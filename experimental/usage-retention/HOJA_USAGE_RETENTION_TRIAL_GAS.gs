@@ -87,6 +87,6 @@ function hojaUsageRetentionPreviewTrialU1(){
     retriesSuppressed:snapshot.retriesSuppressed,
     totalBuckets:snapshot.totals.length,dimensionBuckets:snapshot.dimensions.length,
     canonicalContentSha256:digest,
-    totals:snapshot.totals,dimensions:snapshot.dimensions
+    totals:snapshot.totals,dimensions:snapshot.dimensions,facets:snapshot.facets
   };
 }
