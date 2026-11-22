@@ -99,10 +99,17 @@ async def main():
             print('PASS',kind,method,qid,'verdict',label,'answered',after['answered'],'correct',after['correct'],flush=True)
         unexpected=[x for x in errors if 'Phaser is not defined' not in x and 'HojaSharedScene is not defined' not in x]
         assert not unexpected,'Unexpected browser errors '+repr(unexpected)
-        await page.evaluate('''()=>{
+        state=await page.evaluate('''()=>{
+          const scene=window.HOJA_ATTRACT_SCENE;
+          const before={pause:window.__hojaAudioPauseCalls,resume:window.__hojaAudioResumeCalls,
+            isPaused:scene?.scene?.isPaused?.(),userPaused:scene?.pausedByUser};
           window.HOJA_FLOW.enterIntro({newRun:false});
-          if(window.__hojaAudioResumeCalls!==1)throw Error('INTRO_NOT_RESUMED');
+          const after={pause:window.__hojaAudioPauseCalls,resume:window.__hojaAudioResumeCalls,
+            isPaused:scene?.scene?.isPaused?.(),userPaused:scene?.pausedByUser};
+          return {before,after,flowWrapped:window.HOJA_FLOW.enterIntro.toString().includes('resumeAttract')};
         }''')
+        print('INTRO_SCENE_GATE_DIAGNOSTIC',state,flush=True)
+        assert state['after']['resume']==1,'INTRO_NOT_RESUMED '+repr(state)
         print('CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio playback not tested)')
         await browser.close()
 
