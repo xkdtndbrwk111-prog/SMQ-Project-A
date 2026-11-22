@@ -40,6 +40,10 @@ jobs:
         run: |
           python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.TEST.html"
           python3 experimental/unified-quiz-renderer/game-trial/verify_trial_chromium.py --html "$RUNNER_TEMP/Game.TEST.html"
+      - name: Exact arcade inner iframe to approved parent renderer browser transport
+        run: |
+          python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.ARCADE.BROWSER.html"
+          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_arcade_chromium.py --html "$RUNNER_TEMP/Game.ARCADE.BROWSER.html"
       - name: Browser smoke exact rebuilt trial (team after solo teardown)
         run: |
           python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.TEAM.TEST.html"
