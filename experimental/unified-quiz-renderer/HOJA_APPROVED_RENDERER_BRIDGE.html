@@ -1282,8 +1282,17 @@ window.HOJA_APPROVED_RENDERER=Object.freeze({
 });
 $('hqChoices').addEventListener('click',function(ev){
  if(!window.HOJA_APPROVED_RENDERER_CAPTURE)return;
+ const judge=ev.target.closest('button.teacher-judge');
+ if(judge){
+   ev.stopImmediatePropagation();ev.preventDefault();
+   parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,
+     choiceId:judge.classList.contains('correct')?'teacher:true':'teacher:false',
+     choiceText:judge.textContent},'*');
+   return;
+ }
  const b=ev.target.closest('button.hqChoice');if(!b)return;
  ev.stopImmediatePropagation();ev.preventDefault();
+ if(b.classList.contains('teacher-reveal-btn')){window.HOJA_APPROVED_RENDERER.reveal();return;}
  parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,choiceId:b.dataset.choice||null,choiceText:b.textContent},'*');
 },true);
 window.addEventListener('message',function(ev){
