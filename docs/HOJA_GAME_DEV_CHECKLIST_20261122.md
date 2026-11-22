@@ -589,3 +589,11 @@
 - [ ] 실제 Google Sheets 복사본과 GAS 연결 시험, 운영 버전 요약 조회 화면 전환, 30일/12개월 자동 압축/원본 영구 삭제 등은 **실행하지 않음**. 모의 스프레드시트 PASS는 실 Google Sheets 쓰기 PASS가 아님.
 
 **다음 작업:** 38번 정기 Phaser 회귀와 신규 집계 QA의 최신 HEAD 성공 여부 확인. 통계는 별도 복사 시트의 실제 쓰기·중복·부분 실패 복구 검증 후 운영 이전을 검토할 것.
+
+### 39-3. 2026-11-23 익명 관리자 통계 오프라인 미리보기
+- [x] `experimental/usage-retention/HOJA_USAGE_RETENTION_DASHBOARD_TRIAL.html` 작성. 복사 시험용 GAS 함수 `hojaUsageRetentionPreviewTrialU1()`의 JSON으로 총 시작·확인된 완료·시간 종료·미확인 건, 날짜별 플레이 막대 그래프, 모드별 이용 횟수, 단원 선택 TOP10을 표시하는 **관리자 검토 전용 로컬 HTML**.
+- [x] 예시 데이터 표시 버튼과 로컬 JSON 파일 불러오기를 구현. 원격 요청/서버 키/Google Sheets 연결 없이 브라우저 내 처리. 셀 내용은 `textContent`로 넣어 HTML 문자열을 실행하지 않음. 학생·학급 개인 기록은 원천 대상에서 제외.
+- [x] 실제 Chromium 자동검증 `experimental/usage-retention/verify_dashboard_chromium.py` 작성: 가상 데이터 합계 14회, 모드·단원·날짜 표시, JSON 불러오기, 악성 HTML 문자열 무해 표시, 파일 형식 오류, 외부 네트워크 요청 없음. 렌더러 QA 워크플로에 추가.
+- [ ] 브라우저 CI 최신 실행 결과 확인. 프로그램 연결형 관리 대시보드(통합 허브 관리자 인증·권한/운영 통계 API)는 미구현. 오프라인 시험판을 운영 서비스로 홍보·배포하지 않음.
+
+**검증 순서 유지:** 38/39의 시험 코드→개발 CI PASS→별도 복사 Google Sheet 실연결→통계 읽기 화면 전환→원본 백업·압축 보관 테스트→사용자 승인 후만 운영 배포.
