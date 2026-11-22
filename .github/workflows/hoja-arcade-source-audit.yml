@@ -22,16 +22,13 @@ jobs:
           const payload=src.match(/const HOJA_V051_ARCADE_GZIP='([^']+)'/);
           if(!payload)throw new Error('Packed arcade missing');
           const html=gunzipSync(Buffer.from(payload[1],'base64')).toString('utf8');
-          const tokens=['createInput()','createInput(){','keys=','keyboard.addKeys','JustDown','keyCode','KeyH','keydown','keyup','death','died','dead','die(', 'killPlayer','showDeath','onDeath','gameOver','respawn','revive','retry','사망','죽었','부활','재시작','확인','Enter','WASD','SHIFT','SPACE','KeyCodes','updateDoors(','cursors','jump','runSpeed'];
-          console.log('AUDIT_LEN',html.length);
-          for(const needle of tokens){
-            let from=0,found=0;const clips=[];
-            while((from=html.indexOf(needle,from))!==-1&&found<10){
-              found++;
-              const lo=Math.max(0,from-260),hi=Math.min(html.length,from+850);
-              clips.push(html.slice(lo,hi).replace(/\r/g,'').replace(/\n/g,'\\n'));
-              from+=needle.length;
+          const needles=['  createInput(){','  update(time,delta){','this.keys.left','this.keys.right','this.keys.run','this.keys.x','this.keys.jump','this.keys.z','this.keys.up','this.keys.down','this.keys.hurryTest','this.hojaDoubleTap','this._hojaDeathKey=(ev)=>','showHojaDeathDialog','continueHojaAfterDeath','const upArrowPressed','const spacePressed','runHeld','runDown','leftHeld','rightHeld','moveSpeed','this.keys.enter'];
+          for(const needle of needles){
+            let from=0,count=0,clips=[];
+            while((from=html.indexOf(needle,from))>=0 && count<4){
+              clips.push(html.slice(Math.max(0,from-650),Math.min(html.length,from+1800)).replace(/\r/g,'').replace(/\n/g,'\\n'));
+              from+=needle.length;count++;
             }
-            if(found)console.log('AUDIT_TOKEN',JSON.stringify(needle),'COUNT_AT_LEAST',found,'CLIPS',JSON.stringify(clips));
+            console.log('AUDIT_FOCUS',JSON.stringify(needle),'SAMPLES',JSON.stringify(clips));
           }
           JS
