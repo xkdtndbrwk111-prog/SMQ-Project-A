@@ -621,3 +621,19 @@
 - [ ] SHA-256 대조, 중단/복구 **실 GAS/실 시트** 시험, Project A/B 요약 조회 전환은 후속 과제. 원본 `EVENT_LOG` 실제 삭제·보관 트리거 설치는 승인 전까지 금지.
 
 **결론:** 운영 스프레드시트는 보호되고, 새 시험용 복사본에서 2개 서로 다른 날짜의 실제 이벤트/요약 합계와 재읽기 정합성을 확인했다. 남은 것은 GAS 실실행·체크섬/실복원 검증과 조회 화면 이전이다.
+
+### 39-6. 2026-11-23 Project A/B 요약 조회 전환용 어댑터 및 실제 사본 판독 점검
+- [x] `HOJA_USAGE_RETENTION_CORE.js`에 **플레이 기준 GRADE/SUBJECT/PUBLISHER facet** 추가. 다중 단원 5개를 선택한 한 게임은 학년·교과에서는 1건만 계산하며, 단원 선택은 5건 보존. 월별 facet 합산과 중복 플레이 단위 테스트 추가.
+- [x] `HOJA_USAGE_RETENTION_TRIAL_GAS.gs`에서 플레이 기준 facets 반환, `HOJA_USAGE_RETENTION_TRIAL_WRITER.gs`에서 `HOJA_TRIAL_DAILY_FACETS` 별도 탭 기록·합계 검사·중복 재실행 저장값 검증. 모의 Sheets 테스트 및 보관 정책 회귀 추가.
+- [x] **실제 격리 Google Sheets 사본**에 `HOJA_TRIAL_DAILY_FACETS` 탭 생성. 2026-11-20 581개 시작에서 16행 플레이 분류, 2026-09-23 414개 시작에서 25행 플레이 분류 저장·다시 읽기 PASS. 11월 20일 기존 `USAGE_DAILY_DIMENSIONS`와 **학년(5학년236/6학년305/기타40), 교과(영어541/기타40), 출판사(천재435/YBM103/비상3)** 그룹별 정확히 일치.
+- [x] `experimental/usage-retention/HOJA_USAGE_SUMMARY_READ_V1.js` 작성. 기존 `U3S1_ROLLUP_V1`와 새 `HOJA_USAGE_RETENTION_V1`를 읽기 전용으로 검사: 최신 COMPLETE·SHA-256 형식·세대 중복·SOLO/TEAM 합계·분류·단원 선택 총합·날짜 누락·원본 조회 없음. 7명 팀을 기록하지 않은 구형 U3S의 잔여 7건은 **인원 미확정**으로 처리.
+- [x] `HOJA_USAGE_SUMMARY_READ_TRIAL_GAS.gs` 구현 및 모의 GAS 시험. **복사본 확인 표식과 운영 시트 ID 차단**, `EVENT_LOG` 접근/쓰기/삭제/트리거 금지. 조회 결과가 통과해도 `productionSwitchAllowed:false` 유지. Project B가 V1 탭이 전혀 없는 기존 U3S 요약만 가진 경우에도 동작하도록 호환 처리(부분적 V1 탭은 오류).
+- [x] **실 Google Sheets 요약 탭만 조회**해 `HOJA_TRIAL_READER_AUDIT` 5개 날짜를 기록하고 다시 읽음: 11/20 U3S COMPLETE 581 + 새 요약 분류 PASS, 11/19 COMPLETE 266, 11/21 COMPLETE 0, 11/22 COMPLETE 6, 09/23은 신형 CONNECTOR_COUNT_VERIFIED 414이지만 **SHA-256 미검증으로 HOLD**, 운영 정식값으로 사용 금지. 표에는 개인식별 필드 없음. 운영 원본에는 시험 탭 생성하지 않음.
+- [x] 위 조회 어댑터/Facet 집계 GitHub Actions **45079474611**(신규 조회/Writer/렌더러 자동검증 전체 PASS). 후속 U3S-only 호환 패치 자동검증은 별도 재확인.
+- [ ] 실제 Project B의 GAS 통계 조회 함수 소스가 연결된 GitHub에서 발견되지 않아 **B 운영 코드 변경/배포 미실시**. B 호출 인터페이스/현재 데이터 계약 확보 후 본 어댑터 매핑과 실제 브라우저 비교 필요.
+- [ ] 별도 Apps Script 시험 프로젝트의 **실행 엔진에서 신규 GAS 조회 함수 실행 미실시**. 이 단계의 실제 시트 점검은 Google Sheets 연결 API와 GitHub 모의시험 기반임을 명확히 구분.
+- [ ] 새 V1의 기존 단원명/namespace 보존은 미확보. 데이터 무결성 외 UI 표시까지 동등해지기 전 Project B 전환 금지. 9/23의 414건은 CONNECTOR_COUNT_VERIFIED일 뿐 SHA-256 COMPLETE가 아니라 오래된 원본 삭제 불가.
+- [ ] 38번 Phaser 자동시험은 최근 실행 `45079474540`에서 반복 사망키 처리 중 타임아웃 FAIL이 재현됨. 이번 변경은 사용량/문서 코드에 국한되고 해당 게임 코드는 수정하지 않았지만, **현재 HEAD 전수 통과라고 주장하지 않음**. 기존 정상 실행 `45038565141`과 별개로 재현성 진단 후 정리.
+- [ ] 통계 삭제·Project A/B 운영 조회 전환·예약 트리거는 계속 금지.
+
+**남은 우선순위:** 39-6 실제 Project B reader 소스 확인/테스트 프로젝트 GAS 실행 → 기존과 신형 요약의 표시·분류 패리티 검증 → 39-7 독립 백업/복구·전체 SHA-256 검증. 정식 배포는 최종 승인 이후.
