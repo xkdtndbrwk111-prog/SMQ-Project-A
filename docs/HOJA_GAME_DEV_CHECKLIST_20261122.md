@@ -242,3 +242,12 @@
 - [ ] `game-trial` 25조각 전체 조립본과 로컬 QA HTML의 일치 여부 미검증. OX 실제 답안 클릭, 전체 56문항 결과, 모바일 화면, 두 단원 혼합, 싱글 아케이드 gzip iframe은 별도 회귀 필요.
 - [ ] Apps Script 실기 시험 프로젝트 미구축, 운영 데이터 쓰기/배포 없음. 오프라인 Phaser 로드 오류는 아케이드 단계에서 점검.
 **다음 작업:** 싱글 OX/OX 재진입 검증 + 정확한 GitHub 브랜치 빌드 재현 후 아케이드 연결.
+
+## 16. 2026-11-22 싱글 OX 정오 회귀와 GitHub 정본 조립 자동검증
+- [x] QA 전용 덱 순서 지정(게임 원본/브랜치 출제 코드 변경 없음)으로 **OX 정답/오답 각각 실제 화면에서 선택**. s6u32:q25 정답 선택 `answered 0→1 / correct 0→1`; s6u31:q24 오답 선택 `answered 1→2 / correct 1 유지`. 두 문제 모두 동일 승인 iframe의 O/X 순서와 다음 풍선 복귀 PASS.
+- [x] 시험 기록 `experimental/unified-quiz-renderer/SOLO_OX_REGRESSION_20261122.md`에 문항 ID·판정·제약 명시. 로컬 7MB 팀+싱글 시험판 기준이며 **GitHub 25조각 정확한 조립본에서 재실행한 결과는 아님**.
+- [x] `game-trial/verify_trial_build.py` 및 `.github/workflows/unified-trial-qa.yml` 추가. GitHub 브랜치에서 정본 25조각 SHA/시험판 14·22번만 변경/승인 HTML 주입/사회6 64문항 WebP15 C형11/저장차단/기존 Node·Python 테스트를 자동 점검하도록 구성.
+- [ ] Github Actions 원격 실행 PASS 여부는 아직 확인 전. 이 워크플로는 **정적·단위·조립 시험만** 수행하며 브라우저/GAS/운영 배포를 테스트하지 않는다.
+- [ ] 전체 56문항 완주, 다른 해상도, 압축 아케이드 연결, 랭킹 서버 인증, 실제 Apps Script 시험 프로젝트 별도 검증 필요.
+
+**다음 작업:** GitHub Actions 빌드 상태 확인→브랜치 정확한 조립본 Chromium 테스트→싱글 아케이드 iframe 원본 메시지 경계 연결.

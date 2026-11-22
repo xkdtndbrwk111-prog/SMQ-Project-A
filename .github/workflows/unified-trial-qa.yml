@@ -1,0 +1,28 @@
+name: HOJA approved renderer trial audit
+on:
+  push:
+    branches:
+      - work/unified-quiz-renderer-20261122
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify original unchanged and rebuild EXACT trial parts
+        run: python3 experimental/unified-quiz-renderer/game-trial/verify_trial_build.py
+      - name: Review and renderer adapter unit tests
+        run: |
+          node --test experimental/unified-quiz-renderer/review_session.test.mjs
+          node --test experimental/unified-quiz-renderer/team_binding.test.mjs
+          node --test experimental/unified-quiz-renderer/frame_host.test.mjs
+          python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'
