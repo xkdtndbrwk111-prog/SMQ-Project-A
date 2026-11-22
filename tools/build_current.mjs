@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { instrumentArcade } from './current-test-probe.mjs';
 import { checkModuleOrder } from './check_module_order.mjs';
+import { execFileSync } from 'node:child_process';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const source=path.join(root,'web/current');
@@ -40,7 +41,20 @@ let arcade=fs.readFileSync(path.join(source,'arcade.html'),'utf8');
  if(errors.length)throw Error('모듈 검사 실패: '+errors.join(' | '));
 }
 
-if(test)arcade=instrumentArcade(arcade);
+let reviewFiles={};
+if(test){
+ const {reviewArcade}=await import('./teacher_review/arcade.mjs');
+ const reviewPath=path.join(root,'tools/teacher_review');
+ reviewFiles['teacher-review.html']=fs.readFileSync(path.join(reviewPath,'index.html'),'utf8');
+ reviewFiles['teacher-review.js']=fs.readFileSync(path.join(reviewPath,'client.js'),'utf8');
+ const gp=fs.readFileSync(path.join(source,'js/parent-gameplay.js'),'utf8');
+ const needle="f.src='arcade.html?season='";
+ if(gp.split(needle).length!==2)throw Error('review host anchor missing');
+ reviewFiles['js/teacher-review-gameplay.js']=gp.replace(needle,"f.src='teacher-review-arcade.html?season='");
+ reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade);
+ arcade=instrumentArcade(arcade);
+ for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
+}
 // Preserve Phase 1 QR compatibility at the frozen baseline. Any source asset change
 // produces a new version, including copied scripts and cartridge files.
 const version=unchanged&&!test?baseline.gameVersion:hash(JSON.stringify(Object.entries(files).sort())+'\0'+hash(arcade)+'\0'+(test?'test':'production')).slice(0,10);
@@ -54,6 +68,13 @@ for(const name of ['index.html','play.html']){
 }
 if((arcade.match(/__HOJA_ARCADE_BUILD_VERSION__/g)||[]).length!==1)throw Error('아케이드 버전 표지가 정확히 하나여야 합니다');
 pages['arcade.html']=arcade.replace('__HOJA_ARCADE_BUILD_VERSION__',version);
+if(test){
+ pages['teacher-review-arcade.html']=reviewFiles['teacher-review-arcade.html'].replace('__HOJA_ARCADE_BUILD_VERSION__',version);
+ const host='js/parent-gameplay.js';
+ if(pages['play.html'].split(host).length!==2)throw Error('review page anchor missing');
+ pages['teacher-review-play.html']=pages['play.html'].replace(host,'js/teacher-review-gameplay.js');
+ pages['teacher-review.html']=reviewFiles['teacher-review.html'].replace('teacher-review.js',`teacher-review.js?v=${hash(reviewFiles['teacher-review.js']).slice(0,16)}`);
+}
 // Content-address local scripts so an old HTTP cache cannot supply a different build.
 for(const name of Object.keys(pages)){
  pages[name]=pages[name].replace(/(<script\b[^>]*\bsrc=["'])(?:(js|vendor)\/)([^"'?]+)(["'])/g,(tag,start,folder,tail,end)=>{
@@ -64,18 +85,22 @@ for(const name of Object.keys(pages)){
 }
 const template=JSON.parse(fs.readFileSync(path.join(source,'BUILD.json'),'utf8'));
 // Hash the exact bytes served, including every external module and cartridge.
-const artifacts = production.map(name => {
- const bytes = Object.hasOwn(pages,name) ? Buffer.from(pages[name]) : fs.readFileSync(path.join(source,name));
+const generated=test?['teacher-review.html','teacher-review.js','teacher-review-arcade.html','teacher-review-play.html','js/teacher-review-gameplay.js']:[];
+const outputFiles=[...production,...generated];
+const artifacts = outputFiles.map(name => {
+ const bytes = Object.hasOwn(pages,name) ? Buffer.from(pages[name]) : Object.hasOwn(reviewFiles,name)?Buffer.from(reviewFiles[name]):fs.readFileSync(path.join(source,name));
  return [name, {bytes:bytes.length, sha256:hash(bytes)}];
 });
-const info = {...template, gameVersion:version, testProbe:test, builtAt:new Date().toISOString(),
+let revision=null,dirty=null;
+if(test){try{revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();dirty=!!execFileSync('git',['status','--porcelain','--untracked-files=normal'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','ignore']}).trim();}catch{}}
+const info = {...template, gameVersion:version, testProbe:test, ...(test?{reviewSourceCommit:revision,reviewSourceDirty:dirty}:{}), builtAt:new Date().toISOString(),
  files:Object.fromEntries(artifacts)};
 if(fs.existsSync(output)){
  const existing = paths(output);
  if(!existing.includes('BUILD.json'))throw Error('빌드 정보가 없는 폴더를 보존합니다.');
  const previous = JSON.parse(fs.readFileSync(path.join(output,'BUILD.json'),'utf8'));
  if(previous.testProbe!==test)throw Error('다른 종류의 빌드 출력이므로 삭제를 중단합니다.');
- const expected = new Set([...production,'BUILD.json']);
+ const expected = new Set([...outputFiles,'BUILD.json']);
  for(const name of existing){
   if(expected.has(name))continue;
   const recorded = previous.files?.[name];
@@ -86,8 +111,8 @@ if(fs.existsSync(output)){
 }
 fs.rmSync(output,{recursive:true,force:true});
 fs.mkdirSync(output,{recursive:true});
-for(const f of production){const target=path.join(output,f);fs.mkdirSync(path.dirname(target),{recursive:true});
- if(Object.hasOwn(pages,f))fs.writeFileSync(target,pages[f]);else fs.copyFileSync(path.join(source,f),target);
+for(const f of outputFiles){const target=path.join(output,f);fs.mkdirSync(path.dirname(target),{recursive:true});
+ if(Object.hasOwn(pages,f))fs.writeFileSync(target,pages[f]);else if(Object.hasOwn(reviewFiles,f))fs.writeFileSync(target,reviewFiles[f]);else fs.copyFileSync(path.join(source,f),target);
 }
 fs.writeFileSync(path.join(output,'BUILD.json'),JSON.stringify(info,null,1)+'\n');
 console.log(`빌드 완료 → ${path.basename(output)}, 게임 버전 ${version}, 시험 훅 ${test?'포함':'없음'}`);
