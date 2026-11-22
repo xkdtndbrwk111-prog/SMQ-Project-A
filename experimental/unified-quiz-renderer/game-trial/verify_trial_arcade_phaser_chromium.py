@@ -150,7 +150,12 @@ async def run():
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open');
     }""",timeout=10000)
-    await focus_arcade_body()
+    # No QA focus steering: the actual death dialog must focus its own button.
+    focused=await page.evaluate("""()=>{
+      const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow;
+      return {outer:document.activeElement?.id,inner:w.document.activeElement?.id};
+    }""")
+    assert focused['inner']=='hojaDeathContinue',('DEATH_CTA_NOT_FOCUSED',key,focused)
     await page.keyboard.press(key)
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
