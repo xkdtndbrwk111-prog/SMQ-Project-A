@@ -58,6 +58,9 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
   const grade=text(r.grade||'',12);
   const subject=text(r.subject||'',64);
   const publisher=text(r.publisher||'',64);
+  // Existing Project B TOP20 counts the original combined cartridge title
+  // once per game, not each individual selected unit.
+  const cartridgeCombination=text(r.cartridge||'이름 없는 카트리지',500);
   const ids=Array.isArray(r.cartridgeIds)?r.cartridgeIds:
    String(r.cartridgeIds||'').split('|').filter(Boolean);
   // Some actual pre-U3S1 EVENT_LOG rows have L:O entirely empty.
@@ -81,7 +84,7 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
     correct>=0&&answered>=correct,'ANSWER_COUNTS');
   }
   if(duration!==null)assert(Number.isFinite(duration)&&duration>=0&&duration<=86400,'DURATION');
-  return {eventId,date,mode,gameId,grade,subject,publisher,
+  return {eventId,date,mode,gameId,grade,subject,publisher,cartridgeCombination,
    cartridgeIds:cartridgeIds.sort(),teamCount,outcome,
    correctTotal:correct,answeredTotal:answered,durationSeconds:duration};
  }
@@ -128,7 +131,8 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
    // multi-cartridge selection dimensions (which intentionally overcount).
    const facetSelections=[
     ['GRADE',e.grade?e.grade+'학년':'기타'],
-    ['SUBJECT',e.subject||'기타']
+    ['SUBJECT',e.subject||'기타'],
+    ['CARTRIDGE_COMBINATION',e.cartridgeCombination]
    ];
    if(e.publisher)facetSelections.push(['PUBLISHER',e.publisher]);
    for(const [dimension,key] of facetSelections){
