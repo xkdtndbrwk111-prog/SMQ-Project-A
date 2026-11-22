@@ -73,14 +73,23 @@ var HOJA_USAGE_V4_CORE=(function(){
   assert(opts.coverageVerified===true,'COVERAGE_NOT_VERIFIED');
   const counts=Object.fromEntries(dims.map(k=>[k,new Map()]));
   const unitLabels=new Map();
-  const ids=new Set(),events=[];
+  const ids=new Map(),events=[];
   let ignoredPrivate=0,ignoredOtherDay=0,starts=0,unknownUnitStarts=0;
+  let retriesSuppressed=0;
   for(const r of rows){
    const e=normalize(r);
    if(!e){ignoredPrivate++;continue;}
    if(e.date!==target){ignoredOtherDay++;continue;}
-   assert(!ids.has(e.eventId),'DUPLICATE_EVENT_ID');
-   ids.add(e.eventId);events.push(e);starts++;
+   const fingerprint=JSON.stringify(e);
+   if(ids.has(e.eventId)){
+    // U3 source sometimes retries the SAME eventId with only a new timestamp.
+    // Existing UsageU2 counted those duplicated rows twice. V4 counts only
+    // one play when all normalized gameplay fields match, but refuses to
+    // silently choose a winner when content actually differs.
+    assert(ids.get(e.eventId)===fingerprint,'DUPLICATE_EVENT_ID_CONFLICT');
+    retriesSuppressed++;continue;
+   }
+   ids.set(e.eventId,fingerprint);events.push(e);starts++;
    add(counts.MODE,e.mode);
    if(e.mode==='TEAM')add(counts.TEAM_SIZE,e.teamSize?e.teamSize+'팀전':'인원 미확인');
    add(counts.GRADE,e.grade);add(counts.SUBJECT,e.subject);
@@ -115,7 +124,7 @@ var HOJA_USAGE_V4_CORE=(function(){
   return {
    schema:SCHEMA,date:target,starts,buckets,
    unitSelectionCount:total('UNIT_SELECTION'),unknownUnitStarts,
-   ignoredPrivate,ignoredOtherDay,sourceRows:rows.length,
+   ignoredPrivate,ignoredOtherDay,sourceRows:rows.length,retriesSuppressed,
    canonicalSource
   };
  }
