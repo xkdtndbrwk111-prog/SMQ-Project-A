@@ -62,6 +62,7 @@ function hojaUsageSummaryReadTrialU1(dateKeys){
     spreadsheetIsolated:true,
     // No fallback to raw EVENT_LOG. Coverage gaps require a separate
     // safe rollup operation, not a fabricated 0 or a live raw scan.
-    productionSwitchAllowed:report.ok===true && countOnly!==true
+    // A validated trial copy is still NOT production deployment approval.
+    productionSwitchAllowed:false
   };
 }
