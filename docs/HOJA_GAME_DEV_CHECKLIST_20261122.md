@@ -576,7 +576,7 @@
 - [x] 이후 물리 진단에서 낮은 소프트웨어 렌더링 FPS, 스폰 지형 접촉/가속 관측 시점 때문에 비결정적인 실패 확인. 지면 판정·코요테 점프 상태·키 입력·실제 원본 Body 속도 호출을 나눠 진단하도록 보강했지만 **반복 CI 안정성은 미확보**.
 - [x] 실험용 `--movement-smoke`는 `.github/workflows/hoja-arcade-input-physics-diagnostic.yml`에 **수동 workflow_dispatch만** 설정. 원래 25풍선+H/7키 필수 자동시험 `hoja-arcade-real-phaser.yml`은 추가 물리 진단에 선행 의존하지 않도록 복구.
 - [x] 사망 다이얼로그의 `hojaDeathContinue` 버튼에 실제 자식 iframe 자동 포커스를 추가하고, QA 스크립트도 자동 포커스가 성공했는지 확인하도록 강화. `versions/2.0.0` 원본 및 운영 GAS는 변경하지 않음.
-- [ ] 자동 포커스 패치 적용 HEAD에서 실 Phaser 전체 25풍선·7개 키·H PASS 재확인 필요. 기존 PASS `45036435321`은 **자동 포커스 추가 이전**이므로 명확히 구분.
+- [x] **자동 포커스 적용 후 전체 실 Phaser 회귀 PASS: GitHub Actions `45038565141` (2026-11-23).** H 표시·닫기/물리 재개, 7키 사망→자동 포커스 버튼→실키 부활, 원래 25풍선·오답 12·FINISH/랭킹 조회 전용·TIME UP 완료. CI 로그에서 `ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS` 확인. 시험은 GitHub 개발 브랜치만, 실 GAS 저장은 차단.
 - [ ] 물리 진단의 반복 가능 실기기/실브라우저 재시험, 자연 맵 및 동굴 전수 완주, 학교 전자칠판과 음향은 NOT RUN.
 
 ### 39-2. 2026-11-23 복사 시험 시트 요약 Writer와 신뢰성 검증
@@ -594,6 +594,7 @@
 - [x] `experimental/usage-retention/HOJA_USAGE_RETENTION_DASHBOARD_TRIAL.html` 작성. 복사 시험용 GAS 함수 `hojaUsageRetentionPreviewTrialU1()`의 JSON으로 총 시작·확인된 완료·시간 종료·미확인 건, 날짜별 플레이 막대 그래프, 모드별 이용 횟수, 단원 선택 TOP10을 표시하는 **관리자 검토 전용 로컬 HTML**.
 - [x] 예시 데이터 표시 버튼과 로컬 JSON 파일 불러오기를 구현. 원격 요청/서버 키/Google Sheets 연결 없이 브라우저 내 처리. 셀 내용은 `textContent`로 넣어 HTML 문자열을 실행하지 않음. 학생·학급 개인 기록은 원천 대상에서 제외.
 - [x] 실제 Chromium 자동검증 `experimental/usage-retention/verify_dashboard_chromium.py` 작성: 가상 데이터 합계 14회, 모드·단원·날짜 표시, JSON 불러오기, 악성 HTML 문자열 무해 표시, 파일 형식 오류, 외부 네트워크 요청 없음. 렌더러 QA 워크플로에 추가.
-- [ ] 브라우저 CI 최신 실행 결과 확인. 프로그램 연결형 관리 대시보드(통합 허브 관리자 인증·권한/운영 통계 API)는 미구현. 오프라인 시험판을 운영 서비스로 홍보·배포하지 않음.
+- [x] **오프라인 시험 대시보드 Chromium CI `45038728913` PASS.** 예시 합계 14회·완료7회·시간종료2회, 단원 TOP3, 유효 JSON 로드, HTML 문자열 실행 방지, 잘못된 JSON 오류 안내, 원격 요청 0회 확인. 기존 공통 문제 렌더러·아케이드 메시지 시험도 같은 실행에서 PASS.
+- [ ] 운영 허브와 연결된 관리자 인증·권한/통계 API는 미구현. 오프라인 시험판을 운영 서비스로 홍보·배포하지 않음.
 
 **검증 순서 유지:** 38/39의 시험 코드→개발 CI PASS→별도 복사 Google Sheet 실연결→통계 읽기 화면 전환→원본 백업·압축 보관 테스트→사용자 승인 후만 운영 배포.
