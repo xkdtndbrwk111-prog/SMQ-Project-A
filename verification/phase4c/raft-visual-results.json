@@ -1,0 +1,1368 @@
+{
+  "seed": 314159,
+  "method": "stage selection and initial placement induced; physics and sinking run in real time",
+  "results": [
+    {
+      "stage": "spring",
+      "rafts": 0
+    },
+    {
+      "stage": "autumn",
+      "rafts": 0
+    },
+    {
+      "stage": "tropics",
+      "label": "idle",
+      "state": {
+        "stage": 2,
+        "dying": false,
+        "player": {
+          "x": 808,
+          "y": 684,
+          "bottom": 705,
+          "vx": 0,
+          "vy": 0,
+          "down": false
+        },
+        "rafts": [
+          {
+            "x": 808,
+            "top": 864,
+            "vy": 0,
+            "left": 768,
+            "right": 848,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 2112,
+            "top": 848,
+            "vy": 0,
+            "left": 2080,
+            "right": 2144,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 2656,
+            "top": 864,
+            "vy": 0,
+            "left": 2624,
+            "right": 2688,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3008,
+            "top": 864,
+            "vy": 0,
+            "left": 2976,
+            "right": 3040,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3104,
+            "top": 848,
+            "vy": 0,
+            "left": 3072,
+            "right": 3136,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 3200,
+            "top": 864,
+            "vy": 0,
+            "left": 3168,
+            "right": 3232,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3488,
+            "top": 864,
+            "vy": 0,
+            "left": 3456,
+            "right": 3520,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3584,
+            "top": 848,
+            "vy": 0,
+            "left": 3552,
+            "right": 3616,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 4000,
+            "top": 864,
+            "vy": 0,
+            "left": 3968,
+            "right": 4032,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4384,
+            "top": 864,
+            "vy": 0,
+            "left": 4352,
+            "right": 4416,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4464,
+            "top": 848,
+            "vy": 0,
+            "left": 4432,
+            "right": 4496,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          }
+        ]
+      },
+      "water": {
+        "visuals": [
+          {
+            "leftX": 736,
+            "rightX": 896,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 704,
+            "backRight": 928,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2048,
+            "rightX": 2176,
+            "leftTop": 832,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2016,
+            "backRight": 2208,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2592,
+            "rightX": 2720,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2560,
+            "backRight": 2752,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2944,
+            "rightX": 3296,
+            "leftTop": 880,
+            "rightTop": 896,
+            "surfaceY": 912,
+            "backLeft": 2912,
+            "backRight": 3328,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3424,
+            "rightX": 3872,
+            "leftTop": 896,
+            "rightTop": 880,
+            "surfaceY": 912,
+            "backLeft": 3392,
+            "backRight": 3904,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3936,
+            "rightX": 4064,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 3904,
+            "backRight": 4096,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 4320,
+            "rightX": 4512,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 4288,
+            "backRight": 4544,
+            "physicsSurfaceY": 896
+          }
+        ],
+        "zones": [
+          {
+            "x": 736,
+            "y": 896,
+            "width": 160,
+            "height": 416
+          },
+          {
+            "x": 2048,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2592,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2944,
+            "y": 912,
+            "width": 352,
+            "height": 400
+          },
+          {
+            "x": 3424,
+            "y": 912,
+            "width": 448,
+            "height": 400
+          },
+          {
+            "x": 3936,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 4320,
+            "y": 896,
+            "width": 192,
+            "height": 416
+          }
+        ]
+      }
+    },
+    {
+      "stage": "tropics",
+      "label": "onboard",
+      "state": {
+        "stage": 2,
+        "dying": false,
+        "player": {
+          "x": 808,
+          "y": 843,
+          "bottom": 864,
+          "vx": 0,
+          "vy": 150,
+          "down": true
+        },
+        "rafts": [
+          {
+            "x": 808,
+            "top": 864,
+            "vy": 150,
+            "left": 768,
+            "right": 848,
+            "occupied": true,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 2112,
+            "top": 848,
+            "vy": 0,
+            "left": 2080,
+            "right": 2144,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 2656,
+            "top": 864,
+            "vy": 0,
+            "left": 2624,
+            "right": 2688,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3008,
+            "top": 864,
+            "vy": 0,
+            "left": 2976,
+            "right": 3040,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3104,
+            "top": 848,
+            "vy": 0,
+            "left": 3072,
+            "right": 3136,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 3200,
+            "top": 864,
+            "vy": 0,
+            "left": 3168,
+            "right": 3232,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3488,
+            "top": 864,
+            "vy": 0,
+            "left": 3456,
+            "right": 3520,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3584,
+            "top": 848,
+            "vy": 0,
+            "left": 3552,
+            "right": 3616,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 4000,
+            "top": 864,
+            "vy": 0,
+            "left": 3968,
+            "right": 4032,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4384,
+            "top": 864,
+            "vy": 0,
+            "left": 4352,
+            "right": 4416,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4464,
+            "top": 848,
+            "vy": 0,
+            "left": 4432,
+            "right": 4496,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          }
+        ]
+      },
+      "water": {
+        "visuals": [
+          {
+            "leftX": 736,
+            "rightX": 896,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 704,
+            "backRight": 928,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2048,
+            "rightX": 2176,
+            "leftTop": 832,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2016,
+            "backRight": 2208,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2592,
+            "rightX": 2720,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2560,
+            "backRight": 2752,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2944,
+            "rightX": 3296,
+            "leftTop": 880,
+            "rightTop": 896,
+            "surfaceY": 912,
+            "backLeft": 2912,
+            "backRight": 3328,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3424,
+            "rightX": 3872,
+            "leftTop": 896,
+            "rightTop": 880,
+            "surfaceY": 912,
+            "backLeft": 3392,
+            "backRight": 3904,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3936,
+            "rightX": 4064,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 3904,
+            "backRight": 4096,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 4320,
+            "rightX": 4512,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 4288,
+            "backRight": 4544,
+            "physicsSurfaceY": 896
+          }
+        ],
+        "zones": [
+          {
+            "x": 736,
+            "y": 896,
+            "width": 160,
+            "height": 416
+          },
+          {
+            "x": 2048,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2592,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2944,
+            "y": 912,
+            "width": 352,
+            "height": 400
+          },
+          {
+            "x": 3424,
+            "y": 912,
+            "width": 448,
+            "height": 400
+          },
+          {
+            "x": 3936,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 4320,
+            "y": 896,
+            "width": 192,
+            "height": 416
+          }
+        ]
+      }
+    },
+    {
+      "stage": "tropics",
+      "label": "sinking",
+      "state": {
+        "stage": 2,
+        "dying": false,
+        "player": {
+          "x": 808,
+          "y": 880.1000000000005,
+          "bottom": 901.1000000000005,
+          "vx": 0,
+          "vy": 34,
+          "down": true
+        },
+        "rafts": [
+          {
+            "x": 808,
+            "top": 901.1000000000005,
+            "vy": 34,
+            "left": 768,
+            "right": 848,
+            "occupied": true,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 909.1000000000005
+          },
+          {
+            "x": 2112,
+            "top": 848,
+            "vy": 0,
+            "left": 2080,
+            "right": 2144,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 2656,
+            "top": 864,
+            "vy": 0,
+            "left": 2624,
+            "right": 2688,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3008,
+            "top": 864,
+            "vy": 0,
+            "left": 2976,
+            "right": 3040,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3104,
+            "top": 848,
+            "vy": 0,
+            "left": 3072,
+            "right": 3136,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 3200,
+            "top": 864,
+            "vy": 0,
+            "left": 3168,
+            "right": 3232,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3488,
+            "top": 864,
+            "vy": 0,
+            "left": 3456,
+            "right": 3520,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3584,
+            "top": 848,
+            "vy": 0,
+            "left": 3552,
+            "right": 3616,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 4000,
+            "top": 864,
+            "vy": 0,
+            "left": 3968,
+            "right": 4032,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4384,
+            "top": 864,
+            "vy": 0,
+            "left": 4352,
+            "right": 4416,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4464,
+            "top": 848,
+            "vy": 0,
+            "left": 4432,
+            "right": 4496,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          }
+        ]
+      },
+      "water": {
+        "visuals": [
+          {
+            "leftX": 736,
+            "rightX": 896,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 704,
+            "backRight": 928,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2048,
+            "rightX": 2176,
+            "leftTop": 832,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2016,
+            "backRight": 2208,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2592,
+            "rightX": 2720,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2560,
+            "backRight": 2752,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2944,
+            "rightX": 3296,
+            "leftTop": 880,
+            "rightTop": 896,
+            "surfaceY": 912,
+            "backLeft": 2912,
+            "backRight": 3328,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3424,
+            "rightX": 3872,
+            "leftTop": 896,
+            "rightTop": 880,
+            "surfaceY": 912,
+            "backLeft": 3392,
+            "backRight": 3904,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3936,
+            "rightX": 4064,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 3904,
+            "backRight": 4096,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 4320,
+            "rightX": 4512,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 4288,
+            "backRight": 4544,
+            "physicsSurfaceY": 896
+          }
+        ],
+        "zones": [
+          {
+            "x": 736,
+            "y": 896,
+            "width": 160,
+            "height": 416
+          },
+          {
+            "x": 2048,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2592,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2944,
+            "y": 912,
+            "width": 352,
+            "height": 400
+          },
+          {
+            "x": 3424,
+            "y": 912,
+            "width": 448,
+            "height": 400
+          },
+          {
+            "x": 3936,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 4320,
+            "y": 896,
+            "width": 192,
+            "height": 416
+          }
+        ]
+      }
+    },
+    {
+      "stage": "tropics",
+      "label": "fall",
+      "state": {
+        "stage": 2,
+        "dying": false,
+        "player": {
+          "x": 808,
+          "y": 902.4597222222246,
+          "bottom": 923.4597222222246,
+          "vx": 0,
+          "vy": 83.58333333333334,
+          "down": false
+        },
+        "rafts": [
+          {
+            "x": 808,
+            "top": 922.6333333333358,
+            "vy": 20,
+            "left": 768,
+            "right": 848,
+            "occupied": false,
+            "sunk": true,
+            "waterY": 896,
+            "enabled": false,
+            "artY": 930.6333333333358
+          },
+          {
+            "x": 2112,
+            "top": 848,
+            "vy": 0,
+            "left": 2080,
+            "right": 2144,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 2656,
+            "top": 864,
+            "vy": 0,
+            "left": 2624,
+            "right": 2688,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3008,
+            "top": 864,
+            "vy": 0,
+            "left": 2976,
+            "right": 3040,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3104,
+            "top": 848,
+            "vy": 0,
+            "left": 3072,
+            "right": 3136,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 3200,
+            "top": 864,
+            "vy": 0,
+            "left": 3168,
+            "right": 3232,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3488,
+            "top": 864,
+            "vy": 0,
+            "left": 3456,
+            "right": 3520,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3584,
+            "top": 848,
+            "vy": 0,
+            "left": 3552,
+            "right": 3616,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 4000,
+            "top": 864,
+            "vy": 0,
+            "left": 3968,
+            "right": 4032,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4384,
+            "top": 864,
+            "vy": 0,
+            "left": 4352,
+            "right": 4416,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4464,
+            "top": 848,
+            "vy": 0,
+            "left": 4432,
+            "right": 4496,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          }
+        ]
+      },
+      "water": {
+        "visuals": [
+          {
+            "leftX": 736,
+            "rightX": 896,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 704,
+            "backRight": 928,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2048,
+            "rightX": 2176,
+            "leftTop": 832,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2016,
+            "backRight": 2208,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2592,
+            "rightX": 2720,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2560,
+            "backRight": 2752,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2944,
+            "rightX": 3296,
+            "leftTop": 880,
+            "rightTop": 896,
+            "surfaceY": 912,
+            "backLeft": 2912,
+            "backRight": 3328,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3424,
+            "rightX": 3872,
+            "leftTop": 896,
+            "rightTop": 880,
+            "surfaceY": 912,
+            "backLeft": 3392,
+            "backRight": 3904,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3936,
+            "rightX": 4064,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 3904,
+            "backRight": 4096,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 4320,
+            "rightX": 4512,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 4288,
+            "backRight": 4544,
+            "physicsSurfaceY": 896
+          }
+        ],
+        "zones": [
+          {
+            "x": 736,
+            "y": 896,
+            "width": 160,
+            "height": 416
+          },
+          {
+            "x": 2048,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2592,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2944,
+            "y": 912,
+            "width": 352,
+            "height": 400
+          },
+          {
+            "x": 3424,
+            "y": 912,
+            "width": 448,
+            "height": 400
+          },
+          {
+            "x": 3936,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 4320,
+            "y": 896,
+            "width": 192,
+            "height": 416
+          }
+        ]
+      }
+    },
+    {
+      "stage": "tropics",
+      "label": "deep",
+      "state": {
+        "stage": 2,
+        "dying": true,
+        "player": {
+          "x": 808,
+          "y": 1133.133333333336,
+          "bottom": 1167.9597222222249,
+          "vx": 0,
+          "vy": 0,
+          "down": false
+        },
+        "rafts": [
+          {
+            "x": 808,
+            "top": 933.6333333333371,
+            "vy": -55,
+            "left": 768,
+            "right": 848,
+            "occupied": false,
+            "sunk": true,
+            "waterY": 896,
+            "enabled": false,
+            "artY": 941.6333333333371
+          },
+          {
+            "x": 2112,
+            "top": 848,
+            "vy": 0,
+            "left": 2080,
+            "right": 2144,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 2656,
+            "top": 864,
+            "vy": 0,
+            "left": 2624,
+            "right": 2688,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3008,
+            "top": 864,
+            "vy": 0,
+            "left": 2976,
+            "right": 3040,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3104,
+            "top": 848,
+            "vy": 0,
+            "left": 3072,
+            "right": 3136,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 3200,
+            "top": 864,
+            "vy": 0,
+            "left": 3168,
+            "right": 3232,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3488,
+            "top": 864,
+            "vy": 0,
+            "left": 3456,
+            "right": 3520,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 3584,
+            "top": 848,
+            "vy": 0,
+            "left": 3552,
+            "right": 3616,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 912,
+            "enabled": true,
+            "artY": 856
+          },
+          {
+            "x": 4000,
+            "top": 864,
+            "vy": 0,
+            "left": 3968,
+            "right": 4032,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4384,
+            "top": 864,
+            "vy": 0,
+            "left": 4352,
+            "right": 4416,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 872
+          },
+          {
+            "x": 4464,
+            "top": 848,
+            "vy": 0,
+            "left": 4432,
+            "right": 4496,
+            "occupied": false,
+            "sunk": false,
+            "waterY": 896,
+            "enabled": true,
+            "artY": 856
+          }
+        ]
+      },
+      "water": {
+        "visuals": [
+          {
+            "leftX": 736,
+            "rightX": 896,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 704,
+            "backRight": 928,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2048,
+            "rightX": 2176,
+            "leftTop": 832,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2016,
+            "backRight": 2208,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2592,
+            "rightX": 2720,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 2560,
+            "backRight": 2752,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 2944,
+            "rightX": 3296,
+            "leftTop": 880,
+            "rightTop": 896,
+            "surfaceY": 912,
+            "backLeft": 2912,
+            "backRight": 3328,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3424,
+            "rightX": 3872,
+            "leftTop": 896,
+            "rightTop": 880,
+            "surfaceY": 912,
+            "backLeft": 3392,
+            "backRight": 3904,
+            "physicsSurfaceY": 912
+          },
+          {
+            "leftX": 3936,
+            "rightX": 4064,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 3904,
+            "backRight": 4096,
+            "physicsSurfaceY": 896
+          },
+          {
+            "leftX": 4320,
+            "rightX": 4512,
+            "leftTop": 880,
+            "rightTop": 880,
+            "surfaceY": 896,
+            "backLeft": 4288,
+            "backRight": 4544,
+            "physicsSurfaceY": 896
+          }
+        ],
+        "zones": [
+          {
+            "x": 736,
+            "y": 896,
+            "width": 160,
+            "height": 416
+          },
+          {
+            "x": 2048,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2592,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 2944,
+            "y": 912,
+            "width": 352,
+            "height": 400
+          },
+          {
+            "x": 3424,
+            "y": 912,
+            "width": 448,
+            "height": 400
+          },
+          {
+            "x": 3936,
+            "y": 896,
+            "width": 128,
+            "height": 416
+          },
+          {
+            "x": 4320,
+            "y": 896,
+            "width": 192,
+            "height": 416
+          }
+        ]
+      }
+    },
+    {
+      "stage": "winter",
+      "rafts": 0
+    },
+    {
+      "stage": "tropics",
+      "label": "water-hazard-induced",
+      "hazard": {
+        "atSurface": false,
+        "belowScreen": true,
+        "surface": 896,
+        "screenBottom": 1028
+      }
+    }
+  ]
+}

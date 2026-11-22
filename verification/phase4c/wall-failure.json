@@ -1,0 +1,9 @@
+{
+  "method": "eaea7c9 test body, seed 314159, existing synthetic KeyA, test-only diagnostic after placement; diagnostic intentionally stops after observation",
+  "stage": 0,
+  "cliffX": 3424,
+  "oldSpawn": {"x": 3496, "y": 900},
+  "enemy": {"type": "MARTIAN", "x": 3520, "y": 903.5},
+  "observedAfterInput": {"recognizedLeft": true, "playerX": 3496, "playerY": 900, "vx": 0, "vy": 0, "physicsBodyEnabled": false, "dying": true, "lastDeathReason": "enemy", "paused": false, "quiz": false, "transitioning": false, "documentFocused": true, "activeElement": "BODY", "solidOverlaps": []},
+  "conclusion": "Player spawned adjacent to MARTIAN; enemy collision disabled body before X movement. This does not show a cliff or input defect."
+}

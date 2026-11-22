@@ -32,3 +32,13 @@
 `node tools/build_current.mjs` → `HOJA_TEST_PROBE=1 node tools/build_current.mjs` → `node verification/phase4c/inventory.mjs` → `node verification/phase4c/natural-smoke.mjs` → `node --test verification/phase4c/inventory.test.mjs`. 시험 빌드의 계측은 게임 상태나 난수를 변경하지 않으며, 0번 시드도 명시적으로 전달한다. 게임 시각은 자연 키 입력 시험에서 실제 시간으로 흐른다. 키 타이밍은 실행 환경에 따라 결과가 달라질 수 있다.
 
 기존 회귀는 `HOJA_BUILD=current node verification/phase2/harness/regression.mjs`, `node --test --test-concurrency=1 verification/phase2c/production-cave.test.mjs verification/phase4b/browser.test.mjs verification/phase4b_cave/browser.test.mjs`, `node tools/check_web.mjs dist-current`, `python3 tools/legacy_split.py check`, `python3 tools/check_phase1_baseline.py`로 확인했다. 단계 간 실행 시 기존 단계의 기준 캡처는 보존한다.
+
+## 2026-11-22 후속 검증 — 미완료 유지
+
+- **PASS:** 절벽 브라우저 시험 입력은 정상 전달됐으며 기존 시험의 플레이어가 적과 충돌해 쓰러진 것이 시간 초과의 원인이다. 게임 코드를 바꾸지 않고 안전한 시작 위치와 실제 브라우저 A키를 사용해 절벽 충돌·사계절 지면/공중 발판·숨은 통로 진입까지 재실행했다. [원인 및 배경·뗏목 시험](PARALLAX_WATER.md).
+- **FAIL:** 열대 뗏목 정지 그림이 수면 위 16px에 떠 있다. 기존 몸체와 물 판정을 보존하면서 자연스럽게 연결하는 시각 보정은 아직 적용하지 못했다.
+- **FAIL (자동 키 입력 자연 시도):** 314159 시드에서 정상 키보드 입력으로 초원 x≈1443까지 이동했으나 적 사유 3회 사망으로 중단했다. 위치 이동·강제 전환·무적은 사용하지 않았다. [입력과 상태 기록](natural-keyboard-retry.json), [시작](screenshots/natural-retry/natural-start.png), [중간](screenshots/natural-retry/natural-progress.png), [중단](screenshots/natural-retry/natural-stop.png). 수동 사람 플레이와 자동 입력을 혼동하지 않는다.
+- **NOT RUN:** 사람이 직접 수행한 사계절 및 동굴 전체 자연 완주와 자연 경로로 모든 부활점·기믹·문항·꽃·FINISH 확인, 다른 시드의 비열대 뗏목, 학교망·실기기.
+- **BLOCKED:** Phase 4C 자연 완주 게이트는 미완료이며 Phase 4D·4E는 착수하지 않는다.
+- **PASS — 추가 회귀:** 원본 및 Phase 1 해시, 26개 입력·몬스터·스프링·뗏목·이동/무너짐 발판·지면·장식·동굴 지형 단위 시험, 배포판 정적 검사, 결정적 trace, QR·HTTP, 유도 FINISH/63점·중복 정산·오답 복습, 개인전 데이터 집계, 지상 체크포인트·토관 S키 왕복, 동굴 여섯 체크포인트 유도 시험, 물 수면 접촉 및 화면 아래 사망 규칙. 절벽 전체 시험은 수정 후 세 차례 통과했다.
+- **BLOCKED — 개인전 실제 에뮬레이터 네트워크:** 기존 `demo-hoja-phase3a` Firestore 프로세스가 127.0.0.1:18080을 이미 점유해 새 격리 시험 인스턴스를 시작하지 못했다. 기존 프로세스나 안전 가드를 변경하지 않았다. 개인전 데이터 단위 시험은 PASS이나 실제 교사·학생 개인전 네트워크 재실행은 NOT RUN이다.

@@ -1,0 +1,1088 @@
+{
+  "seed": 314159,
+  "method": "Pre-scripted browser keyboard events, real time, no teleport or stage override; stop after 3 deaths, 80 actions or 90 seconds.",
+  "trace": [
+    {
+      "label": "start",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 900,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 128,
+        "y": 859,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 1: d 600ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 900,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 128,
+        "y": 859,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 2: d+. 500ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 900,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 132.65350400000005,
+        "y": 750.9828811856454,
+        "vx": 0,
+        "vy": -41.410304926635845,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 3: d 400ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 899,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 150.47350400000002,
+        "y": 795,
+        "vx": 39.59999999999995,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 4: d+. 600ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 899,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 213.60864639999994,
+        "y": 664.7477553987163,
+        "vx": 164.39193599999965,
+        "vy": 69.15674178359023,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 5: d+, 500ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 898,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 266.2975055999999,
+        "y": 795,
+        "vx": 105.33576000000005,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 6: d+,+. 650ms",
+      "lastDeathReason": null,
+      "stage": 0,
+      "secondsRemaining": 898,
+      "deaths": 0,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 532.0221935999998,
+        "y": 859,
+        "vx": 238.755168,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 679.7166666666715,
+          "y": 815.5,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 582.000000000006,
+          "y": 855.5,
+          "state": "ALERT"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 7: d 400ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 898,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 548.3806992,
+        "y": 859,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 644.0500000000037,
+          "y": 818,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 582.000000000006,
+          "y": 863,
+          "state": "ALERT"
+        }
+      ],
+      "dying": true,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "continue",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 897,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 128,
+        "y": 859,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 8: d+. 650ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 896,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 251.64564319999982,
+        "y": 795,
+        "vx": 111.01766399999985,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 9: w 80ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 896,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 259.66148479999987,
+        "y": 795,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 10: d 600ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 895,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 395.6306383999996,
+        "y": 822.0277777777778,
+        "vx": 114.201504,
+        "vy": 376.25,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 470.0500000000005,
+          "y": 814.549999999999,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 602.9166666666698,
+          "y": 863,
+          "state": "PATROL"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 11: d+. 500ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 895,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 530.0668351999994,
+        "y": 747,
+        "vx": 92.01916800000005,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 462.8000000000006,
+          "y": 816.7999999999993,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 628.9166666666683,
+          "y": 863,
+          "state": "PATROL"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 12: d 400ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 894,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 638.9303445333343,
+        "y": 811,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 507.7500000000002,
+          "y": 843.7499999999998,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 650.9166666666671,
+          "y": 863,
+          "state": "PATROL"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 13: d+. 600ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 893,
+      "deaths": 1,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 780.3019725333352,
+        "y": 866.5203229204819,
+        "vx": 111.02716799999989,
+        "vy": 780,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 574.4500000000015,
+          "y": 830.4499999999996,
+          "state": "AIR"
+        },
+        {
+          "type": "MARTIAN",
+          "x": 681.583333333332,
+          "y": 858.75,
+          "state": "ALERT"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 14: d+, 500ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 893,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 782,
+        "y": 1135.8328229204826,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": true
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": true
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": true,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "continue",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 893,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 128,
+        "y": 859,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 15: d+,+. 650ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 892,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 249.48079999999993,
+        "y": 795,
+        "vx": 171.86399999999998,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 16: d 400ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 891,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 378.31269439999977,
+        "y": 798.2569444444443,
+        "vx": 131.62233599999996,
+        "vy": 107.91666666666667,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 17: d+. 650ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 890,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 550.8994831999994,
+        "y": 747,
+        "vx": 122.11833599999994,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "MARTIAN",
+          "x": 680.666666666669,
+          "y": 863,
+          "state": "PATROL"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 18: w 80ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 890,
+      "deaths": 2,
+      "score": 0,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 560.5310287999994,
+        "y": 747,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "MARTIAN",
+          "x": 670.6666666666696,
+          "y": 863,
+          "state": "PATROL"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 19: d 600ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 890,
+      "deaths": 2,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 625.274133333334,
+        "y": 852.4027777777777,
+        "vx": 0,
+        "vy": 405.41666666666663,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 20: d+. 500ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 889,
+      "deaths": 2,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 692.1755722666676,
+        "y": 747,
+        "vx": 29.974336000000076,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 21: d 400ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 888,
+      "deaths": 2,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 746.9042426666671,
+        "y": 755.3124999999999,
+        "vx": 152.20799999999997,
+        "vy": 186.66666666666669,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 22: d+. 600ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 888,
+      "deaths": 2,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 923.1194426666679,
+        "y": 651,
+        "vx": 152.20799999999997,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 1066.0000000000168,
+          "y": 815.8499999999992,
+          "state": "AIR"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 23: d+, 500ms",
+      "lastDeathReason": "water",
+      "stage": 0,
+      "secondsRemaining": 887,
+      "deaths": 2,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 1169.9945978666683,
+        "y": 800.1319444444446,
+        "vx": 305.2831679999997,
+        "vy": 780,
+        "blocked": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": true,
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "JUMPY",
+          "x": 1089.2000000000176,
+          "y": 851.4499999999994,
+          "state": "AIR"
+        },
+        {
+          "type": "ROACH",
+          "x": 1284.5500000000013,
+          "y": 670,
+          "state": "PATROL"
+        },
+        {
+          "type": "JUMPY",
+          "x": 1044.9499999999941,
+          "y": 819.4499999999994,
+          "state": "AIR"
+        }
+      ],
+      "dying": false,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    },
+    {
+      "label": "action 24: d+,+. 650ms",
+      "lastDeathReason": "enemy",
+      "stage": 0,
+      "secondsRemaining": 886,
+      "deaths": 3,
+      "score": 1,
+      "found": 0,
+      "checkpoint": "start",
+      "player": {
+        "x": 1442.6819221333365,
+        "y": 747,
+        "vx": 0,
+        "vy": 0,
+        "blocked": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        },
+        "touching": {
+          "none": false,
+          "up": false,
+          "down": true,
+          "left": false,
+          "right": false
+        }
+      },
+      "nearbyEnemies": [
+        {
+          "type": "ROACH",
+          "x": 1364.4999999999995,
+          "y": 670,
+          "state": "PATROL"
+        },
+        {
+          "type": "ROACH",
+          "x": 1480.116666666667,
+          "y": 750,
+          "state": "FLEE"
+        }
+      ],
+      "dying": true,
+      "quiz": false,
+      "clear": false,
+      "timeUp": false
+    }
+  ],
+  "screenshots": [
+    "verification/phase4c/screenshots/natural-retry/natural-start.png",
+    "verification/phase4c/screenshots/natural-retry/natural-progress.png",
+    "verification/phase4c/screenshots/natural-retry/natural-stop.png"
+  ],
+  "stopReason": "three deaths"
+}

@@ -1,0 +1,155 @@
+{
+  "method": "induced placement; real browser A key; physics and enemies enabled",
+  "seed": 314159,
+  "pair": {
+    "a": {
+      "x": 3248,
+      "y": 880,
+      "w": 176,
+      "h": 368,
+      "kind": "ground",
+      "cave": false,
+      "slab": false
+    },
+    "b": {
+      "x": 3424,
+      "y": 928,
+      "w": 384,
+      "h": 320,
+      "kind": "ground",
+      "cave": false,
+      "slab": false
+    }
+  },
+  "before": {
+    "stage": 0,
+    "position": {
+      "x": 3466,
+      "y": 907
+    },
+    "body": {
+      "x": 3448,
+      "y": 886,
+      "left": 3448,
+      "right": 3484,
+      "top": 886,
+      "bottom": 928,
+      "vx": 0,
+      "vy": 0,
+      "blocked": {
+        "none": false,
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "touching": {
+        "none": false,
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "enabled": true
+    },
+    "input": {
+      "left": false,
+      "right": false,
+      "up": false,
+      "down": false,
+      "run": false,
+      "jump": false,
+      "enter": false
+    },
+    "paused": false,
+    "scenePaused": false,
+    "dying": false,
+    "quiz": false,
+    "clear": false,
+    "timeUp": false,
+    "transitioning": false,
+    "focus": true,
+    "activeElement": "BODY",
+    "overlaps": [],
+    "seed": 314159,
+    "lastDeathReason": null,
+    "enemies": [
+      {
+        "type": "MARTIAN",
+        "x": 3520,
+        "y": 905,
+        "vx": 0,
+        "vy": -105
+      }
+    ]
+  },
+  "events": [
+    {
+      "code": "KeyA",
+      "key": "a",
+      "trusted": true
+    }
+  ],
+  "after": {
+    "stage": 0,
+    "position": {
+      "x": 3442,
+      "y": 907
+    },
+    "body": {
+      "x": 3424,
+      "y": 886,
+      "left": 3424,
+      "right": 3460,
+      "top": 886,
+      "bottom": 928,
+      "vx": -13.199999999999998,
+      "vy": 0,
+      "blocked": {
+        "none": false,
+        "up": false,
+        "down": true,
+        "left": true,
+        "right": false
+      },
+      "touching": {
+        "none": false,
+        "up": false,
+        "down": true,
+        "left": true,
+        "right": false
+      },
+      "enabled": true
+    },
+    "input": {
+      "left": true,
+      "right": false,
+      "up": false,
+      "down": false,
+      "run": false,
+      "jump": false,
+      "enter": false
+    },
+    "paused": false,
+    "scenePaused": false,
+    "dying": false,
+    "quiz": false,
+    "clear": false,
+    "timeUp": false,
+    "transitioning": false,
+    "focus": true,
+    "activeElement": "BODY",
+    "overlaps": [],
+    "seed": 314159,
+    "lastDeathReason": null,
+    "enemies": [
+      {
+        "type": "MARTIAN",
+        "x": 3520,
+        "y": 911,
+        "vx": 0,
+        "vy": 135
+      }
+    ]
+  }
+}
