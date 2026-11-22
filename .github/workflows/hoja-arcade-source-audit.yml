@@ -1,8 +1,5 @@
 name: HOJA arcade packed-source input audit (trial only)
 on:
-  push:
-    branches:
-      - work/unified-quiz-renderer-20261122
   workflow_dispatch:
 permissions:
   contents: read
