@@ -570,3 +570,22 @@
 - [ ] 운영 스크립트·운영 Sheets·원본 gzip·랭킹 TOP25·승인 문제은행은 변경하지 않음.
 
 **다음 작업:** 먼저 38-2의 실키 점프/달리기 물리 진단과 자동 포커스 CI 확인. 39는 복사 시험 시트 연결 → 요약 조회 화면 교체 → 실제 백업/복구 시험 후에만 운영 적용 검토.
+
+### 38-2. 2026-11-23 키보드 실 Phaser 물리 진단과 CI 격리
+- [x] 실 Chromium/Phaser 시험 중 **S 앉기·해제**, **마침표(Period) 점프**, **쉼표(Comma) 달리기 속도 증가** 관측. 실행 `45037144456`에서 `ARCADE_REAL_2_0_PHYSICS_S_CROUCH_PERIOD_JUMP_COMMA_RUN_PASS` 출력: 일반 이동 52.8, 쉼표 달리기 66.0; 정기 전체 CI PASS와는 분리해서 표기.
+- [x] 이후 물리 진단에서 낮은 소프트웨어 렌더링 FPS, 스폰 지형 접촉/가속 관측 시점 때문에 비결정적인 실패 확인. 지면 판정·코요테 점프 상태·키 입력·실제 원본 Body 속도 호출을 나눠 진단하도록 보강했지만 **반복 CI 안정성은 미확보**.
+- [x] 실험용 `--movement-smoke`는 `.github/workflows/hoja-arcade-input-physics-diagnostic.yml`에 **수동 workflow_dispatch만** 설정. 원래 25풍선+H/7키 필수 자동시험 `hoja-arcade-real-phaser.yml`은 추가 물리 진단에 선행 의존하지 않도록 복구.
+- [x] 사망 다이얼로그의 `hojaDeathContinue` 버튼에 실제 자식 iframe 자동 포커스를 추가하고, QA 스크립트도 자동 포커스가 성공했는지 확인하도록 강화. `versions/2.0.0` 원본 및 운영 GAS는 변경하지 않음.
+- [ ] 자동 포커스 패치 적용 HEAD에서 실 Phaser 전체 25풍선·7개 키·H PASS 재확인 필요. 기존 PASS `45036435321`은 **자동 포커스 추가 이전**이므로 명확히 구분.
+- [ ] 물리 진단의 반복 가능 실기기/실브라우저 재시험, 자연 맵 및 동굴 전수 완주, 학교 전자칠판과 음향은 NOT RUN.
+
+### 39-2. 2026-11-23 복사 시험 시트 요약 Writer와 신뢰성 검증
+- [x] `experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_WRITER.gs` 추가. 기존 `EVENT_LOG`는 읽기만 하고, **별도 복사 시험 스프레드시트**에 `HOJA_TRIAL_DAILY_TOTALS`/`HOJA_TRIAL_DAILY_DIMENSIONS`/`HOJA_TRIAL_RETENTION_MANIFEST` 세 탭만 생성·갱신.
+- [x] 실제 실행 전 스크립트 속성 `HOJA_USAGE_TRIAL_WRITE_ACK=COPIED_SHEET_ONLY`, 수동 작성된 `_HOJA_USAGE_TRIAL_ONLY!A1=HOJA_RETENTION_SANDBOX_V1`, 운영 시트 ID와 불일치 조건을 모두 확인. 필요한 확인 표식을 코드가 자기 자신에게 부여할 수 없음.
+- [x] `ScriptLock`으로 요약 쓰기 경합 차단, `PREPARING` 매니페스트 기록→합계 저장→각 시트 읽기 검증→`COMPLETE` 게시. 같은 데이터 재실행에는 저장행/매니페스트 일치까지 확인하고 중복 append를 생략, 중단된 `PREPARING`에는 자동 재작성 금지.
+- [x] `HOJA_USAGE_RETENTION_TRIAL_WRITER.test.mjs`에서 운영 ID/수동 확인표식 누락 차단, 원본 불변, 정상 집계, 중복 재호출, 중단·재개 차단, 저장행 변조 검출 시험. GitHub Actions **`45037927335` PASS** (해당 시점 시험판 코드); 신규 다중단원 정답률 왜곡 방지 테스트는 후속 실행 대상.
+- [x] 다중 카트리지에 완주/정답/시간을 **근거 없이 배분해 두 배로 집계하던 문제** 수정. 총 플레이의 결과값은 전체 게임·모드 합계에서만, 단원별로는 사용 선택 횟수만 보존. 시험 케이스 추가.
+- [x] 통계 보관 설계서에 복사 시트 시험 절차·안전성 조건을 문서화. 실제 원본 삭제 API·예약 트리거·운영 Apps Script 배포는 포함하지 않음.
+- [ ] 실제 Google Sheets 복사본과 GAS 연결 시험, 운영 버전 요약 조회 화면 전환, 30일/12개월 자동 압축/원본 영구 삭제 등은 **실행하지 않음**. 모의 스프레드시트 PASS는 실 Google Sheets 쓰기 PASS가 아님.
+
+**다음 작업:** 38번 정기 Phaser 회귀와 신규 집계 QA의 최신 HEAD 성공 여부 확인. 통계는 별도 복사 시트의 실제 쓰기·중복·부분 실패 복구 검증 후 운영 이전을 검토할 것.
