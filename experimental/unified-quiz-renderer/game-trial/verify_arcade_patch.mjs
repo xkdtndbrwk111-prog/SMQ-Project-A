@@ -17,6 +17,8 @@ assert(patched.includes('run:this.input.keyboard.addKey(K.COMMA)'),'Comma must b
 assert(patched.includes('const left=this.keys.a.isDown;')&&patched.includes('const right=this.keys.d.isDown;'),'Movement must use A/D only');
 assert(patched.includes('const upPressed=Phaser.Input.Keyboard.JustDown(this.keys.w);'),'W must be the sole door key');
 assert(patched.includes('const jumpPressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);'),'Jump must not fire on W/Space/Z');
+const jumpProbeIndex=patched.indexOf('const jumpPressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);');
+console.log('ARCADE_TRIAL_JUMP_CONTEXT_START\n'+patched.slice(jumpProbeIndex-2300,jumpProbeIndex+2200)+'\nARCADE_TRIAL_JUMP_CONTEXT_END');
 assert(patched.includes('const jumpHeld=this.keys.jump.isDown;'),'Variable jump height must use only period');
 assert(patched.includes("const run=this.keys.run.isDown;"),'Double tap/Shift/X run must be disabled');
 assert(!patched.includes('const doubleTapRun='),'Double tap running must be disabled');
