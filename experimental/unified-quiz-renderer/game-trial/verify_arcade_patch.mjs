@@ -20,6 +20,17 @@ assert(patched.includes('m.found===25&&m.answered===25&&m.usedFamilies===25'),'F
 assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_START'));
 assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_DONE'));
 assert(patched.includes('startReview?.(RUN.step09History||[]'));
+assert(patched.includes('maxlength="6"'),'Rank input must permit 2–6 characters');
+assert(patched.includes('aria-label="한글·영문·숫자 2~6자"'));
+assert(patched.includes("normalize('NFC').replace(/[a-z]/g,c=>c.toUpperCase()).replace(/[^가-힣A-Z0-9]/g,'').slice(0,6)"));
+assert(patched.includes('const valid=cleaned.length>=2&&cleaned.length<=6'));
+assert(patched.includes('compositionstart')&&patched.includes('compositionend'));
+assert(patched.includes('/^[가-힣A-Z0-9]{2,6}$/.test(r.name)'));
+assert(!patched.includes('aria-label="영문 또는 숫자 세 글자"'));
+const approvedBackend=readFileSync('versions/2.0.0/Code.gs','utf8');
+assert(approvedBackend.includes('/^[가-힣A-Z0-9]{2,6}$/.test(v)'),'Name policy must remain identical to the source GAS');
+assert(approvedBackend.includes("HOJA_RANK_FORBIDDEN_ = ['SEX','XES','EXS','SXE']"),'Forbidden-name rule must remain original');
+console.log('ARCADE_RANK_NAME_POLICY_2_TO_6_HANGUL_LATIN_NUMERIC_PASS');
 
 const child=patched.match(/<script id="hojaArcadeApprovedChildTrial">([\s\S]*?)<\/script>/);
 assert(child&&child[1],'Child bridge script missing');

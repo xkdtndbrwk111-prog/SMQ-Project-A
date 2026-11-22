@@ -255,6 +255,62 @@ async def run():
     assert finish['rankLabel']=='FINISH' and '전체 스테이지 완료' in finish['title'],finish
     assert '시험용 이동' in finish['message'],finish
     print('ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS',finish,flush=True)
+    # Existing Code.gs accepts NFC Hangul, Latin and numbers 2-6 chars.
+    # All browser RPCs below are read-only: never touch GAS or saved rank records.
+    rank_frame=page.frame_locator('#hqArcadeFrame')
+    name_input=rank_frame.locator('#hojaRankName')
+    enter=rank_frame.locator('#hojaRankEnter')
+    for value,normalized in [('호자','호자'),('김하늘','김하늘'),
+                             ('ABC123','ABC123'),('ab','AB'),('A9','A9'),
+                             ('가나다라마바','가나다라마바')]:
+      await name_input.fill(value)
+      assert (await name_input.input_value())==normalized,(value,await name_input.input_value())
+      assert await enter.is_enabled(),value
+    for invalid in ['A','SEX','XES','EXS','SXE']:
+      await name_input.fill(invalid)
+      assert not await enter.is_enabled(),invalid
+    # Korean IME must not be sanitized while it is composing a syllable.
+    ime_state=await name_input.evaluate("""el=>{
+      el.value='';
+      el.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));
+      el.value='ㅎ';
+      el.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true,data:'ㅎ'}));
+      const inProgress=el.value;
+      el.value='하';
+      el.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
+      return {inProgress,final:el.value};
+    }""")
+    assert ime_state=={'inProgress':'ㅎ','final':'하'},ime_state
+    await name_input.fill('호자')
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      w.__QA_RANK_RPC_CALLS__=[];
+      w.HOJA_STEP10_RPC=async(method,payload)=>{
+        w.__QA_RANK_RPC_CALLS__.push({method,payload});
+        if(method!=='RANK_LIST')throw Error('LIVE_RANK_WRITE_FORBIDDEN');
+        return {rows:[
+          {name:'김하늘',score:900,correct:22,found:25},
+          {name:'ABC123',score:800,correct:20,found:25},
+          {name:'A9',score:700,correct:18,found:25},
+          {name:'SEX',score:1000,correct:25,found:25},
+          {name:'TOOLONG',score:650,correct:17,found:25},
+          {name:'a9',score:600,correct:16,found:25}
+        ]};
+      };
+    }""")
+    await enter.click(timeout=12000)
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('hojaRankListPhase')?.hidden===false;
+    }""",timeout=16000)
+    rank_names=await rank_frame.locator('#hojaRankRows .hojaRankRow span:nth-child(2)').all_text_contents()
+    visible=[x.strip() for x in rank_names if x.strip()!='---']
+    assert visible==['김하늘','ABC123','A9'],visible
+    rpc_calls=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_RANK_RPC_CALLS__")
+    assert [r['method'] for r in rpc_calls]==['RANK_LIST'],rpc_calls
+    print('ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS',visible,ime_state,flush=True)
+    await rank_frame.locator('#hojaRankClose').click()
+
     # Independent TIME UP path: no finish rank even with a valid test scene.
     await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
