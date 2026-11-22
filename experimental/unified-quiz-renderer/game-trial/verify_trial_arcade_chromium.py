@@ -33,6 +33,14 @@ async def run():
         browser=await pw.chromium.launch(**opts)
         page=await browser.new_page(viewport={'width':1280,'height':800})
         page.on('dialog',lambda d:asyncio.create_task(d.dismiss()))
+        # Transport-only: prevent the real Phaser boot scene from asynchronously
+        # closing the synthetic child request before the parent renderer finishes.
+        # The dedicated real-Phaser workflow tests game lifecycle separately.
+        blocked=[0]
+        async def block_phaser(route):
+            blocked[0]+=1
+            await route.abort()
+        await page.route('**/phaser.min.js',block_phaser)
         await page.set_content(html,wait_until='domcontentloaded',timeout=90000)
         await page.evaluate('''(sources)=>{
           window.HOJA_B_LIVE.setSources(sources);
@@ -90,5 +98,7 @@ async def run():
             await page.wait_for_selector('#hojaArcadeApprovedJudgment',timeout=3000)
             await page.wait_for_function('''()=>document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='none' ''',timeout=10000)
             print('ARCADE_IFRAME_TRANSPORT_PASS',typ,'index',observed['index'],flush=True)
+        assert blocked[0]>=1,'Unexpected: no Phaser resource was isolated'
+        print('ARCADE_TRANSPORT_ONLY_PHASER_BLOCKED',blocked[0],flush=True)
         await browser.close()
 if __name__=='__main__':asyncio.run(run())
