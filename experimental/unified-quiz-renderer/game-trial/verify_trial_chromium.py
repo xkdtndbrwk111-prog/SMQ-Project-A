@@ -54,11 +54,15 @@ async def main():
         await page.evaluate('''(sources)=>{
           window.__hojaAudioPauseCalls=0;window.__hojaAudioResumeCalls=0;
           let paused=false;
-          window.HOJA_ATTRACT_SCENE={pausedByUser:false,scene:{
-            isPaused:()=>paused,
-            pause:()=>{paused=true;window.__hojaAudioPauseCalls++;},
-            resume:()=>{paused=false;window.__hojaAudioResumeCalls++;}
-          }};
+          window.HOJA_ATTRACT_SCENE={pausedByUser:false,
+            anims:{pauseAll:()=>{},resumeAll:()=>{}},
+            tweens:{pauseAll:()=>{},resumeAll:()=>{}},
+            scene:{
+              isPaused:()=>paused,
+              pause:()=>{paused=true;window.__hojaAudioPauseCalls++;},
+              resume:()=>{paused=false;window.__hojaAudioResumeCalls++;},
+              restart:()=>{}
+            }};
           window.HOJA_B_LIVE={sources};window.HOJA_GAMEPLAY.setServerQuestions(sources);
           window.HOJA_GAMEPLAY.launch("quiz","spring");
           if(window.__hojaAudioPauseCalls!==1)throw Error('INTRO_NOT_PAUSED_FOR_SOLO');
