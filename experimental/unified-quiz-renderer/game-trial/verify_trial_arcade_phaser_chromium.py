@@ -207,14 +207,15 @@ async def run():
    # consume the JustDown edge if tested on the same frame.
    await page.wait_for_function("""()=>{
      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-     return (s.playerBody.body.blocked?.down||s.playerBody.body.touching?.down) && !s.hojaIsSitting;
-   }""",timeout=10000)
+     return (s.playerBody.body.blocked?.down||s.playerBody.body.touching?.down) &&
+       !s.hojaIsSitting && s.coyoteMs>0 && !s._jumpConsumedAirborne;
+   }""",timeout=15000)
    try:
     focus=await focus_keys()
     before_jump=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),b=s.playerBody.body;
       return {jumpKey:s.keys.jump.keyCode,frame:s.game.loop.frame,
-       grounding:b.blocked?.down||b.touching?.down,vy:b.velocity.y,
+       grounding:b.blocked?.down||b.touching?.down,vy:b.velocity.y,coyoteMs:s.coyoteMs,consumedAir:s._jumpConsumedAirborne,
        paused:s.manualPaused,focus:w.document.activeElement?.tagName};
     }""")
     print('ARCADE_REAL_PERIOD_PRE',focus,before_jump,flush=True)
@@ -225,7 +226,7 @@ async def run():
     }""",timeout=8000)
     after_key=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),b=s.playerBody.body;
-      return {isDown:s.keys.jump.isDown,vy:b.velocity.y,ground:b.blocked?.down||b.touching?.down,
+      return {isDown:s.keys.jump.isDown,vy:b.velocity.y,ground:b.blocked?.down||b.touching?.down,coyoteMs:s.coyoteMs,consumedAir:s._jumpConsumedAirborne,
        jumping:s.hojaIsJumping,focus:w.document.activeElement?.tagName};
     }""")
     print('ARCADE_REAL_PERIOD_KEY',after_key,flush=True)
@@ -236,7 +237,7 @@ async def run():
    except PWTimeout:
     diagnostic=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),b=s.playerBody.body;
-      return {isDown:s.keys.jump.isDown,vy:b.velocity.y,ground:b.blocked?.down||b.touching?.down,
+      return {isDown:s.keys.jump.isDown,vy:b.velocity.y,ground:b.blocked?.down||b.touching?.down,coyoteMs:s.coyoteMs,consumedAir:s._jumpConsumedAirborne,
        jumpCode:s.keys.jump.keyCode,frame:s.game.loop.frame,paused:s.manualPaused,
        childFocus:w.document.activeElement?.tagName,outerFocus:document.activeElement?.id};
     }""")
