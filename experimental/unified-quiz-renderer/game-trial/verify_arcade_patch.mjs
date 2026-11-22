@@ -27,6 +27,7 @@ assert(!patched.includes("if(ev.code!=='Enter'&&ev.code!=='Space')return"),'Old 
 assert(patched.includes('this.continueHojaAfterDeath()'),'Original checkpoint respawn must remain');
 const help=patched.match(/<script id="hojaTrialControlsHelpScript">([\s\S]*?)<\/script>/);
 assert(help&&help[1],'H help script missing');
+assert(help[1].trim().startsWith('(()=>'),'H help source must be executable, not a quoted string');
 new Function(help[1]);
 console.log('ARCADE_TRIAL_INPUT_WASD_COMMA_PERIOD_HELP_DEATH_STATIC_PASS');
 
