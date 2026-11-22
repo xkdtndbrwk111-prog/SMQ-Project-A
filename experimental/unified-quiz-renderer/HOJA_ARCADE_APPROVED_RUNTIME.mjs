@@ -129,7 +129,7 @@ export function patchApprovedArcadeInnerHTML(html){
  // The death overlay must focus a real control inside the nested arcade iframe.
  // Otherwise keydown can remain on the parent frame after stage transitions.
  s=substituteOnce(s,"    window.addEventListener('keydown',this._hojaDeathKey,true);",
- "    window.addEventListener('keydown',this._hojaDeathKey,true);\\n    document.getElementById('hojaDeathContinue')?.focus({preventScroll:true});".replace('\\n','\\n'));
+ "    window.addEventListener('keydown',this._hojaDeathKey,true);\n    document.getElementById('hojaDeathContinue')?.focus({preventScroll:true});");
 
  s=substituteOnce(s,"<button id=\"hojaDeathContinue\" type=\"button\">계속하기 ▶</button>","<button id=\"hojaDeathContinue\" type=\"button\">조작키 아무거나 눌러 계속 ▶</button>");
  s=substituteOnce(s,'</head>',HELP_SCRIPT+'\n</head>');
