@@ -140,7 +140,22 @@ async def run():
      return {run:s.keys.run.keyCode,comma:K.COMMA,jump:s.keys.jump.keyCode,period:K.PERIOD};
    }""")
    assert mapping['run']==mapping['comma'] and mapping['jump']==mapping['period'],mapping
+   pre_help=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+     w.__QA_H_KEY_LOG__=[];w.addEventListener('keydown',e=>{if(e.code==='KeyH')w.__QA_H_KEY_LOG__.push(e.code)},true);
+     return {helpExists:!!w.document.getElementById('hojaTrialControlsHelp'),app:!!w.HOJA_PHASER_APP,
+       appSceneMatches:w.HOJA_PHASER_APP?.scene?.()===s,
+       focus:w.document.activeElement?.id,
+       flags:{dying:s.dying,clear:s.clear,timeUp:s.timeUp,transitioning:s.transitioning,quizActive:s.quizActive,manualPaused:s.manualPaused}};
+   }""")
+   print('ARCADE_H_HELP_PRECHECK',pre_help,flush=True)
    await page.keyboard.press('h')
+   help_probe=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return {seen:w.__QA_H_KEY_LOG__,display:w.document.getElementById('hojaTrialControlsHelp')?.style.display,
+       paused:w.__QA_ACTIVE_SCENE__()?.manualPaused};
+   }""")
+   print('ARCADE_H_HELP_AFTER_KEY',help_probe,flush=True)
    await page.wait_for_function("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow;
      return w.document.getElementById('hojaTrialControlsHelp')?.style.display==='grid' &&
