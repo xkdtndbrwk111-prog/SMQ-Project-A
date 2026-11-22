@@ -3596,7 +3596,7 @@ class HojaScene extends Phaser.Scene{
       ...ENEMY_SPAWNS.filter(o=>o.type==='BALLOONEY').map(o=>({x:o.x,y:o.y,radius:40})),
       ...CAVES.map(([a,b])=>({x:(a+b)/2,radius:(b-a)/2+16})),
       ...WATER_SPANS.map(([a,b])=>({x:(a+b)*TILE/2,radius:(b-a)*TILE/2+24}))];
-    const plan=api.checkpoint({solids:SOLIDS,start,end,blocked:cpBlocked,
+    const plan=api.checkpoint({solids:SOLIDS,start,end,theme:STAGE.theme,blocked:cpBlocked,
       clear:(x,y)=>!hojaRectsHit(x-34,y-68,x+34,y)});
     const props=api.plan({theme:STAGE.theme,solids:SOLIDS,start,end,
       blocked:[...blocked,{x:plan.mid,y:plan.midY,radius:80}],enemies:ENEMY_SPAWNS,seed:(RUN.seed|0)^STAGE_INDEX});

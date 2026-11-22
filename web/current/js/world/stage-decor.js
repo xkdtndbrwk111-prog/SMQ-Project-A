@@ -7,7 +7,7 @@ window.HOJA_STAGE_DECOR=(()=>{
   grassland:{path:'assets/decoration/grassland/Grassland_entities (16 x 16).png',items:[['flower-tree',144,16,48,48],['sign',48,80,16,16],['wood-fence',80,80,48,16],['short-fence',80,80,16,16]]},
   plants:{path:'assets/decoration/grassland/Extra_plants (16 x 16).png',items:[['flower-bed',80,32,64,32]]},
   autumn:{path:'assets/decoration/autumn/Autumn_entities (16 x 16).png',items:[['autumn-tree',16,16,48,48],['forest-rail',224,48,80,32]]},
-  tropics:{path:'assets/decoration/tropics/Tropics_entities (16 x 16).png',items:[['palm',16,16,48,48],['shore-rail',80,48,48,16],['short-rail',80,48,16,16],['shore-rock',144,48,16,16],['pier',176,32,80,32]]},
+  tropics:{path:'assets/decoration/tropics/Tropics_entities (16 x 16).png',items:[['palm',16,16,48,48],['shore-rail',80,48,48,16],['short-rail',80,48,48,16],['shore-rock',144,48,16,16],['pier',176,32,80,32]]},
   winter:{path:'assets/decoration/winter/Winter_entities (16 x 16).png',items:[['snow-tree',16,16,48,48],['snow-fence',144,16,48,16],['short-snow-fence',144,16,16,16],['snow-rock',16,80,16,16]]},
   flowers:{path:'assets/decoration/universal/Flowers (16 x 16).png',items:[['flower',0,0,16,16],['flowers-pink',16,0,16,16],['flowers-yellow',32,0,16,16]]},
   street:{path:'assets/decoration/universal/Snack_machine_Bench_Trash_bin (16 x 16).png',items:[['vending-machine',16,16,32,32],['bench',48,16,48,32],['bin',96,16,16,32]]},
@@ -25,16 +25,20 @@ window.HOJA_STAGE_DECOR=(()=>{
  function atlasList(theme){return PALETTES[theme]||[];}
  function item(id){const [sheet,name]=id.split(':');const def=ATLASES[sheet]?.items.find(a=>a[0]===name);if(!def)throw Error('Missing decoration '+id);return {sheet,name,rect:def.slice(1)};}
  function ground(solids,x,width){let found=null;for(const s of solids){if(s.kind!=='ground'||s.cave||s.slab||x-width/2<s.x+T||x+width/2>s.x+s.w-T)continue;if(found===null||s.y<found)found=s.y;}return found;}
- function checkpoint({solids,start,end,blocked=[],clear=()=>true}){
-  const line=(start+end)/2,candidates=[];
+ function checkpoint({solids,start,end,theme,blocked=[],clear=()=>true}){
+  const center=(start+end)/2,candidates=[];
   for(const s of solids){if(s.kind!=='ground'||s.cave||s.slab||s.w<96)continue;for(let x=Math.ceil((s.x+48)/T)*T;x<=s.x+s.w-48;x+=T){
    if(x<=start+64||x>=end-64||ground(solids,x,64)!==s.y||!clear(x,s.y))continue;
    const overlap=blocked.some(b=>Math.abs(b.x-x)<(b.radius||64)&&Math.abs((b.y??s.y)-s.y)<160);
    if(!overlap)candidates.push({x,y:s.y});
   }}
   if(!candidates.length)throw Error('No safe ground for midpoint checkpoint');
-  candidates.sort((a,b)=>Math.abs(a.x-line)-Math.abs(b.x-line)||a.x-b.x);
-  return {start,line,mid:candidates[0].x,midY:candidates[0].y,end};
+  candidates.sort((a,b)=>Math.abs(a.x-center)-Math.abs(b.x-center)||a.x-b.x);
+  // The meadow machine can be far from the map midpoint. Attach its
+  // invisible crossing line to the machine; other themes retain their
+  // established checkpoint rule. The line works at any player height.
+  const mid=candidates[0].x;
+  return {start,line:theme==='grassland'?mid:center,mid,midY:candidates[0].y,end};
  }
  function crossed(a,b,line){return Number.isFinite(a)&&Number.isFinite(b)&&((a<line&&b>=line)||(a>line&&b<=line));}
  function plan({theme,solids,start,end,blocked=[],enemies=[],seed=0}){
