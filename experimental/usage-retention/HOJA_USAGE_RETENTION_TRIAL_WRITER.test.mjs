@@ -119,6 +119,12 @@ test('replay same SHA-256 is idempotent; does not append extra rows',()=>{
  assert.deepEqual([...t.contents].map(([key,value])=>[key,value.length]),counts);
 });
 
+test('same completed generation with altered stored summary is NOT treated as replay success',()=>{
+ const t=fixture();t.run();
+ t.contents.get('HOJA_TRIAL_DAILY_TOTALS')[1][4]=999;
+ assert.throws(()=>t.run(),/REPLAY_READBACK_MISMATCH/);
+});
+
 test('incomplete generation stops and remains visible for manual review',()=>{
  const t=fixture();t.setFail('HOJA_TRIAL_DAILY_TOTALS');
  assert.throws(()=>t.run(),/SIMULATED_INTERRUPTED_WRITE/);
