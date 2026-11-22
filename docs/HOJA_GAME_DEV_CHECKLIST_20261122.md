@@ -338,3 +338,15 @@
 - [ ] GitHub Actions 신규 5건 실행 결과 확인 대기. 운영 원본/main/GAS 불변.
 
 **다음 작업:** 요청 ID를 가지는 아케이드 iframe↔승인 렌더러 어댑터 → 압축 HTML 시험용 패치 → Chromium 실행 회귀.
+
+## 24. 2026-11-22 아케이드 승인 렌더러 실제 시험판 삽입 — 첫 연결
+- [x] `HOJA_ARCADE_APPROVED_RUNTIME.mjs` 추가: 압축 원본 `showQuiz(e)`의 기존 `finish(index)`와 점수/풍선/25문항 진행은 **그대로 보존**하고, 질문 표시 요청만 부모 화면으로 전달. 교사 승인 렌더러에 있는 정답 ID를 기존 게임 선택지 인덱스로 역변환하여 답변.
+- [x] iframe 요청 `HOJA_ARCADE_APPROVED_OPEN / SELECT / VERDICT / CLOSE`에 1회성 요청 ID·실제 iframe `event.source` 대조·중복답변 차단을 적용. 정확한 정답/오답 문구는 실제 아케이드 판정 이벤트를 받아 표시(부모에서 재채점하지 않음).
+- [x] 부모 아케이드 승인 iframe이 기존 `HOJA_APPROVED_RENDERER_BRIDGE.html`을 그대로 사용. 싱글 모드와 동일한 숫자 1~3/숫자패드, O/X, 방향키/Enter/Space 지원 구조. 최상단 62px 게임 메뉴는 가리지 않음.
+- [x] `game-trial/part-14.txt`의 아케이드 압축 해제 직후 **허가된 정확한 원본 HTML 문자열만** 시험용 패치 후 원래 `srcdoc`으로 실행하도록 코드 연결. `stop()`에 아케이드 임시 iframe 정리 추가. `part-22.txt`에 런타임 모듈 주입 앵커 추가.
+- [x] `build_trial.py`는 별도 승인 렌더러 원문 + 외부 매핑/런타임 모듈을 시험판에만 삽입. 기존 `versions/2.0.0`과 gzip 원본을 변경하지 않음.
+- [x] GitHub Actions에 원본 gzip 복원/주입 앵커/기존 점수·풍선 함수 보존/아케이드 브리지 JS 구문 확인을 위한 `verify_arcade_patch.mjs` 검사 추가.
+- [ ] **새 CI 실제 실행 PASS는 확인 전.** 정적 시험이 통과해도 Phaser 실제 풍선 충돌→아케이드 iframe→승인 화면 클릭→점수 정산의 전체 브라우저 재현은 별도 필요.
+- [ ] 운영 게임/GAS/랭킹 미변경. 실기 음향 및 2~7팀 자연 완주도 별개.
+
+**다음 작업:** 새 CI 결과 확인/실패 수정 → 정확한 개발 브랜치의 Chromium 아케이드 두 프레임 메시지 왕복·정오답 UI 실기 테스트 → 원래 Phaser 환경 자연 풍선 풀이 회귀.

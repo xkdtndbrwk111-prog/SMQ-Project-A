@@ -12,7 +12,7 @@ ROOT=HERE.parents[2]
 ORIGINAL=ROOT/'versions/2.0.0/Game.html.parts'
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
-EXPECTED_14='70d3c6aab0620a74e7cd9f91015a02b2c3f8ca21'
+EXPECTED_14='de83f2e30c03b082b7acbdf47a2c42bb2bc98eeb'
 def gitblob(data):
     return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():
@@ -31,6 +31,9 @@ def audit():
         assert b'HOJA_TRIAL_APPROVED_HTML_INLINE' not in b
         assert b'window.HOJA_TRIAL_APPROVED_HTML=' in b
         assert b'window.HOJA_UNIFIED_TRIAL_CORE' in b
+        assert b'HOJA_ARCADE_APPROVED_RUNTIME_INLINE' not in b
+        assert b'function patchApprovedArcadeInnerHTML' in b
+        assert b'HOJA_ARCADE_APPROVED_OPEN' in b
         assert b'SOLO_APPROVED_RENDERER_SOURCE_REQUIRED' in b
         assert b'TEAM_RENDER_APPROVED_QUESTION_REQUIRED' in b
         return {'originalSha256':EXPECTED,'trialBytes':len(b),'trialSha256':hashlib.sha256(b).hexdigest(),'changedParts':changed}

@@ -27,6 +27,11 @@ jobs:
           node --test experimental/unified-quiz-renderer/frame_host.test.mjs
           node --test experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_MAPPING.test.mjs
           python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'
+      - name: Validate exact compressed arcade source bridge (static)
+        run: |
+          node --check experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_RUNTIME.mjs
+          python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.ARCADE.TEST.html"
+          node experimental/unified-quiz-renderer/game-trial/verify_arcade_patch.mjs "$RUNNER_TEMP/Game.ARCADE.TEST.html"
       - name: Install Chromium smoke dependencies
         run: |
           python -m pip install playwright

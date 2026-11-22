@@ -233,6 +233,7 @@ window.HOJA_TRIAL_SCENE_AUDIO=(()=>{
  return Object.freeze({suspendAttract,resumeAttract});
 })();
 
+window.HOJA_ARCADE_APPROVED_TRIAL=/* HOJA_ARCADE_APPROVED_RUNTIME_INLINE */null;
 window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  const core=window.HOJA_UNIFIED_TRIAL_CORE;
  let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0;
