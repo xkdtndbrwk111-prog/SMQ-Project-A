@@ -13,7 +13,7 @@ const CHILD_SCRIPT=[
  " const send=data=>parent.postMessage(data,'*');",
  ' window.HOJA_ARCADE_APPROVED_BRIDGE=Object.freeze({',
  '  open(question,finish){',
- "   if(window===parent||!question?.familyKey||!Array.isArray(question.choices)||typeof finish!=='function)throw Error('ARCADE_CHILD_NOT_READY');",
+ "   if(window===parent||!question?.familyKey||!Array.isArray(question.choices)||typeof finish!=='function')throw Error('ARCADE_CHILD_NOT_READY');",
  "   if(active)throw Error('ARCADE_CHILD_ALREADY_OPEN');",
  "   const id='ha-'+(++serial);",
  '   active={id,finish,responded:false};',
