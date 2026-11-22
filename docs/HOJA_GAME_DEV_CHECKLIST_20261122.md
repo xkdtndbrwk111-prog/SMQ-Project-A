@@ -165,3 +165,14 @@
 - [ ] **실제 구현 상태:** 요구사항 확정, 코드 미반영, GAS 시험판/운영본 미배포. 승인 공통 렌더러 연결 후 팀전 우승 화면 복습 트리거부터 구현.
 
 참조: `versions/2.0.0/Game.html.parts/part-22.txt`의 `state.done`, `verdict()`, `showFinal()`, `advanceFinal()`. 팀전의 `state.limit = floor(25/teamCount)*teamCount`이므로 특히 7팀에서 **미출제 풍선을 복습 목록에 포함하지 않도록** 주의.
+
+## 10. 2026-11-22 공통 렌더러 iframe 호스트 — 독립 동작 시험
+- [x] 교사 승인 렌더러 원본 CSS와 자동 배치 함수는 보존. 게임 메시지 연결 어댑터에서 SHORT 답안 공개/교사 판정 송신 버그만 수정.
+- [x] 공통 `HOJA_UNIFIED_FRAME_HOST.mjs` 작성. 응답 수신, 실제 표시 문항 확인 및 중복 답변 차단. 각 게임 모드가 정답·점수 판정을 소유.
+- [x] 독립 Chromium iframe 실제 브라우저: MCQ C 좌우 q04→A형 q01, OX q23, SHORT q29 주관식 판정, 3보기·중복 제출·오류0 PASS.
+- [x] 사회6 64문항 x HD/FHD/4:3 = 192건 승인 원본 대 브리지 DOM 배치 비교 차이0; 전체 픽셀 스크린샷은 미검증.
+- [x] Node 팀전 원본 매핑 7건, iframe 호스트 2건, Python 원본 SHA 잠금 패처 3건 독립 PASS.
+- [ ] 실제 7MB Game.html 시험 사본에 소스 보존 패치 적용하고 두 싱글+팀전 모두 승인 렌더러로 질문 표시/정답 처리 검증.
+- [ ] 팀전 우승 연출 완료 후 오답 복습 진입, 재오답 반복·원래 점수/우승 불변·미출제 풍선 제외·2~7팀 회귀.
+- [ ] 내장 GAS 카탈로그에서 `rendererQuestion, images, tags, unitMeta` 손실 없이 제공, 싱글 랭킹 잠금·서버 신뢰 검증.
+- [ ] Apps Script 시험 프로젝트와 실기기 검증 후 승인 받기. **main/운영본 변경 없음.**
