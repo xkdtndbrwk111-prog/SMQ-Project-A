@@ -31,31 +31,6 @@ jobs:
         run: |
           python3 experimental/unified-quiz-renderer/game-trial/verify_trial_build.py
           python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.PHASER.TEST.html"
-      - name: Inspect original arcade controls and death overlay (trial source only)
-        run: |
-          node --input-type=module <<'JS'
-          import {readFileSync} from 'node:fs';
-          import {gunzipSync} from 'node:zlib';
-          const src=readFileSync(process.env.RUNNER_TEMP+'/Game.PHASER.TEST.html','utf8');
-          const payload=src.match(/const HOJA_V051_ARCADE_GZIP='([^']+)'/);
-          if(!payload)throw new Error('compressed arcade not found');
-          const html=gunzipSync(Buffer.from(payload[1],'base64')).toString('utf8');
-          for(const [name,needle] of Object.entries({
-            createInput:'createInput()',input_keys:'this.keys=',keyboard:'keydown',death_korean:'사망',
-            dead:'dead',die:'die(',death:'death',gameover:'gameOver',respawn:'respawn',
-            confirm:'확인',restart:'재시작',space:'SPACE',shift:'SHIFT',jump:'jump',
-            key_h:'KeyH',help:'도움말',numpad:'Numpad',cursors:'cursors',
-            w:'JustDown(this.keys.w)'
-          })){
-            let from=0,n=0;const spots=[];
-            while((from=html.indexOf(needle,from))>=0&&n<7){
-              const before=Math.max(0,from-330),after=Math.min(html.length,from+950);
-              spots.push(html.slice(before,after).replace(/\r/g,'').replace(/\n/g,'\\n'));
-              from+=needle.length;n++;
-            }
-            console.log('ARCADE_AUDIT',name,'COUNT_AT_LEAST',n,'SAMPLES',JSON.stringify(spots));
-          }
-          JS
       - name: Browser real Phaser boot and original showQuiz/finish synthetic-balloon smoke
         run: |
           python3 experimental/unified-quiz-renderer/game-trial/verify_trial_arcade_phaser_chromium.py --html "$RUNNER_TEMP/Game.PHASER.TEST.html" --phaser package/dist/phaser.min.js --rounds 25 --collision-first --finish-check --keyboard-smoke
