@@ -251,6 +251,18 @@ async def run():
        paused:s.manualPaused,focus:w.document.activeElement?.tagName};
     }""")
     print('ARCADE_REAL_PERIOD_PRE',focus,before_jump,flush=True)
+    # Observe the ORIGINAL Phaser Body.setVelocityY call, without changing
+    # its argument or physics. A jump impulse is very brief at low FPS and
+    # may fall entirely between Python polling ticks.
+    await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      const body=w.__QA_ACTIVE_SCENE__().playerBody.body,original=body.setVelocityY.bind(body);
+      w.__QA_REAL_JUMP_IMPULSE__=null;
+      body.setVelocityY=function(value){
+       if(value< -80)w.__QA_REAL_JUMP_IMPULSE__={value,frame:w.__QA_ACTIVE_SCENE__().game.loop.frame};
+       return original(value);
+      };
+    }""")
     await page.keyboard.down('.')
     await page.wait_for_function("""()=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
@@ -264,8 +276,9 @@ async def run():
     print('ARCADE_REAL_PERIOD_KEY',after_key,flush=True)
     await page.wait_for_function("""()=>{
       const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
-      return s.playerBody.body.velocity.y< -80;
-    }""",timeout=8000)
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return s.playerBody.body.velocity.y< -80 || !!w.__QA_REAL_JUMP_IMPULSE__;
+    }""",timeout=12000)
    except PWTimeout:
     diagnostic=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),b=s.playerBody.body;
@@ -277,7 +290,12 @@ async def run():
     raise
    finally:
     await page.keyboard.up('.')
-   print('ARCADE_REAL_PERIOD_JUMP_LAUNCH_PASS',flush=True)
+   jump=await page.evaluate("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.__QA_REAL_JUMP_IMPULSE__;
+   }""")
+   assert jump and jump['value']< -80,('NO_REAL_PHASER_JUMP_IMPULSE',jump)
+   print('ARCADE_REAL_PERIOD_JUMP_LAUNCH_PASS',jump,flush=True)
    print('ARCADE_REAL_2_0_PHYSICS_S_CROUCH_PERIOD_JUMP_COMMA_RUN_PASS',
     {'normalSpeed':normal['speed'],'runSpeed':running['speed'],'startX':stage['x']},flush=True)
    # Stop after this independent real-key physics smoke. The second CI step
