@@ -109,7 +109,19 @@ async def main():
           return {before,after,flowWrapped:window.HOJA_FLOW.enterIntro.toString().includes('resumeAttract')};
         }''')
         print('INTRO_SCENE_GATE_DIAGNOSTIC',state,flush=True)
-        assert state['after']['resume']==1,'INTRO_NOT_RESUMED '+repr(state)
+        # Existing intro's repository transition intentionally marks pausedByUser=true.
+        # That manual/explicit pause must not be overridden by a hidden game view.
+        if state['before']['userPaused']:
+            assert state['after']['resume']==0,'USER_PAUSED_INTRO_WAS_RESUMED '+repr(state)
+            second=await page.evaluate('''()=>{
+              window.HOJA_ATTRACT_SCENE.pausedByUser=false;
+              window.HOJA_FLOW.enterIntro({newRun:false});
+              return {resume:window.__hojaAudioResumeCalls,
+                isPaused:window.HOJA_ATTRACT_SCENE.scene.isPaused()};
+            }''')
+            assert second['resume']==1 and not second['isPaused'],'EXPLICIT_INTRO_RESUME_FAILED '+repr(second)
+        else:
+            assert state['after']['resume']==1,'INTRO_NOT_RESUMED '+repr(state)
         print('CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio playback not tested)')
         await browser.close()
 
