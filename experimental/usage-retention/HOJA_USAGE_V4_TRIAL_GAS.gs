@@ -6,7 +6,7 @@
  */
 const HOJA_V4_MANIFEST_HEADER=['date','generation','status','sourceStartRow',
  'sourceEndRow','sourceRowCount','publicStarts','contentDigest','bucketCount',
- 'createdAt','verifiedAt','sourcePrefixEndRow','bucketDigest'];
+ 'createdAt','verifiedAt','sourcePrefixEndRow','bucketDigest','retriesSuppressed'];
 const HOJA_V4_BUCKET_HEADER=['date','generation','dimension','dimensionKey',
  'displayLabel','count'];
 function hojaV4Sha256_(payload){
@@ -91,6 +91,7 @@ function hojaV4PreviewDailyTrialU1(day){
   sourceStartRow:scanned.first,sourceEndRow:scanned.end,
   sourcePrefixEndRow:scanned.sourcePrefixEndRow,
   sourceRowCount:scanned.rawRows,publicStarts:snapshot.starts,
+  retriesSuppressed:snapshot.retriesSuppressed,
   earliestPublicDay:scanned.earliestPublicDay,sourceLatestDay:scanned.sourceLatestDay,
   sourceLastRow:scanned.sourceLastRow,buckets:snapshot.buckets,
   unknownUnitStarts:snapshot.unknownUnitStarts};
@@ -138,6 +139,7 @@ function hojaV4WriteDailyTrialU1(day){
      Number(existing[0][3])!==pvw.sourceStartRow||
      Number(existing[0][4])!==pvw.sourceEndRow||
      Number(existing[0][5])!==pvw.sourceRowCount||
+     Number(existing[0][13])!==pvw.retriesSuppressed||
      Number(existing[0][11])!==pvw.sourcePrefixEndRow||
      Number(existing[0][6])!==pvw.publicStarts||
      Number(existing[0][8])!==expected.length)
@@ -149,7 +151,7 @@ function hojaV4WriteDailyTrialU1(day){
   const row=m.getLastRow()+1;
   const mr=[date,gen,'PREPARING',pvw.sourceStartRow,pvw.sourceEndRow,
    pvw.sourceRowCount,pvw.publicStarts,gen,expected.length,now,'',
-   pvw.sourcePrefixEndRow,pvw.bucketDigest];
+   pvw.sourcePrefixEndRow,pvw.bucketDigest,pvw.retriesSuppressed];
   m.getRange(row,1,1,mr.length).setValues([mr]);SpreadsheetApp.flush();
   if(expected.length){
    const start=b.getLastRow()+1;
@@ -172,6 +174,7 @@ function hojaV4WriteDailyTrialU1(day){
   if(m.getRange(row,3).getValue()!=='COMPLETE')
    throw Error('HOJA_V4_TRIAL_PUBLISH_FAILED');
   return {ok:true,replayed:false,date,starts:pvw.publicStarts,
+   retriesSuppressed:pvw.retriesSuppressed,
    buckets:expected.length,source:'ISOLATED_COPY_ONLY'};
  }finally{
   lock.releaseLock();
