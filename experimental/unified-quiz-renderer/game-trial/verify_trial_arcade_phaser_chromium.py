@@ -88,13 +88,56 @@ async def run():
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
   if args.control_smoke:
+   # Test H first in the freshly started arcade. Death retries are a separate
+   # phase, because repeated respawns can steal focus from a nested srcdoc.
    body=page.frame_locator('#hqArcadeFrame').locator('body')
+   async def focus_arcade_body():
+    return await page.evaluate("""()=>{
+      const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow;
+      w.document.body.tabIndex=-1;
+      w.focus();w.document.body.focus({preventScroll:true});
+      return {parentFocus:document.activeElement?.id,childFocus:w.document.activeElement?.tagName};
+    }""")
    mapping=await page.evaluate("""()=>{
      const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),K=w.Phaser.Input.Keyboard.KeyCodes;
      return {run:s.keys.run.keyCode,comma:K.COMMA,jump:s.keys.jump.keyCode,period:K.PERIOD};
    }""")
    assert mapping['run']==mapping['comma'] and mapping['jump']==mapping['period'],mapping
+   preh=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
+     w.__QA_H_SEEN__=0;w.addEventListener('keydown',e=>{if(e.code==='KeyH')w.__QA_H_SEEN__++},true);
+     return {helpExists:!!w.document.getElementById('hojaTrialControlsHelp'),
+       same:w.HOJA_PHASER_APP?.scene?.()===s,
+       active:s?.scene?.isActive?.(),dying:s?.dying,clear:s?.clear,
+       timeUp:s?.timeUp,transitioning:s?.transitioning,quiz:s?.quizActive,
+       paused:s?.manualPaused};
+   }""")
+   focus=await focus_arcade_body()
+   print('ARCADE_CONTROL_HELP_PRE',preh,focus,flush=True)
+   await page.keyboard.press('h')
+   opened=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return {display:w.document.getElementById('hojaTrialControlsHelp')?.style.display,
+       paused:w.__QA_ACTIVE_SCENE__()?.manualPaused,
+       seen:w.__QA_H_SEEN__,childFocus:w.document.activeElement?.tagName};
+   }""")
+   print('ARCADE_CONTROL_HELP_AFTER',opened,flush=True)
+   assert opened['display']=='grid' and opened['paused'] is True and opened['seen']>=1,opened
+   await focus_arcade_body()
+   await page.keyboard.press('h')
+   closed=await page.evaluate("""()=>{
+     const w=document.getElementById('hqArcadeFrame').contentWindow;
+     return {display:w.document.getElementById('hojaTrialControlsHelp')?.style.display,
+       paused:w.__QA_ACTIVE_SCENE__()?.manualPaused,seen:w.__QA_H_SEEN__};
+   }""")
+   assert closed['display']=='none' and closed['paused'] is False and closed['seen']>=2,closed
+   print('ARCADE_REAL_H_HELP_OPEN_CLOSE_PASS',flush=True)
    for key in ['w','a','s','d',',','.','Enter']:
+    # Wait for normal post-respawn immunity to expire before the next synthetic death.
+    await page.wait_for_function("""()=>{
+      const s=document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__();
+      return s&&!s.dying&&!s.transitioning&&!s.manualPaused&&s.invulnUntil<=s.time.now;
+    }""",timeout=15000)
     prior=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
       return {score:s.score,found:r.found,history:r.step09History.length,deaths:r.deaths||0};
@@ -104,7 +147,8 @@ async def run():
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return w.document.getElementById('hojaDeathOverlay')?.classList.contains('is-open');
     }""",timeout=10000)
-    await body.press(key,timeout=12000)
+    await focus_arcade_body()
+    await page.keyboard.press(key)
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
       return s && !s.dying && !s._hojaDeathDialogOpen &&
@@ -118,30 +162,6 @@ async def run():
     assert after['deaths']==prior['deaths']+1 and after['invuln'],(key,prior,after)
     assert all(after[k]==prior[k] for k in ['score','found','history']),(key,prior,after)
     print('ARCADE_REAL_DEATH_KEY_PASS',key,flush=True)
-   preh=await page.evaluate("""()=>{
-     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__();
-     w.__QA_H_SEEN__=0;w.addEventListener('keydown',e=>{if(e.code==='KeyH')w.__QA_H_SEEN__++},true);
-     return {active:s?.scene?.isActive?.(),same:w.HOJA_PHASER_APP?.scene?.()===s,
-       focused:document.activeElement?.id,inner:w.document.activeElement?.tagName,
-       dying:s.dying,clear:s.clear,timeUp:s.timeUp,transitioning:s.transitioning,
-       quizActive:s.quizActive,manualPaused:s.manualPaused};
-   }""")
-   print('ARCADE_CONTROL_HELP_PRE',preh,flush=True)
-   await body.press('h',timeout=10000)
-   opened=await page.evaluate("""()=>{
-     const w=document.getElementById('hqArcadeFrame').contentWindow;
-     return [w.document.getElementById('hojaTrialControlsHelp')?.style.display,
-       w.__QA_ACTIVE_SCENE__()?.manualPaused];
-   }""")
-   print('ARCADE_CONTROL_HELP_AFTER',opened,'seen',await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_H_SEEN__"),flush=True)
-   assert opened==['grid',True],opened
-   await body.press('h',timeout=10000)
-   closed=await page.evaluate("""()=>{
-     const w=document.getElementById('hqArcadeFrame').contentWindow;
-     return [w.document.getElementById('hojaTrialControlsHelp')?.style.display,
-       w.__QA_ACTIVE_SCENE__()?.manualPaused];
-   }""")
-   assert closed==['none',False],closed
    print('ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS',mapping,flush=True)
   if args.keyboard_smoke:
    async def focus_game_keys():
