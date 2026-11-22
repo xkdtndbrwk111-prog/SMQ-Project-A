@@ -26,6 +26,7 @@ Project B 제공 `UsageU2.gs`의 두 가지만 운영에서 유지한다.
 - 데이터 행 **17,672개**. `PUBLIC` 17,672개, 조회한 날짜별 상태 분포에서 `PRIVATE`/미상은 없음.
 - 첫 날짜 `2026-09-23`, 마지막 `2026-11-22`. 날짜가 역행하는 행은 검출되지 않았음.
 - 57개의 날짜에 레코드가 존재. 이 기간에는 기록 없는 날도 있으므로 **0회인 날짜를 명시적으로 COMPLETE 요약**해야 월별·연속 기간 집계가 성립한다.
+- **중복 이벤트 감사 추가:** 원본 행 17,672개 중 고유 이벤트 ID는 **17,670개**. 2026-09-28과 2026-10-29에 같은 ID가 한 건씩 재기록되어 있으며 두 쌍 모두 **timestamp만 다르고 날짜·모드·선택단원·팀 등 게임 내용은 동일**. 이전 U2는 이를 중복 플레이로 2회 더 합산했다. V4는 **게임 내용까지 같은 ID의 재전송은 하루에 한 번만 계산**하고, ID가 같지만 실제 게임 내용이 다르면 `DUPLICATE_EVENT_ID_CONFLICT`로 보관/조회 전환을 차단한다. 그래서 검증 시 일별 기존 행수와 새 플레이 수의 차이(해당 두 날짜 각 1건)를 명시해야 한다.
 - 이건 **해당 사본 시점**의 상태만 증명한다. 앞으로 기록이 날짜 순으로 append될 것까지 자동 보장하지 않는다. 추후 Project A append 경로에서도 날짜 비역행/지연 이벤트 차단 정책이 필요하다.
 
 ## 3. 현재 신규 구현
@@ -39,12 +40,12 @@ Project B 제공 `UsageU2.gs`의 두 가지만 운영에서 유지한다.
 
 요약 탭(**아직 실제 GAS 프로젝트에서 생성/운영 실행하지 않음**):
 
-- `HOJA_V4_DAILY_MANIFEST`: `date,generation,status,sourceStartRow,sourceEndRow,sourceRowCount,publicStarts,contentDigest,bucketCount,createdAt,verifiedAt,sourcePrefixEndRow,bucketDigest`
+- `HOJA_V4_DAILY_MANIFEST`: `date,generation,status,sourceStartRow,sourceEndRow,sourceRowCount,publicStarts,contentDigest,bucketCount,createdAt,verifiedAt,sourcePrefixEndRow,bucketDigest,retriesSuppressed`
 - `HOJA_V4_DAILY_BUCKETS`: `date,generation,dimension,dimensionKey,displayLabel,count`
 
 `sourcePrefixEndRow`는 **그 날짜까지 원본이 확정된 마지막 실제 행 번호**다. 0회인 날에도 직전 날짜의 마지막 번호를 보존한다. 추후 관리자 화면에서 마지막 확정 행 다음(미집계분)만 읽는 데 사용할 기준점이다.
 
-원본과 버킷은 **별도의 SHA-256**으로 보증한다. 원본에는 이벤트 ID가 있어도 요약 표에는 SHA 해시, 날짜, 집계값만 남는다. SHA 형식만 검사하지 않고, 요약을 소비할 때 실제 버킷을 다시 해시해 일치 여부를 검사하도록 V4 엔진에 필수 검증 인자를 추가했다.
+원본과 버킷은 **별도의 SHA-256**으로 보증한다. `retriesSuppressed`는 실제 source row와 고유 플레이 횟수의 차이를 감사할 수 있도록 별도로 보존한다. 원본에는 이벤트 ID가 있어도 요약 표에는 SHA 해시, 날짜, 집계값만 남는다. SHA 형식만 검사하지 않고, 요약을 소비할 때 실제 버킷을 다시 해시해 일치 여부를 검사하도록 V4 엔진에 필수 검증 인자를 추가했다.
 
 ## 4. 격리 복사본 시험 준비
 
