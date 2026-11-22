@@ -51,7 +51,8 @@ if(test){
  const needle="f.src='arcade.html?season='";
  if(gp.split(needle).length!==2)throw Error('review host anchor missing');
  reviewFiles['js/teacher-review-gameplay.js']=gp.replace(needle,"f.src='teacher-review-arcade.html?season='");
- reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade);
+ const course=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/gimmick-course.json'),'utf8'));
+ reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course);
  arcade=instrumentArcade(arcade);
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }

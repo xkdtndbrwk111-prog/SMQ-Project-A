@@ -27,15 +27,25 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
  }
  function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
  function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&s.y<v.y+v.height);}
+ // Sample the traversed path, including the player's previous physics position,
+ // so a delayed frame cannot skip across a moving circular hazard.
+ function crossed(body,c,from,to){
+  const n=Math.min(256,Math.max(1,Math.ceil((to-from)/12)));
+  const w=body.right-body.left,h=body.bottom-body.top,px=Number.isFinite(body.prev?.x)?body.prev.x:body.left,py=Number.isFinite(body.prev?.y)?body.prev.y:body.top;
+  for(let i=0;i<=n;i++){const f=i/n,x=px+(body.left-px)*f,y=py+(body.top-py)*f;if(model.circleHit({left:x,right:x+w,top:y,bottom:y+h},model.state(c,from+(to-from)*f)))return true;}
+  return false;
+ }
  function create(scene,configs){
   if(!Array.isArray(configs))throw Error('기믹 목록 오류');
-  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art};});let elapsed=0;
+  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null};});let elapsed=0;
   for(const e of entries)paint(scene,e,model.state(e.cfg,0),0);
   return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>({...model.state(e.cfg,elapsed)}));},
-   update(delta){if(!Number.isFinite(delta)||delta<0)throw Error('기믹 시간 오류');if(scene.manualPaused||scene.quizActive||scene.dying||scene.timeUp||scene.clear||scene.transitioning)return;elapsed+=delta;const body=scene.playerBody?.body;if(!body||!body.enable)return;
-    for(const e of entries){const s=model.state(e.cfg,elapsed),visible=inView(scene,e.cfg);e.art.all.forEach(o=>o.setVisible(visible));if(visible)paint(scene,e,s,elapsed);
-     if(e.cfg.kind==='fan'){if(s.active&&model.rectHit(body,s)){const amount=s.power*Math.min(delta,35)/1000;if(s.direction==='left')body.setVelocityX(body.velocity.x-amount);if(s.direction==='right')body.setVelocityX(body.velocity.x+amount);if(s.direction==='up')body.setVelocityY(body.velocity.y-amount);if(s.direction==='down')body.setVelocityY(body.velocity.y+amount);}}
-     else if(e.cfg.kind==='flame'?s.active&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y,w:s.w*.6,h:s.h*.55}):model.circleHit(body,s)){scene.startDeath('enemy');if(scene.dying)return;}
+   update(delta){if(!Number.isFinite(delta)||delta<0)throw Error('기믹 시간 오류');if(scene.manualPaused||scene.quizActive||scene.dying||scene.timeUp||scene.clear||scene.transitioning)return;const before=elapsed;elapsed+=delta;const body=scene.playerBody?.body;if(!body||!body.enable)return;
+    for(const e of entries){const s=model.state(e.cfg,elapsed),visible=inView(scene,e.cfg),cycle=e.cfg.kind==='flame'?Math.floor((elapsed+e.cfg.phase)/(e.cfg.wait+e.cfg.warn+e.cfg.active+e.cfg.cool)):null,warned=e.cfg.kind==='flame'&&e.warnCycle===cycle;e.art.all.forEach(o=>o.setVisible(visible));
+     if(e.cfg.kind==='flame')e.warnShown=warned;
+     if(visible){if(e.cfg.kind==='flame'&&s.active&&!warned){paint(scene,e,{...s,phase:'warn',active:false},elapsed);e.warnShown=true;e.warnCycle=cycle;}else{paint(scene,e,s,elapsed);if(e.cfg.kind==='flame'&&s.phase==='warn'){e.warnShown=true;e.warnCycle=cycle;}}}
+     if(e.cfg.kind==='fan'){if(s.active&&model.rectHit(body,s)){const amount=s.power*Math.min(delta,100)/1000;if(s.direction==='left')body.setVelocityX(body.velocity.x-amount);if(s.direction==='right')body.setVelocityX(body.velocity.x+amount);if(s.direction==='up')body.setVelocityY(body.velocity.y-amount);if(s.direction==='down')body.setVelocityY(body.velocity.y+amount);}}
+     else if(e.cfg.kind==='flame'?s.active&&warned&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y,w:s.w*.6,h:s.h*.55}):crossed(body,e.cfg,before,elapsed)){scene.hojaGimmickHit=e.cfg.kind;try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
     }
    },destroy(){for(const e of entries)for(const o of e.art.all)o.destroy();}};
  }

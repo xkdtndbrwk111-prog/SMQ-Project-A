@@ -1,0 +1,20 @@
+{
+  "format": "HOJA_MAKER_PROJECT",
+  "schemaVersion": 6101,
+  "title": "신규 기믹 시험 코스",
+  "maps": [{
+    "id": "phase4d-gimmick-course",
+    "name": "신규 기믹 시험 코스",
+    "width": 100,
+    "height": 24,
+    "theme": "grassland",
+    "spawn": {"x": 6, "y": 18},
+    "terrain": [{"id":"safe-floor","kind":"ground","x":0,"y":22,"w":100,"h":2}],
+    "objects": [
+      {"id":"moving-saw","type":"gimmick","x":20,"y":20,"w":2,"h":2,"gimmick":{"kind":"saw","axis":"x","distance":64,"speed":45,"radius":14}},
+      {"id":"swinging-ball","type":"gimmick","x":40,"y":15,"w":2,"h":2,"gimmick":{"kind":"pendulum","length":80,"amplitude":50,"speed":1.5,"radius":14}},
+      {"id":"crosswind","type":"gimmick","x":58,"y":18,"w":7,"h":4,"gimmick":{"kind":"fan","direction":"left","power":180,"period":5000,"on":3000}},
+      {"id":"periodic-fire","type":"gimmick","x":79,"y":18,"w":2,"h":4,"gimmick":{"kind":"flame","wait":2200,"warn":1200,"active":1500,"cool":900}}
+    ]
+  }]
+}

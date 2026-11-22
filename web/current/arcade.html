@@ -3016,7 +3016,7 @@ class HojaScene extends Phaser.Scene{
     this.createEnemies();
     if(HOJA_MAKER_MODE)this.createMakerExtraObjects();
     this.hojaGimmicks=STAGE.gimmicks?.length?window.HOJA_CREATE_GIMMICKS(HOJA_MAKER_IMAGES).create(this,STAGE.gimmicks):null;
-    if(this.hojaGimmicks){const gimmicks=this.hojaGimmicks;this.events.once('shutdown',()=>gimmicks.destroy());}
+    if(this.hojaGimmicks){const gimmicks=this.hojaGimmicks,resetClock=()=>{this.hojaGimmickLastTime=null;};resetClock();this.events.on('pause',resetClock);this.events.on('resume',resetClock);this.events.once('shutdown',()=>{this.events.off('pause',resetClock);this.events.off('resume',resetClock);gimmicks.destroy();});}
     this.createInput();
     this.keys.chunkToggle=this.keys.chunkBench=this.keys.vision=this.keys.caveLight=HOJA_P1C_INPUT.DEAD; // 개발용 키 없음
     this.createWeather();
@@ -5772,6 +5772,8 @@ class HojaScene extends Phaser.Scene{
   }
 
   update(time,delta){
+    const gimmickDelta=this.hojaGimmickLastTime==null?delta:Math.min(1000,Math.max(0,time-this.hojaGimmickLastTime));
+    this.hojaGimmickLastTime=time;
     if(HOJA_CLASS_SESSION&&!HOJA_CLASS_SESSION.submitted&&Date.now()-(HOJA_CLASS_SESSION.lastProgressAt||0)>=3000){
       HOJA_CLASS_SESSION.lastProgressAt=Date.now();
       parent.postMessage({type:'HOJA_CLASS_PROGRESS',score:Math.max(0,Math.floor(this.score||0))},location.origin);
@@ -5906,7 +5908,7 @@ class HojaScene extends Phaser.Scene{
     const zPressed=Phaser.Input.Keyboard.JustDown(this.keys.z);
     const jumpPressed=spacePressed||zPressed; // Phase 1C: W 점프 없음
     applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
-    if(this.hojaGimmicks){this.hojaGimmicks.update(delta);if(this.dying)return;}
+    if(this.hojaGimmicks){this.hojaGimmicks.update(gimmickDelta);if(this.dying)return;}
 
     this.updateSecrets(time);
     this.checkHeadImpact(time);
