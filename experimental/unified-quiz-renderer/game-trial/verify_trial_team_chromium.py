@@ -26,7 +26,12 @@ async def main():
         await page.set_content(s,wait_until='domcontentloaded',timeout=90000)
         await page.evaluate('''(sources)=>{
           window.__hojaTeamIntroPaused=0;
-          window.HOJA_ATTRACT_SCENE={scene:{isPaused:()=>false,pause:()=>window.__hojaTeamIntroPaused++}};
+          let paused=false;
+          window.HOJA_ATTRACT_SCENE={scene:{
+            isPaused:()=>paused,
+            pause:()=>{paused=true;window.__hojaTeamIntroPaused++;},
+            resume:()=>{paused=false;}
+          }};
           window.HOJA_B_LIVE={sources};
           window.HOJA_GAMEPLAY.setServerQuestions(sources);
           window.HOJA_GAMEPLAY.launch('quiz','spring');
