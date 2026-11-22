@@ -6,7 +6,7 @@
  */
 const HOJA_V4_MANIFEST_HEADER=['date','generation','status','sourceStartRow',
  'sourceEndRow','sourceRowCount','publicStarts','contentDigest','bucketCount',
- 'createdAt','verifiedAt'];
+ 'createdAt','verifiedAt','sourcePrefixEndRow'];
 const HOJA_V4_BUCKET_HEADER=['date','generation','dimension','dimensionKey',
  'displayLabel','count'];
 function hojaV4KstDay_(value){
@@ -31,7 +31,7 @@ function hojaV4TrialStorage_(){
 function hojaV4ScanDateIndexTrial_(sh,requestedDay){
  const last=sh.getLastRow();
  const dates=[],minKey={date:null,row:0},maxKey={date:null,row:0};
- let prev=null,first=0,end=0,starts=0,headPublic='';
+ let prev=null,first=0,end=0,starts=0,headPublic='',prefixEnd=1;
  for(let start=2;start<=last;start+=500){
   const n=Math.min(500,last-start+1);
   // Only columns C:E (date, mode, kind), not raw event details.
@@ -46,6 +46,7 @@ function hojaV4ScanDateIndexTrial_(sh,requestedDay){
    prev=day;
    if(!headPublic&&String(chunk[i][2]||'').trim().toUpperCase()==='PUBLIC')
     headPublic=day;
+   if(day<=requestedDay)prefixEnd=rowNumber;
    if(day===requestedDay){
     if(!first)first=rowNumber;
     end=rowNumber;starts++;
@@ -54,7 +55,7 @@ function hojaV4ScanDateIndexTrial_(sh,requestedDay){
    }
   }
  }
- return {first,end,rawRows:starts,sourceLastRow:last,
+ return {first,end,rawRows:starts,sourcePrefixEndRow:prefixEnd,sourceLastRow:last,
   earliestPublicDay:headPublic,sourceLatestDay:prev||''};
 }
 function hojaV4PreviewDailyTrialU1(day){
@@ -68,11 +69,13 @@ function hojaV4PreviewDailyTrialU1(day){
  if(expected.some((x,i)=>header[i]!==x&&!(i===10&&header[i]==='')))
   throw Error('HOJA_V4_TRIAL_SOURCE_HEADER_MISMATCH');
  const scanned=hojaV4ScanDateIndexTrial_(sh,date);
+ if(!scanned.earliestPublicDay)
+  throw Error('HOJA_V4_TRIAL_NO_PUBLIC_HISTORY');
  if(scanned.earliestPublicDay&&date<scanned.earliestPublicDay)
   throw Error('HOJA_V4_TRIAL_BEFORE_PUBLIC_HISTORY_START');
+ if(scanned.rawRows>25000)throw Error('HOJA_V4_TRIAL_DAY_TOO_LARGE');
  const rows=scanned.rawRows?
   sh.getRange(scanned.first,1,scanned.rawRows,15).getDisplayValues():[];
- if(scanned.rawRows>25000)throw Error('HOJA_V4_TRIAL_DAY_TOO_LARGE');
  const snapshot=HOJA_USAGE_V4_CORE.snapshot(date,rows,{coverageVerified:true});
  const hex=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,
   snapshot.canonicalSource,Utilities.Charset.UTF_8)
@@ -81,6 +84,7 @@ function hojaV4PreviewDailyTrialU1(day){
   throw Error('HOJA_V4_TRIAL_SOURCE_CHANGED_DURING_SCAN');
  return {ok:true,source:'ISOLATED_COPY_ONLY',date,sourceDigest:hex,
   sourceStartRow:scanned.first,sourceEndRow:scanned.end,
+  sourcePrefixEndRow:scanned.sourcePrefixEndRow,
   sourceRowCount:scanned.rawRows,publicStarts:snapshot.starts,
   earliestPublicDay:scanned.earliestPublicDay,sourceLatestDay:scanned.sourceLatestDay,
   sourceLastRow:scanned.sourceLastRow,buckets:snapshot.buckets,
@@ -134,7 +138,8 @@ function hojaV4WriteDailyTrialU1(day){
   const now=new Date();
   const row=m.getLastRow()+1;
   const mr=[date,gen,'PREPARING',pvw.sourceStartRow,pvw.sourceEndRow,
-   pvw.sourceRowCount,pvw.publicStarts,gen,expected.length,now,''];
+   pvw.sourceRowCount,pvw.publicStarts,gen,expected.length,now,'',
+   pvw.sourcePrefixEndRow];
   m.getRange(row,1,1,mr.length).setValues([mr]);SpreadsheetApp.flush();
   if(expected.length){
    const start=b.getLastRow()+1;
