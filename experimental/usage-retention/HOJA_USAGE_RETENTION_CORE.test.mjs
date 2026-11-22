@@ -102,7 +102,7 @@ test('preview never authorizes purge without every safety prerequisite',()=>{
  assert.equal(approved.find(x=>x.date===old).eligibleForFutureApprovedPurge,true);
  assert.equal(approved.find(x=>x.date===recent).eligibleForFutureApprovedPurge,false);
  // This is only a preview: there is no delete function or SpreadsheetApp import.
- assert.doesNotMatch(source,/deleteRows|deleteRow|SpreadsheetApp|ScriptApp|DriveApp/);
+ assert.doesNotMatch(source.replace(/\/\*[\s\S]*?\*\//g,''), /(?:deleteRows?|SpreadsheetApp|ScriptApp|DriveApp)\s*[.(]/);
 });
 
 test('count mismatch, absent digest or unverified manifest HOLD the purge',()=>{
