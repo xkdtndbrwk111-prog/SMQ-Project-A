@@ -25,6 +25,7 @@ jobs:
           node --test experimental/unified-quiz-renderer/review_session.test.mjs
           node --test experimental/unified-quiz-renderer/team_binding.test.mjs
           node --test experimental/unified-quiz-renderer/frame_host.test.mjs
+          node --test experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_MAPPING.test.mjs
           python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'
       - name: Install Chromium smoke dependencies
         run: |
