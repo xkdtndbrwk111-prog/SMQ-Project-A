@@ -103,6 +103,12 @@ test('copied sheet: summary rows + verified manifest; EVENT_LOG untouched',()=>{
  assert.equal(result.uniqueStarts,2);
  assert.equal(result.dailyTotalRows,1);
  assert.equal(result.dailyDimensionRows,2);
+ assert.equal(result.dailyFacetRows,4);
+ assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').length,5);
+ assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').slice(1)
+   .filter(r=>r[4]==='GRADE').reduce((n,r)=>n+r[7],0),2);
+ assert.equal(t.contents.get('HOJA_TRIAL_DAILY_FACETS').slice(1)
+   .filter(r=>r[4]==='SUBJECT').reduce((n,r)=>n+r[7],0),2);
  assert.equal(t.contents.get('HOJA_TRIAL_RETENTION_MANIFEST')[1][4],'COMPLETE');
  assert.equal(t.contents.get('HOJA_TRIAL_DAILY_TOTALS')[1][4],2);
  assert.equal(t.contents.get('HOJA_TRIAL_DAILY_DIMENSIONS')[1][8],2);
@@ -117,6 +123,13 @@ test('replay same SHA-256 is idempotent; does not append extra rows',()=>{
  assert.equal(b.replayed,true);
  assert.equal(a.generation,b.generation);
  assert.deepEqual([...t.contents].map(([key,value])=>[key,value.length]),counts);
+});
+
+test('on replay, a corrupted grade facet blocks reuse even if other summaries still match',()=>{
+ const t=fixture();t.run();
+ const row=t.contents.get('HOJA_TRIAL_DAILY_FACETS').find(r=>r[4]==='GRADE');
+ row[7]=999;
+ assert.throws(()=>t.run(),/REPLAY_READBACK_MISMATCH_/);
 });
 
 test('same completed generation with altered stored summary is NOT treated as replay success',()=>{
