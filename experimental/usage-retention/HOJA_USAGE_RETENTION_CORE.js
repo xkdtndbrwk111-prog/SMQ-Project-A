@@ -118,8 +118,14 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
    unique.set(e.eventId,fingerprint);
    const count=statsFor(e);
    addCounters(createGroup(totals,[e.date,e.gameId,e.mode]),count);
+   // Multi-cartridge sessions reveal selections, NOT which cartridge supplied
+   // individual answers or duration. Never duplicate game-wide correct/time
+   // totals into every selected cartridge's usage dimension.
+   const selection=zeroCounters();
+   selection.starts=1;
+   selection.teamCounts[String(e.teamCount)]=1;
    for(const id of e.cartridgeIds)
-    addCounters(createGroup(dims,[e.date,e.gameId,e.mode,e.grade,e.subject,e.publisher,id]),count);
+    addCounters(createGroup(dims,[e.date,e.gameId,e.mode,e.grade,e.subject,e.publisher,id]),selection);
   }
   const totalRows=sortedGroup(totals,['date','gameId','mode']);
   const dimensionRows=sortedGroup(dims,['date','gameId','mode','grade','subject','publisher','cartridgeId']);
