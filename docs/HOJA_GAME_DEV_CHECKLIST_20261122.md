@@ -251,3 +251,13 @@
 - [ ] 전체 56문항 완주, 다른 해상도, 압축 아케이드 연결, 랭킹 서버 인증, 실제 Apps Script 시험 프로젝트 별도 검증 필요.
 
 **다음 작업:** GitHub Actions 빌드 상태 확인→브랜치 정확한 조립본 Chromium 테스트→싱글 아케이드 iframe 원본 메시지 경계 연결.
+
+## 17. 2026-11-22 GitHub 자동검증 초록색 통과 및 브라우저 시험 확대
+- [x] 커밋 `bf4864d7`의 GitHub Actions `45020415372`: **PASS**. 실제 브랜치 25조각 조립(8,555,362바이트, SHA-256 `a9373a2bd2480344d14d374f0313aa70d5464b0fe65ee58b9e4660298ec27585`), 64문항/WebP15/C형11 확인, Node 14건+Python 3건 PASS.
+- [x] 최초 자동검증 실패는 Python 테스트 도구 Git blob NUL 이스케이프 계산 오류로 확인하여 수정. 게임 엔진 실패로 분류하지 않음.
+- [x] 로컬 재시험 가능한 `verify_trial_chromium.py` 개발: 승인 문항에서 56문항 싱글을 준비하고 QA 전용 메모리 덱 선택으로 MCQ 정답/OX 오답 2문항의 승인 iframe·정답/풀이 카운터·연속 재진입을 Chromium 검증. **로컬 시험 PASS**.
+- [x] GitHub workflow에 정확한 GitHub 브랜치 조립본을 실행하는 **Chromium smoke 단계**를 추가. 기존 정적·단위 검증은 유지.
+- [ ] GitHub Actions 새 Chromium 단계의 원격 결과는 아직 확인 전. 56문항 전부 플레이/팀전 자연 완주/아케이드/실기기/GAS 시험은 이 smoke 대상 밖.
+- [ ] 아케이드 gzip 압축 내부 `quizOverlay/quizCard`, 문제 추출 `drawQuestion()`이 독립적임을 확인. 승인 렌더러를 새로 구현하지 않고 이 iframe의 표시·답변 이벤트 경계를 추가로 연결해야 함.
+
+**다음 작업:** GitHub Chromium CI 결과 확인 → 실패 시 시험 스크립트/앵커부터 복구 → 싱글 아케이드 질문 이벤트와 승인 호스트 간 인터페이스 연결.

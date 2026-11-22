@@ -26,3 +26,11 @@ jobs:
           node --test experimental/unified-quiz-renderer/team_binding.test.mjs
           node --test experimental/unified-quiz-renderer/frame_host.test.mjs
           python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'
+      - name: Install Chromium smoke dependencies
+        run: |
+          python -m pip install playwright
+          python -m playwright install chromium
+      - name: Browser smoke exact rebuilt trial (solo MCQ/OX)
+        run: |
+          python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.TEST.html"
+          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_chromium.py --html "$RUNNER_TEMP/Game.TEST.html"
