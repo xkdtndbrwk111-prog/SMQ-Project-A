@@ -89,6 +89,7 @@ test('V4 copied-sheet preview reads real K-empty schema and preserves 7-person t
  assert.equal(p.publicStarts,2);
  assert.equal(p.sourceStartRow,3);
  assert.equal(p.sourceEndRow,4);
+ assert.equal(p.sourcePrefixEndRow,4);
  assert.equal(p.earliestPublicDay,'2026-09-23');
  assert.equal(p.buckets.find(x=>x.dimension==='TEAM_SIZE').key,'7팀전');
  assert.equal(p.buckets.find(x=>x.dimension==='CARTRIDGE_COMBINATION').count,2);
@@ -117,6 +118,7 @@ test('zero-event day inside verified full date-column scan produces COMPLETE zer
  const t=make();const r=t.write('2026-11-21');
  assert.equal(r.starts,0);assert.equal(r.buckets,0);
  assert.equal(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][2],'COMPLETE');
+ assert.equal(t.tabs.get('HOJA_V4_DAILY_MANIFEST')[1][11],4);
  assert.equal(t.write('2026-11-21').replayed,true);
 });
 test('failed bucket write leaves PREPARING marker and retries fail closed',()=>{
