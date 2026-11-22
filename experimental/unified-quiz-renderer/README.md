@@ -19,3 +19,8 @@
 - **운영본·`main` 변경 금지.** 본 브랜치를 그대로 병합하거나 GAS에 배포하지 않는다.
 
 다음 작업: 승인 콘텐츠 `sourceQuestionId/contentBlocks/choiceBlocks/media/layout`을 단원별 원본 rendererQuestion으로 손실 없이 매핑 → 세 모드 질문 표시 어댑터 → 팀전 `stage===3` 후 오답 복습 트리거 → 실제 브라우저 실행과 GAS 시험판 검증.
+## 2026-11-22 다음 개발 단위: 팀전 시각 메타데이터 보존(소스 추가)
+- `patch_team_approved_metadata.py`: SHA-256 고정된 원본 7MB Game.html을 **별도 출력 경로**로 패치. 팀전 `fromServer()`에서 원본 `row`/카트리지 미디어/선택지의 원래 인덱스를 잃지 않도록 보존. 기존 7MB 스냅샷과 `main`은 변경하지 않음.
+- `HOJA_TEAM_APPROVED_BINDING.mjs`: 교사 승인 문항의 그림·태그·C 배치와 정답 ID를 확인하고, 기존 팀전에서 섞은 3개 보기의 인덱스로 매핑. 승인 정본 데이터가 없다면 추측·텍스트 대체 금지.
+- 단위시험: `node --test experimental/unified-quiz-renderer/team_binding.test.mjs` (7건), `python3 -m unittest discover -s experimental/unified-quiz-renderer -p 'test_patch_team_approved_metadata.py'` (3건).
+- **미완료**: 이 데이터 경로는 아직 실제 7MB 게임 브라우저에 렌더러를 표시하지 않음. Apps Script 공용 로더에서 `row.rendererQuestion` 및 `images/tags/unitMeta`를 공급해야 실사용 가능. 개발 사본으로 패치→전체 세 모드 승인 렌더러 연결→팀전 우승 후 복습→브라우저 및 GAS 시험 순서 유지.
