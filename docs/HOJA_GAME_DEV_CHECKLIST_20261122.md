@@ -636,13 +636,23 @@
 - [ ] 38번 Phaser 자동시험은 최근 실행 `45079474540`에서 반복 사망키 처리 중 타임아웃 FAIL이 재현됨. 이번 변경은 사용량/문서 코드에 국한되고 해당 게임 코드는 수정하지 않았지만, **현재 HEAD 전수 통과라고 주장하지 않음**. 기존 정상 실행 `45038565141`과 별개로 재현성 진단 후 정리.
 - [ ] 통계 삭제·Project A/B 운영 조회 전환·예약 트리거는 계속 금지.
 
-**남은 우선순위:** 39-6 실제 Project B reader 소스 확인/테스트 프로젝트 GAS 실행 → 기존과 신형 요약의 표시·분류 패리티 검증 → 39-7 독립 백업/복구·전체 SHA-256 검증. 정식 배포는 최종 승인 이후.
+**남은 우선순위:** 39-6 Project B 실제 `UsageU2.gs` 소스 분석 완료; 테스트 프로젝트 GAS 실행 → 기존과 신형 요약의 표시·분류 패리티 검증 → 39-7 독립 백업/복구·전체 SHA-256 검증. 정식 배포는 최종 승인 이후.
 
 
 ### 39-6 입력 자료 추가 검토 — 2026-11-23
 - [x] 사용자 제공 Project B `Code.gs` 원문 전체(약 15,901행) 확인. 파일 정체는 `SUPER MARIO MANAGER` 서버 측으로, 공용/개인 카트리지·CREATOR 등록·소유자 관리·랭킹 등을 처리하는 GAS임을 확인.
 - [x] 원문에서 `EVENT_LOG`, `USAGE_DAILY_*`, `USAGE_ROLLUP`, `SMQ_USAGE`, `usage`, `statistics`, `analytics`, `통계` 조회 관련 기능 검색: **해당 표현/구현 없음**. `_SMQ_RANKING` 등 랭킹은 이용량 원본과 별개의 데이터이며 집계 조회 전환 대상으로 오인 금지.
 - [x] 사용자 제공 Apps Script 편집기 스크린샷에서 **동일 Project B 내부의 별도 `UsageU2.gs` 파일** 확인. 앞선 코드 검색은 **첨부받은 `Code.gs` 단일 파일에만 적용**되므로 'Project B 통계 코드 없음'이라는 결론은 철회. 집계 기능은 과거 준비 후 보류된 상태이며 다른 프로젝트를 찾지 않음.
-- [ ] `UsageU2.gs` 본문을 확보해 실제 raw 조회 호출·함수 인터페이스·UI 연계를 확인한 뒤, 기존 Project B 통계 화면에만 요약 조회 어댑터 이식. 현재 Drive/GitHub 연결 조회에서 이 내부 `.gs` 파일의 본문은 확인할 수 없으므로 구현 추정·임의 수정 금지.
+- [x] 사용자 제공 `UsageU2.gs` 전체에서 통계 RPC `getUsageStatisticsU2(creatorToken)`와 실제 AUTH 함수 `requireUsageStatisticsAccessU3_`·OWNER/유효 GOOGLE CREATOR 현재 Registry 권한을 직접 확인. 응답 계약(오늘·7일·30일·전체, 시계열, 모드, 팀, 학년·교과·출판사, TOP20)과 원본 `EVENT_LOG` 읽기 의존 확인. **Code.gs만으로 소스가 없다고 판단했던 오류를 수정**.
 - [x] 제공 소스 내 고정 원본 시트 ID·소유자·기타 민감한 프로젝트 내부 상세는 이 공개 GitHub 체크리스트에 복사하지 않음.
 - [ ] 기존 운영 Manager GAS/랭킹/원본 Sheet 변경 없음. 39-6 운영 조회 전환과 39-7 삭제 자동화는 여전히 HOLD.
+
+
+### 39-6B. 사용자 제공 Project B UsageU2.gs 기반 실제 응답 계약 보존 (2026-11-23)
+- [x] 실제 `UsageU2.gs`의 `getUsageStatisticsU2(creatorToken)`는 통계 시트 `EVENT_LOG` A:K(있는 경우 L까지) 전체 공개 행을 읽어 `today/days7/days30/all`, `daily`, `mode`, `teamCount`, `repositoryKind`, `grade`, `subject`, `publisher`, `topCartridges` 출력하는 **lazy RPC**임을 확인. OWNER/유효 GOOGLE CREATOR만 이용, EDIT_CODE·BLOCKED 등 거부. 홈 부트스트랩과 무관; 권한 코드 유지.
+- [x] 오래된 U3S `CARTRIDGE` 차원은 **개별 단원별 선택**, 실제 Project B `topCartridges`는 원본 I열의 **다중 단원 이름 조합**을 1플레이=1조합으로 세므로 기존 TOP20을 그대로 대체할 수 없음. `HOJA_USAGE_RETENTION_CORE.js`에 `CARTRIDGE_COMBINATION` 별도 일/월 분류 추가, 신형 요약 리더에 해당 그룹 허용. 기존 단원별 선택 및 학년별 플레이 집계와 분리.
+- [x] 실 Google Sheets **격리 복사본**에 `CARTRIDGE_COMBINATION` 119개 분류행 추가, 원본 I열과 그룹별 완전 대조. 2026-11-20: 581건/53개 고유 조합/모드 분할 60행, 2026-09-23: 414건/38개 고유 조합/모드 분할 59행. 각각 조합 횟수 합계 581/414와 그룹별 **전부 동일 PASS**. 운영 원본 변경·원본 행 삭제 없음.
+- [x] `HOJA_PROJECT_B_USAGE_SHADOW_V1.js` 및 `HOJA_PROJECT_B_USAGE_SHADOW_TRIAL_GAS.gs` 구현. 구형 `getUsageStatisticsU2` 건드리지 않는 병렬 `getUsageStatisticsU3ShadowTrial(creatorToken,dateKeys,asOf)`. 기존 `requireUsageStatisticsAccessU3_` **선검증**, 이후 복사본 시트의 요약만 읽기, 기존 U2 응답 형식 `preview`로 투영. 정확한 7팀, 알 수 없는 구형 인원은 미분류, 조합 TOP20, 기간 누락 HOLD. 전체 시작 날짜 미증명으로 `totals.all=null`, 필요한 날짜가 빠진 today/7일/30일은 `null` 처리하고 `productionSwitchAllowed:false` 유지.
+- [x] `HOJA_PROJECT_B_USAGE_SHADOW_V1.test.mjs`에서 응답 키·2~7팀·원본과 신형의 다중단원 조합 TOP20 구분·검증 없는 기간 HOLD·권한검사 호출 선행·원본 접근 금지 검증을 CI에 추가.
+- [ ] 새 Project B shadow가 실제 Apps Script 테스트 프로젝트에서 실행되었거나 운영 Manager HTML에 연결된 것은 **아님**. 현 실연동은 Google Sheets API 및 GitHub mock/브라우저 CI이며 운영 조회 전환·원본 삭제·트리거 설치는 HOLD.
+- [ ] 원본 이력 전체 기간의 출처/집계 건수·새 V1의 SHA-256 COMPLETE·오늘 실시간 증분(또는 안전한 읽기 모델)·상용 TOP20 성능을 채우기 전 기존 `getUsageStatisticsU2` 교체 금지.
