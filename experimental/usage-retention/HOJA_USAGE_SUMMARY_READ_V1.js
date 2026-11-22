@@ -43,8 +43,9 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
  const group=(list,dim)=>{
   const map=new Map();
   for(const r of list.filter(x=>x.dimension===dim)){
-   assert(!map.has(r.dimensionKey),'DUPLICATE_FACET_'+dim);
-   map.set(r.dimensionKey,r.count);
+   // Verified trial facets are partitioned by SOLO/TEAM and gameId,
+   // while legacy charts are already merged across those axes.
+   map.set(r.dimensionKey,(map.get(r.dimensionKey)||0)+r.count);
   }
   return Object.fromEntries([...map].sort((a,b)=>a[0].localeCompare(b[0])));
  };
