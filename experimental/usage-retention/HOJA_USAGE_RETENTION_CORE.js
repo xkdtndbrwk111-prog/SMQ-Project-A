@@ -60,7 +60,12 @@ var HOJA_USAGE_RETENTION_CORE=(function(){
   const publisher=text(r.publisher||'',64);
   const ids=Array.isArray(r.cartridgeIds)?r.cartridgeIds:
    String(r.cartridgeIds||'').split('|').filter(Boolean);
-  const cartridgeIds=ids.map(x=>text(x,64));
+  // Some actual pre-U3S1 EVENT_LOG rows have L:O entirely empty.
+  // Preserve their play counts without inventing a unit identity. The unknown
+  // bucket means no per-unit historical detail can be reconstructed.
+  const sourceWasLegacy=Array.isArray(value);
+  const cartridgeIds=(sourceWasLegacy&&!ids.length?['LEGACY_UNRESOLVED']:ids)
+   .map(x=>text(x,64));
   assert(cartridgeIds.length>=1&&cartridgeIds.length<=5 &&
    new Set(cartridgeIds).size===cartridgeIds.length,'CARTRIDGES');
   const teamCount=r.teamCount==null||r.teamCount===''?(mode==='TEAM'?null:1):Number(r.teamCount);
