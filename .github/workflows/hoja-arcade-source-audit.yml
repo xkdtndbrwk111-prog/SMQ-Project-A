@@ -1,0 +1,37 @@
+name: HOJA arcade packed-source input audit (trial only)
+on:
+  push:
+    branches:
+      - work/unified-quiz-renderer-20261122
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect original compressed arcade keymap and death screen
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {gunzipSync} from 'node:zlib';
+          const root='experimental/unified-quiz-renderer/game-trial/';
+          const src=Array.from({length:25},(_,i)=>readFileSync(root+'part-'+String(i+1).padStart(2,'0')+'.txt','utf8')).join('');
+          const payload=src.match(/const HOJA_V051_ARCADE_GZIP='([^']+)'/);
+          if(!payload)throw new Error('Packed arcade missing');
+          const html=gunzipSync(Buffer.from(payload[1],'base64')).toString('utf8');
+          const tokens=['createInput()','createInput(){','keys=','keyboard.addKeys','JustDown','keyCode','KeyH','keydown','keyup','death','died','dead','die(', 'killPlayer','showDeath','onDeath','gameOver','respawn','revive','retry','사망','죽었','부활','재시작','확인','Enter','WASD','SHIFT','SPACE','KeyCodes','updateDoors(','cursors','jump','runSpeed'];
+          console.log('AUDIT_LEN',html.length);
+          for(const needle of tokens){
+            let from=0,found=0;const clips=[];
+            while((from=html.indexOf(needle,from))!==-1&&found<10){
+              found++;
+              const lo=Math.max(0,from-260),hi=Math.min(html.length,from+850);
+              clips.push(html.slice(lo,hi).replace(/\r/g,'').replace(/\n/g,'\\n'));
+              from+=needle.length;
+            }
+            if(found)console.log('AUDIT_TOKEN',JSON.stringify(needle),'COUNT_AT_LEAST',found,'CLIPS',JSON.stringify(clips));
+          }
+          JS
