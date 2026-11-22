@@ -176,7 +176,7 @@ var HOJA_USAGE_SUMMARY_READ_V1=(function(){
    const observedFacet=new Set();
    for(const r of rawFacets){
     const dimension=str(r[4]),gameId=str(r[2]),mode=str(r[3]),label=str(r[5]);
-    assert(['GRADE','SUBJECT','PUBLISHER'].includes(dimension),'TRIAL_FACET_TYPE');
+    assert(['GRADE','SUBJECT','PUBLISHER','CARTRIDGE_COMBINATION'].includes(dimension),'TRIAL_FACET_TYPE');
     const key=JSON.stringify([gameId,mode,dimension,label]);
     assert(!observedFacet.has(key),'TRIAL_FACET_DUPLICATE');
     observedFacet.add(key);
