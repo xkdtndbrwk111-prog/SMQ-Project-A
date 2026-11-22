@@ -58,10 +58,17 @@ test('older 11-field PUBLIC events count plays without inventing selected unit I
  assert.equal(snap.buckets.some(r=>r.dimension==='UNIT_SELECTION'),false);
  assert.equal(snap.buckets.find(r=>r.dimension==='CARTRIDGE_COMBINATION').count,1);
 });
-test('new summary rejects event ID duplicates but never silently deduplicates historical starts',()=>{
- assert.throws(()=>v4.snapshot('2026-11-20',[row(1),row(1)],{coverageVerified:true}),
-  /DUPLICATE_EVENT_ID/);
- assert.throws(()=>v4.snapshot('2026-11-20',[row(1)],{}),/COVERAGE_NOT_VERIFIED/);
+test('actual historical timestamp-only repeated eventId is one play, conflicting payload blocks',()=>{
+ const a=row(1),b=row(1);b[1]='2026-11-20T10:00:30Z';
+ const snap=v4.snapshot('2026-11-20',[a,b],{coverageVerified:true});
+ assert.equal(snap.starts,1);
+ assert.equal(snap.sourceRows,2);
+ assert.equal(snap.retriesSuppressed,1);
+ assert.equal(snap.buckets.find(x=>x.dimension==='CARTRIDGE_COMBINATION').count,1);
+ const conflict=row(1);conflict[8]='다른 단원'; 
+ assert.throws(()=>v4.snapshot('2026-11-20',[a,conflict],{coverageVerified:true}),
+  /DUPLICATE_EVENT_ID_CONFLICT/);
+ assert.throws(()=>v4.snapshot('2026-11-20',[a],{}),/COVERAGE_NOT_VERIFIED/);
 });
 test('7 teams and unknown team size preserve explicit grand total and percentages',()=>{
  const day=published('2026-11-20',[
