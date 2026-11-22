@@ -215,7 +215,7 @@ window.HOJA_GAMEPLAY=(()=>{
   }
  async function launch(which,requested){
   if(!window.HOJA_B_LIVE?.sources||!questions.length){window.alert('Project B 문제를 먼저 선택하고 불러와야 합니다.');return;}
-  stop();const own=++loadId;page=which;season=SEASONS[requested]?requested:window.HOJA_SEASON_SESSION?.current?.()||'spring';
+  stop();window.HOJA_TRIAL_SCENE_AUDIO?.suspendAttract?.();const own=++loadId;page=which;season=SEASONS[requested]?requested:window.HOJA_SEASON_SESSION?.current?.()||'spring';
   window.HOJA_MODE_PREVIEW?.hide?.();host().hidden=false;
   host().dataset.mode=which;frame().hidden=which!=='arcade';stage().hidden=which!=='quiz';
   img('hqArcadeInfo').hidden=true;img('hqHud').hidden=which!=='quiz';img('hqModeLabel').textContent=which==='arcade'?'아케이드 모드 · 호자 모험':'문제 풀이 모드 · Project B 문제';
@@ -251,7 +251,7 @@ window.HOJA_GAMEPLAY=(()=>{
   stopEnemyFrames();
   loadId++;if(anim){cancelAnimationFrame(anim);anim=0;}
   if(doneTimer){clearTimeout(doneTimer);doneTimer=0;}
-  if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
+  if(questionHandler){window.removeEventListener('keydown',questionHandler,true);window.HOJA_TEAM_APPROVED_TRIAL?.inputWindow()?.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
   activeQuiz=false;jumping=false;img('hqOverlay').hidden=true;img('hqResult').hidden=true;
   frame().removeAttribute('srcdoc');frame().removeAttribute('src');frame().hidden=true;
  }
@@ -275,7 +275,7 @@ window.HOJA_GAMEPLAY=(()=>{
   anim=requestAnimationFrame(tick);
  }
  function closeQuestion(){
-  img('hqOverlay').hidden=true;activeQuiz=false;if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
+  img('hqOverlay').hidden=true;activeQuiz=false;if(questionHandler){window.removeEventListener('keydown',questionHandler,true);window.HOJA_TEAM_APPROVED_TRIAL?.inputWindow()?.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
   const justCorrect=lastCorrect;lastCorrect=false;
   if(justCorrect)celebrate();
   if(answered>=questions.length){
@@ -316,17 +316,50 @@ window.HOJA_GAMEPLAY=(()=>{
    if(locked||i<0||i>=q.choices.length)return;locked=true;answered++;
    for(let k=0;k<choices.children.length;k++)if(k===q.answer)choices.children[k].classList.add('correct');
    if(i===q.answer){correct++;feedback.textContent='정답!  +10';window.HOJA_V055_SFX?.('correct');lastCorrect=true;quizHappyEye=hojaPickHappyEye();quizEyeHappyUntil=performance.now()+1400;quizEyeFailUntil=0;}else{choices.children[i]?.classList.add('wrong');feedback.textContent='오답 · 0점';window.HOJA_V055_SFX?.('wrong');lastCorrect=false;quizEyeFailUntil=performance.now()+950;quizEyeHappyUntil=0;}
+   window.HOJA_TEAM_APPROVED_TRIAL.feedback(i===q.answer);
    updateQuizHud();
-   if(questionHandler){window.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
-   doneTimer=setTimeout(()=>{doneTimer=0;if(page==='quiz'){window.HOJA_TEAM_APPROVED_TRIAL.hide();closeQuestion()}},950);
+   if(questionHandler){window.removeEventListener('keydown',questionHandler,true);window.HOJA_TEAM_APPROVED_TRIAL?.inputWindow()?.removeEventListener('keydown',questionHandler,true);questionHandler=null;}
+   doneTimer=setTimeout(()=>{doneTimer=0;if(page==='quiz'){window.HOJA_TEAM_APPROVED_TRIAL.hide();closeQuestion()}},1100);
   }
   if(!q.approvedBinding){window.HOJA_TEAM_APPROVED_TRIAL.fail(Error('SOLO_APPROVED_BINDING_REQUIRED'));return;}
   window.HOJA_TEAM_APPROVED_TRIAL.show(q,'solo',d=>{
     if(page!=='quiz'||!activeQuiz||finished)return;
     let ix;
     try{ix=window.HOJA_UNIFIED_TRIAL_CORE.teamRendererAnswerIndex(q.approvedBinding,d.choiceId);}
-    catch(e){window.HOJA_TEAM_APPROVED_TRIAL.fail(e);return;}
+    catch(e){window.HOJA_TEAM_APPROVED_TRIAL.error(e);return;}
     choose(ix);
+  }).then(()=>{
+    if(page!=='quiz'||!activeQuiz||locked)return;
+    const child=window.HOJA_TEAM_APPROVED_TRIAL.inputWindow();
+    if(!child)return;
+    // Parent listeners cannot see keydown inside the approved srcdoc iframe.
+    // Route shortcuts through the renderer's visible buttons so host scoring stays authoritative.
+    const buttons=()=>[...child.document.querySelectorAll('#hqChoices button.hqChoice')];
+    const keyPosition=code=>{
+      if(/^Digit[123]$/.test(code)||/^Numpad[123]$/.test(code))return Number(code.at(-1))-1;
+      if(q.type==='OX'&&code==='KeyO')return buttons().findIndex(b=>b.dataset.choice==='true');
+      if(q.type==='OX'&&code==='KeyX')return buttons().findIndex(b=>b.dataset.choice==='false');
+      return -1;
+    };
+    questionHandler=e=>{
+      if(page!=='quiz'||!activeQuiz||locked||finished||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey)return;
+      if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName)||e.target?.isContentEditable)return;
+      const items=buttons();if(!items.length)return;
+      const key=e.code;let position=keyPosition(key);
+      const arrows=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
+      if(position<0&&!arrows.includes(key)&&key!=='Enter'&&key!=='Space')return;
+      e.preventDefault();e.stopImmediatePropagation();
+      if(arrows.includes(key)){
+        const delta=(key==='ArrowDown'||key==='ArrowRight')?1:-1;
+        focus=(focus+delta+items.length)%items.length;
+        items[focus].focus();items.forEach((button,i)=>button.style.outline=i===focus?'4px solid #ffdb67':'');
+        return;
+      }
+      if(position<0)position=focus>=0?focus:0;
+      if(position>=0&&position<items.length)items[position].click();
+    };
+    window.addEventListener('keydown',questionHandler,true);
+    child.addEventListener('keydown',questionHandler,true);
   });
   return;
   // Legacy question DOM is kept as an inert rollback reference in the trial.

@@ -207,11 +207,50 @@ return Object.freeze({bindTeamApprovedQuestion,teamRendererAnswerIndex,teamAppro
 
 /* Only the trial copy invokes this. The browser host does not calculate score. */
 window.HOJA_TRIAL_APPROVED_HTML=/* HOJA_TRIAL_APPROVED_HTML_INLINE */null;
+/* Trial-only intro sound ownership: stop scene events, retain shared BGM and gameplay SFX. */
+window.HOJA_TRIAL_SCENE_AUDIO=(()=>{
+ function suspendAttract(){
+   const scene=window.HOJA_ATTRACT_SCENE;
+   if(!scene?.scene?.pause)return false;
+   try{
+     if(!scene.scene.isPaused?.())scene.scene.pause();
+     return true;
+   }catch(err){console.warn('HOJA intro pause failed',err);return false;}
+ }
+ function resumeAttract(){
+   const scene=window.HOJA_ATTRACT_SCENE;
+   if(!scene?.scene?.resume||scene.pausedByUser)return false;
+   try{
+     if(scene.scene.isPaused?.())scene.scene.resume();
+     return true;
+   }catch(err){console.warn('HOJA intro resume failed',err);return false;}
+ }
+ const flow=window.HOJA_FLOW;
+ if(flow&&typeof flow.enterIntro==='function'){
+   const enter=flow.enterIntro;
+   flow.enterIntro=function(...args){const output=enter.apply(this,args);resumeAttract();return output;};
+ }
+ return Object.freeze({suspendAttract,resumeAttract});
+})();
+
 window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  const core=window.HOJA_UNIFIED_TRIAL_CORE;
  let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0;
- let header=null,nextButton=null;
+ let header=null,nextButton=null,judgment=null;
  function overlay(){return document.getElementById('hqOverlay')}
+ function clearJudgment(){if(judgment){judgment.remove();judgment=null;}}
+ function showJudgment(correct){
+   if(overlay()?.dataset.hojaUnified!=='yes')return;
+   clearJudgment();
+   judgment=document.createElement('div');judgment.id='hojaSoloJudgment';
+   judgment.setAttribute('role','status');judgment.setAttribute('aria-live','assertive');
+   judgment.style.cssText='position:absolute;inset:0;z-index:45;display:grid;place-items:center;pointer-events:none;background:rgba(5,12,21,.48)';
+   const mark=document.createElement('div');
+   mark.style.cssText='border-radius:20px;box-shadow:0 12px 55px #000a;padding:22px 45px;max-width:90%;font:900 clamp(28px,4.5vw,54px)/1.2 system-ui,sans-serif;text-align:center;color:#fff;border:4px solid rgba(255,255,255,.75);background:'+(correct?'#176c4b':'#a12b37');
+   mark.textContent=correct?'✓ 정답! +10점':'✕ 오답 · 0점';
+   judgment.append(mark);overlay().append(judgment);
+ }
+ function inputWindow(){return frame?.contentWindow||null}
  function error(reason){
    const m='승인 공통 렌더러 연결 실패: '+String(reason?.message||reason);
    console.error('[HOJA unified team trial]',reason);
@@ -257,7 +296,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(frame)frame.hidden=false;
  }
  async function show(q,mode,onAnswer,caption=''){
-   const token=++serial;answerHandler=null;reveal();
+   const token=++serial;answerHandler=null;clearJudgment();reveal();
    if(header){header.style.display=mode==='review'?'block':'none';document.getElementById('hojaTeamReviewLabel').textContent=caption;}
    if(nextButton)nextButton.style.display='none';
    try {
@@ -277,7 +316,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    nextButton.onclick=()=>{nextButton.style.display='none';onNext();};
  }
  function hide(){
-   serial++;answerHandler=null;
+   serial++;answerHandler=null;clearJudgment();
    if(host)host.suspend();
    if(frame)frame.hidden=true;
    if(header)header.style.display='none';
@@ -291,7 +330,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(header)header.remove();
    frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;
  }
- return Object.freeze({begin,show,reviewFeedback,hide,reset,error});
+ return Object.freeze({begin,show,reviewFeedback,hide,reset,error,feedback:showJudgment,inputWindow});
 })();
 
 window.HOJA_TEAM_TEST=(()=>{
@@ -898,6 +937,7 @@ window.HOJA_TEAM_TEST=(()=>{
      return;
    }
    window.HOJA_GAMEPLAY?.stop?.();
+   window.HOJA_TRIAL_SCENE_AUDIO?.suspendAttract?.();
    try{window.HOJA_TEAM_APPROVED_TRIAL.begin(questions);}
    catch(error){window.alert('팀전 승인 렌더러 준비 실패: '+String(error?.message||error));return;}
    hideBlockingStartLayers();

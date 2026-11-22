@@ -25,11 +25,14 @@ async def main():
         page.on('dialog',lambda d:asyncio.create_task(d.dismiss()))
         await page.set_content(s,wait_until='domcontentloaded',timeout=90000)
         await page.evaluate('''(sources)=>{
+          window.__hojaTeamIntroPaused=0;
+          window.HOJA_ATTRACT_SCENE={scene:{isPaused:()=>false,pause:()=>window.__hojaTeamIntroPaused++}};
           window.HOJA_B_LIVE={sources};
           window.HOJA_GAMEPLAY.setServerQuestions(sources);
           window.HOJA_GAMEPLAY.launch('quiz','spring');
           window.HOJA_TEAM_TEST.launch(2,'spring');
         }''', sources)
+        assert await page.evaluate('window.__hojaTeamIntroPaused')==1,'Team mode did not pause intro scene'
         await page.wait_for_timeout(2800)
         await page.evaluate('''()=>{const b=document.querySelector('#htTeamBoard button.htBalloon');
           if(!b)throw Error('TEAM_BALLOON_NOT_FOUND');b.click()}''')
