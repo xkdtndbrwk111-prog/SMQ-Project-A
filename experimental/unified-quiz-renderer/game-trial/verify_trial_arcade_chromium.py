@@ -4,7 +4,7 @@ Transport test only. Phaser world balloon/collisions NOT simulated.
 """
 import argparse,asyncio,shutil
 from pathlib import Path
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright,TimeoutError as PWTimeout
 from verify_trial_chromium import social6_sources
 ROOT=Path(__file__).resolve().parent
 
@@ -57,11 +57,26 @@ async def run():
               });
             }''',question)
             choices=3 if typ=='MULTIPLE' else 2
-            await page.wait_for_function('''n=>{
-              const f=document.getElementById('hojaArcadeApprovedParentFrame');
-              return f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length===n &&
-                document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
-            }''',arg=choices,timeout=30000)
+            family_id=question['familyKey'].split(chr(0))[-1]
+            prompt=next(r['rendererQuestion']['prompt'] for e in sources for r in e['data']['questions'] if r['familyId']==family_id)
+            try:
+                await page.wait_for_function('''e=>{
+                  const f=document.getElementById('hojaArcadeApprovedParentFrame');
+                  return f?.style.visibility==='visible' &&
+                    f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===e.prompt &&
+                    f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length===e.count &&
+                    document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
+                }''',arg={'prompt':prompt,'count':choices},timeout=75000)
+            except PWTimeout:
+                diag=await page.evaluate('''()=>{
+                  const f=document.getElementById('hojaArcadeApprovedParentFrame'),a=document.getElementById('hqArcadeFrame'),o=document.getElementById('hojaArcadeApprovedParentOverlay');
+                  return {parent:window.HOJA_ARCADE_APPROVED_TRIAL?.state,arcadeReady:typeof a?.contentWindow?.HOJA_ARCADE_APPROVED_BRIDGE?.open==='function',
+                   frame:!!f,visibility:f?.style.visibility,text:f?.contentDocument?.getElementById('hqQuestion')?.textContent?.slice(0,120),
+                   options:[...(f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice')||[])].map(x=>x.dataset.choice),
+                   overlay:o?.style.display,error:o?.querySelector('#hojaArcadeApprovedError')?.textContent,loading:!!o?.querySelector('#hojaArcadeApprovedLoading')};
+                }''')
+                print('ARCADE_TRANSPORT_LOAD_TIMEOUT',diag,flush=True)
+                raise
             loc=page.frame_locator('#hojaArcadeApprovedParentFrame')
             if typ=='OX':
                 # Keyboard event must enter the nested approved iframe, not the arcade parent.

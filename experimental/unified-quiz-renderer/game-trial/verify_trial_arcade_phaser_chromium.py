@@ -97,15 +97,20 @@ async def run():
     s.showQuiz(e);
     if(!e.consumed || e.alive)throw Error('ORIGINAL_BALLOON_NOT_CONSUMED');
    }''',i)
-   await page.wait_for_function('''()=>document.querySelector('#hojaArcadeApprovedParentOverlay')?.style.display==='block' &&
-    !!document.querySelector('#hojaArcadeApprovedParentFrame')?.contentDocument?.querySelector('#hqChoices button.hqChoice')''',timeout=30000)
-   # Choose the original approved answer on first question and a wrong answer on second.
+   # Match the ACTIVE canonical question, not stale buttons from the last iframe show().
    family=await page.evaluate("""()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow;
     return w.__QA_RUN__().step09History.at(-1).key.split('\\u0000').at(-1);
    }""")
    row=next(r for e in sources for r in e['data']['questions'] if r['familyId']==family)
    canonical=row['rendererQuestion']
+   await page.wait_for_function("""(prompt)=>{
+     const f=document.getElementById('hojaArcadeApprovedParentFrame');
+     return f?.style.visibility==='visible' &&
+       f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===prompt &&
+       f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=2 &&
+       document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
+   }""",arg=canonical['prompt'],timeout=30000)
    answer=canonical['answer']
    correct_id=str(answer['value']).lower() if row['type']=='OX' else answer['choiceId']
    choices=await page.evaluate("""()=>{

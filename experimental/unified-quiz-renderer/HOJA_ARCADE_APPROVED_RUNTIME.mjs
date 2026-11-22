@@ -99,9 +99,18 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   });
   return loading;
  }
+ function showLoading(){
+  overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();
+  const label=document.createElement('div');
+  label.id='hojaArcadeApprovedLoading';label.setAttribute('role','status');
+  label.style.cssText='position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:#071421;color:#e7f5ff;font:800 clamp(22px,3vw,34px) system-ui';
+  label.textContent='승인 문제를 준비하는 중…';
+  overlay.append(label);
+ }
  function error(err){
   console.error('[HOJA arcade approved]',err);
-  ensureUI();overlay.style.display='block';
+  ensureUI();frame.style.visibility='hidden';overlay.style.display='block';
+  overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();
   const label=document.createElement('div');label.id='hojaArcadeApprovedError';label.setAttribute('role','alert');
   label.style.cssText='position:absolute;inset:20%;z-index:11;padding:30px;display:grid;place-items:center;text-align:center;color:#ffcccc;background:#501a26;border:3px solid #f9b1b1;border-radius:18px;font:bold 23px system-ui';
   label.textContent='승인 문제 연결 오류: '+String(err?.message||err)+' · 뒤로 가기로 종료하세요.';
@@ -113,11 +122,13 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   try{mapping=resolveApprovedArcadeChoice(catalog,msg.question,core)}
   catch(e){error(e);return}
   const local=++epoch;focus=-1;active={id:msg.id,mapping,responded:false};
-  ensureUI();overlay.style.display='block';
+  ensureUI();frame.style.visibility='hidden';overlay.style.display='block';showLoading();
   try{
    const h=await ensureHost();
    if(local!==epoch||active?.id!==msg.id)return;
    await h.show({questionId:mapping.binding.questionId,mode:'solo',omitChoiceId:mapping.binding.omitChoiceId});
+   if(local!==epoch||active?.id!==msg.id)return;
+   overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();frame.style.visibility='visible';
   }catch(e){if(local===epoch)error(e)}
  }
  function verdict(msg){
@@ -133,9 +144,12 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   ++epoch;active=null;host?.suspend();
   overlay?.querySelector('#hojaArcadeApprovedJudgment')?.remove();
   overlay?.querySelector('#hojaArcadeApprovedError')?.remove();
+  overlay?.querySelector('#hojaArcadeApprovedLoading')?.remove();
+  if(frame)frame.style.visibility='hidden';
   if(overlay)overlay.style.display='none';
  }
  function shortcut(ev){
+  if(frame?.style.visibility!=='visible')return;
   if(!active||active.responded||ev.repeat||ev.isComposing||ev.ctrlKey||ev.altKey||ev.metaKey)return;
   if(['INPUT','TEXTAREA','SELECT'].includes(ev.target?.tagName)||ev.target?.isContentEditable)return;
   const buttons=[...(frame?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice')||[])];
