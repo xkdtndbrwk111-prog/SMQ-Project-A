@@ -1,0 +1,36 @@
+name: HOJA arcade real Phaser smoke (trial only)
+on:
+  push:
+    branches:
+      - work/unified-quiz-renderer-20261122
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  phaser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned real Phaser 4.2.1 from npm
+        run: |
+          npm pack phaser@4.2.1 --silent
+          tar -xzf phaser-4.2.1.tgz package/dist/phaser.min.js
+          test -s package/dist/phaser.min.js
+      - name: Install Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install chromium
+      - name: Rebuild exact 25-part trial Game.html
+        run: |
+          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_build.py
+          python3 experimental/unified-quiz-renderer/game-trial/build_trial.py --output "$RUNNER_TEMP/Game.PHASER.TEST.html"
+      - name: Browser real Phaser boot and original showQuiz/finish synthetic-balloon smoke
+        run: |
+          python3 experimental/unified-quiz-renderer/game-trial/verify_trial_arcade_phaser_chromium.py --html "$RUNNER_TEMP/Game.PHASER.TEST.html" --phaser package/dist/phaser.min.js

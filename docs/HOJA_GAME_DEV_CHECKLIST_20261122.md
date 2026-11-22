@@ -377,3 +377,12 @@
 - [x] 실제 승인 렌더러가 뜬 **중첩 iframe 안에서** OX 문제의 `X` 키 입력을 수행: 원본 아케이드 요구 인덱스 **0**으로 1회 정상 반환 및 판정 표시/닫기 PASS. 객관식 실제 클릭 인덱스1도 동일 실행에서 PASS.
 - [x] 싱글 문제풀이 정오답 4사례·숫자/OX 키, 팀전 첫 문제, 아케이드 원본 압축 정적 패치, 전체 단위 테스트도 재통과.
 - [ ] 이 성공은 아케이드 **승인 렌더러 입력/전달 경로** 검증이며 게임 월드 내 실제 풍선 충돌·점수/랭킹 자연 완주 검증이 아니다.
+
+## 27. 2026-11-22 실제 Phaser 4.2.1 아케이드 게임 엔진 회귀 시험 추가
+- [x] 앞선 `45025470206`에서 아케이드 원본 iframe↔승인 A/C/D 문제↔정답 선택(OX X키 포함) 메시지 왕복이 Chromium PASS임을 재확인. 다만 원래 `HojaScene.showQuiz()/finish()` 및 점수 지급은 호출하지 않은 테스트였음.
+- [x] **격리된 별도 GitHub Actions `hoja-arcade-real-phaser.yml`** 신설. 아케이드가 실제 사용하는 `phaser@4.2.1`을 npm에서 시험 시 다운로드하고, 동일 버전 JS를 Playwright iframe 자원으로 공급. 앱 운영 의존성/원본 코드/번들 추가 없음.
+- [x] `verify_trial_arcade_phaser_chromium.py` 신설: GitHub 정확한 25조각 조립본을 로드하고 아케이드 `HOJA_V058_ARCADE_START` 공식 수신 경로로 승인 사회6 문항을 전달. **실제 Phaser Scene 생성** 여부/bootStatus를 확인하고, QA 전용 가짜 풍선 2개를 `HojaScene.showQuiz()`에 넣어 게임 원래 `finish(index)`·`awardScore`·`step09History`·장면 pause/resume을 검사하도록 설계.
+- [ ] 새 실 Phaser CI 결과는 실행 전. 실제 학생 이동·충돌 감지/자연 풍선 생성/25문항 전체 완주는 이 검증에서 **미실시**. 정식 Phaser 장면/퀴즈 정산 함수의 부분 통합시험과 자연 플레이를 엄격히 구분.
+- [ ] 인트로 실제 음향 중첩 및 Windows 전자칠판·GAS/랭킹 실기 테스트 별도. 변경은 작업 브랜치와 테스트 파일에 한정.
+
+**다음 작업:** 새 GitHub Phaser Actions 실패/성공 로그 확인 → 시험 환경 차이와 실제 게임 코드 오류 분리 → 2개 실제 quiz/score 경로 안정화 → 25개 문항 QA·자연 플레이 검증 확대.
