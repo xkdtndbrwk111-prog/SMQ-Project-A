@@ -11,14 +11,12 @@ const HOJA_REVIEW_EVENTS=[];let PENDING_SEED=HOJA_REVIEW_CONFIG.seed;`);
  edit('    this._makerPendingEvent=null;\n  }\n  updateMakerExtraObjects(time,delta){', `    this._makerPendingEvent=null;
     if(HOJA_REVIEW_CONFIG.mode==='course'){
       const style={fontSize:'18px',color:'#fff3bf',stroke:'#153b43',strokeThickness:4};
-      for(const [x,label] of [[20,'톱날'],[39,'진자'],[78,'불꽃']])this.add.text(x*TILE,STAGE.makerHeight-125,label,style).setDepth(20);
-      this.hojaCourseGoalLabel=this.add.text(94*TILE,STAGE.makerHeight-125,'골인 →',style).setDepth(20);
-      this.hojaCourseFanLabel=this.add.text(58*TILE,STAGE.makerHeight-125,'← 바람',style).setDepth(20);
+      for(const [x,label] of [[20,'지면 톱날'],[34,'공중 톱날'],[49,'S로 앉기'],[71,'계속 바람'],[98,'간헐 바람'],[125,'불꽃 발판'],[145,'↑ 바람'],[158,'↓ 바람']])this.add.text(x*TILE,STAGE.makerHeight-125,label,style).setDepth(20);
+      this.hojaCourseGoalLabel=this.add.text((STAGE.worldW-6)*TILE,STAGE.makerHeight-125,'골인 →',style).setDepth(20);
     }
   }
   updateMakerExtraObjects(time,delta){`);
  edit('    if(!this.playerBody)return;\n    for(const h of this.makerHazards||[]){', `    if(!this.playerBody)return;
-    if(HOJA_REVIEW_CONFIG.mode==='course'&&this.hojaCourseFanLabel){const fan=this.hojaGimmicks?.snapshot().find(g=>g.kind==='fan');this.hojaCourseFanLabel.setText(fan?.active?'← 바람 작동':'바람 멈춤');}
     if(HOJA_REVIEW_CONFIG.mode==='course'&&!this.hojaReviewCourseGoal&&!this.dying&&this.playerBody.x>=(STAGE.worldW-5)*TILE){this.hojaReviewCourseGoal=true;this.hojaCourseGoalLabel?.setVisible(false);HOJA_REVIEW_EVENTS.push({type:'course_goal',stage:STAGE_INDEX,x:this.playerBody.x,y:this.playerBody.y,at:Date.now()});this.add.text(Math.min(this.playerBody.x,this.cameras.main.worldView.right-110),this.playerBody.y-72,'코스 통과!',{fontSize:'24px',color:'#ffe690',stroke:'#153b43',strokeThickness:4}).setOrigin(.5).setDepth(30);}
     for(const h of this.makerHazards||[]){`);
  edit('let ACTIVE_SCENE=null;', `let ACTIVE_SCENE=null;
