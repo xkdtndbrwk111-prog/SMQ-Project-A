@@ -40,3 +40,27 @@
 - `versions/2.0.0/Code.gs`: `recordUsageStartU1()`가 공개 단원별 시작 이벤트를 `EVENT_LOG`에 append. 형식 검증은 하지만 현재 `eventId` 중복 존재 검사 없음. `HOJA_RANKING`은 별도의 TOP25 자료.
 - `versions/2.0.0/UsageRollupU3S.gs`: `runUsageRollupDateU3S1`, `runUsageRollupParityDateU3S2`, `USAGE_DAILY_TOTALS`, `USAGE_DAILY_DIMENSIONS`, `USAGE_ROLLUP_MANIFEST`. Shadow·원본 보존 전제.
 - 기존 통계의 기록/운영 설정이 보존되도록 `versions/2.0.0` 파일 자체와 운영 배포는 본 설계 작업에서 수정하지 않음.
+
+## 시험판 코드 구현 및 자동검증 (2026-11-23)
+
+이번 개발 브랜치에 아래 파일을 추가했다. 이들은 **운영 배포본이 아니며 운영 시트에 쓰거나 행을 지우지 않는다.**
+
+| 소스 | 구현 내용 |
+| --- | --- |
+| experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.js | 기존 EVENT_LOG 15열 인식, 이벤트 ID 중복 제거 및 충돌 차단, 일별·단원별 총합, 팀 7개까지 지원, 모든 날짜 검증 후 월별 집계, 30일 및 12개월 보관기한 판정 |
+| experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.test.mjs | 다중 단원 1회 플레이, 반복 수신, 윤년 29일, 월 합산 및 누락 검출, 1,000회 시작→일별 1행, 개인정보 제외, 보관 보류 안전 조건 |
+| experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_GAS.gs | 복사한 시험 시트의 EVENT_LOG 읽기 전용 미리보기. 10,000행을 넘으면 부분 집계 없이 중단. 운영용으로 등록된 시트 ID와 같으면 읽기조차 거부 |
+| experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_GAS.test.mjs | Apps Script·Sheets 모의객체로 스키마·날짜 변환·SHA-256·운영 ID 차단·변경 API 부재 확인 |
+| .github/workflows/unified-trial-qa.yml | 위 두 종류의 자동 검증을 렌더러 CI 단계에 연결 |
+
+**기존 기록의 한계:** 기존 EVENT_LOG에는 종료 정보와 게임 구분 필드가 없다. 시험 엔진은 모르는 종료를 UNKNOWN, 게임 구분을 HOJA_LEGACY로 처리해 실제 모드·완주를 지어내지 않는다. 다중 단원을 선택하면 플레이 수는 1회, 해당 단원별 선택 수는 각 1회로 집계한다. 정답률·완주율은 결과 이벤트 연결 이후에만 산출할 수 있다.
+
+### 안전한 실행 절차
+
+1. 기존 운영 시트와 GAS는 변경하지 않고, 별도의 시험 복사 시트와 Apps Script 프로젝트를 준비한다.
+2. 시험 프로젝트에 위 CORE.js와 TRIAL_GAS.gs 소스를 넣는다.
+3. 시험 스크립트 속성 HOJA_USAGE_TRIAL_SPREADSHEET_ID에 복사한 시트 ID를 입력한다.
+4. 함수 hojaUsageRetentionPreviewTrialU1()을 실행한다. 반환되는 전체 시작 합계, 단원별 합계, 중복 재전송 수와 SHA-256을 기존 통계와 대조한다.
+5. 실제 운영 데이터 삭제는 **프로젝트 A/B 조회 화면 모두 요약을 읽도록 바뀌고, 집계 세대·원본 백업·체크섬·재실행/복원 시험이 완료된 뒤** 별도의 승인으로만 진행한다.
+
+현재 시험 모듈은 삭제할 수 있는 날짜/월을 **미리보기로 계산할 뿐**, 삭제 함수·보관 스케줄·시트 변경 동작은 포함하지 않는다. 원본 EVENT_LOG의 실제 압축은 아직 실행하지 않았다.
