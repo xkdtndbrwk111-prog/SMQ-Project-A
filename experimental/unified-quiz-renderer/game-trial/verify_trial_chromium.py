@@ -24,7 +24,7 @@ def social6_sources(s):
         elif typ=='OX':a='O' if q['answer']['value'] else 'X'
         else:a=q['answer']['text']
         rows.append({'familyId':q['id'],'question':q['prompt'],'type':typ,'answer':a,
-                     'options':[c['text'] for c in q.get('choices',[])], 'explanation':q.get('explanation',''), 'rendererQuestion':q})
+                     'options':['O','X'] if typ=='OX' else [c['text'] for c in q.get('choices',[])], 'explanation':q.get('explanation',''), 'rendererQuestion':q})
     return [{'sheetName':'사회6 승인 시험용','data':{'questionSchemaVersion':2,'sourceSheetVersion':2,
             'questions':rows,'images':imgs,'tags':tags,'unitMeta':meta}}]
 

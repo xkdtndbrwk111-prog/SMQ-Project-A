@@ -386,3 +386,11 @@
 - [ ] 인트로 실제 음향 중첩 및 Windows 전자칠판·GAS/랭킹 실기 테스트 별도. 변경은 작업 브랜치와 테스트 파일에 한정.
 
 **다음 작업:** 새 GitHub Phaser Actions 실패/성공 로그 확인 → 시험 환경 차이와 실제 게임 코드 오류 분리 → 2개 실제 quiz/score 경로 안정화 → 25개 문항 QA·자연 플레이 검증 확대.
+
+### 27-1. 실제 Phaser 최초 CI 실패 원인·시험데이터 보정
+- [x] `17495dd` 실 Phaser GitHub Actions `45026058455`: **Phaser 4.2.1 npm 패키지 다운로드 및 실제 Chromium 로드 성공(요청 2건, 자바스크립트 오류 0)**. 그러나 장면 생성 전 서버 출제 정규화가 `OX 보기 오류: 사회6 승인 시험용 s6u31:q23`로 거부하여 **실 Phaser 원본 showQuiz/채점은 NOT RUN**.
+- [x] 해당 오류는 CI용 `social6_sources()`에서 OX 승인 원본의 보기 배열을 `[]`로 임의 합성한 **QA fixture 오류**. GitHub 승인 시험용 GAS `HOJA_QB_UNIT_S6U31.gs`의 OX 6문항은 모두 `options:["O","X"]`임을 실제 소스 JSON을 열어 재검증. `verify_trial_chromium.py`의 QA 생성 OX 배열을 동일하게 `["O","X"]`로 수정. 운영/승인 데이터는 손대지 않음.
+- [x] 구형 `HOJA approved renderer trial audit` 실행 `45026058360`의 간헐적 실패는 브라우저 테스트용 임시 판정 레이어를 **400ms 후 닫아** 자동화가 가끔 놓친 문제. 시험 콜백 종료 시간을 1500ms로 늘려 관측 안정화; 실제 게임 코드는 변경하지 않음.
+- [ ] 두 CI 재실행 실제 PASS/FAIL 확인 필요. 실제 Phaser 물리 충돌 25문항 자연 완주는 여전히 별개 시험.
+
+**다음 작업:** Phaser real smoke 재실행 결과 확인 → 초기화/충돌/원본 score path 추가 문제를 분류·수정.

@@ -53,7 +53,7 @@ async def run():
               win.HOJA_ARCADE_APPROVED_BRIDGE.open(q,index=>{
                 window.__QA_ARCADE_FINISH.push({index,expected:q.answer});
                 win.HOJA_ARCADE_APPROVED_BRIDGE.verdict(index===q.answer);
-                setTimeout(()=>win.HOJA_ARCADE_APPROVED_BRIDGE.close(),400);
+                setTimeout(()=>win.HOJA_ARCADE_APPROVED_BRIDGE.close(),1500);
               });
             }''',question)
             choices=3 if typ=='MULTIPLE' else 2
