@@ -113,3 +113,26 @@ function hojaV4TestColdU3(token){
   HOJA_V4U_VERIFIED_CACHE_+ctx.tag,HOJA_V4U_CACHE_FRESH_,HOJA_V4U_CACHE_GOOD_]);
  return true;
 }
+
+/* F4 (40-6AB/AC): token-guarded tail check of NEW EVENT_LOG rows after `fromRow`. Returns, per row,
+ * only public catalog facts: KST date, mode, schema, namespace, repository kind, whether every
+ * cartridge id is an ACTIVE approved id (and those public approved ids), plus duplicate eventId count.
+ * Never returns eventIds, timestamps, titles, sheet ids or any user data. */
+function hojaV4TestTailF4(token,fromRow){
+ const want=PropertiesService.getScriptProperties().getProperty('HOJA_V4_U3_TEST_TOKEN')||'';
+ if(!want||token!==want)throw Error('HOJA_V4_U3_TEST_DENIED');
+ const ctx=hojaV4uOpen_(PropertiesService.getScriptProperties());
+ const last=ctx.event.getLastRow(),from=Number(fromRow);
+ if(!Number.isSafeInteger(from)||from<1||from>last)throw Error('BAD_FROM');
+ const rows=last>from?ctx.event.getRange(from+1,1,last-from,15).getDisplayValues():[];
+ const active=new Set(hojaApprovedActive_().entries.map(e=>e.cartridgeId));
+ const seen=new Map();
+ const out=rows.map(r=>{seen.set(r[0],(seen.get(r[0])||0)+1);
+  let ids=[];try{ids=JSON.parse(r[11]||'[]');}catch(e){ids=['UNPARSEABLE'];}
+  const approved=Array.isArray(ids)&&ids.length>0&&ids.every(x=>active.has(String(x)));
+  return {date:r[2],mode:r[3],repositoryKind:r[4],schema:r[13],namespace:r[12],
+   allIdsActiveApproved:approved,approvedIds:approved?ids:[],cartridgeCount:r[9],teamCount:r[10],
+   validTail:HOJA_USAGE_V4_PUBLIC.validTailRow(r)};});
+ return {lastRow:last,rowsAdded:rows.length,uniqueEventIds:seen.size,duplicateRows:rows.length-seen.size,
+  rows:out,watermark:hojaV4uReadWatermark_(ctx)};
+}

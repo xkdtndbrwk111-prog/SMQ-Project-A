@@ -1056,3 +1056,16 @@
 - [ ] **`F4/F5/G` 독립 HOLD 유지:** **실 GAS A1 사용량/공개 익명 통계, R7 자정·80–120 부하·탭 종료 후 복구·실 랭킹, 85인치 전자칠판 0/16ms 즉시 탭 UX**, 교사 육안 **7단원 234문항**, 비공개 QBank pinned CI 검증 SKIPPED, **미디어 권리 23/23 HOLD**, 실제 활성 `active-deployment.json` = 0, PR Draft. 학생/교사 개인정보·이전 EVENT_LOG·실 GAS·운영 원본 변경, PR merge, 라이브 배포는 별도 승인까지 금지.
 
 **결론:** F3-3을 “전체 게임 출시 완료”가 아닌 **“로컬/모의 서버 기능 검증 완료(F4 진입 가능)”**로 명확히 구분한다. 다음 작업은 새 F3-3 검사 추가가 아니라 **F4의 승인된 격리 환경에서 실제 GAS 사용량·권한·통계 경계 확인**이다.
+
+
+### 40-6AC. Claude 제출 — F4 격리 GAS 실증 1차: 프로젝트 크기 한도로 push FAIL (2026-11-23)
+**작성자/경계:** Claude 자체 보고. 승인 범위 = PR #6 코멘트 7102127261(격리 시험 프로젝트 시험용 push만). GPT-6 독립 감수 전. 원격 프로젝트·시트·운영 무변경.
+
+| ID | 상태 | 근거 / 수치 | 증거(`experimental/usage-v4-unified/evidence/f4/`) | 다음 |
+|---|---|---|---|---|
+| `F4-PREPUSH-SAFETY` | **PASS(로컬)** | 대상 = R6 격리 프로젝트(ID 3곳 일치, 운영 프로젝트와 별개), 원격 R6 번들 백업, 서버 격리 게이트 fail-closed 코드 확인, 시험 설정의 세 시트 ID 상이, 번들 31파일·23/732·QA_TEST_ONLY·allowedScriptIds 1개, 게임 = F3-3 RC, 서버 코드 저장소와 동일, 매니페스트 동일 | `f4_isolated_push_attempt.txt` | — |
+| `F4-LOCAL-PREFLIGHT` | **PASS(mock)** | 실 격리 ID 번들 → 다른 프로젝트에서 `APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED`; mock 쌍둥이 UI E2E 4/4·팀전 1단원 exit 0 | `f4_local_preflight.txt` | — |
+| `F4-ISOLATED-PUSH` | **FAIL** | `clasp push --force` → "The project is too large to save." exit 1. 14,766,720 B(게임 8.6MB + 콘텐츠 6.0MB) > 한도; 현재 원격 7,309,075 B. 푸시 후 원격 9/9 파일 불변 확인, 배포 없음 | `f4_isolated_push_attempt.txt` | 설계 결정 필요 |
+| `F4-REAL-GAS-A1` / `F4-ANON-STATS` / `F4-OPS-DENIED` / `F4-DEPLOY-DELETE` | **NOT RUN** | push 실패로 미실행 | — | 결정 후 |
+| `F4-RELEASE-SIZE` (신규 위험) | **OPEN BLOCKER** | 승인 콘텐츠를 GAS `.gs`에 내장하는 RELEASE 설계는 23단원 + 게임을 한 프로젝트에 담지 못함 | 위 | 선택지: ① 일부 단원만 격리 실증, ② 콘텐츠를 프로젝트 밖 저장(SHA 검증 로드), ③ 게임 자산 경량화 — **사용자/GPT-6 결정** |
+- [ ] **이월 유지:** R7 자정, 80–120 부하, 탭 닫힘 복구, 교사 234 육안, QBank pin CI SKIPPED, 85인치·0/16ms 탭 UX, 실 랭킹, 미디어 권리 23/23 HOLD, 운영 활성 0, PR Draft.

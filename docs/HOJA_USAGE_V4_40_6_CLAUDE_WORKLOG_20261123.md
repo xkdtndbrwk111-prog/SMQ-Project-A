@@ -423,3 +423,23 @@
   1. guard v2의 `data-hoja-gen` 속성을 렌더/수학 동등성 검증기가 제외하지 않아 **1차 FAIL(exit 1)**. 진단으로 차이가 보기 버튼의 이 속성뿐임을 확인 → 두 guard 속성만 제외 → 렌더 539/539 × 4, 수학 187/187 PASS.
   2. `verify_f2_soc5_parity.py`가 차이가 있어도 **항상 exit 0**(fail-open) → fail-closed로 수정, 음성 시험 exit 1 확인, 재실행 64/64 PASS.
 - 원시 로그: `evidence/f3_3/` (HISTORY_* 실패 이력 포함).
+
+## F4 (1차) — 격리 GAS 실증 시도: 프로젝트 크기 한도로 push FAIL (2026-11-23, 40-6AB 승인 코멘트 7102127261)
+**승인 범위:** 기존 격리 시험 프로젝트에 대한 시험용 `clasp push`만. 웹앱 배포는 선생님이 편집기에서 직접. 운영 GAS·EVENT_LOG·랭킹·`main`·활성화·merge 금지.
+
+**푸시 전 안전 검증(로컬, ID 비공개):**
+- 대상 = R6와 같은 격리 프로젝트(로컬 `.clasp.json` 3곳 동일 ID, `clasp list` 이름 접두 "HOJA V4 40-6U ISOLA"). 운영 프로젝트("SUPER MARIO QUIZ…" 등)와 별개.
+- 원격 현재 내용 = R6 번들(Game.html `f9647ad6…`) → 푸시 전 전체 백업.
+- 격리 조건은 서버 코드가 fail-closed로 강제: `HOJA_V4_UNIFIED_ISOLATION=COPY_40_6U_ONLY`, 저장 ID ≠ 운영·인증 사본·랭킹, 사본 `_HOJA_USAGE_TRIAL_ONLY` A1/B1 카나리. 시험 전용 설정 파일의 세 시트 ID가 서로 다름(집합 크기 3) 확인.
+- 번들: QA 변형 + `--game approved-rc`, 31파일, 23단원/732문항, QA 카탈로그 `QA_TEST_ONLY` + `allowedScriptIds`=격리 프로젝트 1개. 게임 `876933…`(= F3-3 감사 RC, 원본 `4ac5c4ef…`, 부품 14/22). 서버 4파일 저장소와 바이트 동일. 매니페스트 원격과 동일.
+- **로컬 사전 시험(mock):** 실제 격리 ID 번들을 다른 프로젝트에서 열면 `APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED`(음성 PASS). mock ID 쌍둥이(카탈로그 ID만 다름): UI E2E 4/4, 팀전 전체 1단원(SHORT 4 교사 판정, 12=12, A1 1행, RPC 0) exit 0.
+- 시험 전용 파일에 F4용 꼬리 검사 함수 `hojaV4TestTailF4` 추가(토큰 보호, 공개 승인 ID·모드·날짜·스키마·중복 수만 반환). 저장소 템플릿 `test-only/TestOnlyU3.template.gs`에 같은 함수(비밀값 없음).
+
+**결과 — FAIL(push 단계):**
+- `clasp push`: "Skipping push."(비대화형 매니페스트 확인 기본값) → 전송 없음.
+- `clasp push --force`(매니페스트 동일 확인 후): **"The project is too large to save." exit 1.**
+- 푸시 후 `clasp pull`: 원격 9/9 파일 백업과 바이트 동일 → **원격 변경 없음, 배포 없음, 시험 시트 영향 없음.**
+- 크기: 푸시 14,766,720 B(Game.html 8,613,936 + 승인 콘텐츠 23파일 6,036,252) vs 현재 원격 7,309,075 B → 이 프로젝트의 한도는 그 사이.
+- 우회(단원 삭제·데이터 축소·검사 해제) 하지 않음. 증거: `evidence/f4/f4_isolated_push_attempt.txt`, `evidence/f4/f4_local_preflight.txt`.
+
+**의미:** 승인 콘텐츠를 GAS 프로젝트 안 `.gs` 파일로 넣는 현재 RELEASE 설계는 23단원 전체 + 게임을 한 프로젝트에 담을 수 없다. F4 실 GAS 시험과 향후 RELEASE 모두 설계 결정 필요(예: 단원 일부만 시험, 콘텐츠를 프로젝트 밖 저장소에 두고 SHA 검증 후 로드, 게임 자산 경량화). **결정 전까지 F4 실 GAS 항목 NOT RUN.**
