@@ -2,7 +2,7 @@
 """Team approved iframe smoke on the EXACT rebuilt branch trial.
 Uses synthetic GAS responses in memory. Does not call GAS or write scores.
 """
-import argparse, asyncio, shutil
+import argparse, asyncio, json, shutil
 from pathlib import Path
 from playwright.async_api import async_playwright
 from verify_trial_chromium import social6_sources
@@ -12,8 +12,9 @@ APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 async def main():
     p=argparse.ArgumentParser()
     p.add_argument('--html',type=Path,required=True)
+    p.add_argument('--sources',type=Path)
     args=p.parse_args()
-    sources=social6_sources(APPROVED.read_text())
+    sources=json.loads(args.sources.read_text()) if args.sources else social6_sources(APPROVED.read_text())
     s=args.html.read_text()
     async with async_playwright() as pw:
         chrome=shutil.which('chromium') or shutil.which('google-chrome-stable') or shutil.which('google-chrome')

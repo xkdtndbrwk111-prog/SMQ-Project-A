@@ -55,6 +55,13 @@ export function gameRow(concise, original) {
   let answer, options;
   if (concise.type === 'MCQ') {
     options = concise.choices.map(c => c.text);
+    // Picture-only choices: the shared renderer shows the approved picture; the legacy game
+    // contract still needs 4 non-empty unique labels, so use the approved alt text (or a
+    // neutral ordinal label when alts are missing/duplicated). Display content is unchanged.
+    if (concise.choices.some(c => !String(c.text || '').trim() && c.image)) {
+      const alts = concise.choices.map(c => String(c.text || '').trim() || String(c.imageAlt || '').trim());
+      options = alts.every(Boolean) && new Set(alts).size === alts.length ? alts : concise.choices.map((c, i) => String(c.text || '').trim() || '그림 선택지 ' + (i + 1));
+    }
     const k = concise.choices.findIndex(c => c.id === concise.answer?.choiceId);
     if (k < 0) fail('MCQ_ANSWER_NOT_IN_CHOICES:' + concise.id);
     answer = String(k + 1);
@@ -392,6 +399,16 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
     const used = [...new Set(conc.flatMap(q => [q.image, ...(q.media || []).filter(m => m.kind === 'image').map(m => m.asset), ...q.choices.map(c => c.image)]).filter(Boolean))].sort();
     const tags = {};
     if (p.tags) for (const q of conc) if (p.tags[q.id]) tags[q.id] = JSON.parse(JSON.stringify(p.tags[q.id]));
+    // renderer-v2 source without render tags (approved v0.1 page): its renderer chose the layout by
+    // defaultLayout(q) = q.image ? 'C' : 'A'. Encode exactly that as a DERIVED tag (the team binding
+    // requires a tag per question); parity with the approved page is verified separately.
+    let derivedDefault = false;
+    if (!adapted && !p.tags) {
+      const m = /function defaultLayout\(q\)\{return q\.image\?'C':'A'\}/.test(p.text);
+      if (!m) fail('NO_TAGS_AND_UNKNOWN_DEFAULT_LAYOUT:' + e.cartridgeId);
+      for (const q of conc) tags[q.id] = derivedTag(q, q.image ? 'C' : 'A', "approved page defaultLayout(q)=q.image?'C':'A'");
+      derivedDefault = true;
+    }
     let layoutPrefs = null;
     if (e.archivePath && e.sourceShape !== 'bundle-source-zips' && zipOf(e.archivePath).has('presentation/layout-preferences.json'))
       layoutPrefs = applyLayoutPreferences(zipOf(e.archivePath).json('presentation/layout-preferences.json'), tags, conc, p.text, e.cartridgeId);
@@ -412,7 +429,7 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
     Object.assign(r, {unitId, presentationSha256: p.sha, presentationShaVerified: p.shaVerified,
       types: Object.fromEntries(Object.entries(pkg.questions.reduce((a, q) => (a[q.type] = (a[q.type] || 0) + 1, a), {})).sort()),
       images: used.length, tags: Object.keys(tags).length,
-      renderTags: adapted ? r.renderTagsSourceDetail : p.tags ? 'APPROVED' : 'NONE_IN_APPROVED_SOURCE',
+      renderTags: adapted ? r.renderTagsSourceDetail : p.tags ? 'APPROVED' : derivedDefault ? 'DERIVED_FROM_APPROVED_PAGE_DEFAULT_LAYOUT' : 'NONE_IN_APPROVED_SOURCE',
       mediaQuestions: conc.filter(q => q.media).length,
       layoutPreferences: layoutPrefs, layoutCounts: Object.fromEntries(Object.entries(layoutCounts).sort()),
       presentationScriptsNotInBridge: scriptsNotInBridge, displayProfile,

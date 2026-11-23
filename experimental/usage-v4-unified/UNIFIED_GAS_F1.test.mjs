@@ -151,7 +151,9 @@ test('F1/F1-B REAL: 23 units / 732 questions packaged by three version-identifie
   assert.equal(math.reduce((n, e) => n + (e.layoutCounts.A || 0), 0), 120);
   assert.equal(ready.filter(e => e.layoutPreferences?.schema === 'hoja-layout-preferences-v1').reduce((n, e) => n + e.layoutPreferences.verifiedFixed, 0), 11);
   assert.ok(math.every(e => e.presentationScriptsNotInBridge.length === 2), 'math display scripts the bridge lacks are reported');
-  assert.ok(r.entries.filter(e => e.adapter === 'renderer-v2' && !e.layoutPreferences && e.renderTags === 'NONE_IN_APPROVED_SOURCE').every(e => e.visualParity === 'NOT_VERIFIED'));
+  const dflt = r.entries.filter(e => e.renderTags === 'DERIVED_FROM_APPROVED_PAGE_DEFAULT_LAYOUT');
+  assert.equal(dflt.length, 2, 'soc5 3-1/3-2: derived from the approved page rule, not labelled approved');
+  assert.ok(dflt.every(e => e.visualParity === 'NOT_VERIFIED'));
   const txt = readFileSync(REPORT, 'utf8');
   assert.ok(!/data:image|"prompt"|"choices"/.test(txt), 'report carries no question content');
 });
@@ -281,4 +283,16 @@ test('F2 math extension: generated from the approved math HTML, profile-gated, n
   assert.ok(prof.every(e => e.cartridgeId.startsWith('math')) || prof.length === 6);
   assert.ok(r.entries.filter(e => !e.displayProfile).every(e => !(e.presentationScriptsNotInBridge || []).length),
     'no other unit depends on an approved display script the renderer lacks');
+});
+
+test('F3 QA route: in the isolated QA build the game LIST/GET RPCs serve the SAME approved catalog; release never reroutes', () => {
+  const w = qaWorld();
+  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: 'zz5-s1-u1 승인 제목', cartridgeId: 'zz5-s1-u1'}, {name: 'zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}]);
+  const got = w.rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']);
+  assert.equal(got[0].data.cartridgeId, 'zz5-s1-u2');
+  assert.throws(() => w.rpc('hojaGetPublicQuestions', ['없는 제목']), /PROJECT_B_CARTRIDGE_NOT_PUBLIC/);
+  // release catalog (0 active): legacy Sheets path untouched (mock legacy catalog answers)
+  const {ss} = buildCopy({history: standardHistory()});
+  const rel = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]), props: ISOLATED_PROPS});
+  assert.deepEqual(rel.rpc('hojaListPublicCartridges').map(x => x.cartridgeId), ['101', '102']);
 });

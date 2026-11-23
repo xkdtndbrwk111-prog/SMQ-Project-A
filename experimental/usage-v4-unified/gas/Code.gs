@@ -132,6 +132,8 @@ function hojaPublicSheets_() {
 }
 
 function hojaListPublicCartridges() {
+  const qa=hojaApprovedQaCatalog_(); // 40-6 F3: QA build in the isolated project only
+  if(qa)return qa.entries.map(e=>({name:e.title,cartridgeId:e.cartridgeId}));
   const sheets=hojaPublicSheets_().sheets;
   hojaUsageCatalogPut_(sheets); // warms the telemetry cache: the game lists before it starts
   return sheets.map(p=>({name:p.title,cartridgeId:p.sheetId}));
@@ -179,6 +181,23 @@ function hojaApprovedActive_(){
       throw new Error('APPROVED_QA_CATALOG_REQUIRES_ISOLATED_TEST_PROJECT');
   }else if(type!=='RELEASE')throw new Error('APPROVED_CATALOG_INVALID');
   return c;
+}
+/* 40-6 F3: the game's existing LIST/GET RPCs serve the approved catalog ONLY when the
+ * TEST-ONLY QA catalog is embedded (which hojaApprovedActive_ refuses outside the isolated
+ * project). The RELEASE catalog (0 active) never reroutes: legacy behaviour is unchanged. */
+function hojaApprovedQaCatalog_(){
+  const c=hojaApprovedActive_();
+  return c.buildType==='QA_TEST_ONLY'?c:null;
+}
+function hojaApprovedIdsByTitle_(cat,names){
+  if(!Array.isArray(names)||!names.length||names.length>5||
+     names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>200)||
+     new Set(names.map(n=>n.trim())).size!==names.length)throw new Error('PROJECT_B_SELECTION_INVALID');
+  return names.map(n=>{
+    const hits=cat.entries.filter(e=>e.title===n.trim());
+    if(hits.length!==1)throw new Error('PROJECT_B_CARTRIDGE_NOT_PUBLIC');
+    return hits[0].cartridgeId;
+  });
 }
 function hojaListApprovedCartridges(){
   const c=hojaApprovedActive_();
@@ -262,6 +281,8 @@ function hojaReadCartridge_(sheet) {
 }
 
 function hojaGetPublicQuestions(names) {
+  const qa=hojaApprovedQaCatalog_(); // 40-6 F3: QA build in the isolated project only
+  if(qa)return hojaGetApprovedQuestions(hojaApprovedIdsByTitle_(qa,names));
   if(!Array.isArray(names)||!names.length||names.length>5||
      names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>180)||
      new Set(names.map(n=>n.trim())).size!==names.length)

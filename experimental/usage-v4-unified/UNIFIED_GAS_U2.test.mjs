@@ -71,13 +71,17 @@ test('existing game RPCs in the single GAS are byte-identical to the root produc
   const j=src.indexOf('\n}',i+1);return src.slice(i,j+2).trim();}; // to the column-0 closing brace
  const root=readFileSync('Code.gs','utf8'),uni=readFileSync(GAS_DIR+'/Code.gs','utf8');
  for(const n of ['hojaApiGet_','hojaPublicName_','hojaCatalogRead_','hojaPublicSheets_',
-  'hojaRows_','hojaReadCartridge_','hojaGetPublicQuestions',
+  'hojaRows_','hojaReadCartridge_',
   'hojaRankNormalizeName_','hojaRankValidName_','hojaRankSheet_','hojaRankCartridge_',
   'hojaRankRows_','hojaRankPublicRows_','hojaRankList','hojaRankSave','hojaUsageText_',
   'hojaUsageClassification_'])assert.equal(fn(uni,n),fn(root,n),n);
  // 40-6-U D: the ONLY intended difference in this function is warming the
  // telemetry catalog cache; the returned contract is unchanged.
- const strip=t=>t.replace(/\n\s*const sheets=hojaPublicSheets_\(\)\.sheets;\n\s*hojaUsageCatalogPut_\(sheets\);[^\n]*\n\s*return sheets\.map/,'\n  return hojaPublicSheets_().sheets.map');
+ // 40-6 F3: the only other intended difference is the 2-line QA-catalog route at the top of
+ // hojaListPublicCartridges / hojaGetPublicQuestions (inactive with the RELEASE catalog).
+ const noQa=t=>t.replace(/\n\s*const qa=hojaApprovedQaCatalog_\(\);[^\n]*\n\s*if\(qa\)return [^\n]*/,'');
+ assert.equal(noQa(fn(uni,'hojaGetPublicQuestions')),fn(root,'hojaGetPublicQuestions'));
+ const strip=t=>noQa(t).replace(/\n\s*const sheets=hojaPublicSheets_\(\)\.sheets;\n\s*hojaUsageCatalogPut_\(sheets\);[^\n]*\n\s*return sheets\.map/,'\n  return hojaPublicSheets_().sheets.map');
  assert.equal(strip(fn(uni,'hojaListPublicCartridges')),fn(root,'hojaListPublicCartridges'));
 });
 test('Stats.html: lazy single RPC, no external resources, data rendered as text only',()=>{

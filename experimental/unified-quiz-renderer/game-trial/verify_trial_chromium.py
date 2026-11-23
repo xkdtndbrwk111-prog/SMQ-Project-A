@@ -39,9 +39,10 @@ async def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--html',type=Path,required=True)
     parser.add_argument('--approved',type=Path,default=APPROVED)
+    parser.add_argument('--sources',type=Path,help='JSON [{sheetName,data}] as returned by hojaGetApprovedQuestions (F3)')
     a=parser.parse_args()
     s=instrument(a.html.read_text())
-    sources=social6_sources(a.approved.read_text())
+    sources=json.loads(a.sources.read_text()) if a.sources else social6_sources(a.approved.read_text())
     async with async_playwright() as pw:
         chrome=shutil.which('chromium') or shutil.which('google-chrome-stable') or shutil.which('google-chrome')
         options={'headless':True,'args':['--no-sandbox','--disable-dev-shm-usage']}

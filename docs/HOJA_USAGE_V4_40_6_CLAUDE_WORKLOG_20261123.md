@@ -330,3 +330,22 @@
 | Node 전체 | **84/84 PASS** |
 증거: `evidence/f2_parity_20261123.log`.
 **여전히 시각 동등성 미검증:** 영어 천재 6단원(승인 v3 화면은 별도 렌더러 — 지문을 별도 패널로 표시하는 등 구조가 달라 DOM 대조 불가, 교사 QA 미리보기 검토 필요), 사회5 2-2(승인 렌더러 화면 자체가 없음). 픽셀 단위 대조·실 GAS·게임 버튼·전자칠판 **NOT RUN**.
+
+## F3 (1차) — 세 게임 모드 시험 게임 연결 + 승인 ID 기록(Q04) + 게임 LIST/GET 경로 (2026-11-23, 40-6R Q03/Q04)
+**변경:**
+- `game-trial/build_trial.py --renderer`: 시험 7MB 게임(운영 아님)에 **합성 렌더러**(브리지 무변경 + media + math 확장)를 주입. 기본값은 기존 브리지 그대로(하위호환). 시험 파트 파일 무변경.
+- 기존 3개 시험 검증기(`verify_trial_chromium.py`·`verify_trial_team_chromium.py`·`verify_trial_arcade_chromium.py`)에 `--sources` 추가 — 사회6 고정 샘플 대신 **GAS `hojaGetApprovedQuestions`가 반환하는 실제 `[{sheetName,data}]`** 사용. `run_f3_all_units.sh`로 단원 전체 반복.
+- 발견·수정한 실제 결함 2건:
+  1. **그림 보기 MCQ 22문항(영어 11단원 × 2)**이 게임의 기존 보기 검증("객관식 보기 오류": 4개 비어 있지 않은 고유 텍스트)에 걸려 단원 전체 로드 실패 → 패키지 `options`(게임 내부 키)에 승인 `imageAlt`(중복·누락 시 "그림 선택지 n") 사용. 화면에는 승인 그림이 그대로 표시, rendererQuestion 불변.
+  2. 사회5 3-1·3-2는 승인 태그가 없어 팀 바인딩이 `TEAM_RENDER_APPROVED_TAGS_REQUIRED`로 fail-closed → 승인 화면 자체 규칙 `defaultLayout(q)=q.image?'C':'A'`(원문 일치 확인 후)를 **derived 태그**로 기록(`DERIVED_FROM_APPROVED_PAGE_DEFAULT_LAYOUT`, needsHumanReview). 적용 후에도 승인 화면 대비 **64/64 DOM 동일** 유지.
+- **Q04 수정:** `UsageTelemetryClient.html` `track()`이 숫자 ID만 허용해 승인 ID를 조용히 버리던 문제 → 구형 숫자 ID **또는** 승인 안정 ID(혼합 불가)를 전송, 판단(시대·활성)은 서버가 fail-closed. 혼합/미인식은 미전송 + `lastError` 표시.
+- **게임 LIST/GET = 같은 카탈로그:** 시험 번들 `hojaListPublicCartridges`/`hojaGetPublicQuestions` 첫머리에 2줄 QA 경로 — **QA 카탈로그(격리 시험 프로젝트에서만 허용)일 때만** 승인 목록/콘텐츠 반환(제목→ID 1:1), RELEASE 카탈로그(활성 0)에서는 기존 Sheets 경로 그대로(U2 시험이 이 2줄 외 원본과 동일함을 확인).
+
+**결과(로컬, 오프라인 Chromium + mock GAS):**
+| 시험 | 결과 |
+|---|---|
+| **23단원 × 3모드** (시험 게임 + 합성 렌더러 + 실제 GAS 형태 소스) | **23/23 전부 통과** — 싱글: MC·OX 클릭/키보드(1~3, O/X) 정답·오답 판정 표시·점수 반영 + 인트로 오디오 게이트(오디오 재생 자체는 mock) / 팀전: 첫 풍선이 승인 iframe 렌더러로 표시 / 아케이드: iframe 전송 MC·OX 2종 (`evidence/f3_modes_20261123.log`) |
+| 승인 ID 텔레메트리 → A1 | mock: 승인 시대 + 활성 카탈로그에서 정렬 ID 조합 1행 기록, 혼합 ID 미전송 |
+| 렌더러 무회귀·수학·사회5 동등성 재실행 | 539 동일 + media 6 OK(4해상도) / 수학 187/187 / 사회5 64/64 |
+| Node 전체 | **86/86 PASS** |
+**정직한 범위 표기:** 이번 3모드 시험은 기존 검증기 방식대로 게임의 `setServerQuestions` 시험 훅으로 소스를 주입한 것이다. **시작 화면에서 실제 카트리지 목록 클릭 → LIST/GET → 모드 버튼 → 시작까지의 완전한 UI 버튼 E2E는 NOT RUN.** 팀전 **우승 발표 후 오답 복습**, 아케이드 **실제 Phaser 풍선 라운드·FINISH·랭킹 차단**, 팀 SHORT 교사 판정 흐름, 단원 전 문항 순회, 실 GAS(QA 번들 배포)·전자칠판·85인치 터치는 **NOT RUN**(다음 F3 2차). 영어 천재·사회5 2-2의 승인 원본 대비 시각 동등성은 여전히 미검증(교사 QA 미리보기 대상). 운영·원본·active 0·미디어 권리 HOLD 무변경, 콘텐츠·스크린샷 미커밋.

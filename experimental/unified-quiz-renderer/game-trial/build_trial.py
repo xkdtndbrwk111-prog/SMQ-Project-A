@@ -12,13 +12,13 @@ ARCADE_MARK = "/* HOJA_ARCADE_APPROVED_RUNTIME_INLINE */null"
 ARCADE_MAPPING = BASE.parent/'HOJA_ARCADE_APPROVED_MAPPING.mjs'
 ARCADE_RUNTIME = BASE.parent/'HOJA_ARCADE_APPROVED_RUNTIME.mjs'
 EXPECTED_ORIGINAL = "4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6"
-def build(output:Path):
+def build(output:Path,renderer:Path=RENDER):
     if output.exists(): raise ValueError("Output exists; refusing overwrite")
     pieces=[(PARTS/f'part-{i:02d}.txt').read_bytes() for i in range(1,26)]
     if len(pieces)!=25:raise ValueError("Trial parts incomplete")
     game=b''.join(pieces).decode('utf-8')
     assert game.count(MARK)==1,"Approved renderer injection anchor mismatch"
-    approved=RENDER.read_text(encoding='utf-8')
+    approved=renderer.read_text(encoding='utf-8')
     assert approved.count('HOJA_APPROVED_RENDERER')>0,"Approved renderer missing"
     literal=json.dumps(approved,ensure_ascii=False).replace('<','\\u003c')
     game=game.replace(MARK,literal)
@@ -42,7 +42,8 @@ def build(output:Path):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('--output',type=Path,required=True)
+    p.add_argument('--renderer',type=Path,default=RENDER,help='composed renderer (compose_renderer.mjs output); default: the unchanged bridge')
     a=p.parse_args()
     if a.output.resolve().parent==PARTS.resolve(): raise ValueError("Do not write into source parts")
-    build(a.output)
+    build(a.output,a.renderer)
 if __name__=='__main__':main()

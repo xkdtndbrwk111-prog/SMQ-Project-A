@@ -21,5 +21,7 @@ for (const u of list) {
   payloads.push({id: u.cartridgeId, payload: {questions: d.questions.map(q => q.rendererQuestion), originalQuestions: d.questions.map(q => q.originalQuestion), images: d.images, tags: d.tags, unitMeta: d.unitMeta}});
 }
 writeFileSync(outFile, JSON.stringify(payloads));
+// F3: exact GAS-shaped game sources per unit ([{sheetName,data}] from hojaGetApprovedQuestions)
+if (process.argv[4]) writeFileSync(process.argv[4], JSON.stringify(list.map(u => ({id: u.cartridgeId, sources: p.rpc('hojaGetApprovedQuestions', [u.cartridgeId])}))));
 console.log(JSON.stringify({units: rows.length, questions: rows.reduce((n, r) => n + r.q, 0), missingImages: rows.reduce((n, r) => n + r.missingImages, 0),
   loadMsMax: Math.max(...rows.map(r => r.loadMs)), rows}));

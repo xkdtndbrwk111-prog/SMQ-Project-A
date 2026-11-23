@@ -253,3 +253,21 @@ test('D client: a start that exhausts its in-call budget is recovered by the in-
   assert.equal(new Set(c.calls).size, 1, 'same eventId throughout');
   assert.equal(w.ev.getLastRow(), before + 1);
 });
+
+test('F3 (Q04) client: approved stable ids are sent (no silent drop) and land as one A1 row in the approved era', async () => {
+  const w = world({extra: {HOJA_USAGE_APPROVED_ERA_START: '2026-11-23'}});
+  setActive(w);
+  const c = client(w, {cartridges: ['zz5-s2-u2', 'zz5-s2-u1']});
+  const before = w.ev.getLastRow();
+  c.api.track('SOLO', 1);
+  const s = await settle(c.api, 1);
+  assert.equal(s.delivered, 1);
+  const row = w.ev.rows[before];
+  assert.deepEqual([row[11], row[13], row[8]], ['zz5-s2-u1|zz5-s2-u2', 'A1', 'zz5-s2-u1 + zz5-s2-u2']);
+  // mixed legacy + approved ids are never sent
+  const m = client(w, {cartridges: ['101', 'zz5-s2-u1']});
+  m.api.track('SOLO', 1);
+  await new Promise(r => setImmediate(r));
+  assert.equal(m.calls.length, 0);
+  assert.equal(m.api.status().lastError, 'USAGE_CLIENT_IDS_UNRECOGNISED');
+});

@@ -2,7 +2,7 @@
 """Exact 25-part rebuilt HTML: arcade inner srcdoc -> parent approved iframe.
 Transport test only. Phaser world balloon/collisions NOT simulated.
 """
-import argparse,asyncio,shutil
+import argparse,asyncio,json,shutil
 from pathlib import Path
 from playwright.async_api import async_playwright,TimeoutError as PWTimeout
 from verify_trial_chromium import social6_sources
@@ -23,8 +23,8 @@ def case(sources,typ):
             'type':'OX','choices':['X','O'],'answer':0},'false',0
 
 async def run():
-    p=argparse.ArgumentParser();p.add_argument('--html',type=Path,required=True);args=p.parse_args()
-    sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
+    p=argparse.ArgumentParser();p.add_argument('--html',type=Path,required=True);p.add_argument('--sources',type=Path);args=p.parse_args()
+    sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
     html=args.html.read_text()
     async with async_playwright() as pw:
         chrome=shutil.which('chromium') or shutil.which('google-chrome')
