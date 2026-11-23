@@ -18,10 +18,12 @@ function game(n,date,{mode='SOLO',team=1}={}){
   '6','사회','','사회 2단원',1,team,'101','PUBLIC:TEST','U3S1','["사회2"]'];
 }
 function setup({deny=false,late=false,wrongCanary=false,corruptBucket=false,
- dropZeroDay=false,extraToday=false}={}){
+ dropZeroDay=false,extraToday=false,partialToday=false,privateToday=false}={}){
  const events=[game(1,'2026-11-20'),game(2,'2026-11-22'),
   game(3,late?'2026-11-22':'2026-11-23')];
  if(extraToday)events.push(game(4,'2026-11-23',{mode:'TEAM',team:7}));
+ if(partialToday)events[2][4]='';
+ if(privateToday)events[2][4]='PRIVATE';
  const certHeaders=['scope','startDate','endDate','rawRows','uniquePlays',
   'duplicateRetries','zeroUseDays','bucketRows','sourceLastRow','validation'];
  const mHeaders=['date','generation','status','sourceStartRow','sourceEndRow',
@@ -153,4 +155,12 @@ test('pure trial RPC cannot replace production getUsageStatisticsU2 or mutate or
  const src=sources.at(-1).replace(/\/\*[\s\S]*?\*\//g,'').replace(/\/\/.*$/gm,'');
  assert.doesNotMatch(src,/function\s+getUsageStatisticsU2\s*\(/);
  assert.doesNotMatch(src,/(?:appendRow|deleteRows?|clearContent|setValues?|ScriptApp|UrlFetchApp)\s*[.(]/);
+});
+
+test('Project B trial reader refuses half-flushed and non-PUBLIC raw tail rows',()=>{
+ for(const options of [{partialToday:true},{privateToday:true}]){
+  const t=setup(options);
+  assert.throws(()=>t.run(),/HOJA_V4_LIVE_TRIAL_PARTIAL_OR_UNEXPECTED_TAIL_ROW/);
+  assert.equal(t.trace.filter(x=>x.startsWith('RANGE:EVENT_LOG')).length,1);
+ }
 });

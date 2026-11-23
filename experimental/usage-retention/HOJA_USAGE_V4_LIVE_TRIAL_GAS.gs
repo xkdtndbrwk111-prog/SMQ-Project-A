@@ -100,6 +100,16 @@ function getUsageStatisticsU4TrialShadow(creatorToken){
     throw Error('HOJA_V4_LIVE_TRIAL_MUTABLE_TAIL_LIMIT');
   const tail=newRows?
     original.getRange(lastPrefix+1,1,newRows,15).getDisplayValues():[];
+  // A partial flush must never be misread as a valid zero-usage event.
+  for(const row of tail){
+    if(!Array.isArray(row)||row.length!==15||
+       !/^[a-f0-9-]{32,40}$/i.test(String(row[0]||'').trim())||
+       !String(row[1]||'').trim()||String(row[2]||'').trim()!==now||
+       !['SOLO','TEAM'].includes(String(row[3]||'').trim().toUpperCase())||
+       String(row[4]||'').trim()!=='PUBLIC'||
+       String(row[13]||'').trim()!=='U3S1')
+      throw Error('HOJA_V4_LIVE_TRIAL_PARTIAL_OR_UNEXPECTED_TAIL_ROW');
+  }
   if(original.getLastRow()!==lastRow||
      manifest.getLastRow()!==mLast||buckets.getLastRow()!==bLast)
     throw Error('HOJA_V4_LIVE_TRIAL_SOURCE_CHANGED_DURING_READ');

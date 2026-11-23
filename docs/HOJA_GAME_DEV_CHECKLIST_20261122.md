@@ -700,3 +700,14 @@
 - [x] 상세 근거·출처·범위·운영 보류 조건 `docs/HOJA_USAGE_V4_REAL_COPY_BACKFILL_20261123.md` 정리.
 - [ ] Apps Script 실행기에서 실제 `getUsageStatisticsU4TrialShadow` 권한·실행 시간·Manager UI 연동 시험은 아직 NOT RUN. 교차 프로젝트 ScriptLock이 공유된다고 가정하면 안 됨. Project A append 날짜 비역행/지연 재전송 방어 및 실제 양 프로젝트 전환은 후속.
 - [ ] **원본 `EVENT_LOG` 삭제/보관 30일/12개월 자동화 설치 및 Project A/B 운영 배포 금지 유지.** 독립 백업·복구 및 운영 사용자 승인 전까지 HOLD.
+
+
+### 40-6. 2026-11-23 Project A/B 복사본 연결 경계 시험 — 운영 전환 HOLD
+- [x] Project A 개발 브랜치 실제 recordUsageStartU1 함수의 ScriptLock 내부에 COPY-ONLY 선택형 가드 연결. 플래그 없는 기존 append U3S1 결과와 계약 유지.
+- [x] 신규 HOJA_USAGE_V4_APPEND_GUARD_TRIAL.gs: 복사본/운영본 ID 서로 다름, canary, 15열 schema, 과거보다 빠른 날짜 역행 거부, 같은 eventId의 당일/전일 재시도 멱등 처리, 내용 충돌 거부. 전체 ID 검색은 복사본의 시험용이며 운영 그대로 전환 불가.
+- [x] Project B 병렬 V4 shadow 조회에서 불완전한 오늘 원본 행, PRIVATE/불명 범위, 비 U3S1, 날짜 불일치 모두 거부. 실제 Project B 운영 파일은 수정하지 않음.
+- [x] 원본 U1 함수를 실제로 실행하는 mock 시험과 B 조회의 불완전 행 회귀 시험, GitHub CI 포함.
+- [ ] CI PASS 확인 전. PASS하더라도 실 Apps Script 런타임·권한·동시 기록 시험을 대체하지 못함.
+- [ ] Project A/B 실제 GAS 시험 프로젝트 통합 및 OWNER/CREATOR/철회 권한, 기존 U2 전체 UI 패리티, 하루 경계 동시 읽기 시험은 NOT RUN.
+- [ ] 운영 사용 전 더 효율적인 전역 eventId 색인, Project A측 원자적 절단점, 일별 자동 COMPLETE 재검증, 백업/복구, 교사 승인 필요.
+- [ ] 운영 원본 17,672개 행, 기존 U2 RPC, Manager 화면, 랭킹, 원본 삭제, 보관 트리거, 운영 배포 전부 HOLD.
