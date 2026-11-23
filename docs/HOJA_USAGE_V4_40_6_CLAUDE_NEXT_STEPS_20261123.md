@@ -75,3 +75,9 @@
 5. 최신 commit SHA 및 PR 링크, 작업 로그 갱신; 실험·미실시 여부를 정직하게 표기.
 
 **이 문서를 읽은 즉시 A 단계부터 진행하고, A를 마친 뒤 B 및 D(유실 해결을 병행)와 E를 진행하라. 최종 운영 승인 없이는 실제 배포하지 마라.**
+
+
+## 최신 후속 지시(2026-11-23): R7 대기 중 승인 정본 실제 게임 연결
+- 신규 정본 문서: [HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md](HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md).
+- **중요**: 별도 승인 A/C/D 통합 렌더러를 게임 싱글/아케이드/팀전/오답 복습에 연결하는 F단계가 우선. 기존 R7 자정 실제 GAS 시험은 잔여 항목으로 유지하고 대기하지 않음.
+- 40-6O의 approved 영문 cartridgeId가 현재 telemetry client의 숫자 ID 필터에 걸려 무기록되는 문제를 F3에 포함. 운영 활성 0개·미디어 권리 HOLD는 그대로 유지. 
