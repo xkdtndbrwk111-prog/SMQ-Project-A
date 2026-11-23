@@ -749,3 +749,12 @@
 - [x] 현재 완료 항목은 **방향·문서 변경**뿐. 초기 40-6 코드·mock CI 성적은 유지하되, Project A 단일 GAS 실제 구현·관리자 인증·실 GAS 테스트는 새 범위에서 전부 NOT RUN.
 - [ ] Claude 40-6-U0 보안 설계 → U1 단일 GAS writer/rollup/reader → U2 관리자 인증·화면 → U3 동시성/날짜 경계/GAS → U4 GPT-6 독립 감수 및 운영 승인.
 - [ ] 운영 Code.gs, main/정식버전, 원본 EVENT_LOG, 랭킹, 기존 앱 실제 제거·사용자 데이터 삭제, 운영 GAS 배포, 보관·삭제 트리거는 모두 HOLD.
+
+### 40-6F. 사용자 최종 공개 범위 결정: 통계는 누구에게나 오픈 (2026-11-23)
+- [x] **Project A 단일 GAS + 기존 교실매니저 폐기 예정** 유지. 신규 결정: V4 통계 공개 화면과 공개 집계 API는 **익명/비로그인 모두 열람**. OWNER/CREATOR 인증, 관리자 토큰 및 Project B 권한 함수를 조회 경로에서 요구하지 않는다.
+- [x] 정본 Claude 지시서 docs/HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md를 공개 통계 요구로 수정. 과거 40-6E의 'Project A 자체 관리자 인증 필요' 부분은 정책 변경으로 **SUPERSEDED**, 당시 판단 이력만 보존.
+- [x] 공개 데이터는 PUBLIC의 기간·모드·팀·학년·교과·출판사·카트리지 조합 TOP20 등 **비식별 집계 allowlist**. 개별 EVENT_LOG/이벤트 ID/시트 ID·Script Properties/토큰/식별 텍스트 비공개. 원본 변경·집계 강제 재작성·보관/삭제·내부 관리 기능은 익명에 노출 불가.
+- [ ] U0 공개 데이터 계약·익명 호출 및 원본/변경 경로 위협 분석: NOT RUN.
+- [ ] U1 단일 GAS 기록/집계/읽기, U2 익명 공개 대시보드, U3 데이터·성능·실 GAS: NOT RUN.
+- [ ] Claude 새 구현 증빙 검수 및 단계별 체크리스트 업데이트: PENDING.
+- [ ] 운영 GAS 배포, 실제 원본 수정·삭제·트리거, 기존 앱의 실제 폐기 작업 모두 HOLD.

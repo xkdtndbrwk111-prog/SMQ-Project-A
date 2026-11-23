@@ -21,3 +21,8 @@
 - 이후 구현자 신규 로그는 `40-6-U0` ~ `40-6-U4` 아래에 기록한다.
 - 상태: U0 설계 NOT STARTED, U1 단일 GAS NOT RUN, U2 권한·UI NOT RUN, U3 경계·실기 시험 NOT RUN, U4 감수 PENDING.
 - 최신 지시서: `docs/HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md`
+
+## 40-6F 통계 공개 정책 갱신 (2026-11-23)
+- 새 정책: Project A 한 GAS 프로젝트에서 누구든 **비로그인/익명으로 PUBLIC 집계 통계만 열람**.
+- 기존 "관리자 통계 조회·OWNER 권한"에 관한 정책은 SUPERSEDED. 단 원본 데이터, 집계 재작성/설정/삭제, 개인정보는 공개되지 않는다.
+- U0~U4 새 공개 통계 구현/실 GAS 검증: NOT RUN. 운영 배포 HOLD.
