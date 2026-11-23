@@ -80,7 +80,7 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
      if(e.cfg.kind==='spike_head'){
       const c=e.cfg,h=e.head,old=h.y;let limit=c.y+c.drop;
       for(const group of [scene.solidGroup,scene.oneWayGroup,scene.brickGroup,scene.pipeGroup,scene.movingPlatformGroup,scene.crumbleGroup])for(const obj of group?.getChildren?.()||[]){const b=obj.body;if(b&&b.enable!==false&&b.right>c.x&&b.left<c.x+c.w&&b.top>=c.y+c.h-1)limit=Math.min(limit,b.top-c.h);}
-      if(h.phase==='idle'&&body.right>c.x&&body.left<c.x+c.w&&body.top>=c.y+c.h&&body.top<=c.y+c.h+c.range)h.phase='fall';
+      if(h.phase==='idle'&&body.right>c.x-24&&body.left<c.x+c.w+24&&body.top>=c.y+c.h&&body.top<=c.y+c.h+c.range)h.phase='fall';
       if(h.phase==='fall'){h.y=Math.min(limit,h.y+c.fallSpeed*delta/1000);if(h.y>=limit){h.phase='landed';h.landedMs=0;}}
       else if(h.phase==='landed'){h.landedMs+=delta;if(h.landedMs>=c.wait)h.phase='return';}
       else if(h.phase==='return'){h.y=Math.max(c.y,h.y-c.returnSpeed*delta/1000);if(h.y<=c.y)h.phase='idle';}
