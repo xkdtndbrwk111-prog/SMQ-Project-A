@@ -151,7 +151,7 @@ test('writer: crash between append and commit is adopted later; partial orphan h
 
 // ---------------- public reader ----------------
 const ALLOWED_KEYS=['asOf','cache','daily','generatedAt','grade','historyStart','historyStatus',
- 'mode','provisionalDays','publisher','schema','status','subject','teamCount','todayStatus',
+ 'mode','provisionalDays','publisher','schema','status','subject','todayStatus',
  'topCartridges','totals'];
 test('reader: exact numbers from sealed summaries + committed tail, fixed allowlist, no secrets',()=>{
  const w=world();
@@ -167,7 +167,7 @@ test('reader: exact numbers from sealed summaries + committed tail, fixed allowl
  assert.equal(s.daily[1].date,'2026-11-20','verified zero day present as 0');
  assert.deepEqual(s.provisionalDays,['2026-11-23']);
  assert.equal(s.mode.find(x=>x.label==='TEAM').count,3);
- assert.deepEqual(s.teamCount.map(x=>[x.label,x.count]).sort(),[['2팀전',1],['7팀전',2]]);
+ assert.ok(!('teamCount' in s)&&!JSON.stringify(s).includes('팀전'),'team-size distribution is not published');
  assert.equal(s.grade.reduce((a,x)=>a+x.count,0),8);
  assert.equal(s.subject.reduce((a,x)=>a+x.count,0),8);
  const json=JSON.stringify(s);

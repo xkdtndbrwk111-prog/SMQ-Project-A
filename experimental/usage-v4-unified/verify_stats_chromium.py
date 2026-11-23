@@ -62,7 +62,7 @@ async def main():
         assert prov_rows == len(ok['provisionalDays'])
         assert await page.locator('#top tr').count() == len(ok['topCartridges'])
         assert '개인전' in await page.locator('#l-mode').inner_text()
-        assert '7팀전' in await page.locator('#l-team').inner_text()
+        assert await page.locator('#l-team').count() == 0 and '팀전 팀 수' not in await page.content()
         # hover tooltip on a bar
         box = await page.locator('#chart').bounding_box()
         await page.mouse.move(box['x'] + box['width'] - 10, box['y'] + box['height'] / 2)

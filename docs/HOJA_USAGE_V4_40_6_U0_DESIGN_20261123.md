@@ -62,7 +62,8 @@ Ops 가드: `Session.getActiveUser().getEmail()`이 비어 있지 않고 `Sessio
   cache:{ageSeconds,maxAgeSeconds,stale},
   totals:{today,days7,days30,all},
   daily:[{date,count}],
-  mode, teamCount, grade, subject, publisher, topCartridges : [{label,count,share}] }
+  mode, grade, subject, publisher, topCartridges : [{label,count,share}] }
+  // teamCount(팀전 팀 수 분포)는 2026-11-23 사용자 결정으로 공개 제외
 ```
 오류는 `{schema, status:'UNAVAILABLE', code, generatedAt}`만 반환하며 **숫자 필드를 포함하지 않는다**(0으로 위장 금지). 오류 코드는 고정 코드표로 매핑하고 내부 메시지·행 번호·시트 이름은 노출하지 않는다.
 

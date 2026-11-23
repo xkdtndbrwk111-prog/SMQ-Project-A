@@ -83,11 +83,10 @@ details summary{cursor:pointer;font-size:13px;color:var(--text-secondary)}
   </div>
   <div class="grid2">
    <div class="card"><h2>개인전 / 팀전</h2><div id="l-mode"></div></div>
-   <div class="card"><h2>팀전 팀 수</h2><div id="l-team"></div></div>
    <div class="card"><h2>학년</h2><div id="l-grade"></div></div>
    <div class="card"><h2>교과</h2><div id="l-subject"></div></div>
+   <div class="card"><h2>출판사 <span class="note">(출판사 정보가 있는 게임만)</span></h2><div id="l-publisher"></div></div>
   </div>
-  <div class="card"><h2>출판사 <span class="note">(출판사 정보가 있는 게임만)</span></h2><div id="l-publisher"></div></div>
   <div class="card"><h2>많이 선택된 카트리지 TOP 20</h2>
    <p class="note">여러 단원을 함께 고른 경우 그 조합을 한 번으로 셉니다. 5회 미만 조합은 ‘기타(소수)’로 묶고, 형식이 다른 이름은 ‘기타 공개 카트리지’로 표시합니다.</p>
    <table><thead><tr><th>#</th><th>카트리지</th><th class="n">횟수</th><th class="n">비율</th></tr></thead><tbody id="top"></tbody></table>
@@ -186,7 +185,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--text-secondary)}
   s.daily.slice().reverse().forEach(function(d){var tr=el('tr');tr.appendChild(el('td',d.date));
    tr.appendChild(el('td',fmt(d.count),'n'));tr.appendChild(el('td',prov.indexOf(d.date)>=0?'잠정':'확정'));tb.appendChild(tr);});
   bars('l-mode',s.mode,function(l){return MODE[l]||l;});
-  bars('l-team',s.teamCount);bars('l-grade',s.grade);bars('l-subject',s.subject);bars('l-publisher',s.publisher);
+  bars('l-grade',s.grade);bars('l-subject',s.subject);bars('l-publisher',s.publisher);
   var top=$('top');clear(top);
   if(!s.topCartridges.length){var tr0=el('tr');var td0=el('td','아직 기록이 없습니다.','empty');td0.colSpan=4;tr0.appendChild(td0);top.appendChild(tr0);}
   s.topCartridges.forEach(function(x,i){var tr=el('tr');tr.appendChild(el('td',i+1));tr.appendChild(el('td',x.label));

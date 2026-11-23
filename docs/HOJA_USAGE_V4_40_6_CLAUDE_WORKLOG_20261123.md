@@ -105,3 +105,8 @@
 - 사유: 실 엔진 시험에는 사용자 Google 계정에 ① 인증 사본의 새 복제본 생성 ② 새 Apps Script 프로젝트 생성 ③ 익명 e2e용 `ANYONE_ANONYMOUS` 공개 URL 테스트 배포가 필요. 공개 URL 생성은 외부 노출 행위이므로 교사 승인 없이 진행하지 않음. 이 세션의 Drive 커넥터는 인증 사본 쓰기 권한 없음(적절).
 - 실행 절차와 기대값: `docs/HOJA_USAGE_V4_40_6_U3_REAL_GAS_RUNBOOK_20261123.md` (R1~R10: 익명 Ops 거부·`_` 함수 호출 불가 실측, 17,671 = 17,670+1, 재전송/충돌, 동시 40건, 자정 seal, 해시 손상, 실행 시간).
 - 실 엔진에서만 확인 가능한 잔여 위험: PropertiesService 쓰기-읽기 일관성(watermark), CacheService 실제 휘발, `Session.getActiveUser()` 익명 빈 값, ScriptLock 대기 시 `USAGE_APPEND_LOCK_TIMEOUT` 빈도, connector로 기록된 실 사본 manifest의 표시 형식(날짜가 `2026-09-23` 텍스트로 표시되는지, 숫자 천단위 구분 없음) — 형식이 다르면 Reader가 `INTEGRITY`/`MANIFEST_DATE_GAP`로 fail-closed(0 표시 아님).
+
+## 사용자 범위 변경 반영 — 팀전 팀 수 비공개 (2026-11-23 KST)
+- 사용자 지시: "팀전 팀수는 필요없음". 공개 응답에서 `teamCount` 필드 제거(서버 allowlist), Stats.html의 "팀전 팀 수" 카드 제거. 개인전/팀전(SOLO/TEAM) 비율은 유지.
+- 기록 계약(팀 2~7 입력 검증)과 V4 내부 `TEAM_SIZE` 버킷·정합성 검사는 **변경 없음**(과거 61일 인증 SHA·버킷 3,969행 호환 유지).
+- 재시험(로컬): U1 24/24, U2 7/7, U3 6/6, 오프라인 Chromium PASS(팀 수 카드 부재 확인). 지시서 rev.2의 `teamCount`/"팀 인원 2~7" 화면 요구는 이 사용자 결정으로 대체됨.

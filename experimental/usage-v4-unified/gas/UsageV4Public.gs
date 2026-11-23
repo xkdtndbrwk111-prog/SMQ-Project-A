@@ -150,7 +150,7 @@ var HOJA_USAGE_V4_PUBLIC=(function(){
  function publicView(p,meta){
   const m=meta||{};
   const dim=n=>p.maps.get(n)||new Map();
-  const all=p.totals.all,team=dim('MODE').get('TEAM')||0;
+  const all=p.totals.all;
   const int=x=>{assert(Number.isSafeInteger(x)&&x>=0,'COUNT');return x;};
   return {
    schema:SCHEMA,status:'OK',
@@ -164,7 +164,7 @@ var HOJA_USAGE_V4_PUBLIC=(function(){
     days30:int(p.totals.days30),all:int(all)},
    daily:p.daily.map(r=>({date:String(r.date),count:int(r.count)})),
    mode:listOf(dim('MODE'),all,k=>fixedModes.has(k)?k:'기타'),
-   teamCount:listOf(dim('TEAM_SIZE'),team,k=>/^[2-7]팀전$/.test(k)?k:'인원 미확인'),
+   // 팀전 팀 수 분포는 공개하지 않는다(2026-11-23 사용자 결정). TEAM_SIZE는 내부 정합성 검사에만 사용.
    grade:listOf(dim('GRADE'),all,k=>/^[1-6]학년$/.test(k)?k:'기타'),
    subject:listOf(dim('SUBJECT'),all,k=>safeShortLabel(k,20)),
    publisher:listOf(dim('PUBLISHER'),all,k=>safeShortLabel(k,30)),
