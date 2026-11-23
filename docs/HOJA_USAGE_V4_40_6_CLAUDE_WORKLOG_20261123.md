@@ -110,3 +110,27 @@
 - 사용자 지시: "팀전 팀수는 필요없음". 공개 응답에서 `teamCount` 필드 제거(서버 allowlist), Stats.html의 "팀전 팀 수" 카드 제거. 개인전/팀전(SOLO/TEAM) 비율은 유지.
 - 기록 계약(팀 2~7 입력 검증)과 V4 내부 `TEAM_SIZE` 버킷·정합성 검사는 **변경 없음**(과거 61일 인증 SHA·버킷 3,969행 호환 유지).
 - 재시험(로컬): U1 24/24, U2 7/7, U3 6/6, 오프라인 Chromium PASS(팀 수 카드 부재 확인). 지시서 rev.2의 `teamCount`/"팀 인원 2~7" 화면 요구는 이 사용자 결정으로 대체됨.
+
+## U4 — 독립 검수 제출 (2026-11-23 KST) — **Claude 자기 PASS 아님, 승인 아님**
+**검수 대상**: 브랜치 `work/usage-v4-40-6-u-20261123` (기준 `d72964f`), 커밋 `05fa127`(U0) → `c6ba90b`(U1) → `6e828b9`(U2+U3 mock 시험) → `5f15527`(U3 문서) → `a584582`(팀 수 비공개) → 본 U4 커밋. diff: `git diff d72964f..work/usage-v4-40-6-u-20261123`. Draft PR 링크는 PR 본문 참조.
+
+| 검증 종류 (분리 보고) | 상태 | 근거 |
+|---|---|---|
+| GitHub mock (node:test, 로컬) | PASS(구현자 실행) | U1 24, U2 7, U3 6, 기존 V4 6개 suite fail 0 |
+| GitHub Actions CI | **NOT RUN** | OAuth 토큰 `workflow` scope 없음 → `ci/usage-v4-unified-qa.yml`을 소유자가 `.github/workflows/`로 이동 필요 |
+| 오프라인 익명 Chromium | PASS(구현자 실행) | `verify_stats_chromium.py`, 스크린샷 `evidence/` (합성 데이터) |
+| Google Sheets 실제 복사본 검사 | **BLOCKED / NOT RUN** | 커넥터 범위 읽기 불가. 17,670/2/4/3,969·날짜별 SHA **미재검증** |
+| 실 Apps Script 엔진 | **BLOCKED / NOT RUN** | 새 사본·새 GAS·공개 테스트 배포 승인 필요. runbook R1~R10 |
+| 실 GAS 익명 브라우저 e2e | **NOT RUN** | 동일 |
+
+**PASS 기준(지시서 4장) 대비**: 61일 인증 수치·SHA 일치, 실 GAS, 실 익명 e2e는 **증거 없음 → PASS 주장하지 않음.** mock 수준에서 중복/충돌 신규 0, fail-closed, 부분 숫자 0, 원본/관리 RPC 거부를 확인.
+
+**감수 요청 핵심 포인트**
+1. 발견 F-1: 운영 후보 `UsageRollupU3S.gs` 9개 함수 익명 호출 가능(저장소 ID 반환·트리거 재설치). 운영 핫픽스 여부 교사 결정 필요.
+2. commit watermark 절단점 논증(U0 설계 4장)과 Reader 읽기 순서(manifest→W→꼬리→재확인).
+3. Ops 가드(`activeUser==effectiveUser`, 비어있지 않음)의 충분성 — 실 GAS R4에서 실측 필요.
+4. 최근창 멱등(2일 초과 재전송 미탐지 가능)과 운영용 색인 제안.
+5. 카트리지 이름 정규식·k=5 병합 정책이 실데이터 251개 조합 중 얼마나 `기타`로 가려지는지 실 사본 미확인.
+6. 실 사본 manifest 셀 표시 형식이 Reader 가정(텍스트 날짜·구분자 없는 숫자)과 다르면 fail-closed됨.
+
+**HOLD 유지**: 운영 GAS·EVENT_LOG·랭킹·배포·트리거·원본 보관/삭제·교실매니저 실제 폐기·중앙 체크리스트 PASS 기록.
