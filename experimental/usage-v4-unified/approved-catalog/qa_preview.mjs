@@ -9,7 +9,19 @@ import {createHash} from 'node:crypto';
 export const QA_SCHEMA = 'hoja-qa-preview-v1';
 const fail = c => { throw new Error('HOJA_QA_PREVIEW_' + c); };
 
-export function qaPreviewCatalog(index, report, manifest, {allowedScriptIds = []} = {}) {
+/* F4 (40-6AD): runtime package location inside the PUBLIC HOJA-QUESTION-BANK (fetched at a fixed commit). */
+export const RUNTIME_REPO = 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK';
+export const approvedPackagePath = id => {
+  if (!/^[a-z0-9][a-z0-9-]{2,63}$/.test(String(id))) fail('PACKAGE_ID:' + id);
+  return 'game-runtime/approved-packages/v1/' + id + '.json';
+};
+export function withContentSource(cat, contentSource) {
+  if (!contentSource) return cat;
+  if (contentSource.repo !== RUNTIME_REPO || !/^[a-f0-9]{40}$/.test(String(contentSource.commit))) fail('CONTENT_SOURCE');
+  return {...cat, contentSource: {kind: 'GITHUB_RAW_PINNED_V1', repo: contentSource.repo, commit: contentSource.commit},
+    entries: cat.entries.map(e => ({...e, contentPath: approvedPackagePath(e.cartridgeId)}))};
+}
+export function qaPreviewCatalog(index, report, manifest, {allowedScriptIds = [], contentSource = null} = {}) {
   if (!Array.isArray(allowedScriptIds) || !allowedScriptIds.length || allowedScriptIds.some(x => !/^[A-Za-z0-9_-]{20,80}$/.test(String(x))))
     fail('ALLOWED_SCRIPT_ID_REQUIRED');
   if (!manifest || manifest.schemaVersion !== QA_SCHEMA || manifest.purpose !== 'TEST_ONLY_QA_NOT_DEPLOYMENT') fail('MANIFEST');
@@ -28,8 +40,8 @@ export function qaPreviewCatalog(index, report, manifest, {allowedScriptIds = []
       questionCount: e.questionCount, effectiveSha256: e.effectiveSha256, packageSha256: r.packageSha256,
       releaseId: e.releaseId, deploymentStatus: 'QA_PREVIEW_NOT_DEPLOYED', mediaRights: e.mediaRights.status};
   }).sort((a, b) => a.cartridgeId.localeCompare(b.cartridgeId));
-  return {schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'QA_TEST_ONLY', allowedScriptIds: allowedScriptIds.map(String),
-    sourceRepo: index.sourceRepo, sourceCommit: index.sourceCommit, deploymentId: 'qa-preview-not-deployment', entries};
+  return withContentSource({schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'QA_TEST_ONLY', allowedScriptIds: allowedScriptIds.map(String),
+    sourceRepo: index.sourceRepo, sourceCommit: index.sourceCommit, deploymentId: 'qa-preview-not-deployment', entries}, contentSource);
 }
 export function renderCatalogGs(cat) {
   return '/* GENERATED — TEST-ONLY QA PREVIEW CATALOG. NOT A DEPLOYMENT. NEVER SHIP IN A RELEASE BUILD.\n' +

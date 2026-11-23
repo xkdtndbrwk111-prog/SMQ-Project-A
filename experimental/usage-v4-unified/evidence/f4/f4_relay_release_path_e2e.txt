@@ -1,0 +1,9 @@
+{"unit": "math5-s2-u4", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+F3_UI_E2E_PASS {"cases": 6}
+exit=0
+fetched 3 rejected 0 usageRows 6

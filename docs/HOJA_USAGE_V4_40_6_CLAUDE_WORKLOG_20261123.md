@@ -443,3 +443,29 @@
 - 우회(단원 삭제·데이터 축소·검사 해제) 하지 않음. 증거: `evidence/f4/f4_isolated_push_attempt.txt`, `evidence/f4/f4_local_preflight.txt`.
 
 **의미:** 승인 콘텐츠를 GAS 프로젝트 안 `.gs` 파일로 넣는 현재 RELEASE 설계는 23단원 전체 + 게임을 한 프로젝트에 담을 수 없다. F4 실 GAS 시험과 향후 RELEASE 모두 설계 결정 필요(예: 단원 일부만 시험, 콘텐츠를 프로젝트 밖 저장소에 두고 SHA 검증 후 로드, 게임 자산 경량화). **결정 전까지 F4 실 GAS 항목 NOT RUN.**
+
+## F4 (2차) — 공개 GitHub 고정 커밋 단원 JSON 로더: GAS 중계 경로 (2026-11-23, 코멘트 7103561024 / 40-6AD)
+**역할(40-6AD 이후):** 브라우저 IndexedDB 캐시가 1차 경로가 될 예정이며, 이 서버 로더는 **브라우저 직접 다운로드가 막힐 때의 GAS 중계 fallback**이다. 로컬 mock + 오프라인 Chromium만, 실 GAS·GitHub 게시·배포 없음.
+- **`Code.gs`:** 카탈로그 `contentSource` = `GITHUB_RAW_PINNED_V1`이면 선택 단원만 `https://raw.githubusercontent.com/<허용 repo>/<40-hex commit>/<contentPath>`에서 `UrlFetchApp.fetchAll`(리다이렉트 미추종).
+  - 바이트 SHA-256 = 카탈로그 `packageSha256`일 때만 사용한다.
+  - 구조·문항 수·이미지 data URI 형식·이미지 참조·태그를 검사한다.
+  - CacheService 90KB 청크 캐시를 두며, 읽을 때마다 재해시한다.
+  - 실패 코드: `APPROVED_CONTENT_SOURCE_INVALID` / `_FETCH_FAILED` / `_DIGEST_MISMATCH` / `_MEDIA_INVALID` / `_TAGS_INVALID` / `_INVALID`.
+  - 호스트와 repo는 코드 allowlist에만 있다. 브랜치명 거부, `..` 경로 거부, 부분 성공 없음.
+  - `contentSource`가 없으면 기존 내장 경로(오류 순서 보존).
+- **빌더:**
+  - `build_content_packages.mjs --content-commit <40hex>`: 원격 카탈로그 생성, 내장 콘텐츠 없음.
+  - `--packages-out`: 게시용 정확한 패키지 파일 + INDEX를 저장소 밖에 생성.
+  - `build_unified_gas.py`: 원격 카탈로그에 내장 콘텐츠를 섞으면 `MIXED_CONTENT_SOURCE`로 거부, `bundleBytes`를 보고.
+  - `make_synthetic_release.mjs --content-commit`, `verify_release_candidate.py`는 원격 RELEASE를 감사한다.
+- **mock:** `UrlFetchApp.fetchAll`·`CacheService.getAll/putAll`을 시험 resolver로만 제공. `qa_mock_gas_server.mjs <qa> <port> [<packagesDir>]`는 고정 URL만 로컬 파일로 응답하고, 그 밖은 404다.
+
+| 시험 | 결과 |
+|---|---|
+| Node | **95/95 PASS**, exit 0 — 신규 F4 5개(선택 단원만 fetch·캐시 재검증·손상 캐시 재다운로드 / 네트워크·503·302·변조·부분 실패·비활성 fail-closed / 브랜치·타 repo·경로 조작 거부 / SHA 맞는 패키지라도 나쁜 미디어·태그 거부 / 빌더 혼합 거부) |
+| 변이 시험 4종 | 원격 SHA 검사 제거, 브랜치 허용, 미디어 검사 제거, 캐시 재해시 제거 → **각각 F4 시험 2개 FAIL**(검출됨) |
+| 실데이터 mock E2E(QA 경로, 23 패키지 5,799,408 B를 고정 URL로 제공) | UI **46/46**, 팀전 3단원 PASS, exit 0. 49회 로드에 fetch 23회(단원당 1회), 거부 URL 0 |
+| RELEASE 경로(합성 원격 카탈로그) | UI 6/6 PASS, RC 감사 PASS(콘텐츠 0·고정 커밋) |
+| 음성(실데이터 RPC) | 네트워크 없음 → `APPROVED_CONTENT_FETCH_FAILED`; 패키지 1바이트 변조 → `APPROVED_CONTENT_DIGEST_MISMATCH`; 정상 대조군 2단원 로드 |
+| 경량 번들 크기 | **8,728,927 B / 8파일**(게임 8,613,936 B 포함), 콘텐츠 0. 현재 원격 7,309,075 B보다 큼 → **실 저장 가능 여부 미확인, F4-SIZE-GATE OPEN** |
+증거: `evidence/f4/f4_relay_*`, `f4_lite_bundle_sizes.txt`. 패키지 게시·격리 push·배포 NOT RUN(별도 승인 필요).

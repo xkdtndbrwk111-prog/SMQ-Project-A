@@ -77,6 +77,8 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
   CacheService:{getScriptCache(){return{
    get:k=>{const e=cache.get(k);return e&&e.exp>clock.ms?e.v:null;},
    put:(k,v,ttl)=>{cache.set(k,{v:String(v),exp:clock.ms+ttl*1000});},
+   getAll:ks=>{const o={};for(const k of ks){const e=cache.get(k);if(e&&e.exp>clock.ms)o[k]=e.v;}return o;},
+   putAll:(o,ttl)=>{for(const k of Object.keys(o))cache.set(k,{v:String(o[k]),exp:clock.ms+ttl*1000});},
    remove:k=>{cache.delete(k);}};}},
   Session:{getActiveUser:()=>({getEmail:()=>env.__active}),
    getEffectiveUser:()=>({getEmail:()=>effectiveEmail})},
@@ -88,9 +90,14 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
   HtmlService:{XFrameOptionsMode:{ALLOWALL:'ALLOWALL'},createHtmlOutputFromFile(name){
    const o={file:name,title:'',meta:[],setTitle(t){o.title=t;return o;},
     addMetaTag(k,v){o.meta.push([k,v]);return o;},setXFrameOptionsMode(){return o;}};return o;}},
-  UrlFetchApp:{fetch(){throw Error('NETWORK_DISABLED_IN_TEST');}},
+  // F4: fetchAll is served ONLY by a test-installed resolver env.__fetch(req) -> {code, body}
+  // (default: no network at all). fetch() (Sheets API) stays disabled.
+  UrlFetchApp:{fetch(){throw Error('NETWORK_DISABLED_IN_TEST');},
+   fetchAll(reqs){if(typeof env.__fetch!=='function')throw Error('NETWORK_DISABLED_IN_TEST');
+    return reqs.map(r=>{trace.push('FETCH:'+r.url);const x=env.__fetch(r);
+     return {getResponseCode:()=>x.code,getContentText:()=>String(x.body)};});}},
   ScriptApp:{getOAuthToken(){return 'x';},getScriptId(){return env.__scriptId;},newTrigger(){throw Error('TRIGGER_FORBIDDEN');}},
-  __scriptId:'MOCK_ISOLATED_TEST_SCRIPT_ID_0001',
+  __scriptId:'MOCK_ISOLATED_TEST_SCRIPT_ID_0001',__fetch:null,
   __active:activeEmail
  };
  const ctx=createContext(env);
@@ -102,5 +109,6 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
  return {ctx,call,props:store,cache,trace,clock,locks,
   setNow(iso){clock.ms=Date.parse(iso);},
   setActive(email){env.__active=email;},
+  setFetch(fn){env.__fetch=fn;},
   rpc(name,...args){return call(name+'('+args.map(a=>JSON.stringify(a)).join(',')+')');}};
 }

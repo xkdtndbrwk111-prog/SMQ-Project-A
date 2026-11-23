@@ -1084,3 +1084,14 @@
 - [ ] **`F4-SIZE-GATE` OPEN:** `40-6AC`의 14,766,720B GAS push FAIL 사실 유지. Claude 로컬 보고에 따른 새 **콘텐츠 제외 경량 후보 약 8.73MB / 8파일**은 **실 GAS 저장 성공이 아님**. 기존 게임 RC SHA `876933…`·승인 렌더러·문항 및 기존 40-6Z 비무작위 196문항 표본 PASS를 보존하고, F3-3 무의미한 재검사 확대 금지.
 - [ ] **`F4-DEPLOY-AND-OPERATIONS` HOLD:** 실 격리 GAS `clasp push`, 웹앱 배포, 운영 GAS·EVENT_LOG/랭킹·개인 데이터 수정 및 `main` 병합은 본 정책 등록으로 승인된 것이 아님. 기존 시험 프로젝트 격리·계정 조작 승인 절차 준수. PR #6 **Draft**, `active-deployment.json` **0**, 실 F4 A1/익명통계·권한/부하·R7 자정/탭복구·85인치/교사 시각 검수 등은 증거 전까지 NOT RUN/HOLD. 사용자 본인의 생성 이미지·전체 GitHub 공개 결정은 반영하되, **GitHub 공개가 게임 운영 배포 자동 승인인 것은 아님**.
 - [ ] **체크리스트/PR 작업 규율:** Claude는 본 정책을 시작점으로 설계→최소 기능 구현→로컬/실브라우저 E2E 순서로 진행. 각각 코드·시험 로그·작업 로그·본 체크리스트를 동일 커밋에 동기화(40-6U), 결과를 PR #6에 링크. 거부·미실행은 FAIL/NOT RUN으로 정직하게 기록. 기능 완성·배포 완료로 조기 체크하지 말 것.
+
+
+### 40-6AE. Claude 제출 — F4 GAS 중계 로더(공개 GitHub 고정 커밋) 로컬 구현·검증 (2026-11-23)
+**경계:** Claude 자체 보고, 로컬 mock + 오프라인 Chromium. 40-6AD 이후 이 서버 로더는 **브라우저 직접 다운로드 불가 시 fallback**. 실 GAS·GitHub 패키지 게시·배포 NOT RUN.
+| ID | 상태 | 수치 / 근거 | 증거(`experimental/usage-v4-unified/evidence/f4/`) |
+|---|---|---|---|
+| `F4-RELAY-LOADER` | **PASS(mock)** | 고정 40-hex 커밋, 허용 repo/호스트 코드 고정, 바이트 SHA-256·구조·미디어·태그 검사, 재해시 캐시, 부분 성공 없음; Node 95/95, 변이 4/4 검출 | `f4_relay_node_tests.txt` |
+| `F4-RELAY-E2E` | **PASS(mock, 실데이터)** | UI 46/46, 팀전 3단원, fetch 23/49 로드, RELEASE 경로 6/6, RC 감사 PASS; 음성 FETCH_FAILED·DIGEST_MISMATCH | `f4_relay_ui_e2e_23x2_real_packages.txt`, `f4_relay_team_full_3units.txt`, `f4_relay_release_path_e2e.txt`, `f4_relay_release_audit.txt` |
+| `F4-SIZE-GATE` | **OPEN** | 경량 번들 8,728,927 B/8파일(콘텐츠 0) — 실 Apps Script 저장 미시도 | `f4_lite_bundle_sizes.txt` |
+| `F4-CACHE-*`(40-6AD) | **IN PROGRESS** | 다음 커밋: C1 가능성 검증부터 | — |
+- [ ] 이월 유지: 패키지 GitHub 게시·격리 push·배포(별도 승인), R7, 부하, 탭 복구, 교사 234 육안, QBank pin CI SKIPPED, 85인치, 실 랭킹, 운영 활성 0, PR Draft.

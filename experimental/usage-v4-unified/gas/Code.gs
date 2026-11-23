@@ -166,10 +166,35 @@ function hojaUsageLegacyCatalog_(perf){
   return sheets.map(s=>({sheetId:String(s.sheetId),title:String(s.title)}));
 }
 
-/* 40-6-U B: approved (HOJA-QUESTION-BANK) cartridges. The ONLY runtime source
+/* 40-6-U B: approved (HOJA-QUESTION-BANK) cartridges. The ONLY runtime list source
  * is the build-time generated HOJA_APPROVED_ACTIVE_CATALOG_ (ApprovedActiveCatalog.gs):
- * teacher deployment-approved, effective-SHA-pinned ids. GitHub is never read. */
+ * teacher deployment-approved, effective-SHA-pinned ids.
+ * F4 (40-6AD): package CONTENT is either embedded (HOJA_APPROVED_CONTENT_, legacy) or, when the
+ * catalog declares contentSource GITHUB_RAW_PINNED_V1, fetched per selected unit from the PUBLIC
+ * HOJA-QUESTION-BANK at a FIXED 40-hex commit (never a branch / moving HEAD) and accepted only if
+ * its SHA-256 equals the catalog packageSha256. Host + repo are allowlisted here, not in data. */
 const HOJA_APPROVED_ID_RE_=/^[a-z0-9][a-z0-9-]{2,63}$/;
+const HOJA_APPROVED_RAW_HOST_='https://raw.githubusercontent.com/';
+const HOJA_APPROVED_RAW_REPOS_=Object.freeze(['xkdtndbrwk111-prog/HOJA-QUESTION-BANK']);
+const HOJA_APPROVED_PATH_RE_=/^[A-Za-z0-9][A-Za-z0-9_-]*(\/[A-Za-z0-9][A-Za-z0-9._-]*)*\.json$/;
+const HOJA_APPROVED_IMAGE_RE_=/^data:image\/(webp|png|jpeg|gif|svg\+xml);base64,[A-Za-z0-9+\/=]+$/;
+const HOJA_APPROVED_CACHE_PREFIX_='HOJA_AQ1_';
+const HOJA_APPROVED_CACHE_CHUNK_=90000;
+const HOJA_APPROVED_CACHE_SECONDS_=21600;
+/* Validates the catalog's remote content source (null = embedded content). Throws on anything else. */
+function hojaApprovedSource_(c){
+  if(!Object.prototype.hasOwnProperty.call(c,'contentSource'))return null;
+  const s=c.contentSource;
+  if(!s||typeof s!=='object'||s.kind!=='GITHUB_RAW_PINNED_V1'||
+     HOJA_APPROVED_RAW_REPOS_.indexOf(String(s.repo))<0||!/^[a-f0-9]{40}$/.test(String(s.commit)))
+    throw new Error('APPROVED_CONTENT_SOURCE_INVALID');
+  for(const e of c.entries){
+    const path=String(e.contentPath||'');
+    if(!HOJA_APPROVED_PATH_RE_.test(path)||path.indexOf('..')>=0||path.length>200)
+      throw new Error('APPROVED_CONTENT_SOURCE_INVALID');
+  }
+  return s;
+}
 function hojaApprovedActive_(){
   const c=typeof HOJA_APPROVED_ACTIVE_CATALOG_==='object'?HOJA_APPROVED_ACTIVE_CATALOG_:null;
   if(!c||c.schemaVersion!=='hoja-active-cartridge-catalog-v1'||!Array.isArray(c.entries)||
@@ -184,6 +209,7 @@ function hojaApprovedActive_(){
     if(!allowed.length||allowed.indexOf(ScriptApp.getScriptId())<0)
       throw new Error('APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED');
   }else if(type!=='RELEASE')throw new Error('APPROVED_CATALOG_INVALID');
+  hojaApprovedSource_(c);
   return c;
 }
 /* 40-6 F3/F3-2: the game's existing LIST/GET RPCs serve the approved catalog when
@@ -232,7 +258,7 @@ function hojaListApprovedCartridges(){
     grade:e.grade,semester:e.semester,subject:e.subjectLabel,publisher:e.publisher,
     unit:e.unit,questionCount:e.questionCount,qaPreview:c.buildType==='QA_TEST_ONLY'}));
 }
-/* F1: lazy, per-unit approved content (only the selected units are parsed). The package
+/* F1: lazy, per-unit approved content (only the selected units are loaded). The package
  * text is SHA-256 pinned by the SAME active catalog that list/usage validation use. */
 function hojaGetApprovedQuestions(ids){
   const cat=hojaApprovedActive_();
@@ -241,22 +267,86 @@ function hojaGetApprovedQuestions(ids){
      ids.some(id=>typeof id!=='string'||!HOJA_APPROVED_ID_RE_.test(id)))
     throw new Error('APPROVED_SELECTION_INVALID');
   if(ids.some(id=>!active.has(id)))throw new Error('APPROVED_CARTRIDGE_NOT_ACTIVE');
+  const entries=ids.map(id=>active.get(id));
+  const source=hojaApprovedSource_(cat);
+  if(source&&entries.some(e=>!/^[a-f0-9]{64}$/.test(String(e.packageSha256))))
+    throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+  const texts=source?hojaApprovedFetchTexts_(source,entries):entries.map(hojaApprovedEmbeddedText_);
+  return entries.map((e,i)=>({sheetName:e.title,data:hojaApprovedParse_(e,texts[i])}));
+}
+function hojaApprovedEmbeddedText_(e){
   const reg=typeof HOJA_APPROVED_CONTENT_==='object'&&HOJA_APPROVED_CONTENT_?HOJA_APPROVED_CONTENT_:{};
-  return ids.map(id=>{
-    const e=active.get(id);
-    const p=Object.prototype.hasOwnProperty.call(reg,id)?reg[id]:null;
-    if(!p||typeof p.load!=='function')throw new Error('APPROVED_CONTENT_NOT_PACKAGED');
-    if(!/^[a-f0-9]{64}$/.test(String(e.packageSha256))||p.packageSha256!==e.packageSha256)
-      throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
-    const text=p.load();
-    if(hojaV4uSha256_(text)!==e.packageSha256)throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
-    const data=JSON.parse(text);
-    if(data.cartridgeId!==id||data.questionSchemaVersion!==2||!Array.isArray(data.questions)||
-       data.questions.length!==e.questionCount||!data.images||!data.unitMeta||
-       data.questions.some(q=>!q||!q.rendererQuestion||!q.familyId||!q.type))
-      throw new Error('APPROVED_CONTENT_INVALID');
-    return {sheetName:e.title,data};
-  });
+  const p=Object.prototype.hasOwnProperty.call(reg,e.cartridgeId)?reg[e.cartridgeId]:null;
+  if(!p||typeof p.load!=='function')throw new Error('APPROVED_CONTENT_NOT_PACKAGED');
+  if(!/^[a-f0-9]{64}$/.test(String(e.packageSha256))||p.packageSha256!==e.packageSha256)
+    throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+  const text=p.load();
+  if(hojaV4uSha256_(text)!==e.packageSha256)throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+  return text;
+}
+/* Remote (F4): cache (re-verified) -> one parallel fetchAll for the misses -> verify -> cache.
+ * Any network error, non-200, redirect or digest mismatch fails the WHOLE request (no partial game). */
+function hojaApprovedFetchTexts_(source,entries){
+  const out=entries.map(e=>hojaApprovedCacheGet_(e.packageSha256));
+  const miss=[];out.forEach((t,i)=>{if(t==null)miss.push(i);});
+  if(miss.length){
+    const reqs=miss.map(i=>({url:HOJA_APPROVED_RAW_HOST_+source.repo+'/'+source.commit+'/'+entries[i].contentPath,
+      method:'get',muteHttpExceptions:true,followRedirects:false,validateHttpsCertificates:true}));
+    let res;
+    try{res=UrlFetchApp.fetchAll(reqs);}catch(_e){throw new Error('APPROVED_CONTENT_FETCH_FAILED');}
+    if(!Array.isArray(res)||res.length!==reqs.length)throw new Error('APPROVED_CONTENT_FETCH_FAILED');
+    miss.forEach((i,k)=>{
+      const r=res[k];
+      if(!r||r.getResponseCode()!==200)throw new Error('APPROVED_CONTENT_FETCH_FAILED');
+      const text=r.getContentText('UTF-8');
+      if(hojaV4uSha256_(text)!==entries[i].packageSha256)throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+      out[i]=text;
+    });
+    miss.forEach(i=>hojaApprovedCachePut_(entries[i].packageSha256,out[i]));
+  }
+  return out;
+}
+/* Cache is an optimisation only: every read is re-hashed; failures fall back to a fetch. */
+function hojaApprovedCacheGet_(sha){
+  try{
+    const c=CacheService.getScriptCache();const head=c.get(HOJA_APPROVED_CACHE_PREFIX_+sha+'_n');
+    const n=Number(head);if(!Number.isSafeInteger(n)||n<1||n>40)return null;
+    const keys=[];for(let i=0;i<n;i++)keys.push(HOJA_APPROVED_CACHE_PREFIX_+sha+'_'+i);
+    const got=c.getAll(keys);const parts=keys.map(k=>got[k]);
+    if(parts.some(p=>typeof p!=='string'))return null;
+    const text=parts.join('');
+    return hojaV4uSha256_(text)===sha?text:null;
+  }catch(_e){return null;}
+}
+function hojaApprovedCachePut_(sha,text){
+  try{
+    const n=Math.ceil(text.length/HOJA_APPROVED_CACHE_CHUNK_);if(n<1||n>40)return;
+    const v={};for(let i=0;i<n;i++)v[HOJA_APPROVED_CACHE_PREFIX_+sha+'_'+i]=text.slice(i*HOJA_APPROVED_CACHE_CHUNK_,(i+1)*HOJA_APPROVED_CACHE_CHUNK_);
+    const c=CacheService.getScriptCache();c.putAll(v,HOJA_APPROVED_CACHE_SECONDS_);
+    c.put(HOJA_APPROVED_CACHE_PREFIX_+sha+'_n',String(n),HOJA_APPROVED_CACHE_SECONDS_);
+  }catch(_e){}
+}
+/* Structure + media/tag checks on a digest-verified package. */
+function hojaApprovedParse_(e,text){
+  let data;
+  try{data=JSON.parse(text);}catch(_e){throw new Error('APPROVED_CONTENT_INVALID');}
+  if(!data||data.cartridgeId!==e.cartridgeId||data.questionSchemaVersion!==2||!Array.isArray(data.questions)||
+     data.questions.length!==e.questionCount||!data.images||typeof data.images!=='object'||Array.isArray(data.images)||
+     !data.unitMeta||typeof data.unitMeta!=='object'||!data.tags||typeof data.tags!=='object'||Array.isArray(data.tags)||
+     data.questions.some(q=>!q||!q.rendererQuestion||!q.familyId||!q.type))
+    throw new Error('APPROVED_CONTENT_INVALID');
+  for(const k of Object.keys(data.images))
+    if(typeof data.images[k]!=='string'||!HOJA_APPROVED_IMAGE_RE_.test(data.images[k]))
+      throw new Error('APPROVED_CONTENT_MEDIA_INVALID');
+  for(const q of data.questions){
+    const r=q.rendererQuestion;
+    const refs=(r.image?[r.image]:[]).concat((Array.isArray(r.media)?r.media:[]).filter(m=>m&&m.kind==='image').map(m=>m.asset));
+    if(refs.some(a=>typeof a!=='string'||!Object.prototype.hasOwnProperty.call(data.images,a)))
+      throw new Error('APPROVED_CONTENT_MEDIA_INVALID');
+  }
+  for(const k of Object.keys(data.tags))
+    if(!data.tags[k]||typeof data.tags[k]!=='object')throw new Error('APPROVED_CONTENT_TAGS_INVALID');
+  return data;
 }
 
 function hojaRows_(name) {

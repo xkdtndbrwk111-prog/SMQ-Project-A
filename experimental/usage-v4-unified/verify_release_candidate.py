@@ -32,10 +32,18 @@ entries = json.loads(cat[cat.index('Object.freeze(') + 14:cat.rindex(');')])['en
 content = [f for f in gs if f.startswith('HOJA_QB_CONTENT_')]
 if info.get('syntheticReleaseCatalog'):
     ok('SYNTHETIC-TEST-ONLY' in cat and all(e.get('deploymentStatus') == 'SYNTHETIC_TEST_ONLY_NOT_DEPLOYED' for e in entries), 'SYNTHETIC_NOT_MARKED')
-    ok(len(content) == len(entries), 'SYNTHETIC_CONTENT_COUNT')
+    if '"contentSource"' in cat:
+        # F4 lightweight release: content is fetched at a pinned commit -> NO embedded content at all
+        src = json.loads(cat[cat.index('Object.freeze(') + 14:cat.rindex(');')]).get('contentSource') or {}
+        ok(src.get('kind') == 'GITHUB_RAW_PINNED_V1' and re.fullmatch(r'[a-f0-9]{40}', str(src.get('commit'))) is not None
+           and src.get('repo') == 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK', 'CONTENT_SOURCE_NOT_PINNED')
+        ok(content == [] and all(e.get('contentPath') for e in entries), 'REMOTE_RELEASE_MUST_HAVE_0_CONTENT_AND_PATHS')
+    else:
+        ok(len(content) == len(entries), 'SYNTHETIC_CONTENT_COUNT')
 else:
     ok(entries == [] and content == [], 'COMMITTED_RELEASE_MUST_HAVE_0_ACTIVE_AND_0_CONTENT')
 summary = {'bundle': d.name, 'synthetic': bool(info.get('syntheticReleaseCatalog')), 'activeEntries': len(entries), 'contentFiles': len(content),
+           'contentSource': 'GITHUB_RAW_PINNED_V1' if '"contentSource"' in cat else 'EMBEDDED', 'bundleBytes': info.get('bundleBytes'),
            'rcGameSha256': rc.get('rcGameSha256'), 'patchedGameSha256': info['patchedGameSha256'], 'composedRendererSha256': rc.get('composedRendererSha256'),
            'part14Sha256': rc.get('part14Sha256'), 'part22Sha256': rc.get('part22Sha256'), 'fails': fails}
 print(json.dumps(summary, ensure_ascii=False))

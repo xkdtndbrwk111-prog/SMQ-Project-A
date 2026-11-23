@@ -111,7 +111,10 @@ def main():
         if '"buildType": "QA_TEST_ONLY"' not in qcat:
             raise SystemExit('QA_CATALOG_REQUIRED')
         shutil.copyfile(qa / 'ApprovedActiveCatalog.gs', out / 'ApprovedActiveCatalog.gs')
+        remote = '"contentSource"' in qcat
+        if remote and '"GITHUB_RAW_PINNED_V1"' not in qcat: raise SystemExit('CONTENT_SOURCE_INVALID')
         for f in sorted(qa.glob('HOJA_QB_CONTENT_*.gs')):
+            if remote: raise SystemExit('MIXED_CONTENT_SOURCE: remote catalog must ship NO embedded content')
             shutil.copyfile(f, out / f.name); extra.append(f.name)
     elif a.qa_dir:
         raise SystemExit('QA_DIR_ONLY_WITH_QA_VARIANT')
@@ -119,7 +122,13 @@ def main():
         # RELEASE: active entries (teacher deployment approved) must ship their exact content, nothing more.
         body = cat[cat.index('Object.freeze(') + len('Object.freeze('):cat.rindex(');')]
         active = {e['cartridgeId']: e.get('packageSha256') for e in json.loads(body)['entries']}
-        if active:
+        if active and '"contentSource"' in cat:
+            # F4: lightweight RELEASE — content is fetched at a pinned commit; nothing embedded.
+            if a.release_content_dir: raise SystemExit('MIXED_CONTENT_SOURCE: remote catalog must ship NO embedded content')
+            ents = json.loads(body)['entries']
+            if '"GITHUB_RAW_PINNED_V1"' not in cat or any(not e.get('contentPath') for e in ents):
+                raise SystemExit('CONTENT_SOURCE_INVALID')
+        elif active:
             d = Path(a.release_content_dir or '').resolve()
             files = sorted(d.glob('HOJA_QB_CONTENT_*.gs')) if a.release_content_dir else []
             got = {}
@@ -150,6 +159,7 @@ def main():
     print(json.dumps({'output': str(out), 'variant': a.variant, 'files': FILES + extra + ['Game.html'], 'gameSha256': sha,
                       'catalogSha256': hashlib.sha256((out / 'ApprovedActiveCatalog.gs').read_bytes()).hexdigest(),
                       'contentFiles': len(extra), 'contentBytes': sum((out / f).stat().st_size for f in extra),
+                      'bundleBytes': sum(f.stat().st_size for f in out.iterdir() if f.is_file()),
                       'patchedGameSha256': hashlib.sha256(patched).hexdigest(), 'game': a.game, 'releaseCandidate': rc,
                       'syntheticReleaseCatalog': synthetic,
                       'telemetryBlockOldSha256': old_block, 'telemetryBlockNewSha256': new_block}))

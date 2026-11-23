@@ -2,7 +2,7 @@
 // cross-checked against approved effective content) + GAS lazy loader + QA/release split.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync, existsSync, mkdtempSync, rmSync, readdirSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, readdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
@@ -374,4 +374,105 @@ test('F3-3 game names: two active units resolving to the same name fail closed e
   const w = nameWorld([ent('zz5-s2-u1', {title: '같은 제목'}), ent('zz5-s2-u2', {title: '같은 제목'})]);
   assert.throws(() => w.rpc('hojaListPublicCartridges'), /APPROVED_GAME_NAME_COLLISION/);
   assert.throws(() => w.rpc('hojaGetPublicQuestions', ['5-2학기-사회-같은 제목']), /APPROVED_GAME_NAME_COLLISION/);
+});
+
+/* ---------------- F4 (40-6AD): lightweight GAS — content fetched from the PUBLIC bank at a pinned commit ---------------- */
+const RAW = 'https://raw.githubusercontent.com/';
+const PIN = 'a'.repeat(40);
+function remoteWorld({mutate = null, source = {repo: 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK', commit: PIN}, catalogEdit = null} = {}) {
+  const fs = bank([['social/a/zz5-s1-u1', 'zz5-s1-u1'], ['social/b/zz5-s1-u2', 'zz5-s1-u2']]);
+  const {index, report, packages} = build(fs);
+  const served = new Map();
+  for (const pk of packages) {
+    let json = pk.json;
+    if (mutate) { const o = JSON.parse(json); const m = mutate(pk.cartridgeId, o); if (m) { json = JSON.stringify(o); const r = report.entries.find(x => x.cartridgeId === pk.cartridgeId); if (m === 'repin') r.packageSha256 = sha256(Buffer.from(json, 'utf8')); } }
+    served.set(RAW + 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK/' + PIN + '/game-runtime/approved-packages/v1/' + pk.cartridgeId + '.json', json);
+  }
+  let cat = qaPreviewCatalog(index, report, {schemaVersion: 'hoja-qa-preview-v1', purpose: 'TEST_ONLY_QA_NOT_DEPLOYMENT', sourceCommit: COMMIT, select: 'ALL_READY'},
+    {allowedScriptIds: ['MOCK_ISOLATED_TEST_SCRIPT_ID_0001'], contentSource: source});
+  if (catalogEdit) cat = catalogEdit(JSON.parse(JSON.stringify(cat)));
+  const {ss} = buildCopy({history: standardHistory()});
+  const p = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]), props: ISOLATED_PROPS});
+  runInContext(renderCatalogGs(cat), p.ctx);
+  const net = {calls: [], fail: null};
+  p.setFetch(r => { net.calls.push(r.url); if (net.fail) return net.fail(r); return served.has(r.url) ? {code: 200, body: served.get(r.url)} : {code: 404, body: 'nf'}; });
+  return {...p, net, served};
+}
+test('F4 GAS: remote catalog — only the selected unit is fetched from the pinned commit, verified, then served from a re-verified cache', () => {
+  const w = remoteWorld();
+  assert.equal(w.rpc('hojaListApprovedCartridges').length, 2);
+  assert.equal(w.net.calls.length, 0, 'listing fetches nothing');
+  const got = w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']);
+  assert.equal(got[0].sheetName, 'zz5-s1-u1 승인 제목'); assert.equal(got[0].data.questions.length, 3);
+  assert.deepEqual(w.net.calls, [RAW + 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK/' + PIN + '/game-runtime/approved-packages/v1/zz5-s1-u1.json']);
+  const req = w.trace.filter(t => t.startsWith('FETCH:'));
+  assert.equal(req.length, 1);
+  assert.deepEqual(w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), got, 'second load identical');
+  assert.equal(w.net.calls.length, 1, 'second load served from cache (no fetch)');
+  // a corrupted cache chunk is ignored (re-hash) and the package is fetched again — never served corrupted
+  for (const k of w.cache.keys()) if (k.startsWith('HOJA_AQ1_') && k.endsWith('_0')) w.cache.get(k).v = 'x' + w.cache.get(k).v.slice(1);
+  assert.deepEqual(w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), got);
+  assert.equal(w.net.calls.length, 2, 'corrupted cache -> refetch');
+  assert.ok(!readFileSync(DIR + '/gas/Code.gs', 'utf8').includes('HOJA_QB_CONTENT_'), 'no embedded content referenced by name');
+});
+test('F4 GAS: fail-closed — network error, non-200, tampered bytes, partial multi-unit failure, inactive id', () => {
+  let w = remoteWorld(); w.net.fail = () => { throw Error('DNS'); };
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_FETCH_FAILED/);
+  w = remoteWorld(); w.net.fail = () => ({code: 503, body: ''});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_FETCH_FAILED/);
+  w = remoteWorld(); w.net.fail = () => ({code: 302, body: ''});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_FETCH_FAILED/, 'redirects are not followed');
+  w = remoteWorld(); w.net.fail = r => ({code: 200, body: w.served.get(r.url).replace('Q1', 'Q1 (changed)')});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_DIGEST_MISMATCH/);
+  assert.ok(![...w.cache.keys()].some(k => k.startsWith('HOJA_AQ1_')), 'nothing cached from a rejected fetch');
+  w = remoteWorld(); w.net.fail = r => r.url.endsWith('zz5-s1-u2.json') ? {code: 404, body: ''} : {code: 200, body: w.served.get(r.url)};
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1', 'zz5-s1-u2']), /APPROVED_CONTENT_FETCH_FAILED/, 'no partial game');
+  w = remoteWorld();
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u9']), /APPROVED_CARTRIDGE_NOT_ACTIVE/);
+  assert.equal(w.net.calls.length, 0, 'inactive id never reaches the network');
+});
+test('F4 GAS: source pinning — branch names, other repos, path traversal are refused for list AND load', () => {
+  const bad = [
+    c => { c.contentSource.commit = 'main'; return c; },
+    c => { c.contentSource.commit = 'A'.repeat(40); return c; },
+    c => { c.contentSource.repo = 'someone/HOJA-QUESTION-BANK'; return c; },
+    c => { c.contentSource.kind = 'URL'; return c; },
+    c => { c.entries[0].contentPath = 'game-runtime/../secrets.json'; return c; },
+    c => { c.entries[0].contentPath = '/etc/passwd.json'; return c; },
+    c => { c.entries[0].contentPath = 'https://evil.example/x.json'; return c; },
+    c => { delete c.entries[1].contentPath; return c; },
+  ];
+  for (const edit of bad) {
+    const w = remoteWorld({catalogEdit: edit});
+    assert.throws(() => w.rpc('hojaListApprovedCartridges'), /APPROVED_CONTENT_SOURCE_INVALID/);
+    assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_SOURCE_INVALID/);
+    assert.equal(w.net.calls.length, 0);
+  }
+  assert.throws(() => remoteWorld({source: {repo: 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK', commit: 'main'}}), /CONTENT_SOURCE/, 'builder refuses a branch too');
+});
+test('F4 GAS: a digest-valid package with bad media or tags is still refused', () => {
+  let w = remoteWorld({mutate: (id, o) => { if (id !== 'zz5-s1-u1') return null; const k = Object.keys(o.images)[0]; o.images[k] = 'javascript:alert(1)'; return 'repin'; }});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_MEDIA_INVALID/);
+  w = remoteWorld({mutate: (id, o) => { if (id !== 'zz5-s1-u1') return null; o.images = {}; return 'repin'; }});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_MEDIA_INVALID/, 'referenced image missing');
+  w = remoteWorld({mutate: (id, o) => { if (id !== 'zz5-s1-u1') return null; o.tags = {x: 'not-an-object'}; return 'repin'; }});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_TAGS_INVALID/);
+  w = remoteWorld({mutate: (id, o) => { if (id !== 'zz5-s1-u1') return null; o.cartridgeId = 'zz5-s1-u2'; return 'repin'; }});
+  assert.throws(() => w.rpc('hojaGetApprovedQuestions', ['zz5-s1-u1']), /APPROVED_CONTENT_INVALID/);
+});
+test('F4 builder: remote QA catalog ships NO content files and refuses mixing; a branch commit is refused', () => {
+  const out = mkdtempSync(join(tmpdir(), 'hoja-f4-'));
+  try {
+    const fs = bank([['social/a/zz5-s1-u1', 'zz5-s1-u1']]);
+    const {index, report} = build(fs);
+    const cat = qaPreviewCatalog(index, report, {schemaVersion: 'hoja-qa-preview-v1', purpose: 'TEST_ONLY_QA_NOT_DEPLOYMENT', sourceCommit: COMMIT, select: 'ALL_READY'},
+      {allowedScriptIds: ['MOCK_ISOLATED_TEST_SCRIPT_ID_0001'], contentSource: {repo: 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK', commit: PIN}});
+    const qa = join(out, 'qa'); execFileSync('mkdir', ['-p', qa]);
+    writeFileSync(join(qa, 'ApprovedActiveCatalog.gs'), renderCatalogGs(cat));
+    const r = JSON.parse(execFileSync('python3', [DIR + '/build_unified_gas.py', '--output', join(out, 'b'), '--variant', 'qa', '--qa-dir', qa]).toString());
+    assert.equal(r.contentFiles, 0); assert.ok(r.bundleBytes > 0);
+    assert.ok(!readdirSync(join(out, 'b')).some(f => f.startsWith('HOJA_QB_CONTENT_')));
+    writeFileSync(join(qa, 'HOJA_QB_CONTENT_01.gs'), '/* x */');
+    assert.throws(() => execFileSync('python3', [DIR + '/build_unified_gas.py', '--output', join(out, 'c'), '--variant', 'qa', '--qa-dir', qa], {stdio: 'pipe'}), /MIXED_CONTENT_SOURCE/);
+  } finally { rmSync(out, {recursive: true, force: true}); }
 });
