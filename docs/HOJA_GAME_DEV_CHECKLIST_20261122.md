@@ -679,3 +679,22 @@
 - [x] V4 CORE 및 복사본 전용 GAS preview/writer에 중복 억제 건수 `retriesSuppressed` 기록, `HOJA_V4_DAILY_MANIFEST`에 별도 열 추가. GitHub 테스트에 동일 ID의 타임스탬프만 다른 재전송·내용 충돌 거부 시험 추가.
 - [ ] 17,672 기존 원본 행 vs 17,670 고유 플레이의 **전체 57개 기록 날짜와 0회 날짜**에 대한 V4 실제 GAS 완전 backfill/실 시트 재검증은 NOT RUN. 기존 화면의 행수 통계와 차이나는 2회를 정식 운영 전 관리자에게 명시해야 함.
 - [ ] 전체 이력 시작점 인증·오늘 원본 꼬리 조회·Project A/B 실제 통계 운영 전환·과거 원본 삭제는 HOLD.
+
+
+### 40-4. 2026-11-23 V4 격리 Google Sheets 전체 기간 실집계 — COPY ONLY
+- [x] 실제 시험 복사본 `EVENT_LOG` 전체 17,672행을 날짜별로 그룹화. 2026-09-23~2026-11-22 **61일 전체**, 기록 있는 날 57일 + 원본에 행이 없음을 직접 확인한 0회 날짜 4일. 날짜 역행 0, 원본 물리 위치 2~17,673.
+- [x] V4 순수 집계 엔진의 `snapshot()`과 독립 UTF-8 SHA-256 감사 도구를 활용해 원본 콘텐츠 해시·버킷 해시를 분리 산출. `HOJA_V4_DAILY_MANIFEST` 61행 및 `HOJA_V4_DAILY_BUCKETS` **3,969행**을 시험 복사 시트에만 저장. `HOJA_V4_BACKFILL_AUDIT`에 외부 Google Sheets 연결 API로 수행한 작업임을 명시.
+- [x] 2026-10-22 버킷 일부 저장 후 연결 실행의 최대 호출 수 제한으로 중단되었으나, 기존 저장 2,250행과 재계산 첫 14행의 일치를 검증한 다음 나머지 1,719행만 정확한 위치에 이어 기록. 중복 요약행 없이 복구.
+- [x] **원본 17,672건, 중복 재전송 2건, 실제 고유 플레이 17,670회, 0회 날짜 4일, 버킷 3,969행, 최종 원본 위치 17,673** 전역 불변식 PASS.
+- [x] 초기 29일 + 후반 32일 **모든 61일 원본 SHA-256 재계산**, 저장된 전 버킷행 독립 재읽기 및 일별 버킷 SHA-256 재계산, sourcePrefixEndRow의 날짜별 연속성, 원본 건수=고유 시작+재전송 억제 검증 PASS. 이후 복사본의 61개 매니페스트를 `COMPLETE`로 확정 및 재읽기 확인. 운영 원본·랭킹/기존 요약 불변.
+- [x] 실제 저장된 V4 요약만으로 `HOJA_USAGE_V4_CORE.report()` 실행: **11/22 기준 전체 17,670회 / 당일 6 / 7일 1,451 / 30일 4,291**, 학년·교과 각각 전체 17,670, 팀 분류 합계 일치, TOP20 20종, 별도 단원 선택 18,659회.
+- [ ] **실 Google Apps Script 런타임에서 V4 함수 실행 NOT RUN.** 이번 실집계는 Google Sheets 연결 API로 안전한 시험 복사본을 직접 갱신한 것. 실제 Project A/B 운영 프로젝트 및 자동 보관 트리거 무변경·원본 삭제 없음.
+
+### 40-5. 2026-11-23 이전 COMPLETE 요약 + 오늘 원본 꼬리만 읽는 V4 병렬 조회
+- [x] `HOJA_USAGE_V4_LIVE_TAIL.js` 신설: 최초 인증된 날짜~어제까지 매일 COMPLETE+버킷 SHA256+원본 구간 연결 검증, 오늘 행은 마지막 `sourcePrefixEndRow+1`부터만 읽으며 `LIVE_PROVISIONAL`로 집계. 지연 전일 이벤트, 미래 날짜, 꼬리 행 수 불일치, 중복 매니페스트/누락 0일은 fail-closed.
+- [x] `getUsageStatisticsU4TrialShadow(creatorToken)` 신설. **기존 Project B의 `requireUsageStatisticsAccessU3_`를 Sheets 접근보다 먼저 호출**. 구글 복사본 표식/운영 ID 다름 확인, 인증된 V4 매니페스트·버킷만 조회하고 `EVENT_LOG`는 오늘 꼬리 범위만 읽음. 기존 `getUsageStatisticsU2()` 수정하지 않음. `productionSwitchAllowed:false` 및 `rawDeletion:'HOLD'` 고정.
+- [x] 실제 격리 시트에서 완료 61일 + 2026-11-23 오늘 꼬리 0건을 `HOJA_USAGE_V4_LIVE_TAIL.project()`로 조합: **11/23 기준 전체 17,670 / 오늘 0 / 7일 1,298 / 30일 4,290**, TOP20과 팀 인원 합계 정합성 PASS. **오늘 0건은 복사본 스냅샷만 의미하고 운영 실시간 원본 통계값을 뜻하지 않음**.
+- [x] Node 기반 `HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs`, `HOJA_USAGE_V4_LIVE_TAIL.test.mjs`, `HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs` 신규 작성 및 `unified-trial-qa.yml` 연결. AUTH 우선, 실 이력 원본 재읽기 차단, 팀7, 임시 오늘, 비공개행, 지연 이벤트, 손상 요약·누락 날짜 검증. 최종 GitHub CI 결과 별도 확인 후 PASS 명시.
+- [x] 상세 근거·출처·범위·운영 보류 조건 `docs/HOJA_USAGE_V4_REAL_COPY_BACKFILL_20261123.md` 정리.
+- [ ] Apps Script 실행기에서 실제 `getUsageStatisticsU4TrialShadow` 권한·실행 시간·Manager UI 연동 시험은 아직 NOT RUN. 교차 프로젝트 ScriptLock이 공유된다고 가정하면 안 됨. Project A append 날짜 비역행/지연 재전송 방어 및 실제 양 프로젝트 전환은 후속.
+- [ ] **원본 `EVENT_LOG` 삭제/보관 30일/12개월 자동화 설치 및 Project A/B 운영 배포 금지 유지.** 독립 백업·복구 및 운영 사용자 승인 전까지 HOLD.
