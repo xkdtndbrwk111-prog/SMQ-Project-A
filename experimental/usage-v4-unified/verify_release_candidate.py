@@ -25,8 +25,13 @@ ok(game.count(mark) == 1, 'PACKAGE_CACHE_BLOCK_COUNT')
 if game.count(mark) == 1:
     i = game.index(mark); j = game.index(b'</script>', i) + len(b'</script>\n')
     ok(hashlib.sha256(game[i:j - 1]).hexdigest() == rc.get('packageCacheBlockSha256'), 'PACKAGE_CACHE_BLOCK_SHA')
-    ok(hashlib.sha256(game[:i] + game[j:]).hexdigest() == rc.get('gameBeforePackageCacheSha256') == '876933786d9cc3bb2dd412afe1823c78625d79747a8ffe4a03f1a25007c0fee7',
-       'GAME_WITHOUT_CACHE_BLOCK_IS_NOT_THE_AUDITED_RC')
+    ok(hashlib.sha256(game[:i] + game[j:]).hexdigest() == rc.get('gameBeforePackageCacheSha256'), 'GAME_WITHOUT_CACHE_BLOCK_MISMATCH')
+# 40-6AI: the telemetry client policy changed (R7 queue rollover), so the patched game hash moved from 876933... (40-6AF).
+# Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
+# UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
+ok(rc.get('rcGameSha256') == '617f2228285ab5dd8fd0af6cb2de47354142c9f9d46b29db0a1ea73dbae60456', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
+ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}
 allsrc = '\n'.join(gs.values()) + game.decode('utf-8', 'replace')
 for bad in ('"buildType": "QA_TEST_ONLY"', 'qa-preview-not-deployment', 'hojaV4TestEvidenceU3',

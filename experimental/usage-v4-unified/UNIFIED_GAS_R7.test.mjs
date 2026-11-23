@@ -182,20 +182,115 @@ test('R7-4c after 11-24 is SEALED, a re-send of an 11-24 event is still recognis
   assert.equal(r.duplicateIgnored, true); assert.equal(r.originalDate, '2026-11-24');
   assert.equal(w.ev.getLastRow(), n);
 });
-test('R7-4d a start still QUEUED in localStorage from 11-24 when the page reopens on 11-25 is EXPIRED (dropped, never sent) — existing client policy', async () => {
+/* R7-4d..k — 40-6AI (teacher decision 2026-11-24, R7 alternative 3). CHANGED EXPECTATION: until 40-6AG the client
+ * EXPIRED a start still queued when the KST day changed ("a past day's start can no longer be dated correctly"), which
+ * lost it. Now it is re-sent with the SAME eventId and counted on the server receive day; only starts queued more than
+ * one KST day ago expire (dedupe-window safety horizon, see UsageTelemetryClient.html). */
+const KEY = 'hoja_usage_pending_v1';
+async function queueOne(w, at, {storage = new Map(), committed = false} = {}) {
+  // a start whose every in-page attempt fails (429), or — committed:true — whose FIRST attempt is stored but its reply lost
+  const down = client(w, {storage, fault: n => committed && n === 1 ? {lostReply: true} : {before: 'Exception: SHEETS_HTTP_429_RATE_LIMIT_EXCEEDED'}});
+  w.at(at); down.api.track('SOLO', 1);
+  for (let i = 0; i < 4000 && !(down.calls.length >= 6 && JSON.parse(storage.get(KEY) || '[]').length === 1 && down.api.status().retries >= 5); i++) await tick(1);
+  await tick(5);
+  const q = JSON.parse(storage.get(KEY));
+  assert.equal(q.length, 1, 'still queued after the in-page budget'); return {storage, eventId: q[0].payload.eventId, day: q[0].day};
+}
+test('R7-4d (NEW POLICY) a start queued on 11-24 is re-sent on 11-25 with the same eventId and stored once on 11-25', async () => {
   const w = world();
-  const storage = new Map();
-  const down = client(w, {storage, fault: () => ({before: 'Exception: SHEETS_HTTP_429_RATE_LIMIT_EXCEEDED'})});
-  w.at('23:59:50'); down.api.track('SOLO', 1);
-  for (let i = 0; i < 2000 && down.calls.length < 6; i++) await tick(1);
-  await tick(3);
-  assert.equal(JSON.parse(storage.get('hoja_usage_pending_v1')).length, 1, 'queued after the in-call budget');
-  const before = w.ev.getLastRow();
+  const {storage, eventId, day} = await queueOne(w, '23:59:50');
+  assert.equal(day, '2026-11-24'); assert.equal(w.ev.rows.filter(r => r[0] === eventId).length, 0, 'nothing stored on 11-24');
   w.at('00:01:00');
-  const later = client(w, {storage});
-  await later.api.flush();
-  assert.equal(later.api.status().expired, 1); assert.equal(later.calls.length, 0); assert.equal(w.ev.getLastRow(), before,
-    'POLICY GAP (reported, not changed): the 11-24 start is lost rather than counted on 11-25');
+  const up = client(w, {storage});
+  await up.api.flush();
+  const s = up.api.status();
+  assert.equal(s.expired, 0); assert.equal(s.resentFromPreviousDay, 1); assert.equal(s.delivered, 1);
+  assert.deepEqual(up.calls.map(x => x.eventId), [eventId], 'same eventId');
+  const rows = w.ev.rows.filter(r => r[0] === eventId);
+  assert.equal(rows.length, 1); assert.equal(rows[0][2], '2026-11-25', 'counted on the server receive day');
+  assert.equal(storage.get(KEY), '[]');
+});
+test('R7-4e stored at 23:59:59 but every reply lost -> queued; re-sent next day before AND after 11-24 is sealed -> duplicateIgnored, 0 extra rows', async () => {
+  for (const sealFirst of [false, true]) {
+    const w = world();
+    const {storage, eventId} = await queueOne(w, '23:59:59', {committed: true});
+    assert.equal(w.ev.rows.filter(r => r[0] === eventId).length, 1, 'stored once on 11-24');
+    w.at('2026-11-24T15:10:00Z');                     // 11-25 00:10 KST
+    if (sealFirst) assert.deepEqual(w.seal().sealed.map(x => x.date), ['2026-11-24']);
+    const up = client(w, {storage});
+    await up.api.flush();
+    assert.equal(up.api.status().duplicateIgnored, 1, 'sealFirst=' + sealFirst);
+    assert.equal(w.ev.rows.filter(r => r[0] === eventId).length, 1, 'no duplicate, sealFirst=' + sealFirst);
+    assert.equal(w.ev.rows.find(r => r[0] === eventId)[2], '2026-11-24');
+  }
+});
+test('R7-4f reopening 2 or 3 days later: the start EXPIRES (counted in status.expiredBeyondHorizon) — and why: a D+2 re-send would double-count', async () => {
+  for (const later of ['2026-11-25T23:00:00Z', '2026-11-26T23:00:00Z']) {   // 11-26 08:00 / 11-27 08:00 KST
+    const w = world();
+    const {storage} = await queueOne(w, '23:59:50');
+    w.at(later);
+    const up = client(w, {storage});
+    await up.api.flush();
+    const s = up.api.status();
+    assert.equal(s.expiredBeyondHorizon, 1); assert.equal(s.expired, 1); assert.equal(up.calls.length, 0, later);
+  }
+  // the hazard the horizon prevents: stored on 11-24 (reply lost), 11-24 and 11-25 sealed by 11-26, then re-sent on 11-26
+  const w = world();
+  w.at('23:59:59').rec(70);
+  w.at('2026-11-25T15:10:00Z');                       // 11-26 00:10 KST — daily seal ran for 11-24 and 11-25
+  w.seal();
+  const r = w.rec(70);
+  assert.ok(!r.duplicateIgnored, 'outside the dedupe window the server can no longer recognise it');
+  assert.equal(w.ev.rows.filter(x => x[0] === id(9070)).length, 2, 'a D+2 re-send WOULD double-count -> the client must not do it');
+});
+test('R7-4g still offline / 429 on the next day: the start stays queued (not expired) and is delivered once the server answers', async () => {
+  const w = world();
+  const {storage, eventId} = await queueOne(w, '23:59:50');
+  w.at('00:01:00');
+  const still = client(w, {storage, fault: () => ({before: 'NetworkError: offline'})});
+  await still.api.flush();
+  assert.equal(still.api.status().expired, 0); assert.equal(JSON.parse(storage.get(KEY)).length, 1);
+  w.at('2026-11-25T03:00:00Z');                       // 11-25 12:00 KST, back online
+  const up = client(w, {storage});
+  await up.api.flush();
+  assert.equal(w.ev.rows.filter(r => r[0] === eventId).length, 1); assert.equal(storage.get(KEY), '[]');
+});
+test('R7-4h two tabs re-send the same queued start at once -> one row, the other tab gets duplicateIgnored', async () => {
+  const w = world();
+  const {storage, eventId} = await queueOne(w, '23:59:50');
+  w.at('00:01:00');
+  const a = client(w, {storage}), b = client(w, {storage});
+  await Promise.all([a.api.flush(), b.api.flush()]);
+  assert.equal(w.ev.rows.filter(r => r[0] === eventId).length, 1);
+  assert.equal(a.api.status().delivered + b.api.status().delivered, 2);
+  assert.equal(a.api.status().duplicateIgnored + b.api.status().duplicateIgnored, 1);
+});
+test('R7-4i corrupt / invalid / duplicated localStorage is counted, never crashes, and valid entries are sent once', async () => {
+  const w = world();
+  w.at('00:01:00');
+  const corrupt = client(w, {storage: new Map([[KEY, '{not json']])});
+  await corrupt.api.flush();
+  assert.equal(corrupt.api.status().corruptQueue, 1); assert.equal(corrupt.calls.length, 0);
+  const good = id(9500);
+  const p = {eventId: good, mode: 'SOLO', repositoryKind: 'PUBLIC', cartridgeIds: ['101'], cartridgeCount: 1, teamCount: 1};
+  const storage = new Map([[KEY, JSON.stringify([{day: '2026-11-24', payload: p}, {day: '2026-11-24', payload: p},
+    {day: 'yesterday', payload: {...p, eventId: id(9501)}}, {day: '2026-11-24', payload: {...p, eventId: 'x'}}, null, 7])]]);
+  const c = client(w, {storage});
+  await c.api.flush();
+  const s = c.api.status();
+  assert.equal(s.invalidQueueEntries, 5, 'duplicate, bad day, bad id, null, number');
+  assert.deepEqual(c.calls.map(x => x.eventId), [good]); assert.equal(w.ev.rows.filter(r => r[0] === good).length, 1);
+});
+test('R7-4j queue overflow beyond 200 pending starts is counted (status.overflowDropped), oldest first', async () => {
+  const w = world();
+  w.at('00:01:00');
+  const list = Array.from({length: 205}, (_, i) => ({day: '2026-11-25', payload: {eventId: id(9600 + i), mode: 'SOLO', repositoryKind: 'PUBLIC', cartridgeIds: ['101'], cartridgeCount: 1, teamCount: 1}}));
+  const storage = new Map([[KEY, JSON.stringify(list)]]);
+  const c = client(w, {storage, fault: () => ({before: 'NetworkError: offline'})});
+  c.api.track('SOLO', 1);
+  for (let i = 0; i < 200; i++) await tick(1);
+  assert.ok(c.api.status().overflowDropped >= 5, JSON.stringify(c.api.status()));
+  assert.equal(JSON.parse(storage.get(KEY)).length, 200);
 });
 
 /* ---------------------------------------------------------------- R7-5 */

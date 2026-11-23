@@ -1,0 +1,3 @@
+mutation: client back to the old rule (only today kept) -> R7-4d, R7-4e, R7-4g, R7-4h FAIL (caught)
+mutation: no horizon (keep every past day) -> R7-4f FAIL (caught: D+2 re-send would be sent)
+source restored after each mutation
