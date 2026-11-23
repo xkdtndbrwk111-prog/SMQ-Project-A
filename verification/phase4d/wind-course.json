@@ -1,0 +1,1261 @@
+{
+  "format": "HOJA_MAKER_PROJECT",
+  "schemaVersion": 6101,
+  "title": "바람 장애물 시험 코스",
+  "maps": [
+    {
+      "id": "phase4d-wind-course",
+      "name": "바람을 타고",
+      "width": 132,
+      "height": 46,
+      "theme": "grassland",
+      "spawn": {
+        "x": 6,
+        "y": 25
+      },
+      "terrain": [
+        {
+          "id": "start",
+          "kind": "ground",
+          "x": 0,
+          "y": 30,
+          "w": 20,
+          "h": 3
+        },
+        {
+          "id": "spike-bed",
+          "kind": "ground",
+          "x": 20,
+          "y": 42,
+          "w": 90,
+          "h": 4
+        },
+        {
+          "id": "exit",
+          "kind": "ground",
+          "x": 110,
+          "y": 30,
+          "w": 22,
+          "h": 3
+        }
+      ],
+      "objects": [
+        {
+          "id": "spike-20",
+          "type": "asset",
+          "x": 20,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-21",
+          "type": "asset",
+          "x": 21,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-22",
+          "type": "asset",
+          "x": 22,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-23",
+          "type": "asset",
+          "x": 23,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-24",
+          "type": "asset",
+          "x": 24,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-25",
+          "type": "asset",
+          "x": 25,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-26",
+          "type": "asset",
+          "x": 26,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-27",
+          "type": "asset",
+          "x": 27,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-28",
+          "type": "asset",
+          "x": 28,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-29",
+          "type": "asset",
+          "x": 29,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-30",
+          "type": "asset",
+          "x": 30,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-31",
+          "type": "asset",
+          "x": 31,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-32",
+          "type": "asset",
+          "x": 32,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-33",
+          "type": "asset",
+          "x": 33,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-34",
+          "type": "asset",
+          "x": 34,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-35",
+          "type": "asset",
+          "x": 35,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-36",
+          "type": "asset",
+          "x": 36,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-37",
+          "type": "asset",
+          "x": 37,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-38",
+          "type": "asset",
+          "x": 38,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-39",
+          "type": "asset",
+          "x": 39,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-40",
+          "type": "asset",
+          "x": 40,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-41",
+          "type": "asset",
+          "x": 41,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-42",
+          "type": "asset",
+          "x": 42,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-43",
+          "type": "asset",
+          "x": 43,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-44",
+          "type": "asset",
+          "x": 44,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-45",
+          "type": "asset",
+          "x": 45,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-46",
+          "type": "asset",
+          "x": 46,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-47",
+          "type": "asset",
+          "x": 47,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-48",
+          "type": "asset",
+          "x": 48,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-49",
+          "type": "asset",
+          "x": 49,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-50",
+          "type": "asset",
+          "x": 50,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-51",
+          "type": "asset",
+          "x": 51,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-52",
+          "type": "asset",
+          "x": 52,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-53",
+          "type": "asset",
+          "x": 53,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-54",
+          "type": "asset",
+          "x": 54,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-55",
+          "type": "asset",
+          "x": 55,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-56",
+          "type": "asset",
+          "x": 56,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-57",
+          "type": "asset",
+          "x": 57,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-58",
+          "type": "asset",
+          "x": 58,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-59",
+          "type": "asset",
+          "x": 59,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-60",
+          "type": "asset",
+          "x": 60,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-61",
+          "type": "asset",
+          "x": 61,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-62",
+          "type": "asset",
+          "x": 62,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-63",
+          "type": "asset",
+          "x": 63,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-64",
+          "type": "asset",
+          "x": 64,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-65",
+          "type": "asset",
+          "x": 65,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-66",
+          "type": "asset",
+          "x": 66,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-67",
+          "type": "asset",
+          "x": 67,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-68",
+          "type": "asset",
+          "x": 68,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-69",
+          "type": "asset",
+          "x": 69,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-70",
+          "type": "asset",
+          "x": 70,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-71",
+          "type": "asset",
+          "x": 71,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-72",
+          "type": "asset",
+          "x": 72,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-73",
+          "type": "asset",
+          "x": 73,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-74",
+          "type": "asset",
+          "x": 74,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-75",
+          "type": "asset",
+          "x": 75,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-76",
+          "type": "asset",
+          "x": 76,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-77",
+          "type": "asset",
+          "x": 77,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-78",
+          "type": "asset",
+          "x": 78,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-79",
+          "type": "asset",
+          "x": 79,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-80",
+          "type": "asset",
+          "x": 80,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-81",
+          "type": "asset",
+          "x": 81,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-82",
+          "type": "asset",
+          "x": 82,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-83",
+          "type": "asset",
+          "x": 83,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-84",
+          "type": "asset",
+          "x": 84,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-85",
+          "type": "asset",
+          "x": 85,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-86",
+          "type": "asset",
+          "x": 86,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-87",
+          "type": "asset",
+          "x": 87,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-88",
+          "type": "asset",
+          "x": 88,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-89",
+          "type": "asset",
+          "x": 89,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-90",
+          "type": "asset",
+          "x": 90,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-91",
+          "type": "asset",
+          "x": 91,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-92",
+          "type": "asset",
+          "x": 92,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-93",
+          "type": "asset",
+          "x": 93,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-94",
+          "type": "asset",
+          "x": 94,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-95",
+          "type": "asset",
+          "x": 95,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-96",
+          "type": "asset",
+          "x": 96,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-97",
+          "type": "asset",
+          "x": 97,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-98",
+          "type": "asset",
+          "x": 98,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-99",
+          "type": "asset",
+          "x": 99,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-100",
+          "type": "asset",
+          "x": 100,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-101",
+          "type": "asset",
+          "x": 101,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-102",
+          "type": "asset",
+          "x": 102,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-103",
+          "type": "asset",
+          "x": 103,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-104",
+          "type": "asset",
+          "x": 104,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-105",
+          "type": "asset",
+          "x": 105,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-106",
+          "type": "asset",
+          "x": 106,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-107",
+          "type": "asset",
+          "x": 107,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-108",
+          "type": "asset",
+          "x": 108,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "spike-109",
+          "type": "asset",
+          "x": 109,
+          "y": 41,
+          "w": 1,
+          "h": 1,
+          "assetPath": "Free/Traps/Spikes/Idle.png",
+          "collision": "hazard"
+        },
+        {
+          "id": "wind-0-up",
+          "type": "gimmick",
+          "x": 20,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-0-down",
+          "type": "gimmick",
+          "x": 27,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-1-up",
+          "type": "gimmick",
+          "x": 30,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-1-down",
+          "type": "gimmick",
+          "x": 37,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-2-up",
+          "type": "gimmick",
+          "x": 40,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-2-down",
+          "type": "gimmick",
+          "x": 47,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-3-up",
+          "type": "gimmick",
+          "x": 50,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-3-down",
+          "type": "gimmick",
+          "x": 57,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-4-up",
+          "type": "gimmick",
+          "x": 60,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-4-down",
+          "type": "gimmick",
+          "x": 67,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-5-up",
+          "type": "gimmick",
+          "x": 70,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-5-down",
+          "type": "gimmick",
+          "x": 77,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-6-up",
+          "type": "gimmick",
+          "x": 80,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-6-down",
+          "type": "gimmick",
+          "x": 87,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-7-up",
+          "type": "gimmick",
+          "x": 90,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-7-down",
+          "type": "gimmick",
+          "x": 97,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-8-up",
+          "type": "gimmick",
+          "x": 100,
+          "y": 8,
+          "w": 7,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "up",
+            "power": 1000,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "wind-8-down",
+          "type": "gimmick",
+          "x": 107,
+          "y": 8,
+          "w": 3,
+          "h": 34,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "down",
+            "power": 100,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "still-saw",
+          "type": "gimmick",
+          "x": 43,
+          "y": 6,
+          "w": 4,
+          "h": 4,
+          "gimmick": {
+            "kind": "saw",
+            "axis": "x",
+            "distance": 0,
+            "speed": 45,
+            "radius": 24
+          }
+        },
+        {
+          "id": "patrol-saw",
+          "type": "gimmick",
+          "x": 75,
+          "y": 8,
+          "w": 4,
+          "h": 4,
+          "gimmick": {
+            "kind": "saw",
+            "axis": "x",
+            "distance": 128,
+            "speed": 55,
+            "radius": 24
+          }
+        },
+        {
+          "id": "flame-platform",
+          "type": "gimmick",
+          "x": 58,
+          "y": 7,
+          "w": 2,
+          "h": 4,
+          "gimmick": {
+            "kind": "flame",
+            "wait": 2400,
+            "warn": 1200,
+            "active": 1200,
+            "cool": 1200
+          }
+        }
+      ]
+    }
+  ]
+}

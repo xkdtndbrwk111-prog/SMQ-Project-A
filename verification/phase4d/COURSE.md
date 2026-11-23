@@ -44,3 +44,15 @@ A/D로 이동, 쉼표로 달리기, 마침표로 점프한다. 위험 장치 앞
 - **NOT RUN:** 새 버전의 교사 수동 플레이 및 학교망·실기기. 이전 교사 골인 기록은 이전 버전의 결과로 보존하며 새 코스의 교사 승인으로 해석하지 않는다.
 
 [지면·공중 톱날](screenshots/course-v2/saw.png) · [진자](screenshots/course-v2/pendulum.png) · [지속 바람](screenshots/course-v2/fan.png) · [간헐 바람](screenshots/course-v2/intermittent.png) · [불꽃 발판](screenshots/course-v2/flame.png) · [불꽃 예고 버튼](screenshots/course-v2/flame-warning.png) · [상승 바람](screenshots/course-v2/updraft.png) · [하강 바람](screenshots/course-v2/downdraft.png) · [새 코스 골인](screenshots/course-v2/goal.png)
+
+## 2026-11-23 바람 진입 수정 및 공중 장애물 코스
+
+- 사용자가 제출한 [개선판 검수 JSON](teacher-reviews/2026-11-23-refined-seed-314159.json)은 `bb196c4` 시험 코스 골인과 골인 전 톱날·진자 각 1회 사망을 기록한다. 사용자가 제공한 두 영상은 상승/하강 바람과 바람개비 근처를 이동하는 모습을 보여준다. 이 기록은 이후 새 바람 코스의 사용자 검수를 대신하지 않는다.
+- **원인 및 수정:** 바람 안에서 정지한 뒤 측정한 이전 시험과 달리, 외부에서 진행 방향 속도를 얻고 들어오면 걷기 가속과 바람이 서로 상쇄되어 기존 속도가 오래 유지됐다. 속도 252로 진입한 단위 시험은 수정 전 239.52로 실패했다. 맞바람에 진입할 때에만 대항 속도의 상한을 적용해 수정했다. 브라우저에서 실제 키 입력으로 외부에서 진입한 직후 약 11.75px/s를 측정했다. 바람 범위 밖이나 바람과 같은 방향의 이동은 이 대항 상한을 적용하지 않는다.
+- 기존 기믹 코스의 지면 톱날 이동 폭 64→128px, 공중 톱날 48→96px. 새 [바람 코스 Maker 프로젝트](wind-course.json)는 교사용 시험 메뉴 **바람 장애물 시험 코스**에서 따로 연다. 상승과 하강 바람이 교대로 이어지고, 공중에 고정 톱날·움직이는 톱날·불꽃 발판을 배치했다.
+- Maker 내장 `Free/Traps/Spikes/Idle.png` 원본을 가시 바닥에 사용했다. 새 그림은 생성하지 않았다. 해당 원본 에셋을 `collision: hazard`로 명시한 경우에만 위험 판정을 적용하며 기존의 다른 Maker 에셋은 유지한다.
+- **키보드 자동화:** 위치 이동과 무적 없이 새 코스를 한 차례 골인했다(사망 0회). 다른 동일 방식의 제한된 시도는 고정 톱날 부근 x≈680에서 세 번 사망해 중단됐다. 완료 여부는 조작과 타이밍에 영향을 받으며 교사의 수동 플레이를 대신하지 않는다. 순찰 폭을 늘린 기존 기믹 코스도 자동 조작으로 골인했다.
+- **PASS — 별도 유도 시험:** 가시 위치로 이동해 가시 접촉 사망 및 부활, 실제 바깥에서 바람 구간 진입 후 감속, 점프·상승 바람·불꽃 발판·진자 앉기 회피를 확인했다. 원본/Phase 1 해시, 정적 검사, 기존 물리·몬스터·기믹 단위 시험도 통과했다.
+- **NOT RUN:** 새 바람 코스의 교사 직접 플레이 및 난이도 평가, 학교망·실기기. 키보드 자동화 골인은 전체 난이도나 모든 프레임 상황의 검증을 뜻하지 않는다. Phase 4D 종료·4E 진입 및 운영 배포는 별도다.
+
+[시작](screenshots/wind/start.png) · [진입](screenshots/wind/entry.png) · [공중 장애물](screenshots/wind/middle.png) · [출구](screenshots/wind/exit.png) · [원본 가시](screenshots/wind/spikes.png)

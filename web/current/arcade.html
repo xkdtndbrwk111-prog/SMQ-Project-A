@@ -5205,6 +5205,14 @@ class HojaScene extends Phaser.Scene{
         const key='v061MakerAsset_'+Array.from(HOJA_MAKER_IMAGES.keys()).indexOf(o.assetPath);
         if(!this.textures.exists(key))this.textures.addImage(key,HOJA_MAKER_IMAGES.get(o.assetPath));
         const im=this.add.image(x,y,key).setOrigin(0,0).setDepth(3).setAlpha(Number(o.opacity??1));
+        // The original Maker spike asset is hazardous only when explicitly
+        // configured as such; all other legacy asset behavior is unchanged.
+        if(o.assetPath==='Free/Traps/Spikes/Idle.png'&&o.collision==='hazard'){
+          this.physics.add.existing(im,true);
+          im.body.updateFromGameObject();
+          im.body.setSize(16,8).setOffset(0,8);
+          this.physics.add.overlap(this.playerBody,im,()=>{this.hojaGimmickHit='spikes';try{this.startDeath('enemy');}finally{this.hojaGimmickHit=null;}});
+        }
         if(o.animationFps>0){
           const match=/\((\d+)x(\d+)\)/.exec(o.assetPath);
           if(match){
