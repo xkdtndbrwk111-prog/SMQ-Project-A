@@ -1,0 +1,35 @@
+name: HOJA usage V4 40-6-U single Project A GAS (mock, no Google access)
+on:
+  push:
+    branches:
+      - work/usage-v4-40-6-u-20261123
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unified:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check single-GAS bundle
+        run: |
+          for f in experimental/usage-v4-unified/gas/*.gs; do
+            cp "$f" "$RUNNER_TEMP/$(basename "$f").js"; node --check "$RUNNER_TEMP/$(basename "$f").js"
+          done
+      - name: Existing V4 suites (regression, unchanged sources)
+        run: |
+          node --test experimental/usage-retention/HOJA_USAGE_V4_CORE.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_TRIAL_GAS.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TAIL.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_APPEND_GUARD_TRIAL.test.mjs
+      - name: 40-6-U1 single GAS writer / seal / public reader (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs
