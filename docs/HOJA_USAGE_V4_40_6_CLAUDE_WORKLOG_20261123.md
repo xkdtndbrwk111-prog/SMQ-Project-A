@@ -134,3 +134,33 @@
 6. 실 사본 manifest 셀 표시 형식이 Reader 가정(텍스트 날짜·구분자 없는 숫자)과 다르면 fail-closed됨.
 
 **HOLD 유지**: 운영 GAS·EVENT_LOG·랭킹·배포·트리거·원본 보관/삭제·교실매니저 실제 폐기·중앙 체크리스트 PASS 기록.
+
+## U3-REAL — 실 Apps Script 엔진 + 익명 브라우저 e2e (2026-11-23 10:57~11:01 KST, 사용자 승인 후 실행)
+**환경**: 사용자 계정의 **새 격리 Apps Script 프로젝트**(운영 아님) + 61일 인증 사본을 Drive에서 복제한 **40-6U 쓰기 사본**(B1 두 번째 canary 설정). 인증 사본·운영 원본·운영 GAS·랭킹 무접근(랭킹 속성 미설정). 사용자가 편집기에서 OAuth 승인·`hojaV4TestSetupU3` 실행·웹앱 배포(모든 사용자)를 직접 수행. 익명 시험은 로그인/쿠키 없는 새 Chromium 컨텍스트(Playwright)에서 실 `/exec` URL로 수행.
+**시험 전용 코드**: `test-only/TestOnlyU3.template.gs`(ID·토큰 제거본; 실제 파일은 시험 프로젝트에만 존재, 토큰 보호 증거/변조 함수), `verify_real_gas_anonymous.py`. 원시 로그: `evidence/u3_real_gas_20261123.log`(ID·URL·토큰·eventId 없음).
+**쓰기 전 안전장치**: R0에서 시험 프로젝트 전용 함수와 B1 canary를 확인하지 못하면 쓰기 전에 중단(첫 시도에서 실제로 중단 작동 — 설정 미완료 시).
+
+| # | 결과 | 비식별 증거 |
+|---|---|---|
+| R0 실 엔진 사본 재검증 | **PASS** | 61일 COMPLETE, 원본 17,672 / 고유 17,670 / 재전송 2 / 0회 4일 / 버킷 3,969 / prefix 17,673, **원본 SHA 61/61, 버킷 SHA 61/61, 버킷 집합 61/61 일치**, bad 0. 전체 읽기 3.7~4.4s, 검증 0.4~0.9s |
+| R1 쓰기 전 통계 | **PASS** | `UNAVAILABLE/NOT_CONFIGURED`, 화면 숫자 0개 표시 |
+| R4 익명 공격면 | **PASS** | Ops 2종·Setup → `HOJA_V4_OPS_DENIED`; `_` 함수·UsageRollupU3S 함수는 **익명 google.script.run 스텁에 아예 없음**; 증거 함수 오토큰 거부 |
+| R2 익명 1회 기록 | **PASS** | append ok, watermark 초기화·전진, RPC 4.3s |
+| R5 재전송/충돌/PRIVATE | **PASS** | 동일 → `duplicateIgnored`(신규 0), 팀 변경 → `USAGE_EVENT_ID_CONFLICT`, PRIVATE → 미수집 |
+| R3 공개 통계 | **PASS** | 전체 **17,671 = 17,670+1**, 오늘 1(LIVE_PROVISIONAL), 62일·0회 4일, 7일 1,299, 30일 4,291, 응답 키 allowlist 정확, TOP20, 익명 화면 렌더 OK |
+| R6 동시 40건(익명 2창×20) + 통계 폴링 | **FAIL (데이터 유실)** | 성공 **10/40**. 실패 30 = `USAGE_APPEND_LOCK_TIMEOUT` 13 + `SHEETS_HTTP_429_RATE_LIMIT_EXCEEDED` 17. 행 +10 = watermark +10(부분 행 0), 통계 폴링 단조(17,672→17,681), 불완전 숫자 0 |
+| R8 버킷 1셀 변조 | **PASS** | 변조 중 `UNAVAILABLE/INTEGRITY`(숫자 없음), 복구 후 OK 17,681 |
+| R9 시간 | 기록 | 캐시 적중 RPC 1.8s, 재계산 3.7s(공개 계산 1.8s) |
+| 게임 기본 경로 | **PASS** | 익명 `/exec` → `HOJA QUIZ 2.0`, 통계 DOM 없음 |
+| R7 자정 seal | **NOT RUN** | 시험 시각이 11/23 오전 → 확정할 지난 날짜 없음 |
+| R10 정리 | 완료 | 공개 시험 배포 삭제(해당 URL "페이지를 찾을 수 없음" 확인). 시험 프로젝트·쓰기 사본은 증거로 보존(시험 이벤트 11건 포함) |
+
+### R6 FAIL 분석 — **운영 전환 STOP/HOLD 사유**
+- 게임 클라이언트는 기록 실패 시 재시도하지 않으므로(`withFailureHandler(()=>{})`), 교실 동시 시작(20~40명)에서 **시작 기록이 유실**된다. 지시서 STOP 조건("재전송 데이터 유실")에 해당.
+- `SHEETS_HTTP_429`: `recordUsageStartU1`이 매 호출마다 `hojaPublicSheets_()`로 Sheets API를 2회 호출(카탈로그 검증). **기존 운영 후보 코드와 동일한 경로**이며 V4가 추가한 것은 아님.
+- `USAGE_APPEND_LOCK_TIMEOUT`: 기존 `tryLock(10000)` + **V4가 락 안에 추가한 작업**(manifest 읽기, 최근창 TextFinder, flush 후 재읽기, 속성 쓰기)으로 락 보유 시간 증가. 기존 경로(V4 없음)와의 동시 부하 비교는 **NOT RUN**이므로 V4 기여분은 미정량.
+- 불변식은 유지됨: 거부된 요청은 행을 남기지 않았고 watermark=행수, 공개 통계는 commit된 값만 단조 표시.
+- 개선 후보(미구현, 결정 필요): ① 카탈로그 검증 결과 CacheService 단기 캐시(429 제거) ② 봉인 상태(마지막 COMPLETE·prefix)를 seal 시 캐시해 락 안 manifest 읽기 제거 ③ `waitLock` 상향(예 25s) ④ eventId 멱등이 보장되므로 **클라이언트 동일 eventId 재시도**(Game.html 수정 필요) ⑤ 수정 후 R6 재실행.
+
+### 추가 발견 — 카트리지 이름 공개 규칙이 과도
+실 버킷 251개 조합 중 **112개(플레이 4,700회, 약 27%)**가 이름 형식 규칙에 걸려 `기타 공개 카트리지`로 가려짐(5회 미만 소수 조합은 별도 93개). 실제 이름 형식을 확인해 규칙을 완화할지 교사/감수자 결정 필요(개인정보 위험 판단 포함).
