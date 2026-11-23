@@ -3,7 +3,7 @@
 Uses QA-injected synthetic balloons, not naturally piloted player collision.
 No GAS, live ranking, or production writes.
 """
-import argparse,asyncio,shutil
+import argparse,asyncio,json,shutil
 from pathlib import Path
 from playwright.async_api import async_playwright,TimeoutError as PWTimeout
 from verify_trial_chromium import social6_sources
@@ -17,12 +17,13 @@ async def run():
  p.add_argument('--rounds',type=int,choices=[2,25],default=2)
  p.add_argument('--collision-first',action='store_true')
  p.add_argument('--finish-check',action='store_true')
+ p.add_argument('--sources',type=Path,help='JSON [{sheetName,data}] from hojaGetApprovedQuestions (F3-2)')
  p.add_argument('--keyboard-smoke',action='store_true')
  p.add_argument('--control-smoke',action='store_true')
  p.add_argument('--movement-smoke',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
- sources=social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
+ sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
  original=args.html.read_text()
  async with async_playwright() as pw:
   chrome=shutil.which('chromium') or shutil.which('google-chrome-stable')
@@ -549,19 +550,25 @@ async def run():
     assert proof and proof['found']==1,proof
     print('ARCADE_WORLD_BALLOON_COLLISION_HANDLER_PASS',proof,flush=True)
    # Match the ACTIVE canonical question, not stale buttons from the last iframe show().
-   family=await page.evaluate("""()=>{
+   family,htype=await page.evaluate("""()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow;
-    return w.__QA_RUN__().step09History.at(-1).key.split('\\u0000').at(-1);
+    const h=w.__QA_RUN__().step09History.at(-1);
+    return [h.key.split('\\u0000').at(-1),h.type];
    }""")
-   row=next(r for e in sources for r in e['data']['questions'] if r['familyId']==family)
+   # F3-2: a family can hold an MC and an OX variant (approved groupId); match the recorded type too
+   want={'MC':'MULTIPLE','OX':'OX'}.get(htype,htype)
+   row=next(r for e in sources for r in e['data']['questions'] if r['familyId']==family and r['type']==want)
    canonical=row['rendererQuestion']
-   await page.wait_for_function("""(prompt)=>{
+   # F3-2: identify the shown question by the renderer's own current() id (display profiles such
+   # as the approved math notation legitimately change the visible text of [[frac:a/b]] prompts).
+   await page.wait_for_function("""(qid)=>{
      const f=document.getElementById('hojaArcadeApprovedParentFrame');
-     return f?.style.visibility==='visible' &&
-       f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===prompt &&
+     let cur=null;try{cur=f?.contentWindow?.current?.()?.id}catch(e){}
+     return f?.style.visibility==='visible' && cur===qid &&
+       (f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()||'').length>0 &&
        f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=2 &&
        document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
-   }""",arg=canonical['prompt'],timeout=30000)
+   }""",arg=canonical['id'],timeout=30000)
    answer=canonical['answer']
    correct_id=str(answer['value']).lower() if row['type']=='OX' else answer['choiceId']
    choices=await page.evaluate("""()=>{
@@ -642,15 +649,16 @@ async def run():
     assert len(before_review['wrong'])==12,before_review
     for n,key in enumerate(before_review['wrong']):
       family=key.split(chr(0))[-1]
-      expected=next(r['rendererQuestion']['prompt'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
+      expected=next(r['rendererQuestion']['id'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
       await page.wait_for_function("""(x)=>{
         const f=document.getElementById('hojaArcadeApprovedParentFrame'),s=window.HOJA_ARCADE_APPROVED_TRIAL?.state;
         const bar=document.getElementById('hojaArcadeReviewBar');
         return s?.reviewIndex===x.index && s?.reviewCount===12 &&
           f?.style.visibility==='visible' &&
           !!bar && f.getBoundingClientRect().top>=bar.getBoundingClientRect().bottom-1 &&
-          f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()===x.prompt;
-      }""",arg={'index':n,'prompt':expected},timeout=20000)
+          (()=>{try{return f.contentWindow.current().id===x.qid}catch(e){return false}})() &&
+          (f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()||'').length>0;
+      }""",arg={'index':n,'qid':expected},timeout=20000)
       label=await page.locator('#hojaArcadeReviewLabel').inner_text()
       assert ('오답 복습 '+str(n+1)+'/12') in label and '정답:' in label,label
       await page.locator('#hojaArcadeReviewNext').click(timeout=15000)

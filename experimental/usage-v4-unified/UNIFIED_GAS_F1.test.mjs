@@ -206,6 +206,8 @@ test('F1 release build: RELEASE catalog with 0 entries, no content; QA build is 
     assert.equal(r.variant, 'release'); assert.equal(r.contentFiles, 0);
     assert.ok(!readdirSync(join(out, 'rel')).some(f => f.startsWith('HOJA_QB_CONTENT_')));
     assert.throws(() => execFileSync('python3', [DIR + '/build_unified_gas.py', '--output', join(out, 'x'), '--qa-dir', out], {stdio: 'pipe'}));
+    assert.throws(() => execFileSync('python3', [DIR + '/build_unified_gas.py', '--output', join(out, 'y'), '--trial-game', DIR + '/gas/Code.gs'], {stdio: 'pipe'}),
+      /TRIAL_GAME_ONLY_WITH_QA_VARIANT/, 'the approved-renderer trial game never enters a release build');
     const dep = JSON.parse(readFileSync(DIR + '/approved-catalog/deployment/active-deployment.json', 'utf8'));
     assert.equal(dep.entries.length, 0, 'teacher deployment approvals stay 0');
   } finally { rmSync(out, {recursive: true, force: true}); }
@@ -289,9 +291,10 @@ test('F2 math extension: generated from the approved math HTML, profile-gated, n
 
 test('F3 QA route: in the isolated QA build the game LIST/GET RPCs serve the SAME approved catalog; release never reroutes', () => {
   const w = qaWorld();
-  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: 'zz5-s1-u1 승인 제목', cartridgeId: 'zz5-s1-u1'}, {name: 'zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}]);
-  const got = w.rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']);
+  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: '5-1학기-사회-zz5-s1-u1 승인 제목', cartridgeId: 'zz5-s1-u1'}, {name: '5-1학기-사회-zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}]);
+  const got = w.rpc('hojaGetPublicQuestions', ['5-1학기-사회-zz5-s1-u2 승인 제목']);
   assert.equal(got[0].data.cartridgeId, 'zz5-s1-u2');
+  assert.equal(got[0].sheetName, '5-1학기-사회-zz5-s1-u2 승인 제목', 'game GET contract: sheetName echoes the requested name');
   assert.throws(() => w.rpc('hojaGetPublicQuestions', ['없는 제목']), /PROJECT_B_CARTRIDGE_NOT_PUBLIC/);
   // release catalog (0 active): legacy Sheets path untouched (mock legacy catalog answers)
   const {ss} = buildCopy({history: standardHistory()});
@@ -310,7 +313,7 @@ function releaseActiveWorld({era = '2026-11-23'} = {}) {
   const {index, report, packages} = build(fs);
   const e = index.entries.find(x => x.cartridgeId === 'zz5-s1-u2'), r = report.entries.find(x => x.cartridgeId === 'zz5-s1-u2');
   const cat = {schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'RELEASE', sourceRepo: 'fixture', sourceCommit: COMMIT,
-    deploymentId: 'synthetic-test-only', entries: [{cartridgeId: e.cartridgeId, title: e.approvedTitle, grade: e.grade, subjectLabel: e.subjectLabel,
+    deploymentId: 'synthetic-test-only', entries: [{cartridgeId: e.cartridgeId, title: e.approvedTitle, grade: e.grade, semester: e.semester, subject: e.subject, subjectLabel: e.subjectLabel,
       publisher: null, questionCount: e.questionCount, effectiveSha256: e.effectiveSha256, packageSha256: r.packageSha256, deploymentStatus: 'DEPLOYED'}]};
   const {ss} = buildCopy({history: standardHistory()});
   const p = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]),
@@ -321,13 +324,13 @@ function releaseActiveWorld({era = '2026-11-23'} = {}) {
 }
 test('F3-2 RELEASE with active approved entries: the game LIST/GET serve that catalog (era started), fail closed before it', () => {
   const w = releaseActiveWorld();
-  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: 'zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}], 'only the deployed unit, no legacy sheets');
-  const got = w.rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']);
+  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: '5-1학기-사회-zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}], 'only the deployed unit, no legacy sheets');
+  const got = w.rpc('hojaGetPublicQuestions', ['5-1학기-사회-zz5-s1-u2 승인 제목']);
   assert.equal(got[0].data.cartridgeId, 'zz5-s1-u2');
-  assert.throws(() => w.rpc('hojaGetPublicQuestions', ['zz5-s1-u1 승인 제목']), /PROJECT_B_CARTRIDGE_NOT_PUBLIC/, 'approved but not deployed');
+  assert.throws(() => w.rpc('hojaGetPublicQuestions', ['5-1학기-사회-zz5-s1-u1 승인 제목']), /PROJECT_B_CARTRIDGE_NOT_PUBLIC/, 'approved but not deployed');
   // same catalog validates the usage record (A1)
   assert.equal(w.rpc('recordUsageStartU1', {eventId: id(7001), mode: 'SOLO', repositoryKind: 'PUBLIC', cartridgeIds: ['zz5-s1-u2'], cartridgeCount: 1, teamCount: 1}).usageSchemaVersion, 'A1');
   const before = releaseActiveWorld({era: ''});
   assert.throws(() => before.rpc('hojaListPublicCartridges'), /APPROVED_ACTIVE_BEFORE_ERA_START/);
-  assert.throws(() => releaseActiveWorld({era: '2026-12-01'}).rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']), /APPROVED_ACTIVE_BEFORE_ERA_START/);
+  assert.throws(() => releaseActiveWorld({era: '2026-12-01'}).rpc('hojaGetPublicQuestions', ['5-1학기-사회-zz5-s1-u2 승인 제목']), /APPROVED_ACTIVE_BEFORE_ERA_START/);
 });

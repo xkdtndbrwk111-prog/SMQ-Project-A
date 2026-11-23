@@ -133,7 +133,7 @@ function hojaPublicSheets_() {
 
 function hojaListPublicCartridges() {
   const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
-  if(qa)return qa.entries.map(e=>({name:e.title,cartridgeId:e.cartridgeId}));
+  if(qa)return qa.entries.map(e=>({name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId}));
   const sheets=hojaPublicSheets_().sheets;
   hojaUsageCatalogPut_(sheets); // warms the telemetry cache: the game lists before it starts
   return sheets.map(p=>({name:p.title,cartridgeId:p.sheetId}));
@@ -201,12 +201,24 @@ function hojaApprovedGameCatalog_(){
     throw new Error('APPROVED_ACTIVE_BEFORE_ERA_START');
   return c;
 }
+/* The game's catalog screen groups entries by parsing "grade-[N학기-]subject-[publisher-]label".
+ * Approved entries are named in that convention from APPROVED metadata only, so they group by
+ * grade/subject(/publisher) and the shown label is the approved title. GET maps the same name back. */
+function hojaApprovedGameName_(e){
+  const clean=v=>String(v==null?'':v).replace(/[-_–—|/·\s]+/g,' ').trim();
+  const parts=[String(e.grade)];
+  if(e.semester===1||e.semester===2)parts.push(e.semester+'학기');
+  parts.push(clean(e.subjectLabel)||'기타');
+  if(e.subject==='english')parts.push(clean(e.publisher)+(e.author?'('+clean(e.author)+')':'')||'출판사 미구분');
+  parts.push(String(e.title));
+  return parts.join('-');
+}
 function hojaApprovedIdsByTitle_(cat,names){
   if(!Array.isArray(names)||!names.length||names.length>5||
      names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>200)||
      new Set(names.map(n=>n.trim())).size!==names.length)throw new Error('PROJECT_B_SELECTION_INVALID');
   return names.map(n=>{
-    const hits=cat.entries.filter(e=>e.title===n.trim());
+    const hits=cat.entries.filter(e=>hojaApprovedGameName_(e)===n.trim());
     if(hits.length!==1)throw new Error('PROJECT_B_CARTRIDGE_NOT_PUBLIC');
     return hits[0].cartridgeId;
   });
@@ -294,7 +306,8 @@ function hojaReadCartridge_(sheet) {
 
 function hojaGetPublicQuestions(names) {
   const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
-  if(qa)return hojaGetApprovedQuestions(hojaApprovedIdsByTitle_(qa,names));
+  // the game requires sheetName === the requested catalog name (GET contract)
+  if(qa)return hojaGetApprovedQuestions(hojaApprovedIdsByTitle_(qa,names)).map((r,i)=>({sheetName:names[i].trim(),data:r.data}));
   if(!Array.isArray(names)||!names.length||names.length>5||
      names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>180)||
      new Set(names.map(n=>n.trim())).size!==names.length)

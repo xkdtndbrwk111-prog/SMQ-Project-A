@@ -50,6 +50,7 @@ def patch_telemetry(content):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--output', required=True)
     ap.add_argument('--variant', choices=['release', 'qa'], default='release'); ap.add_argument('--qa-dir')
+    ap.add_argument('--trial-game', help='QA only: trial Game.html built by game-trial/build_trial.py --renderer <composed> (approved renderer in the game)')
     ap.add_argument('--release-content-dir', help='F3-2: HOJA_QB_CONTENT_*.gs for EXACTLY the release-active ids (required when active > 0)')
     a = ap.parse_args()
     out = Path(a.output).resolve()
@@ -93,6 +94,11 @@ def main():
         elif a.release_content_dir:
             raise SystemExit('RELEASE_HAS_NO_ACTIVE_ENTRIES')
     content, sha = game_bytes()
+    if a.trial_game:
+        if a.variant != 'qa': raise SystemExit('TRIAL_GAME_ONLY_WITH_QA_VARIANT')
+        content = Path(a.trial_game).read_bytes()
+        if b'HOJA_TRIAL_APPROVED_HTML' not in content: raise SystemExit('NOT_A_TRIAL_GAME')
+        sha = hashlib.sha256(content).hexdigest()
     patched, old_block, new_block = patch_telemetry(content)
     (out / 'Game.html').write_bytes(patched)
     if b'getPublicUsageStatisticsV4' in patched:
