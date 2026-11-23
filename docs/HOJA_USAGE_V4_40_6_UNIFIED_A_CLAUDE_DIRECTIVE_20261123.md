@@ -1,70 +1,51 @@
-# Claude Code 정본 지시서 — HOJA V4 공개 통계, Project A 단일 Apps Script
+# Claude Code 실행 지시서 — HOJA V4 공개 통계 / 40-6-U 정본 rev.2
+작성일: 2026-11-23 KST. **이 문서가 과거 Project A/B 분리·관리자 인증·기존 교실매니저 연동 지시보다 우선한다.**
+현재 상태: 정책 확정, 단일 GAS 실제 구현 및 실기 시험 NOT RUN, 운영 배포 HOLD.
 
-최신 사용자 결정: 2026-11-23 (KST).
-이 문서는 과거 Project A/B 분리 설계, 기존 교실매니저 의존 및 관리자 인증 지시보다 우선한다.
-현재 상태: 코드·실환경 시험 NOT RUN / 운영 배포 및 원본 삭제 HOLD.
+## 0. 사용자 최종 확정 정책
+1. **Project A 한 개의 Google Apps Script** 안에 HOJA 게임의 이용 기록 Writer, V4 일별 집계, 검증된 과거 요약 + 오늘 원본 꼬리 조회, **공개 통계 페이지**를 통합한다. Project B 별도 Apps Script는 구현·배포하지 않는다.
+2. **기존 교실매니저는 폐기 예정**이다. 기존 Manager 화면, RPC, Project B의 OWNER/GOOGLE CREATOR 권한 검사에 의존하지 않는다. '폐기'는 기존 앱/데이터를 지금 삭제하라는 명령이 아니다.
+3. **통계 조회는 누구든 비로그인·익명 열람**한다. 조회 경로에 관리자 토큰·교사 로그인·OWNER/CREATOR 인증을 추가하지 않는다.
+4. **공개는 비식별 집계 읽기만**이다. 개별 이벤트, 원본 시트, 식별 가능한 이름/학교/기기/토큰, 집계 수정/재생성·백업/삭제·관리 기능은 공개하지 않는다. 공개 게임 기록 API는 기존 기능을 보존하되 엄격하게 검증한다.
+5. 운영 Project A GAS/원본 EVENT_LOG/랭킹/현재 앱 배포/실제 교실매니저 제거/원본 보관·삭제 트리거는 **별도 교사 승인 전 절대 변경 금지**.
 
-## 0. 최종 정책
+## 1. 필수 확인 및 작업 격리
+- GitHub: `xkdtndbrwk111-prog/SMQ-Project-A`; 기준 브랜치 `work/unified-quiz-renderer-20261122`; 최신 HEAD에서 40-6-U **별도 개발 브랜치** 생성. 기존 분기/PR 있다면 먼저 diff 확인.
+- 반드시 먼저 읽어라: `docs/HOJA_GAME_DEV_CHECKLIST_20261122.md`의 40-1~40-6G, `docs/HOJA_USAGE_V4_REBUILD_PLAN_20261123.md`, `docs/HOJA_USAGE_V4_REAL_COPY_BACKFILL_20261123.md`, `Code.gs`, `UsageRollupU3S.gs`, `experimental/usage-retention/` 아래 V4 소스/시험.
+- 과거 A/B runbook 및 B shadow reader는 과거 실험 기록만 참고. 신규 A에 `getUsageStatisticsU2()`, `requireUsageStatisticsAccessU3_()`, 구형 Manager UI를 이식하지 않는다.
+- 기존 2026-09-23~11-22 **61일 COMPLETE** 복사본: 원본 17,672행, 유효 시작 17,670회, 중복 재전송 2건, 실제 0회 4일, V4 버킷 3,969행, 마지막 확정 원본 위치 17,673. 이는 과거 복사본 스냅샷이지 현재 운영 통계가 아니다.
+- 이 인증 사본에는 더 쓰지 않는다. 이를 다시 복제한 **40-6 전용 쓰기 시험 사본**의 canary, 일별 COMPLETE/SHA-256, watermark를 재검증한 후 그 사본에만 테스트 이벤트 기록. 운영 ID/학생/학교 정보·토큰을 GitHub/로그에 유출하지 않는다.
 
-1. Project A **한 Apps Script 프로젝트**에 게임 이용 기록 저장, V4 일일 요약, 오늘 잠정 통계, 공개 통계 조회 API 및 UI를 통합한다. Project B 별도 GAS는 만들지 않는다.
-2. 기존 교실매니저는 폐기 예정이므로 신규 V4에 연동하거나 기존 화면·권한 시스템을 이식하지 않는다. 단 기존 앱 실제 삭제나 데이터 파기는 승인받지 않았다.
-3. 통계는 **로그인이나 교사/OWNER/CREATOR 인증 없이 누구나 볼 수 있는 공개 서비스**다. 공개 집계 조회 API에 관리자 토큰을 요구하지 마라.
-4. 통계 **열람**만 공개한다. 누구나 원본 데이터를 조회하거나, 집계·원본 데이터를 편집/재생성/삭제하거나, 비밀값을 가져갈 수 있어서는 안 된다. 기존 게임 시작 기록 입력은 별도 제한과 검증이 필요하다.
-5. 기존 Project B UsageU2 통계는 기간·집계 의미 비교용으로만 참고하며, requireUsageStatisticsAccessU3_ 및 기존 관리자 UI는 신규 시스템의 의존성이 아니다.
+## 2. 단일 GAS 기능 계약
+**Writer:** 기존 `recordUsageStartU1(payload)` 및 15열 EVENT_LOG, 게임 시작·랭킹 계약을 보존한다. PUBLIC만 유효한 기록이며 mode/team/cartridgeId/eventId/크기를 서버 검증한다. 같은 ID+동일 게임 내용 재전송 신규 행 0, 같은 ID+다른 내용은 거부, 전일 재전송·날짜 역행/과다 호출을 보호한다. 현재 `TextFinder` 원본 전기간 스캔은 시험용으로만 인정하며 운영용 고효율 멱등 색인·충돌 검사·복구 설계를 제출한다.
 
-## 1. 작업 시작점과 격리
+**Daily:** 기존 V4 CORE를 재사용해 일별 원본 SHA-256, 버킷 SHA-256, 0회 날짜 인증, COMPLETE 연속성, 중복 억제/재실행 멱등을 유지한다. 검증되지 않은 날짜를 0회 COMPLETE로 만들지 말 것. 자동 원본 삭제/보관 트리거를 설치하지 않는다.
 
-- 저장소 xkdtndbrwk111-prog/SMQ-Project-A, 기준 브랜치 work/unified-quiz-renderer-20261122.
-- 40-6-U용 별도 개발 브랜치에서 소단위 코드·테스트·작업 로그 커밋. 다른 개발 브랜치가 있다면 diff 먼저 조사.
-- 읽기 순서: docs/HOJA_GAME_DEV_CHECKLIST_20261122.md 40-1~40-6F, docs/HOJA_USAGE_V4_REBUILD_PLAN_20261123.md, docs/HOJA_USAGE_V4_REAL_COPY_BACKFILL_20261123.md, Code.gs와 experimental/usage-retention 폴더.
-- 과거 검증 사본은 2026-09-23~11-22의 61일 COMPLETE, 원본 17,672행, 중복 재전송 2건 제거 후 17,670회, 0회 날짜 4일, 버킷 3,969행, 확정 원본 마지막 위치 17,673. 현재 운영 실시간 숫자 아님.
-- 해당 검증된 복사본에 새 기록을 쓰지 않는다. 다시 한 번 복제한 40-6 쓰기 전용 사본에서 시험하고 canary, SHA, 원본 watermark를 비교한다.
-- main, versions/2.0.0, 운영 GAS, 원본 EVENT_LOG, 랭킹, 실제 교실매니저 배포/삭제, 보관·삭제 트리거 등은 모두 변경 금지.
+**PublicReader:** Project A 내부 `getPublicUsageStatisticsV4()` 등 고정 응답의 **읽기 전용 공개 RPC**를 만든다. 누구나 `today,days7,days30,all,daily,mode,teamCount,grade,subject,publisher,topCartridges` 등 PUBLIC 집계만 조회. 과거 COMPLETE 요약 + 오늘 인증된 꼬리만 읽으며 통계 화면 호출 때마다 EVENT_LOG 전체를 읽지 않는다. 오늘은 `LIVE_PROVISIONAL`, 손상된 요약/누락 COMPLETE/비정렬·지연 이벤트/미완성 행/날짜 경계 오류는 fail-closed. 오류를 '0회'로 위장하지 말 것.
 
-## 2. 단일 GAS 시스템 구성
+**개인정보·공개 범위:** 원본 eventId/로그 행/개별 timestamp, 학교·학생·교사/기기·IP, 저장소 ID·Script Properties·토큰·관리 API·원본 다운로드를 공개하지 않는다. 카트리지명이나 소수 그룹 통계가 개인/학교를 드러낼 위험을 확인하고 문제가 있으면 공개 대상에서 해당 텍스트를 제외·범주화한다. 응답 필드는 서버 측 allowlist로 고정한다. 익명 사용자의 `google.script.run` 직접 RPC 호출을 공격 관점에서 검사해 쓰기/재집계/삭제를 실행하는 내부 함수나 임의 범위 조회를 노출하지 않는다. 기존 공개 시작 기록 RPC는 예외적으로 검증된 제한적 append만 수행한다.
 
-- Writer: 기존 recordUsageStartU1 공개 게임 시작 기록을 정상 검증하고 이벤트 ID 재전송 멱등, 상충 내용·날짜 역행 거부.
-- Daily: 날짜별 원본 SHA-256과 요약 버킷 SHA-256, 미기록 0일도 검증된 COMPLETE. 잠정 날짜 임의 COMPLETE 처리 금지.
-- PublicReader: 누구나 익명으로 조회할 수 있는 **읽기 전용 서버 API**. 과거 COMPLETE 요약 + 오늘 인증 가능한 꼬리만 조회하고 통계 호출마다 EVENT_LOG 전체 재조회 금지.
-- PublicDashboard: 누구나 접근하는 공개 통계 화면. 게임 첫 화면에서 자동 집계 호출하지 않고 명시적으로 통계 화면에서 lazy 조회.
-- Maintenance: 집계 강제 재작성, 원본 추출/다운로드, 설정/보관/삭제 기능은 공개 RPC로 노출하지 않는다. 이번 단계에서 운영 관리용 API를 만들 필요가 없다.
-- 동일 Project A 안에서 기록과 집계 읽기의 ScriptLock/commit-watermark를 설계한다. 다른 프로젝트의 ScriptLock 공유 가정은 필요하지 않으나 같은 프로젝트 내 레이스는 검증해야 한다.
+**같은 GAS 내부 동시성:** Writer·Reader·Daily의 동일 ScriptLock/원자적 commit watermark와 읽기 절단점을 설계. 앞뒤 `getLastRow()` 비교만으로 완전 원자성을 주장하지 말 것. 자정 KST 및 이전 날짜 미집계 상태에서 일관성이 유지되도록 한다. 공개 요청 남용을 막는 범위·빈도 상한과 캐시 설계(잠정값 갱신 지연 표시 포함) 검증.
 
-## 3. 공개 응답의 엄격한 정보 범위
+**PublicDashboard:** 같은 Project A `doGet`에서 게임과 공개 통계 화면을 구분한다. 기존 학생 QR/게임/랭킹/카트리지 접근과의 호환성 유지. 통계는 전용 페이지나 메뉴 진입 시에만 lazy RPC; 게임 홈·인트로 자동 호출 금지. 기간 카드, 일별 추이, SOLO/TEAM, 팀 인원 2~7, 학년·교과·출판사, TOP20을 PC/모바일에서 표현. 기존 교실매니저 UI를 복제하지 않는다.
 
-- 공개 허용: PUBLIC 전용 today/days7/days30/all, daily, SOLO/TEAM, TEAM 2~7, 학년·교과·출판사, 카트리지 이름 조합 TOP20 등 **집계된 비식별 정보만**.
-- 공개 금지: 개별 EVENT_LOG 행, eventId, 이용자·학생·교사 이름, 학교, IP, 기기 ID, 토큰, 원본 시트 ID, 내부 Script Properties, 개인정보 식별 가능 자유 문구, 원본 다운로드·원본 수정.
-- 카트리지 조합·제목이나 다른 자유 텍스트가 사용자/학교 식별 정보를 포함할 수 있는지 실제 데이터 샘플에서 점검하고, 위험하면 공개 집계에서 제거/그룹화.
-- 공개 UI에 버튼이 보이지 않아도 익명 사용자는 google.script.run을 통해 공개 가능한 서버 함수를 호출할 수 있다고 가정하라. 무인증 원본 읽기/수정이나 통계 재집계가 가능한 경로를 만들지 않는다.
-- 이미 공개 게임에서 호출되는 recordUsageStartU1 경로는 클라이언트 입력만 믿지 말고 실제 공개 카트리지/이벤트 ID/중복/과다 호출/저장 크기/일관성 보호책을 강화해야 한다.
-- 공개 조회는 조회 기간·분류가 고정되거나 범위가 제한되어야 하고, 대량 원본 스캔을 유발하는 매개변수나 무제한 요청을 허용하지 않는다. 필요시 캐시/속도 제한을 검증.
-- 오늘 집계는 LIVE_PROVISIONAL로 표시. 누락 0일, 손상 요약, 과거 지연 이벤트, 부분 저장 행은 임의로 0회 또는 COMPLETE로 꾸미지 않고 명시적으로 HOLD.
+## 3. Claude Code 실행 단계 및 검수 게이트
+- **U0 — 정책·시작점·설계:** 실제 공개 게임과 RPC 노출 경로, 공개 응답 allowlist, 민감값·소규모 셀 노출 방지, Writer/Reader 원자성, 기존 V4 코드 재사용, 별도 작업 브랜치/사본을 설계·기록한다.
+- **U1 — Project A 단일 GAS 시험 통합:** V4 Writer/Daily/PublicReader와 기존 게임 호출을 한 격리 GAS에 결합한다. Mock/CI + 격리 사본 SHA/수치·중복·충돌·watermark 테스트. 운영 원본과 기존 인증 사본은 쓰기 금지.
+- **U2 — 익명 공개 통계 UI:** 비로그인 새 브라우저에서 화면/읽기 성공. 익명 원본 행·토큰·비밀값 읽기/수정·재집계/삭제 불가. 게임 QR·랭킹·문항·시작 기록 기능 회귀시험.
+- **U3 — 실제 GAS·동시성·성능:** 0회 날짜, 해시 손상, 지연 날짜, 오늘 부분 행, 자정 경계, 동일 GAS 동시 append/read, 안전한 중단·복구, 캐시/요청 폭주를 격리 실행 환경에서 검증. 실제 GAS 엔진에 접근하지 못하면 `BLOCKED/NOT RUN`으로 명시.
+- **U4 — 독립 검수:** 단계마다 코드+시험+작업 로그를 커밋하고 PR 또는 diff, CI URL, 실 GAS 비식별 증거와 잔여 위험을 GPT-6에 제출한다. Claude의 자기 PASS는 최종 승인 아님.
 
-## 4. 구현 및 단계별 증빙
+## 4. PASS 기준
+- 이전 61일 인증 사본과 누적 **17,670**, 중복 억제 **2**, 검증 0회 날짜 **4**, 버킷 **3,969**, 각 날짜 SHA 및 COMPLETE 일치. U2의 원본 기준 17,672건과 차이 2건은 재전송 중복으로 별도 설명.
+- 집계 그룹/기간별 값의 실제 대조, 익명 집계 조회 PASS와 원본·관리 RPC DENIED, 동일 ID 중복/내용 충돌 신규 기록 0, 날짜/해시/부분 행 fail-closed, 동시 읽기 시 불완전 숫자 표시 0.
+- GitHub mock, Google Sheets connector 실제 복사본 검사, **실 Apps Script 엔진**, 익명 브라우저 e2e를 각각 분리 보고한다. 수행하지 않은 것은 절대 PASS 금지.
+- 운영 데이터·배포·트리거·원본 보관/삭제·교실매니저 실제 폐기는 **HOLD**.
 
-### U0 — 공개 통계 보안 및 데이터 계약
-- 공개 응답 allowlist, 익명 통계 조회 성공 경로, 원본/수정 기능 차단 경계를 문서로 규정.
-- 공개 read-only와 기존 게임 시작 이벤트 쓰기 함수를 구분하고, 익명 호출 시도/재전송/오남용 위협을 검토.
+## 5. GitHub 체크리스트 운영
+- Claude 작업 증거: `docs/HOJA_USAGE_V4_40_6_CLAUDE_WORKLOG_20261123.md`의 U0~U4. 과거 A/B 로그는 SUPERSEDED로 보존.
+- GPT-6 독립 검수: `docs/HOJA_GAME_DEV_CHECKLIST_20261122.md` 40-6G 이후. Claude는 중앙 검수 PASS를 임의로 기록하거나 운영 배포 승인하지 않는다.
+- 매 단계마다 수정 파일, 정확한 커밋 SHA/CI 링크, 시험 종류, 데이터 범위, 실제 실행 로그, PASS/FAIL/NOT RUN, 미해결 문제를 보고. 개인정보·시트 ID/비밀값은 제출 금지.
+- 운영/사본 식별 혼선, 익명 민감정보 노출, 무인증 원본 수정, 오류를 0으로 정상 표시, 재전송 데이터 유실, 증거 없는 실 GAS PASS 주장 → 즉시 STOP/HOLD.
 
-### U1 — Project A 단일 GAS Writer/Daily/PublicReader
-- 한 격리 GAS 시험 프로젝트에서 V4 CORE 재사용, 복사본 canary 검사, V4 SHA, 범위 연속성·commit watermark, 재전송·충돌 거부를 구현하고 mock CI 실행.
-- 단순 전체 eventId 검색 성능은 시험용에 한정하고 실제 운영 전 효율적인 index 필요.
-
-### U2 — 누구나 보는 공개 UI
-- 비로그인/익명 브라우저에서 통계 화면과 서버 읽기 API가 정상 동작하는지 확인.
-- 전체/일/7일/30일/모드/팀/학년/교과/출판사/조합 TOP20 그룹 합계를 검증.
-- 익명 상태에서 원본 행 다운로드·민감정보·쓰기/재집계/삭제가 불가능한지 공격 관점 테스트.
-- 구형 U2와 V4 비교에서는 기록 재전송 2건 제거에 따른 전체 합계 차이를 정상 원인으로 분리해 보고.
-
-### U3 — 경계/동시성/실기 시험
-- 사본 식별 실패, 부정확한 집계·SHA 손상·0일 누락, PRIVATE/미분류, 당일 부분 행, 전일 지연 기록, 자정, 동일 GAS 동시 append/read, 중단 복구, 과부하·캐시 등을 검증.
-- GitHub mock / Google Sheets connector / 실제 Apps Script 런타임 결과를 명확히 분리하고 미실행은 NOT RUN.
-
-### U4 — 기록·독립 감수
-- docs/HOJA_USAGE_V4_40_6_CLAUDE_WORKLOG_20261123.md에 단계별 커밋 SHA, CI 링크, 비식별 실 GAS 실행 증거, PASS/FAIL/HOLD/NOT RUN을 기록. 이전 A/B 작업표는 SUPERSEDED로 유지.
-- 중앙 docs/HOJA_GAME_DEV_CHECKLIST_20261122.md의 승인 판정은 GPT-6 감수자가 커밋하고 Claude는 자기 승인 금지.
-- 운영 배포/실제 원본 삭제/자동 보관 트리거/기존 앱 제거는 사용자 별도 승인 전까지 HOLD.
-
-## 5. 즉시 STOP/HOLD 조건
-
-운영과 시험용 스프레드시트 ID 혼동, 원본/이벤트 ID/식별 가능 텍스트 익명 노출, 통계 및 원본의 무인증 수정 가능, 검증 실패를 정상 통계로 표시, 증거 없는 실 GAS PASS 주장. 증거를 남기고 운영 데이터 변경 중단.
+**U0부터 착수하라. Project A 한 GAS/기존 교실매니저 의존 없음/익명 통계 열람이라는 확정 정책을 재질문하지 말고 구현을 진행하되, 운영 배포·원본 데이터 조작은 승인 없이 하지 마라.**

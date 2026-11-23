@@ -758,3 +758,11 @@
 - [ ] U1 단일 GAS 기록/집계/읽기, U2 익명 공개 대시보드, U3 데이터·성능·실 GAS: NOT RUN.
 - [ ] Claude 새 구현 증빙 검수 및 단계별 체크리스트 업데이트: PENDING.
 - [ ] 운영 GAS 배포, 실제 원본 수정·삭제·트리거, 기존 앱의 실제 폐기 작업 모두 HOLD.
+
+### 40-6G. Claude Code 지시서 rev.2 재작성 — Project A / 공개 V4 (2026-11-23)
+- [x] `docs/HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md` 전체 실행 지시서 rev.2로 재작성: Project A **단일 GAS**, 기존 교실매니저/Project B 의존 제거, **익명 누구나 비식별 집계 열람**, 원본·관리 기능 비공개.
+- [x] U0~U4 단계별 소스·검증·CI·실 GAS·익명 e2e PASS 구분, 원본 보존, 데이터 최소 공개·동일 GAS ScriptLock/commit watermark·자정·중복 보호·캐시·게임 회귀 기준 명시.
+- [x] 기존 40-6E 관리자 인증 지시 및 A/B GAS 구현 지시는 이전 의사결정 기록으로만 보존. 운영과 구형 검증 사본 무수정.
+- [ ] Claude U0 공개 API 경계 및 격리 복사본 설계: NOT RUN.
+- [ ] Claude U1 단일 GAS writer/daily/reader, U2 익명 통계 UI·보안, U3 동시성·GAS 실기, U4 GPT-6 독립 승인: NOT RUN.
+- [ ] 실제 운영 배포·원본 변경/삭제/트리거·교실매니저 실 제거: HOLD.
