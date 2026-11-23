@@ -6020,6 +6020,9 @@ class HojaScene extends Phaser.Scene{
   updatePlayerVisual(run,delta){
     const b=this.playerBody.body;
     const foot=b.bottom;
+    // This affects sprite playback only; the wind and player body retain their
+    // existing velocity and collision behavior.
+    this.hoja.anims.timeScale=1;
 
     this.hoja.setPosition(this.playerBody.x,foot).setFlipX(this.facing>0);
     // V0.57: respawn mercy blink (alpha only; texture/pixels untouched).
@@ -6082,7 +6085,9 @@ class HojaScene extends Phaser.Scene{
       }
       return;
     }
-    if(this.hojaBraking&&!pressingSide){
+    const inputDir=(this.keys.right.isDown?1:0)-(this.keys.left.isDown?1:0);
+    const againstWind=!!this.hojaHorizontalWind&&inputDir===-this.hojaHorizontalWind;
+    if(this.hojaBraking&&!pressingSide&&!againstWind){
       this.hojaStopSleep();
       if(this.visualState!=='BRAKE'){
         this.hoja.anims.stop();
@@ -6112,7 +6117,8 @@ class HojaScene extends Phaser.Scene{
       }
     }else this.hojaStopSleep();
     const happy=this.time.now<this.happyUntil;
-    const desired=hojaGroundAnimationForSpeed(speed,run,pressingSide,happy,P_CFG.walkTop);
+    const desired=againstWind?'hoja-walk':hojaGroundAnimationForSpeed(speed,run,pressingSide,happy,P_CFG.walkTop);
+    if(againstWind)this.hoja.anims.timeScale=.65;
     if(this.visualState!==desired||!this.hoja.anims.isPlaying){
       this.hoja.play(desired,true);
       this.visualState=desired;
