@@ -711,3 +711,9 @@
 - [ ] Project A/B 실제 GAS 시험 프로젝트 통합 및 OWNER/CREATOR/철회 권한, 기존 U2 전체 UI 패리티, 하루 경계 동시 읽기 시험은 NOT RUN.
 - [ ] 운영 사용 전 더 효율적인 전역 eventId 색인, Project A측 원자적 절단점, 일별 자동 COMPLETE 재검증, 백업/복구, 교사 승인 필요.
 - [ ] 운영 원본 17,672개 행, 기존 U2 RPC, Manager 화면, 랭킹, 원본 삭제, 보관 트리거, 운영 배포 전부 HOLD.
+
+
+### 40-6A. 격리 GAS 실기 시험 절차 문서 확정
+- [x] docs/HOJA_USAGE_V4_40_6_AB_GAS_TRIAL_RUNBOOK_20261123.md 추가. A/B 시험 프로젝트 각자의 Script Properties, 복사본 canary, 기존 U2 대조, 권한 취소, 중복 ID, 오류 시 중단, 실시간 동시성 시험과 NO DEPLOY 정책 정리.
+- [x] 기존 실제 복사본 canary와 V4 감사 인증서 시트 내용 조회 재확인. 오늘의 0건은 복사본 스냅샷일 뿐 실제 운영 통계가 아님.
+- [ ] 실제 Apps Script 실행기에서 문서대로 호출 및 동시성/인가 시험 미실시; 운영 전환 HOLD.
