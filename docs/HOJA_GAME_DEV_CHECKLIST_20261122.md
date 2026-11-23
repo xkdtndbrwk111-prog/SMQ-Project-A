@@ -841,3 +841,12 @@
 - [ ] **추가 실행 검증 대기:** 시험 도구 assert 추가; 실제 시작 버튼/화면 E2E, 페이지 종료·재접속·저장소 비활성·자정 만료, 다학급 80~120 동시 요청, 신규 승인 정본 콘텐츠 로드와 A1 시대 전환. **NOT RUN**.
 - [ ] **R7 자정 실 GAS seal**, 승인 정본 effective 렌더/미디어 권리(23/23 HOLD), 공개 RPC/운영 환경 노출 재검수, 실제 전자칠판 사용 및 게임 전수 회귀: **NOT RUN / HOLD**.
 - [ ] **독립 총판정:** R6b/R6c **범위 한정 PASS**, 운영 전체 U4 및 PR 병합·배포 **HOLD**. Project A 단일 GAS/익명 PUBLIC 집계 정책 유지. 운영 루트 Code.gs, main, versions/2.0.0, 운영 GAS/원본 EVENT_LOG/랭킹, 교실매니저 실제 삭제/자동 보관/트리거 변경 **금지**.
+
+
+### 40-6O. GPT-6 후속 보충 감수 — 신규 정본 ID telemetry와 통계 표시 경계 (2026-11-23)
+**증거 대상:** Claude Draft PR #6 HEAD `1e2e21d75ada7c8e1393ce8eef7b2ac7d6a120ef`, 이전 40-6N, [추가 독립 리뷰](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7091269492). 40-6N의 R6b 게임 페이지 텔레메트리 PASS 판정과 서버 단독 19/40·운영 HOLD 판단은 그대로 보존.
+- [x] **명확한 신규 정본 연동 버그 후보 — B 단계 미완료:** `experimental/usage-v4-unified/gas/UsageTelemetryClient.html`의 `HOJA_USAGE.track()`에서 `ids.some(x=>!/^[0-9]{1,11}$/.test(x))return` 사용. 현재 시험한 구형 Sheets 숫자 ID만 허용하므로, GitHub 정본 `eng5-ham-u10` 등 알파벳 포함 승인 ID를 게임에 탑재할 때 `track()`이 기록 없이 조용히 종료된다. **승인 활성 0개로 현재 실사용 사례 없음**; 승인 정본 렌더러/카탈로그 실제 연결 전에 분기 수정 + approved A1 실 GAS 회귀가 필수. 신규 승인 게임 사용량 PASS 판정 금지.
+- [x] **구형 기록 공개 UX 경계:** `gas/UsageV4Public.gs` public allowlist의 `era.legacy.all`, `gas/Stats.html`는 승인 시대 화면에서 구형 총이용 횟수를 '합산하지 않습니다' 문구와 함께 **별도로 표시**한다. 신규 총계에 혼입되지 않는 코드는 확인되지만 사용자 정책은 구형 카트리지 **사용 중단**이다. 앞으로의 공개 통계에서 구형 집계가 별도 표시되어야 하는지 미확정. 교사 확인 또는 승인 정본 통계에서 그 표시를 제거하는 안전한 제안 필요. 원본 구형 데이터 자체 삭제 금지.
+- [x] **시험 스크립트의 실제 범위:** `verify_real_gas_r6.py:103–120` 게임 페이지/구형 문항 RPC 후 기록함수 직접 호출 → 전체 게임 시작 버튼 UI E2E 아님. 40건 전송 결과는 Claude가 제출한 실 GAS 비식별 로그와 코드로 독립 검토했으며 감수자가 동일 시험을 수행하지 않음.
+- [ ] **재전송 날짜 경계 별도 시험:** 브라우저 화면에서 진행 중인 `deliver()` 반복 호출은 KST 날짜가 바뀔 때에도 초기 eventId를 계속 보내므로 서버 수신 날짜로 기록될 수 있다. `flush()`는 저장된 전날 기록을 제외하나 in-flight retry는 별도 제어 없음. '시작 날짜'와 '서버 기록 날짜'의 정의를 명시하고 R7과 함께 교차 자정 테스트 필요.
+- [ ] **최종:** 승인 정본 실제 게임 로더/기록/공개 통계, 80건 이상·탭 종료·R7 실기 및 보안 전체 검증 **NOT RUN/HOLD**. R6 실 GAS 제한적 PASS와 운영 PR Draft/HOLD 유지. **운영/원본 데이터·Code.gs·versions/2.0.0/트리거/삭제 등 수정 없음.**
