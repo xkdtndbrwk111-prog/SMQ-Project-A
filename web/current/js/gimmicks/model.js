@@ -2,7 +2,7 @@
 // Shared, deterministic gimmick model. Coordinates, distances and sizes are
 // world pixels; time is elapsed simulation milliseconds. No Phaser or RNG.
 window.HOJA_GIMMICK_MODEL=(()=>{
- const types=Object.freeze(['saw','pendulum','fan','flame']);
+ const types=Object.freeze(['saw','pendulum','fan','flame','stepping_blocks']);
  function number(v,name,min,max,def){if(v===undefined)v=def;if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max)throw Error(`기믹 ${name} 범위 오류`);return v;}
  function one(v,name,options,def){if(v===undefined)v=def;if(!options.includes(v))throw Error(`기믹 ${name} 값 오류`);return v;}
  function normalize(raw){
@@ -12,6 +12,7 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='pendulum'){c.length=number(raw.length,'줄 길이',16,512,96);c.amplitude=number(raw.amplitude,'진폭',0,85,45);c.speed=number(raw.speed,'진동 속도',0.1,12,2);c.radius=number(raw.radius,'반지름',4,128,16);c.phase=number(raw.phase,'시작 위상',0,6.283185307179586,0);}
   if(c.kind==='fan'){c.direction=one(raw.direction,'바람 방향',['left','right','up','down'],'right');c.power=number(raw.power,'바람 세기',0,2000,300);c.period=number(raw.period,'작동 주기',100,60000,4000);c.on=number(raw.on,'작동 시간',0,c.period,c.period);c.phase=number(raw.phase,'시작 위상',0,c.period,0);}
   if(c.kind==='flame'){c.wait=number(raw.wait,'대기 시간',0,60000,1800);c.warn=number(raw.warn,'예고 시간',1,60000,600);c.active=number(raw.active,'분출 시간',1,60000,1200);c.cool=number(raw.cool,'종료 시간',1,60000,400);c.phase=number(raw.phase,'시작 위상',0,c.wait+c.warn+c.active+c.cool,0);}
+  if(c.kind==='stepping_blocks'){c.direction=one(raw.direction,'이동 방향',['left','right'],'right');c.interval=number(raw.interval,'블록 이동 간격',200,5000,800);c.steps=number(raw.steps,'순찰 칸 수',1,60,15);if(!Number.isInteger(c.steps))throw Error('기믹 순찰 칸 수 오류');}
   return Object.freeze(c);
  }
  function state(c,elapsed){
@@ -19,6 +20,7 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='saw'){const p=c.distance?((t*c.speed/1000/c.distance)%2):0,offset=c.distance*(p<=1?p:2-p);return {kind:c.kind,x:c.x+c.w/2+(c.axis==='x'?offset:0),y:c.y+c.h/2+(c.axis==='y'?offset:0),radius:c.radius,angle:(t*c.speed/350)%360};}
   if(c.kind==='pendulum'){const a=Math.sin(t*c.speed/1000+c.phase)*c.amplitude*Math.PI/180;return {kind:c.kind,anchorX:c.x+c.w/2,anchorY:c.y,x:c.x+c.w/2+Math.sin(a)*c.length,y:c.y+Math.cos(a)*c.length,radius:c.radius,angle:a};}
   if(c.kind==='fan')return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,direction:c.direction,power:c.power,active:(t+c.phase)%c.period<c.on};
+  if(c.kind==='stepping_blocks'){const step=Math.floor(t/c.interval)%(2*c.steps),offset=step<=c.steps?step:2*c.steps-step,sign=c.direction==='right'?1:-1;return {kind:c.kind,offset,x:c.x,y:c.y,blocks:Array.from({length:5},(_,i)=>({id:i,x:c.x+sign*(offset+((i-offset)%5+5)%5)*32,y:c.y}))};}
   const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,phase,active:phase==='active'};
  }
  function rectHit(b,r){return b.right>r.x&&b.left<r.x+r.w&&b.bottom>r.y&&b.top<r.y+r.h;}

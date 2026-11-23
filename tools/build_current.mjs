@@ -53,7 +53,8 @@ if(test){
  reviewFiles['js/teacher-review-gameplay.js']=gp.replace(needle,"f.src='teacher-review-arcade.html?season='");
  const course=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/gimmick-course.json'),'utf8'));
  const windCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/wind-course.json'),'utf8'));
- reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse);
+ const steppingCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/stepping-course.json'),'utf8'));
+ reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse);
  arcade=instrumentArcade(arcade);
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }
