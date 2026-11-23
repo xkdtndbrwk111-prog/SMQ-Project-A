@@ -17,15 +17,15 @@ const sha = b => createHash('sha256').update(b).digest('hex');
 export function composeRenderer() {
   const bridge = readFileSync(join(here, 'HOJA_APPROVED_RENDERER_BRIDGE.html'), 'utf8');
   if (sha(bridge) !== BRIDGE_SHA256) throw new Error('BRIDGE_SHA_CHANGED');
-  const ext = readFileSync(join(here, 'HOJA_RENDERER_MEDIA_EXT.js'), 'utf8');
-  if (ext.includes('</script')) throw new Error('EXT_UNSAFE');
+  const exts = [['hoja-ext-media-v1', 'HOJA_RENDERER_MEDIA_EXT.js'], ['hoja-ext-math-v1', 'HOJA_RENDERER_MATH_EXT.js']]
+    .map(([id, f]) => [id, readFileSync(join(here, f), 'utf8')]);
   const at = bridge.lastIndexOf('</body>');
-  if (at < 0 || bridge.indexOf('hoja-ext-media-v1') >= 0) throw new Error('BRIDGE_SHAPE');
-  const html = bridge.slice(0, at) + '<script id="hoja-ext-media-v1">\n' + ext + '</script>\n' + bridge.slice(at);
-  return {html, bridgeSha256: BRIDGE_SHA256, extSha256: sha(ext), composedSha256: sha(html)};
+  if (at < 0 || exts.some(([id, t]) => t.includes('</script') || bridge.includes(id))) throw new Error('BRIDGE_SHAPE_OR_EXT_UNSAFE');
+  const html = bridge.slice(0, at) + exts.map(([id, t]) => '<script id="' + id + '">\n' + t + '</script>\n').join('') + bridge.slice(at);
+  return {html, bridgeSha256: BRIDGE_SHA256, extSha256: sha(exts[0][1]), mathExtSha256: sha(exts[1][1]), composedSha256: sha(html)};
 }
 if (process.argv[1] && process.argv[1].endsWith('compose_renderer.mjs')) {
   const r = composeRenderer();
   writeFileSync(process.argv[2], r.html);
-  console.log(JSON.stringify({bridgeSha256: r.bridgeSha256, extSha256: r.extSha256, composedSha256: r.composedSha256}));
+  console.log(JSON.stringify({bridgeSha256: r.bridgeSha256, extSha256: r.extSha256, mathExtSha256: r.mathExtSha256, composedSha256: r.composedSha256}));
 }

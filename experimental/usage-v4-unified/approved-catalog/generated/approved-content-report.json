@@ -33,6 +33,7 @@
     "C": 5
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -68,6 +69,7 @@
     "C": 8
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -103,6 +105,7 @@
     "C": 5
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -153,6 +156,7 @@
     "D": 1
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -192,6 +196,7 @@
     "C": 28
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -231,6 +236,7 @@
     "C": 27
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -266,6 +272,7 @@
     "C": 5
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -301,6 +308,7 @@
     "C": 6
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -336,6 +344,7 @@
     "C": 4
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
@@ -375,6 +384,7 @@
     "C": 28
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -414,6 +424,7 @@
     "C": 28
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -453,6 +464,7 @@
     "C": 27
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -496,14 +508,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 7,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 125709,
-   "packageSha256": "e1522c19de98d02ccd8f181ed3f39b2f1be60b08b4d2e6875a904d72a2e8753a",
+   "packageBytes": 128127,
+   "packageSha256": "2c6f99217ba352458638ebea1b2b2b2d5354f38704ee5cefdadd357fa7f4cea5",
    "effectiveSha256": "c30d44e8dcbf0ab4a830762fa0d32609178dd76300ac1dae3e63bd2f8487855d"
   },
   {
@@ -539,14 +552,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 16,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 156200,
-   "packageSha256": "5aeacb3006cd9a25b0996682c1195b82ab6efdb905480f5566745c0c47d4f435",
+   "packageBytes": 158774,
+   "packageSha256": "31dfba3027efbe589f59d74392fbf72c16f2459561781a6f3edd38c0eca967b0",
    "effectiveSha256": "ef2872c9c4414f24297de3e24ed01c47b0d6d44a552c40b48632153cf5b01df0"
   },
   {
@@ -582,14 +596,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 11,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 192994,
-   "packageSha256": "fd7bea764d5b222de0577f33f00b014e00700f9db1c581c1c7e1704b29a6933e",
+   "packageBytes": 195334,
+   "packageSha256": "4316c12b3c5c949673c98674aa5e328933c3d92a40ba0a2d0735a221c5d97a8d",
    "effectiveSha256": "1810a55da396b832c7e11c5f357fcbe3a4bd67e06119d355562510c2dff6e878"
   },
   {
@@ -625,14 +640,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 7,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 132455,
-   "packageSha256": "3b13a2cc9c68787202bafb1b6c3e8e030be844a94d91e76d54964b471a523086",
+   "packageBytes": 134951,
+   "packageSha256": "867e0813da9d45a07c7b95026241f582add3e90ace98135317783253053039fb",
    "effectiveSha256": "0bd25c188f9c1c411ba72b2087115ab65ded5223ec0ce5cbf75e46a54b8f008e"
   },
   {
@@ -668,14 +684,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 11,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 185774,
-   "packageSha256": "09026a329c0cda97d765c825da35de398fe833ca371b018fe99822642b72fe42",
+   "packageBytes": 188192,
+   "packageSha256": "5edcb3c021387bc0a330c4de5f55986060edc6431e9981317533e8ecc161a580",
    "effectiveSha256": "558da21a65faa935e6242b17c4e67abb7161e42cf43c9d9763d29214c39693bd"
   },
   {
@@ -716,14 +733,15 @@
     "hoja-math-priority-and-notation-v1",
     "hoja-math-teacher-final-wrap-v4"
    ],
+   "displayProfile": "math-reviewfix1-ui4",
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 15,
    "imageBytesDifferFromEffective": 0,
-   "packageBytes": 164865,
-   "packageSha256": "e8107be9ae4720c897df1b25713bcdb942e5abea30aa5580e10a5a5e34b9b772",
+   "packageBytes": 167205,
+   "packageSha256": "dd2dd8f663e51943155a192fd75915be2488c748692b9fc2368c6b23f2d20d3f",
    "effectiveSha256": "83f8b35b1087d443605a686f9e2e649fdfd4956aa32453fab1f4ad6197929518"
   },
   {
@@ -759,6 +777,7 @@
     "D": 1
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_INDEX_TITLE",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -794,6 +813,7 @@
     "C": 2
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_INDEX_TITLE",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -829,6 +849,7 @@
     "C": 2
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_INDEX_TITLE",
    "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -869,6 +890,7 @@
     "C": 8
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
@@ -909,6 +931,7 @@
     "C": 11
    },
    "presentationScriptsNotInBridge": [],
+   "displayProfile": null,
    "unitMetaSource": "APPROVED_PRESENTATION",
    "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",

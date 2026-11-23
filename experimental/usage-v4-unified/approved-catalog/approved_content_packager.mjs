@@ -80,6 +80,8 @@ function effectiveFacts(q) {
   return {type: q.type, choiceIds: (q.choices || []).map(c => c.id).sort(), answer: q.answer, images, choiceImages};
 }
 
+/* approved presentation display scripts -> shared-renderer extension profile (see unified-quiz-renderer/) */
+const DISPLAY_PROFILES = {'math-reviewfix1-ui4': ['hoja-math-priority-and-notation-v1', 'hoja-math-teacher-final-wrap-v4']};
 const scriptIds = text => [...text.matchAll(/<script id="([^"]+)"/g)].map(m => m[1]);
 /* Teacher layout decisions shipped in the unit ZIP (presentation/layout-preferences.json),
  * interpreted by their declared schemaVersion only. Applied to / checked against the tags. */
@@ -396,6 +398,11 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
     const layoutCounts = {};
     for (const q of conc) { const l = tags[q.id]?.layout?.preferredLayout || (q.image ? 'C' : 'A'); layoutCounts[l] = (layoutCounts[l] || 0) + 1; }
     const scriptsNotInBridge = bridgeScriptIds ? p.scripts.filter(x => !bridgeScriptIds.includes(x)) : null;
+    // F2: approved display scripts the shared renderer reproduces through a profile-gated extension.
+    let displayProfile = null;
+    for (const [profile, ids] of Object.entries(DISPLAY_PROFILES))
+      if (ids.every(id => p.scripts.includes(id))) displayProfile = profile;
+    if (displayProfile) for (const q of [...conc, ...orig]) q.displayProfile = displayProfile;
     const unitMeta = {[unitId]: p.unitMeta && p.unitMeta[unitId] ?
       p.unitMeta[unitId] : {label: e.grade + '학년 ' + (e.unit != null ? e.unit + (e.subunit ? '-' + e.subunit : '') + '단원' : ''), title: e.unitTitle || e.approvedTitle, count: e.questionCount}};
     const pkg = {questionSchemaVersion: 2, sourceSheetVersion: 2, cartridgeId: e.cartridgeId, unitId,
@@ -408,7 +415,7 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
       renderTags: adapted ? r.renderTagsSourceDetail : p.tags ? 'APPROVED' : 'NONE_IN_APPROVED_SOURCE',
       mediaQuestions: conc.filter(q => q.media).length,
       layoutPreferences: layoutPrefs, layoutCounts: Object.fromEntries(Object.entries(layoutCounts).sort()),
-      presentationScriptsNotInBridge: scriptsNotInBridge,
+      presentationScriptsNotInBridge: scriptsNotInBridge, displayProfile,
       unitMetaSource: adapted ? r.unitMetaSourceDetail : p.unitMeta && p.unitMeta[unitId] ? 'APPROVED_PRESENTATION' : 'APPROVED_INDEX_TITLE',
       visualParity: adapted || !p.tags ? 'NOT_VERIFIED' : 'SOURCE_RENDERER_DATA',
       crossCheck: effById ? 'EFFECTIVE_CONTENT' : 'APPROVED_TABLES', promptsShortenedForDisplay: textDiffs,

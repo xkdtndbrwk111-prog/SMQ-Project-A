@@ -317,3 +317,16 @@
 | mock GAS 지연 로더(QA 번들 23단원) | Node | 732문항, 누락 그림 0, 단원당 ≤5ms |
 | Node 전체 | Node/mock | **83/83 PASS** (F1-B 신규: blocksToV2, 오버레이 어댑터 fail-closed 3종, 합성 렌더러 SHA·삽입 범위, 실보고서 23/732·어댑터 분포·q21·derived 표기) |
 **구분/미완료:** 위 DOM 동일성은 *브리지 대비 무회귀* 증거이지 **승인 원본 HTML과의 시각 동등성 증거가 아님** — 영어 천재(v3 화면), 사회5 2-2(화면 없음), 사회5 3-1·3-2(v0.1 렌더러)는 `visualParity: NOT_VERIFIED`, 교사 시각 검토용 QA 미리보기 대상. 수학 분수·줄바꿈 스크립트(F2) 미연결. 실 GAS·게임 버튼·전자칠판 **NOT RUN**. 합성 v3 어댑터 단위 fixture는 실데이터 보고서 시험으로 대체(전용 fixture는 후속). 콘텐츠·이미지·스크린샷 미커밋, active 0·미디어 권리 23/23 HOLD 유지.
+
+## F2 — 수학 표기·줄바꿈 재현 + 승인 화면 DOM 동등성 (2026-11-23, 40-6R Q03)
+- `experimental/unified-quiz-renderer/extract_math_display.mjs` → `HOJA_RENDERER_MATH_EXT.js`(생성 파일): 승인 수학 검수 HTML(SHA `a85650c8…` = 수학 manifest `reviewerSha256` 대조)에서 **`enhanceMath()`(분수·수식·m5u4:q13 4값 격자·m6u6:q08 ㉠~㉣ 격자)와 `rebuildOptions()`(교사 지정 보기 줄바꿈 4건)을 글자 그대로**, 해당 CSS 18규칙을 그대로 복사. 승인 HTML의 교사용 사이드바 코드·DATA 변경 코드는 복사하지 않음(교사 C는 F1에서 태그에 이미 반영). 문항 `displayProfile === 'math-reviewfix1-ui4'`일 때만 동작 → 다른 과목 무영향. `--check` drift(CI는 정본 토큰 있을 때).
+- 패키저: 승인 화면에 두 수학 스크립트가 있는 단원(수학 6개)의 문항에 `displayProfile` 기록. 합성 렌더러 = 브리지(무변경, SHA 고정) + media 확장 + math 확장.
+
+| 시험 (오프라인 Chromium, 로컬) | 결과 |
+|---|---|
+| **수학 187문항: 승인 수학 HTML(원본 그대로 실행) vs 합성 렌더러**, 1920×1080·1280×720 | **187/187 동일** — 문항 DOM·보기 DOM(인라인 style 제외)·수학 플래그·선택 A/C/D 레이아웃(교사 C 19 포함). 분수 43·수식 34 렌더, JS 오류 0 → `F2_MATH_PARITY_PASS` |
+| **사회5 3-1·3-2 64문항: 승인 화면(렌더러 v0.1.0-preview.2) vs 합성 렌더러(브리지 v0.2)**, 2해상도 | **64/64 동일** — 문항·보기·지문 패널·그림 수·레이아웃·composition → `F2_SOC5_PARITY_PASS` (F1의 "v0.1↔v0.2 동등성 미검증"을 DOM 수준에서 해소; 픽셀 대조는 아님) |
+| 브리지 vs 합성(무회귀), 732문항 × 4해상도 | 일반 539문항 DOM 동일, media 6 OK, 수학 187은 위 승인 대조로 검증, 오류·빈 화면 0 |
+| Node 전체 | **84/84 PASS** |
+증거: `evidence/f2_parity_20261123.log`.
+**여전히 시각 동등성 미검증:** 영어 천재 6단원(승인 v3 화면은 별도 렌더러 — 지문을 별도 패널로 표시하는 등 구조가 달라 DOM 대조 불가, 교사 QA 미리보기 검토 필요), 사회5 2-2(승인 렌더러 화면 자체가 없음). 픽셀 단위 대조·실 GAS·게임 버튼·전자칠판 **NOT RUN**.
