@@ -1,0 +1,9 @@
+# 40-6-U D R6 rerun, REAL Apps Script, isolated test project (not production). 2026-11-23 ~12:50 KST.
+# Patched test Game.html SHA-256 f9647ad6...; deployment deleted after the run (URL -> 404). Counts/codes/timings only.
+R0_COPY_REVERIFY: {"manifestComplete": 61, "rawRows": 17672, "uniquePlays": 17670, "retries": 2, "zeroDays": 4, "bucketRows": 3969, "srcShaOk": 61, "bucketShaOk": 61, "bucketSetOk": 61, "bad": [], "watermark": 17684, "sourceLastRow": 17684}
+CATALOG: {"publicCartridges": 76}
+R6A_SERVER_ONLY_COLD_BURST: {"sent": 40, "ok": 19, "failures": {"USAGE_APPEND_LOCK_TIMEOUT": 21}, "rowsAdded": 19, "uniqueEventIds": 19, "duplicateRows": 0, "invalidRows": 0, "watermarkMinusLastRow": 0, "catalogSources": {"LIVE": 7, "CACHE": 12}, "sheetsApiCalls": 14, "lockWaitMs": {"p50": 10311, "p95": 19861, "max": 19861}, "lockHoldMs": {"p50": 1006, "p95": 2283, "max": 2283}, "serverTotalMs": {"p50": 12174, "max": 22770}, "rpcMs": {"p50": 22918, "max": 24771}, "seconds": 27.4}
+R6B_GAME_PAGES: {"contexts": 8, "patchedClient": true}
+R6B_REAL_CLIENT_40: {"tracked": 40, "client": {"tracked": 40, "delivered": 40, "duplicateIgnored": 0, "retries": 16, "permanent": 0, "queued": 0, "expired": 0}, "rowsAdded": 40, "uniqueEventIds": 40, "duplicateRows": 0, "invalidRows": 0, "watermarkMinusLastRow": 0, "publicTotalDelta": 40, "pollTotalsSeen": [17703, 17709, 17715, 17720, 17725, 17730, 17736, 17740, 17740, 17740], "monotone": true, "seconds": 58.1, "lastErrors": ["USAGE_APPEND_LOCK_TIMEOUT"]}
+R6C_SAME_EVENT_X3: {"ok": 3, "duplicateIgnored": 2, "failures": [], "rowsAdded": 1}
+R6_FINAL_COPY_REVERIFY: {"manifestComplete": 61, "srcShaOk": 61, "bucketShaOk": 61, "bucketSetOk": 61, "bad": [], "watermark": 17744, "sourceLastRow": 17744, "publicCompute": {"d30": 4361, "all": 17741, "days": 62, "d7": 1369, "prov": ["2026-11-23"], "today": 71}, "publicComputeError": ""}
