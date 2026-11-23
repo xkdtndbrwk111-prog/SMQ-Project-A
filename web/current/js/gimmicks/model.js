@@ -11,7 +11,7 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='saw'){c.axis=one(raw.axis,'방향',['x','y'],'x');c.distance=number(raw.distance,'이동 거리',0,2048,96);c.speed=number(raw.speed,'속도',1,600,80);c.radius=number(raw.radius,'반지름',4,128,Math.min(c.w,c.h)/2);c.embedded=raw.embedded===true;}
   if(c.kind==='pendulum'){c.length=number(raw.length,'줄 길이',16,512,96);c.amplitude=number(raw.amplitude,'진폭',0,85,45);c.speed=number(raw.speed,'진동 속도',0.1,12,2);c.radius=number(raw.radius,'반지름',4,128,16);c.phase=number(raw.phase,'시작 위상',0,6.283185307179586,0);}
   if(c.kind==='fan'){c.direction=one(raw.direction,'바람 방향',['left','right','up','down'],'right');c.power=number(raw.power,'바람 세기',0,2000,300);c.period=number(raw.period,'작동 주기',100,60000,4000);c.on=number(raw.on,'작동 시간',0,c.period,c.period);c.phase=number(raw.phase,'시작 위상',0,c.period,0);}
-  if(c.kind==='flame'){c.wait=number(raw.wait,'대기 시간',0,60000,1800);c.warn=number(raw.warn,'예고 시간',1,60000,600);c.active=number(raw.active,'분출 시간',1,60000,1200);c.cool=number(raw.cool,'종료 시간',1,60000,400);c.phase=number(raw.phase,'시작 위상',0,c.wait+c.warn+c.active+c.cool,0);}
+  if(c.kind==='flame'){c.length=number(raw.length,'불꽃 길이',1,6,1);if(!Number.isInteger(c.length))throw Error('기믹 불꽃 길이 오류');c.wait=number(raw.wait,'대기 시간',0,60000,1800);c.warn=number(raw.warn,'예고 시간',1,60000,600);c.active=number(raw.active,'분출 시간',1,60000,1200);c.cool=number(raw.cool,'종료 시간',1,60000,400);c.phase=number(raw.phase,'시작 위상',0,c.wait+c.warn+c.active+c.cool,0);}
   if(c.kind==='stepping_blocks'){
    c.direction=one(raw.direction,'이동 방향',['left','right'],'right');c.activation=one(raw.activation,'출발 방식',['auto','on_step'],'auto');
    c.count=number(raw.count,'벽돌 수',2,20,5);if(!Number.isInteger(c.count))throw Error('기믹 벽돌 수 오류');
@@ -36,7 +36,7 @@ window.HOJA_GIMMICK_MODEL=(()=>{
    const point=n=>c.path?{x:c.x+c.path[n][0]*32,y:c.y+c.path[n][1]*32}:{x:c.x+sign*n*32,y:c.y};
    return {kind:c.kind,offset,progress,x:c.x,y:c.y,blocks:Array.from({length:c.count},(_,i)=>{const from=index(i,offset),to=index(i,next),distance=Math.abs(to-from),walk=progress*distance,part=Math.min(Math.floor(walk),Math.max(0,distance-1)),fraction=distance?walk-part:0,dir=Math.sign(to-from),a=point(from+part*dir),b=point(from+(part+(distance?1:0))*dir);return {id:i,x:a.x+(b.x-a.x)*fraction,y:a.y+(b.y-a.y)*fraction,moving:distance>0};})};
   }
-  const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,phase,active:phase==='active'};
+  const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,length:c.length,phase,active:phase==='active'};
  }
  function rectHit(b,r){return b.right>r.x&&b.left<r.x+r.w&&b.bottom>r.y&&b.top<r.y+r.h;}
  function circleHit(b,c){const x=Math.max(b.left,Math.min(c.x,b.right)),y=Math.max(b.top,Math.min(c.y,b.bottom));return (x-c.x)**2+(y-c.y)**2<c.radius**2;}

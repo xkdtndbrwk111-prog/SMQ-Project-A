@@ -6,7 +6,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
  function key(scene,name){const [path,w,h]=assets[name],id='hojaGimmick_'+name;if(!scene.textures.exists(id)){const source=images?.get(path);if(!source)throw Error('Maker 기믹 이미지 누락: '+path);scene.textures.addSpriteSheet(id,source,{frameWidth:w,frameHeight:h});}return id;}
  function make(scene,c){
   const all=[],add=name=>{const o=scene.add.sprite(0,0,key(scene,name),0).setDepth(10);all.push(o);return o;};
-  let main,chain=[],particles=[],button=null,platform=null,collider=null,blocks=[],blockBodies=[],blockColliders=[];
+  let main,chain=[],particles=[],flameExtension=null,button=null,platform=null,collider=null,blocks=[],blockBodies=[],blockColliders=[];
   if(c.kind==='stepping_blocks'){
    for(let i=0;i<c.count;i++){
     // The original 22px canvas contains a complete 16px block with a 3px
@@ -24,12 +24,13 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
   if(c.kind==='saw'&&c.embedded)main.setCrop(0,0,38,19);
   if(c.kind==='fan')for(let i=0;i<8;i++)particles.push(add('dust'));
   if(c.kind==='flame'){
+   if(c.length>1)flameExtension=add('fireOn').setCrop(0,0,16,15);
    button=add('fireOn').setCrop(4,23,8,7);
    platform=scene.add.rectangle(c.x+c.w/2,c.y+c.h*.6,c.w,6,0,0);
    scene.physics.add.existing(platform,true);
    collider=scene.physics.add.collider(scene.playerBody,platform,null,scene.playerOneWayProcess,scene);
   }
-  return {all,main,chain,particles,button,platform,collider};
+  return {all,main,chain,particles,flameExtension,button,platform,collider};
  }
  function paint(scene,e,s,t){
   const c=e.cfg,a=e.art,frame=Math.floor(t/90);
@@ -49,10 +50,13 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
   }
   a.main.setTexture(key(scene,s.phase==='active'?'fireOn':'fireOff'),s.phase==='active'?frame%3:0).setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h);
   a.main.setAlpha(1);
+  // Reapply the crop after setTexture: Phaser resets it on frame changes.
+  // The original 16x32 image includes a platform below the flame.
+  if(a.flameExtension)a.flameExtension.setTexture(key(scene,'fireOn'),frame%3).setCrop(0,0,16,15).setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h+2*(s.length-1)*s.h*6/32).setVisible(s.phase==='active');
   a.button.setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h).setVisible(s.phase==='warn'&&frame%2===0);
  }
- function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}if(c.kind==='stepping_blocks'){if(c.path){left=Math.min(left,...c.path.map(p=>c.x+p[0]*32));right=Math.max(right,...c.path.map(p=>c.x+p[0]*32+32));top=Math.min(top,...c.path.map(p=>c.y+p[1]*32));bottom=Math.max(bottom,...c.path.map(p=>c.y+p[1]*32+32));}else if(c.direction==='right')right+=(c.steps+c.count)*32;else left-=(c.steps+c.count)*32;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
- function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&s.y<v.y+v.height);}
+ function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}if(c.kind==='flame')top-=(c.length-1)*c.h*6/32;if(c.kind==='stepping_blocks'){if(c.path){left=Math.min(left,...c.path.map(p=>c.x+p[0]*32));right=Math.max(right,...c.path.map(p=>c.x+p[0]*32+32));top=Math.min(top,...c.path.map(p=>c.y+p[1]*32));bottom=Math.max(bottom,...c.path.map(p=>c.y+p[1]*32+32));}else if(c.direction==='right')right+=(c.steps+c.count)*32;else left-=(c.steps+c.count)*32;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
+ function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView,top=s.y-(s.length-1)*s.h*6/32;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&top<v.y+v.height);}
  // A short gap between neighbouring winds must remain a true no-wind area.
  function inWind(body,s){const x=(body.left+body.right)/2,y=(body.top+body.bottom)/2;return x>=s.x&&x<s.x+s.w&&y>=s.y&&y<s.y+s.h;}
  // Sample the traversed path, including the player's previous physics position,
@@ -79,7 +83,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
      if(visible){if(e.cfg.kind==='flame'&&s.active&&!warned){paint(scene,e,{...s,phase:'warn',active:false},elapsed);e.warnShown=true;e.warnCycle=cycle;}else{paint(scene,e,s,elapsed);if(e.cfg.kind==='flame'&&s.phase==='warn'){e.warnShown=true;e.warnCycle=cycle;}}}
      if(e.cfg.kind==='stepping_blocks')continue;
      if(e.cfg.kind==='fan'){if(s.active&&inWind(body,s)){const grounded=!!(body.blocked?.down||body.touching?.down),amount=s.power*Math.min(delta,100)/1000;const opposingCap=grounded?Math.max(12,252-s.power*.3):Math.max(90,252-s.power*.2);if(s.direction==='left'){if(s.power>0)scene.hojaHorizontalWind=-1;body.setVelocityX(Math.min(body.velocity.x-amount*(grounded?1:.6),opposingCap));}if(s.direction==='right'){if(s.power>0)scene.hojaHorizontalWind=1;body.setVelocityX(Math.max(body.velocity.x+amount*(grounded?1:.6),-opposingCap));}if(s.direction==='up')body.setVelocityY(Math.min(body.velocity.y-amount,-Math.min(150,s.power*.15)));if(s.direction==='down')body.setVelocityY(Math.min(180,Math.max(body.velocity.y+amount,Math.min(150,s.power*.15))));}}
-     else if(e.cfg.kind==='flame'?s.active&&warned&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y,w:s.w*.6,h:s.h*.55}):crossed(body,e.cfg,before,elapsed)){scene.hojaGimmickHit=e.cfg.kind;try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
+     else if(e.cfg.kind==='flame'?s.active&&warned&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y-(s.length-1)*s.h*6/32,w:s.w*.6,h:s.h*.55+(s.length-1)*s.h*6/32}):crossed(body,e.cfg,before,elapsed)){scene.hojaGimmickHit=e.cfg.kind;try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
     }
    },destroy(){for(const e of entries){e.art.collider?.destroy();e.art.platform?.destroy();for(const c of e.art.blockColliders||[])c.destroy();for(const b of e.art.blockBodies||[])b.destroy();for(const o of e.art.all)o.destroy();}}};
  }

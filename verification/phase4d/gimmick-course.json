@@ -112,7 +112,8 @@
             "wait": 2200,
             "warn": 1200,
             "active": 1500,
-            "cool": 900
+            "cool": 900,
+            "length": 5
           }
         },
         {
