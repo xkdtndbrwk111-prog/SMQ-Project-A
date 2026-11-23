@@ -826,3 +826,36 @@
 - [x] R6 동시 40 중 30 실패(429 17/lock 13) **FAIL**을 최우선 운영 차단 조건으로 기록하고, 동일 eventId 재시도·캐시·락 최적화·실 GAS 40/40 증거 요구. R7 자정 실 GAS 및 신규 GitHub Actions CI NOT RUN을 별도 증거로 요구.
 - [ ] A 인덱스 생성 및 승인 effective 추출, B 배포 manifest와 게임/통계 연동, D 동시 기록 유실 해결, E 안전성 실기 검증: **Claude 구현 전/독립 감수 대기**. 지시서·중앙 체크리스트 갱신은 구현 PASS가 아니다.
 - [ ] 운영 프로젝트/Code.gs/main/versions/2.0.0/EVENT_LOG/랭킹/교실매니저 실제 삭제/트리거/배포는 **HOLD**.
+
+
+### 40-6N. GPT-6 독립 감수 — R6 실 GAS 40/40 재시험, 범위 한정 PASS (2026-11-23)
+**대상:** Claude Draft [PR #6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6), 개발 HEAD `1e2e21d75ada7c8e1393ce8eef7b2ac7d6a120ef`; [실 GAS 비식별 기록](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/blob/work/usage-v4-40-6-u-20261123/experimental/usage-v4-unified/evidence/r6_real_gas_rerun_20261123.log), `verify_real_gas_r6.py`, `gas/UsageTelemetryClient.html`, `gas/Code.gs`, `gas/UsageV4Unified.gs`, `UNIFIED_GAS_D.test.mjs`; [독립 수정요청 댓글](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7091263247). **감수자는 실 GAS 자체를 재실행하지 않았고 제출 로그·스크립트·코드의 일치 여부를 검토**함.
+- [x] **R0 사본 재검증 제출 증거 PASS:** 역사 61일 COMPLETE, 원본 SHA 61/61, 버킷 SHA 61/61, 버킷 집합 61/61, bad 0. 실격리 시험의 61일 사본이며 운영 원본에 대한 실시간 인증이 아님.
+- [x] **R6b 실제 게임 페이지의 패치 기록 RPC 시나리오 PASS:** 익명 브라우저 8개 컨텍스트에서 `HOJA_B_LIVE.rpc('GET')`로 구형 카트리지 선택 후 `window.HOJA_USAGE.track('SOLO',1)`을 각 5번 직접 호출. 총 추적 40, 전달 40, 재시도 16, permanent 0, queued 0, expired 0. 실제 기록 추가 +40=고유 이벤트 40, 중복행 0, 무효행 0, 커밋 watermark=행 끝, 공개 총합 +40, 폴링 단조. 기록 완료까지 58.1초. **버튼 클릭부터 결산까지 전체 학생 게임 흐름의 E2E 시험은 아님.**
+- [x] **R6c 재전송 멱등 PASS(제출 로그):** 같은 eventId 3개 동시 전송의 성공응답 3, `duplicateIgnored` 2, 새 행 +1. 원본 15열 및 V4 watermark 정합 유지.
+- [x] **R6a 성능 병목 개선 및 잔여 위험:** 서버 재전송 없는 40 동시 요청은 **19/40, 21 lock timeout, 429 0**. 캐시 LIVE 7/CACHE 12, Sheets API 14회, lock hold p50 1006ms/p95 2283ms, lock wait p50 10311ms/p95 19861ms. 이전 R6 실패 429 17은 이번 증거에서 0이나 **서버 단독 40/40 달성은 아님**. 성공 40/40은 같은 eventId 클라이언트 복구에 의존.
+- [x] **Client code 한계 확인:** `UsageTelemetryClient.html` 최대 6번 인라인 재시도 + 1분 간격 최대 10회 플러시 + `localStorage` 같은 KST 날짜 보존(대기열 상한 200); 한 번 닫힌 브라우저가 다시 열리지 않거나 스토리지 차단/자정 경과, 40건 초과 시에는 기록 유실 가능. 에러는 내부 `status()`에만 남고 최종 실패 UI/운영 경보는 미제공. 이 경우 전체 사용자 환경의 0유실을 주장할 수 없음.
+- [x] **검증 도구 한계:** `verify_real_gas_r6.py`는 R6b 결과를 비식별 출력하지만 40/40, 중복 0, watermark/공개 합계 동일, R6c 행 +1 위반 시 프로세스를 실패 종료하는 `assert`가 없다. 다음 재시험에 fail-fast 강제 검증 추가 필요.
+- [x] **CI 구분:** [GitHub Actions run #45107912487](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45107912487) `4bf80c2e...`에서 **success**(Node/mock·오프라인 Chromium). 승인 정본 저장소 pin checkout/drift는 secret 없음으로 SKIPPED. 이 run은 현재 R6 로그 HEAD `1e2e21d`에 대한 별도 CI를 증명하지 않는다.
+- [x] **승인 정본 경계:** 빌드 산출 `approved-source-index.json` 23단원/732문항, `active-deployment.json` entries **0건**. 시험 R6b는 기존 공개 Sheets 카트리지 76개 중 1개를 사용; 승인 정본 렌더러·A1 실제 기록·새 era 통계의 **실 GAS PASS는 아직 없음**. 이는 승인 23개를 자동 배포하지 않는 정책과 양립. 구형 61일 기록을 새 승인 이용량에 합산하는 건 금지.
+- [ ] **추가 실행 검증 대기:** 시험 도구 assert 추가; 실제 시작 버튼/화면 E2E, 페이지 종료·재접속·저장소 비활성·자정 만료, 다학급 80~120 동시 요청, 신규 승인 정본 콘텐츠 로드와 A1 시대 전환. **NOT RUN**.
+- [ ] **R7 자정 실 GAS seal**, 승인 정본 effective 렌더/미디어 권리(23/23 HOLD), 공개 RPC/운영 환경 노출 재검수, 실제 전자칠판 사용 및 게임 전수 회귀: **NOT RUN / HOLD**.
+- [ ] **독립 총판정:** R6b/R6c **범위 한정 PASS**, 운영 전체 U4 및 PR 병합·배포 **HOLD**. Project A 단일 GAS/익명 PUBLIC 집계 정책 유지. 운영 루트 Code.gs, main, versions/2.0.0, 운영 GAS/원본 EVENT_LOG/랭킹, 교실매니저 실제 삭제/자동 보관/트리거 변경 **금지**.
+
+
+### 40-6O. GPT-6 후속 보충 감수 — 신규 정본 ID telemetry와 통계 표시 경계 (2026-11-23)
+**증거 대상:** Claude Draft PR #6 HEAD `1e2e21d75ada7c8e1393ce8eef7b2ac7d6a120ef`, 이전 40-6N, [추가 독립 리뷰](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7091269492). 40-6N의 R6b 게임 페이지 텔레메트리 PASS 판정과 서버 단독 19/40·운영 HOLD 판단은 그대로 보존.
+- [x] **명확한 신규 정본 연동 버그 후보 — B 단계 미완료:** `experimental/usage-v4-unified/gas/UsageTelemetryClient.html`의 `HOJA_USAGE.track()`에서 `ids.some(x=>!/^[0-9]{1,11}$/.test(x))return` 사용. 현재 시험한 구형 Sheets 숫자 ID만 허용하므로, GitHub 정본 `eng5-ham-u10` 등 알파벳 포함 승인 ID를 게임에 탑재할 때 `track()`이 기록 없이 조용히 종료된다. **승인 활성 0개로 현재 실사용 사례 없음**; 승인 정본 렌더러/카탈로그 실제 연결 전에 분기 수정 + approved A1 실 GAS 회귀가 필수. 신규 승인 게임 사용량 PASS 판정 금지.
+- [x] **구형 기록 공개 UX 경계:** `gas/UsageV4Public.gs` public allowlist의 `era.legacy.all`, `gas/Stats.html`는 승인 시대 화면에서 구형 총이용 횟수를 '합산하지 않습니다' 문구와 함께 **별도로 표시**한다. 신규 총계에 혼입되지 않는 코드는 확인되지만 사용자 정책은 구형 카트리지 **사용 중단**이다. 앞으로의 공개 통계에서 구형 집계가 별도 표시되어야 하는지 미확정. 교사 확인 또는 승인 정본 통계에서 그 표시를 제거하는 안전한 제안 필요. 원본 구형 데이터 자체 삭제 금지.
+- [x] **시험 스크립트의 실제 범위:** `verify_real_gas_r6.py:103–120` 게임 페이지/구형 문항 RPC 후 기록함수 직접 호출 → 전체 게임 시작 버튼 UI E2E 아님. 40건 전송 결과는 Claude가 제출한 실 GAS 비식별 로그와 코드로 독립 검토했으며 감수자가 동일 시험을 수행하지 않음.
+- [ ] **재전송 날짜 경계 별도 시험:** 브라우저 화면에서 진행 중인 `deliver()` 반복 호출은 KST 날짜가 바뀔 때에도 초기 eventId를 계속 보내므로 서버 수신 날짜로 기록될 수 있다. `flush()`는 저장된 전날 기록을 제외하나 in-flight retry는 별도 제어 없음. '시작 날짜'와 '서버 기록 날짜'의 정의를 명시하고 R7과 함께 교차 자정 테스트 필요.
+- [ ] **최종:** 승인 정본 실제 게임 로더/기록/공개 통계, 80건 이상·탭 종료·R7 실기 및 보안 전체 검증 **NOT RUN/HOLD**. R6 실 GAS 제한적 PASS와 운영 PR Draft/HOLD 유지. **운영/원본 데이터·Code.gs·versions/2.0.0/트리거/삭제 등 수정 없음.**
+
+
+### 40-6P. R7 대기 없이 F단계 승인 정본 게임 연동 착수 지시 (2026-11-23)
+- [x] 다음 개발 작업을 **GitHub 승인 정본 23단원·732문항의 게임 실제 렌더링 연결**로 지정. 자정 R7 실 GAS seal은 별도로 보존하고 F단계의 선행 조건이 아님.
+- [x] 기존 A/C/D 승인 렌더러/프레임 호스트/팀 바인딩/아케이드 런타임/오답 복습 모듈 및 7MB 시험판 재조립 경로를 검토. 별도 렌더러 재개발을 금지하고 기존 공용 정본 렌더러 활용 지시.
+- [x] Claude 신규 실행 지시서 `docs/HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md` 작성: F1 정본 23개 콘텐츠·그림·태그 내장 로더, F2 싱글 판정·단축키, F3 아케이드/팀전/오답 복습 및 approved 영문 ID telemetry(40-6O 버그) 수정, F4 mock·게임 버튼 Chromium·CI/메모리/보안 회귀.
+- [x] 승인 정본은 **교사승인과 게임 배포 구별**: `active-deployment.json` entries 0과 미디어 권리 23/23 HOLD 유지. 시험용 read-only QA build와 실사용 active catalog를 물리적으로 분리하고 운영 자동 활성화 금지.
+- [ ] Claude F1~F4 실제 코드·시험·CI·실 GAS 증거: **NOT RUN/개발 대기**. GPT-6 독립 감수 필요.
+- [ ] R7 자정 확정, 80~120건 동시 요청, 탭 종료/재개, 실제 전자칠판·전체 game E2E: **NOT RUN/HOLD**. 운영 코드, 원본 EVENT_LOG·랭킹, Project A 운영 GAS, 교실매니저 실제 폐기·삭제/트리거/배포 무단 변경 금지.
