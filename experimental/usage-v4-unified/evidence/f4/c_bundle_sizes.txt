@@ -1,0 +1,3 @@
+qa-lite(cache) files 8 bundleBytes 8742609 patchedGame 105dad4bbfbe468f8a9b71c7de2ad7a264bd36b374b4d8656cca5737443d3879 gameWithoutCacheBlock 876933786d9cc3bb2dd412afe1823c78625d79747a8ffe4a03f1a25007c0fee7 cacheBlock c3fd3cdf332bfac2253e10ac6fb777ad65374301cdefec7859677685bdc7681f
+release-lite(cache, synthetic remote catalog) files 8 bundleBytes 8742075
+release committed(0 active) files 8 bundleBytes 8726385

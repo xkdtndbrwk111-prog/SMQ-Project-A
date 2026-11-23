@@ -1,0 +1,3 @@
+F3_TEAM_FULL_FAIL TimeoutError('Locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator("iframe[id^=\\"hojaTeamApproved\\"]").content_frame.locator("button.hqChoice[data-choice=\\"c3\\"]")\n')
+exit=1
+relayFetches 0 usageRows 47

@@ -21,11 +21,18 @@ async def visible(page, sel):
 
 async def question_open(page):
     return await page.evaluate(f"""()=>{{const o=document.getElementById('hqOverlay');const f=document.querySelector('{IFR}');
-      return !!(o&&!o.hidden&&f&&f.contentDocument&&f.contentDocument.querySelectorAll('#hqChoices button.hqChoice').length)}}""")
+      // the game's question is drawn only once its `show` has rendered: the input guard marks the load->show
+      // transient (bridge default render, choices hidden) with body.hojaAwaitShow — never answer during it (40-6X)
+      const d=f&&f.contentDocument;
+      return !!(o&&!o.hidden&&d&&d.body&&!d.body.classList.contains('hojaAwaitShow')&&d.querySelectorAll('#hqChoices button.hqChoice').length)}}""")
 
 async def answer(page, want_correct):
     info = await page.evaluate(f"""()=>{{const w=document.querySelector('{IFR}').contentWindow;const q=w.current();
-      return {{id:q.id,type:q.type,ans:q.answer,choices:[...w.document.querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice||'')}}}}""")
+      const bs=[...w.document.querySelectorAll('#hqChoices button.hqChoice')];
+      return {{id:q.id,type:q.type,ans:q.answer,choices:bs.map(b=>b.dataset.choice||''),stamped:bs.length>0&&bs.every(b=>b.dataset.hojaQid===q.id)}}}}""")
+    # answer only the question that is actually drawn (guard stamp == current id); otherwise not ready yet
+    if not info['stamped']: return None, None
+    if info['type'] == 'MCQ' and info['ans']['choiceId'] not in info['choices']: return None, None
     fl = page.frame_locator(IFR)
     if info['type'] == 'SHORT':
         await fl.locator('button.hqChoice').first.click(timeout=10000)          # teacher: 정답 확인 (reveal)
@@ -46,10 +53,11 @@ async def click_first(page, sel):
             await el.click(force=True, timeout=5000); return True
     return False
 
+GH_HITS = []
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
-    ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True)
+    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True)
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     phaser = Path(a.phaser).read_bytes()
@@ -64,6 +72,10 @@ async def main():
                 u = r.request.url
                 if u == f'http://127.0.0.1:{a.port}/game.html': await r.fulfill(body=html, content_type='text/html; charset=utf-8')
                 elif u.endswith('phaser.min.js'): await r.fulfill(body=phaser, content_type='application/javascript')
+                elif a.github_packages and u.startswith('https://raw.githubusercontent.com/xkdtndbrwk111-prog/HOJA-QUESTION-BANK/'):
+                    rel = u.split('/', 6)[-1]; f = Path(a.github_packages) / rel  # .../<owner>/<repo>/<commit>/<path>
+                    GH_HITS.append(rel.rsplit('/', 1)[-1] + ('' if f.is_file() else ':404'))
+                    await r.fulfill(status=200 if f.is_file() else 404, body=f.read_bytes() if f.is_file() else b'', headers={'access-control-allow-origin': '*'})
                 elif u.startswith(('data:', f'http://127.0.0.1:{a.port}')): await r.continue_()
                 else: await r.abort()
             await page.route('**/*', route)
@@ -78,10 +90,14 @@ async def main():
                     await page.locator('#hojaTeamReviewNext').click(force=True); await page.wait_for_timeout(900); continue
                 if await question_open(page):
                     if review_mode:
-                        await answer(page, True); reviewed += 1
+                        t, _ = await answer(page, True)
+                        if t is None: continue
+                        reviewed += 1
                     else:
                         want = answered % 2 == 0
-                        t, _ = await answer(page, want); answered += 1; wrong += (not want); types[t] = types.get(t, 0) + 1
+                        t, _ = await answer(page, want)
+                        if t is None: continue
+                        answered += 1; wrong += (not want); types[t] = types.get(t, 0) + 1
                     await page.wait_for_timeout(900); continue
                 desc = await page.evaluate("document.querySelector('#htItemLayer .htModalDesc')?.textContent||''")
                 if '오답 복습 완료' in desc: break
@@ -118,6 +134,7 @@ async def main():
             await ctx.close()
         await b.close()
     print('F3_TEAM_FULL_PASS')
+    if a.github_packages: print('GITHUB_STANDIN_REQUESTS', len(GH_HITS), 'distinct', len(set(GH_HITS)), 'notFound', sum(h.endswith(':404') for h in GH_HITS))
 
 try:
     asyncio.run(main())

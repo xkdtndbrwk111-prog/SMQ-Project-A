@@ -476,3 +476,29 @@ test('F4 builder: remote QA catalog ships NO content files and refuses mixing; a
     assert.throws(() => execFileSync('python3', [DIR + '/build_unified_gas.py', '--output', join(out, 'c'), '--variant', 'qa', '--qa-dir', qa], {stdio: 'pipe'}), /MIXED_CONTENT_SOURCE/);
   } finally { rmSync(out, {recursive: true, force: true}); }
 });
+test('F4 cache: LIST carries the trusted package pin only for a pinned remote catalog (game reads row.name only)', () => {
+  const w = remoteWorld();
+  const rows = w.rpc('hojaListPublicCartridges');
+  assert.equal(rows.length, 2);
+  for (const r of rows) {
+    assert.equal(typeof r.name, 'string');
+    assert.deepEqual(Object.keys(r.pkg).sort(), ['commit', 'id', 'path', 'questionCount', 'repo', 'sha256', 'sourceCommit']);
+    assert.equal(r.pkg.commit, PIN); assert.equal(r.pkg.repo, 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK');
+    assert.match(r.pkg.sha256, /^[a-f0-9]{64}$/); assert.equal(r.pkg.path, 'game-runtime/approved-packages/v1/' + r.cartridgeId + '.json');
+  }
+  assert.equal(w.net.calls.length, 0, 'LIST never fetches content');
+  const e = qaWorld();
+  assert.ok(e.rpc('hojaListPublicCartridges').every(r => !('pkg' in r)), 'embedded catalog: no pin, the browser cache passes GET through to GAS');
+});
+test('F4 cache client: one injected block, wraps only LIST/GET, IndexedDB only, 10 MiB / 90 days, pinned raw host', () => {
+  const html = readFileSync(DIR + '/gas/ApprovedPackageCacheClient.html', 'utf8');
+  assert.equal((html.match(/<script/g) || []).length, 1);
+  assert.match(html, /^<script id="hoja-approved-package-cache-v1">/);
+  assert.match(html, /LIMIT_BYTES=10485760/); assert.match(html, /MAX_UNUSED_MS=90\*86400000/);
+  assert.match(html, /const RAW='https:\/\/raw\.githubusercontent\.com\/',REPOS=\['xkdtndbrwk111-prog\/HOJA-QUESTION-BANK'\]/);
+  const code = html.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  assert.doesNotMatch(code, /localStorage|sessionStorage|document\.cookie/, 'no large data in localStorage; no identifiers');
+  assert.doesNotMatch(code, /recordUsageStartU1|hojaRank/, 'never touches usage records or ranking');
+  assert.match(code, /if\(method==='LIST'\)/); assert.match(code, /if\(method==='GET'&&handles\(payload\)\)/);
+  assert.match(code, /redirect:'error'/); assert.match(code, /credentials:'omit'/);
+});

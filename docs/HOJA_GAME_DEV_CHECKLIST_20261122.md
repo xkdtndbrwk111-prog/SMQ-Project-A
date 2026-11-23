@@ -1095,3 +1095,26 @@
 | `F4-SIZE-GATE` | **OPEN** | 경량 번들 8,728,927 B/8파일(콘텐츠 0) — 실 Apps Script 저장 미시도 | `f4_lite_bundle_sizes.txt` |
 | `F4-CACHE-*`(40-6AD) | **IN PROGRESS** | 다음 커밋: C1 가능성 검증부터 | — |
 - [ ] 이월 유지: 패키지 GitHub 게시·격리 push·배포(별도 승인), R7, 부하, 탭 복구, 교사 234 육안, QBank pin CI SKIPPED, 85인치, 실 랭킹, 운영 활성 0, PR Draft.
+
+
+### 40-6AF. Claude 제출 — F4 브라우저 IndexedDB 단원 캐시 C1~C4 로컬 구현·검증 (2026-11-24)
+**경계:** Claude 자체 보고. 실제 Chromium + mock GAS + **GitHub 대역 라우트**(패키지 미게시, 커밋 자리표시자). **실 GAS iframe·QR 휴대폰(iOS Safari)·실 GitHub 패키지·실 Apps Script 저장은 NOT RUN.** GPT-6 감수 전.
+| ID(40-6AD) | 상태 | 수치 / 근거 | 증거(`experimental/usage-v4-unified/evidence/f4/`) |
+|---|---|---|---|
+| `F4-CACHE-FEASIBILITY` | **로컬 모의 PASS / 실 GAS NOT RUN** | GitHub 공개 파일 CORS `*`·CORP cross-origin 실측; 교차 사이트 sandbox iframe 2단에서 IndexedDB 새로고침·브라우저 재실행 유지, crypto.subtle·fetch OK; `allow-same-origin` 없으면 SecurityError → 일회성 경로 | `c1_iframe_idb_github_probe_LOCAL_SIMULATION.json` |
+| `F4-CACHE-LOADER` | **PASS(로컬 Chromium)** | 단일 주입 블록이 `HOJA_B_LIVE.rpc` LIST/GET만 감쌈(게임 행 수정 0, 블록 제외 시 `876933…` 동일, RC 감사 PASS); 동일 ID+SHA 재해시 적중, 고정 커밋 선택 단원만, 바이트 SHA·구조·미디어·태그 검사 후 저장, GAS 중계 fallback, 현재 LIST 밖 단원 미사용 | `c3_cache_e2e_14_scenarios.*`, `c_release_audit_with_cache_block.txt` |
+| `F4-CACHE-RETENTION` | **PASS(로컬)** | 10 MiB·90일 정리·LRU·보호 단원 유지·IndexedDB 차단 시 일회성(M, J) | 같음 |
+| `F4-CACHE-E2E` | **PASS(로컬) 14/14** | 최초 1 / 재실행·새로고침·재접속 0 / 버전 변경 해당 단원만 / 변조 폐기 / GitHub 불가 시 캐시·중계 / 모두 불가 시 오류·A1 0 / 23단원 SHA 23·732문항·두 번째 순회 다운로드 0 | 같음 |
+| `F4-CACHE-REGRESSION` | **PASS(로컬, 직접 경로)** | UI 46/46(GitHub 46, 404 0, 중계 0), 팀전 3단원 ×2(중계 0, A1 6/6), 아케이드 2/2. **이력:** 대역 404로 중계 경로만 시험된 1회, 드라이버 과도 상태 답변 FAIL 1회 — 둘 다 검증기 결함, 수정 후 재실행 | `c3_regression_*`, `HISTORY_c3_*` |
+| `F4-CACHE-CONCURRENCY` | **로컬 측정** | 36명: 직접 첫 입장 GitHub 36·GAS GET 0·p50 248 ms, 재입장 0·0·p50 4 ms; GitHub 불가 시 첫 입장 GAS GET 36·p50 1.7 s(재시도 대기 포함), 재입장 0. 탭·기기 간 캐시 공유 없음 | `c4_classroom_36_students_*.json` |
+| `F4-SIZE-GATE` | **OPEN** | 캐시 포함 경량 8,742,609 B/8파일 — 실 Apps Script 저장 미시도 | `c_bundle_sizes.txt` |
+| `F4-DEPLOY-AND-OPERATIONS` | **HOLD** | 패키지 QBank 게시·격리 push·시험 배포는 각각 별도 승인 필요 | — |
+- [ ] **남은 위험:**
+  - 실 GAS iframe의 IndexedDB/fetch(sandbox·CSP) 미실증.
+  - iOS/iPadOS Safari의 제3자 iframe 저장소 분할·7일 정리(ITP) 가능 → 재다운로드로 복구되지만 캐시 이점이 줄 수 있음.
+  - 패키지 미게시(실 커밋 없음).
+  - 프로젝트 크기 한도 미확인.
+  - 중계 모드 재시도 지연 +1.6 s.
+  - 두 탭 동시 첫 다운로드 2회.
+  - 저장본 적중 시에도 기존 로딩 표시가 잠깐 뜸(게임 UI 무수정 원칙).
+- [ ] 이월 유지: R7, 실 부하, 탭 복구, 교사 234 육안, QBank pin CI SKIPPED, 85인치, 실 랭킹, 운영 활성 0, PR Draft.

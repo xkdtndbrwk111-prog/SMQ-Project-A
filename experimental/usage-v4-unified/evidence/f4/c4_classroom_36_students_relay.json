@@ -1,0 +1,35 @@
+{
+ "mode": "relay",
+ "unit": "math5-s2-u4",
+ "githubLatencyMs": 150,
+ "rounds": {
+  "cold_first_entry": {
+   "students": 36,
+   "allLoaded": true,
+   "githubRequests": 108,
+   "gasGetCalls": 36,
+   "gasRelayFetches": 1,
+   "studentsServedFromCache": 0,
+   "loadMs": {
+    "p50": 1697,
+    "p95": 1738,
+    "max": 1742
+   },
+   "wallMs": 1763
+  },
+  "warm_reentry_after_reload": {
+   "students": 36,
+   "allLoaded": true,
+   "githubRequests": 0,
+   "gasGetCalls": 0,
+   "gasRelayFetches": 0,
+   "studentsServedFromCache": 36,
+   "loadMs": {
+    "p50": 3,
+    "p95": 3,
+    "max": 4
+   },
+   "wallMs": 30
+  }
+ }
+}

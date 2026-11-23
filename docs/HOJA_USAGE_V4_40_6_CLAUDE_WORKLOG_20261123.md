@@ -469,3 +469,70 @@
 | 음성(실데이터 RPC) | 네트워크 없음 → `APPROVED_CONTENT_FETCH_FAILED`; 패키지 1바이트 변조 → `APPROVED_CONTENT_DIGEST_MISMATCH`; 정상 대조군 2단원 로드 |
 | 경량 번들 크기 | **8,728,927 B / 8파일**(게임 8,613,936 B 포함), 콘텐츠 0. 현재 원격 7,309,075 B보다 큼 → **실 저장 가능 여부 미확인, F4-SIZE-GATE OPEN** |
 증거: `evidence/f4/f4_relay_*`, `f4_lite_bundle_sizes.txt`. 패키지 게시·격리 push·배포 NOT RUN(별도 승인 필요).
+
+## F4 (3차) — 학생 브라우저 IndexedDB 단원 패키지 캐시 C1~C4 (2026-11-24, 교사 지시서 "브라우저 로컬 캐시 도입" + 40-6AD)
+**경계:** 전부 로컬 — 실제 Chromium(Playwright) + mock GAS. 패키지는 아직 HOJA-QUESTION-BANK에 **게시되지 않았으므로** 고정 `raw.githubusercontent.com` 패키지 URL은 브라우저 라우트가 로컬 빌드 패키지로 응답하는 **GitHub 대역**이다(요청 수 계수). 카탈로그 커밋은 로컬 자리표시자 `000…0`(v2 시험 `111…1`). 실 GAS iframe·iOS Safari·실 GitHub 패키지 경로는 NOT RUN.
+
+### C1 — 기술 가능성
+- **GitHub CORS(실측, 공개 저장소 고정 커밋 파일):** `access-control-allow-origin: *`, `cross-origin-resource-policy: cross-origin`, `cache-control: max-age=300`, HTTP 200. 서버 측으로는 브라우저 직접 읽기가 허용된다.
+- **iframe IndexedDB(로컬 모의):** 다른 사이트 최상위 페이지가 GAS처럼 sandbox iframe 2단 중첩(`allow-same-origin allow-scripts …`)을 띄운 구조다.
+  - 결과: IndexedDB 쓰기/읽기 OK, **새로고침 후 유지, 브라우저 종료·재실행(같은 프로필) 후 유지**.
+  - `crypto.subtle` SHA-256 OK(보안 컨텍스트), GitHub fetch 200(재요청은 브라우저 HTTP 캐시로 1 ms).
+  - `allow-same-origin`이 없으면 IndexedDB `SecurityError` → 캐시 없는 일회성 경로가 필요하다(구현함).
+  - 증거: `evidence/f4/c1_iframe_idb_github_probe_LOCAL_SIMULATION.json`, 도구 `verify_f4_c1_iframe_probe.py`.
+- **결론:** 1차 경로 = 학생 브라우저 → GitHub 직접. 실패하면 기존 GAS 로더가 중계 fallback. **실 GAS HTMLService iframe·QR 휴대폰(Safari ITP) 실증 전까지 확정 아님.**
+
+### C2 — 구현 (게임 엔진·렌더러 무수정)
+- `gas/ApprovedPackageCacheClient.html`: 단일 `<script id="hoja-approved-package-cache-v1">`. 빌더가 RC 게임 `</body>` 앞에 1회 주입하고, `window.HOJA_B_LIVE.rpc`의 **LIST/GET만 감싼다**(게임 코드 행 수정 0). 감사 도구가 이 블록을 빼면 게임이 F3-3 감사 RC `876933…`와 바이트 동일함을 확인한다.
+- 신뢰 핀: 서버 LIST가 원격 카탈로그일 때만 행마다 `pkg{id, sha256, path, commit, repo, questionCount, sourceCommit}`를 붙인다(게임은 `name`만 읽음). **현재 LIST에 없는 단원은 캐시에 있어도 쓰지 않는다.**
+- **로딩 순서:**
+  1. IndexedDB에서 같은 ID + 같은 SHA 저장본을 찾고, 읽을 때마다 재해시한다. 맞으면 사용.
+  2. 저장본이 없거나 다르면 고정 커밋 URL에서 해당 단원만 받는다. 페이지 안에서는 패키지당 Promise 1개를 공유하고, 재시도는 0.4/1.2 s, 타임아웃 20 s, 리다이렉트 거부, 자격증명 미전송.
+  3. 바이트 SHA-256·구조·문항 수·문항 ID 고유·이미지 data URI·참조·태그를 검사한 뒤에만 저장한다.
+  4. 같은 `[{sheetName,data}]` 계약으로 반환한다.
+- **중계 fallback:** 직접 실패 시 기존 GAS GET으로 해당 단원만 받는다. 정규 직렬화 바이트가 카탈로그 SHA와 같으면 캐시에 넣고, 다르면 일회성으로만 쓴다.
+- **보존 정책(40-6AD):**
+  - IndexedDB만 사용(localStorage 없음). 한도 10 MiB(10,485,760 B, 메타 512 B/단원 포함).
+  - 90일 미사용 정리는 LIST(앱 진입)와 저장 시 수행한다. 저장 전 LRU 축출은 현재 요청 단원을 보호한다.
+  - 한도보다 큰 단일 패키지·IndexedDB 오류는 검증된 일회성 실행.
+  - 진단은 `window.HOJA_APPROVED_PACKAGE_CACHE.diagnose()`(개발용, 학생 UI 없음).
+- 서버 로더(`hojaGetApprovedQuestions`)는 fallback으로 유지. 사용량 A1 기록 경로는 변경하지 않았다.
+
+### C3 — 실제 Chromium E2E (`verify_f4_cache_e2e.py`, 영구 프로필) — **14/14 PASS, exit 0**
+| 시나리오 | 결과 |
+|---|---|
+| A 최초(실 UI 선택 + 싱글 시작) | 다운로드 1, 저장, A1 행 1 |
+| B 같은 단원 재실행 / C 새로고침 / D 브라우저 종료·재실행(실 UI) | 다운로드 0 / 0 / 0 |
+| E 다른 단원 | 그 단원만 1 |
+| F 새 승인 버전(새 커밋 + 새 SHA) | 바뀐 단원만 재다운로드, 다른 단원 적중 |
+| G 저장본 1바이트 변조 | 감지·폐기·재다운로드 1 |
+| H GitHub 불가 | 저장본으로 실행(다운로드 0), 미저장 단원은 GAS 중계 + 해시 확인 후 저장 |
+| I GitHub·중계 모두 불가, 미저장 | "문제 다운로드 실패 — 인터넷 연결…" 오류, **A1 행 0** |
+| J IndexedDB 차단 | 매번 검증된 일회성 실행(다운로드 2, 저장 0) |
+| K 한 페이지 동시 3요청 | 다운로드 1 |
+| L 두 탭 같은 단원 | 둘 다 성공, 다운로드 2(탭 간 공유 없음), 저장 1 |
+| M 91일 미사용 정리 + 10 MiB LRU | 정리됨, 가장 오래된 보호 단원 유지, 채움 레코드 축출, 사용량 ≤ 한도 |
+| N 23단원 전체 | SHA 23/23, 732문항, 이미지 145, 태그 732; 두 번째 순회 적중 23·다운로드 0 |
+- **게임 회귀(직접 경로):**
+  - UI E2E 23 × 싱글/팀 **46/46**: GitHub 대역 46요청(문맥마다 새 저장소), not-found 0, 중계 0.
+  - 팀전 전체 3단원 **2회 PASS**: 각 GitHub 3, 중계 0, A1 6행/6게임.
+  - 아케이드 2단원 PASS: 이 검증기는 GET 없이 문항을 주입하므로 캐시 경로와 무관한 회귀 확인이다.
+- **실패·오탐 이력(보존):**
+  1. 첫 회귀에서 GitHub 대역 경로를 `split('/',7)`로 잘라 모든 직접 요청이 404 → 캐시가 정상적으로 GAS 중계로 전환해 46/46·팀 PASS가 났지만 **직접 경로 검증이 아니었음**(`HISTORY_c3_regression_standin_404_relay_path_*`). `split('/',6)`로 고치고 not-found 수를 출력하게 한 뒤 재실행.
+  2. 재실행 팀전 1회 FAIL: 드라이버가 `load`→`show` 과도 상태(기본 렌더, 보기 숨김)에서 답을 눌러 없는 보기 c3를 기다림(`HISTORY_c3_team_FAIL_…`). 40-6X와 같은 하네스 경합이다. 드라이버는 guard의 `hojaAwaitShow`가 없고 모든 버튼 `data-hoja-qid`가 현재 문항일 때만 답하도록 고침(대기 시간 추가 아님). 이후 2회 연속 PASS.
+
+### C4 — 30~40명 동시 시작 측정 (`verify_f4_cache_load.py`, 36개 독립 브라우저 문맥 = 기기 간 캐시 공유 없음)
+| 모드 | 회차 | GitHub 요청 | GAS GET | 캐시 적중 | 로딩 p50/p95/max |
+|---|---|---|---|---|---|
+| 직접 | 첫 입장 | 36 | 0 | 0 | 248/273/276 ms (대역 지연 150 ms) |
+| 직접 | 재입장(새로고침) | 0 | 0 | 36 | 4/5/5 ms |
+| GitHub 불가 → 중계 | 첫 입장 | 108(학생당 시도 3) | 36 | 0 | 1,697/1,738/1,742 ms(재시도 대기 1.6 s 포함) |
+| GitHub 불가 → 중계 | 재입장 | 0 | 0 | 36 | 3/3/4 ms |
+- mock GAS는 로컬 Node 1개라 중계 시간은 Apps Script 실측이 아님. 실 GAS 첫 입장 부하는 별도 시험(승인 필요).
+
+### 번들 크기 (Apps Script 실저장 미시도)
+- QA 경량(캐시 포함): **8,742,609 B / 8파일**, 게임 `105dad4b…`(캐시 블록 제외 시 `876933…` 동일), 캐시 블록 `c3fd3cdf…`.
+- RELEASE 경량(합성 원격 카탈로그): 8,742,075 B. 커밋 기준 RELEASE(활성 0): 8,726,385 B. 둘 다 RC 감사 PASS.
+- 현재 격리 프로젝트 7,309,075 B보다 크다 → **F4-SIZE-GATE OPEN**.
+
+Node: **97/97 PASS**(신규: LIST 핀은 원격 카탈로그에만 / 캐시 블록 정적 규칙 — IndexedDB 전용, 10 MiB·90일, 고정 호스트, 사용량·랭킹 미접촉). 증거 `evidence/f4/c*`.

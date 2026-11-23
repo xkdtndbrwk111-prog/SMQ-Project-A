@@ -19,6 +19,14 @@ ok(hashlib.sha256(game).hexdigest() == info['patchedGameSha256'], 'GAME_SHA_MISM
 for marker in (b'hoja-ext-media-v1', b'hoja-ext-math-v1', b'hoja-ext-input-guard-v1', b'HOJA_TRIAL_APPROVED_HTML', b'hoja_usage_pending_v1'):
     ok(marker in game, 'MISSING_IN_GAME ' + marker.decode())
 ok(b'withFailureHandler(()=>{}).recordUsageStartU1' not in game, 'OLD_TELEMETRY_STILL_PRESENT')
+# F4 (40-6AD): the browser package cache is exactly ONE injected block; without it the game is the audited RC
+mark = b'<script id="hoja-approved-package-cache-v1">'
+ok(game.count(mark) == 1, 'PACKAGE_CACHE_BLOCK_COUNT')
+if game.count(mark) == 1:
+    i = game.index(mark); j = game.index(b'</script>', i) + len(b'</script>\n')
+    ok(hashlib.sha256(game[i:j - 1]).hexdigest() == rc.get('packageCacheBlockSha256'), 'PACKAGE_CACHE_BLOCK_SHA')
+    ok(hashlib.sha256(game[:i] + game[j:]).hexdigest() == rc.get('gameBeforePackageCacheSha256') == '876933786d9cc3bb2dd412afe1823c78625d79747a8ffe4a03f1a25007c0fee7',
+       'GAME_WITHOUT_CACHE_BLOCK_IS_NOT_THE_AUDITED_RC')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}
 allsrc = '\n'.join(gs.values()) + game.decode('utf-8', 'replace')
 for bad in ('"buildType": "QA_TEST_ONLY"', 'qa-preview-not-deployment', 'hojaV4TestEvidenceU3',

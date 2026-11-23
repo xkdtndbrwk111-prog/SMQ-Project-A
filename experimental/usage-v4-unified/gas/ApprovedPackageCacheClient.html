@@ -1,0 +1,224 @@
+<script id="hoja-approved-package-cache-v1">
+/* HOJA F4 (40-6AD) — browser cache for APPROVED unit packages. Injected once by build_unified_gas.py
+ * before </body>; it only WRAPS window.HOJA_B_LIVE.rpc for 'LIST' and 'GET' (no game line is edited):
+ *  - LIST: the trusted GAS response carries, per approved unit, {id, sha256, path, commit, repo, questionCount};
+ *    only units in the CURRENT list can be served (a cached unit that left the list is never used).
+ *  - GET of approved units: IndexedDB (same id + same SHA-256, re-hashed on every read) -> else ONE shared
+ *    download per package from https://raw.githubusercontent.com/<repo>/<40-hex commit>/<path> (limited retries)
+ *    -> byte SHA-256 + structure/media/tag checks -> store -> the SAME [{sheetName,data}] contract as GAS GET.
+ *  - Direct download impossible (CORS/CSP/offline) -> the existing GAS GET is used as a relay for the missing
+ *    units (server-verified); its data is cached only if its canonical bytes hash to the catalog SHA.
+ *  - Storage: IndexedDB only (never localStorage), app limit 10 MiB, 90-day-unused purge, LRU eviction,
+ *    units in use / downloading / verifying are never evicted; any IndexedDB failure -> verified one-time run.
+ * No student identifiers, tokens or progress are stored. No student UI; diagnostics are dev-only. */
+(function(){
+'use strict';
+if(window.HOJA_APPROVED_PACKAGE_CACHE)return;
+const live=window.HOJA_B_LIVE;
+if(!live||typeof live.rpc!=='function')return;
+const DB_NAME='hoja-approved-packages',DB_VERSION=1,STORE='packages',FORMAT='hoja-game-runtime-packages-v1';
+const LIMIT_BYTES=10485760,MAX_UNUSED_MS=90*86400000,META_BYTES=512;
+const RAW='https://raw.githubusercontent.com/',REPOS=['xkdtndbrwk111-prog/HOJA-QUESTION-BANK'];
+const ID_RE=/^[a-z0-9][a-z0-9-]{2,63}$/,SHA_RE=/^[a-f0-9]{64}$/,COMMIT_RE=/^[a-f0-9]{40}$/;
+const PATH_RE=/^[A-Za-z0-9][A-Za-z0-9_-]*(\/[A-Za-z0-9][A-Za-z0-9._-]*)*\.json$/;
+const IMG_RE=/^data:image\/(webp|png|jpeg|gif|svg\+xml);base64,[A-Za-z0-9+\/=]+$/;
+const RETRY_DELAYS=[400,1200],FETCH_TIMEOUT_MS=20000;
+const baseRpc=live.rpc;
+let catalog=new Map();            // game name -> verified pkg descriptor (from the current LIST only)
+const inflight=new Map();         // sha256 -> Promise<text>  (one download per package per page)
+const protect=new Set();          // unit ids in use / downloading / verifying
+const stats={hits:0,misses:0,downloads:0,downloadAttempts:0,relayed:0,stored:0,notStored:0,evicted:0,purged:0,discarded:0,idbErrors:0};
+const enc=new TextEncoder();
+const utf8Bytes=s=>enc.encode(s).length;
+async function sha256Hex(text){
+ const d=await crypto.subtle.digest('SHA-256',enc.encode(text));
+ return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,'0')).join('');
+}
+function fail(code){return new Error(code)}
+/* ---------- IndexedDB (best effort: every failure degrades to a verified one-time run) ---------- */
+let dbPromise=null,dbBroken=false;
+function db(){
+ if(dbBroken)return Promise.resolve(null);
+ if(!dbPromise)dbPromise=new Promise(resolve=>{
+  let req;
+  try{req=indexedDB.open(DB_NAME,DB_VERSION)}catch(_e){dbBroken=true;stats.idbErrors++;resolve(null);return}
+  req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'cartridgeId'})};
+  req.onsuccess=()=>{const d=req.result;d.onversionchange=()=>{try{d.close()}catch(_e){}dbPromise=null};resolve(d)};
+  req.onerror=()=>{dbBroken=true;stats.idbErrors++;resolve(null)};
+  req.onblocked=()=>{};
+ });
+ return dbPromise;
+}
+function tx(d,mode,fn){
+ return new Promise((resolve,reject)=>{
+  let out;let t;
+  try{t=d.transaction(STORE,mode)}catch(e){reject(e);return}
+  t.oncomplete=()=>resolve(out);t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||fail('IDB_ABORT'));
+  try{const r=fn(t.objectStore(STORE));if(r)r.onsuccess=()=>{out=r.result}}catch(e){try{t.abort()}catch(_e){}reject(e)}
+ });
+}
+async function idbGet(id){
+ const d=await db();if(!d)return null;
+ try{return await tx(d,'readonly',s=>s.get(id))||null}catch(_e){stats.idbErrors++;return null}
+}
+async function idbDelete(id){
+ const d=await db();if(!d)return;
+ try{await tx(d,'readwrite',s=>{s.delete(id)})}catch(_e){stats.idbErrors++}
+}
+async function idbTouch(rec){
+ const d=await db();if(!d)return;
+ try{await tx(d,'readwrite',s=>{s.put(Object.assign({},rec,{lastUsedAt:Date.now()}))})}catch(_e){stats.idbErrors++}
+}
+const recSize=r=>(typeof r.bytes==='number'?r.bytes:utf8Bytes(r.text||''))+META_BYTES;
+/* Retention + store in ONE readwrite transaction: purge >90 days unused, then LRU-evict unprotected
+ * units until the new package fits under 10 MiB; never evict protected units; no fit -> not stored. */
+async function idbStore(entry,text){
+ const size=utf8Bytes(text)+META_BYTES;
+ if(size>LIMIT_BYTES){stats.notStored++;return false}
+ const d=await db();if(!d){stats.notStored++;return false}
+ const now=Date.now();
+ const rec={cartridgeId:entry.id,packageSha256:entry.sha256,sourceCommit:entry.sourceCommit,contentCommit:entry.commit,
+  repo:entry.repo,path:entry.path,format:FORMAT,bytes:utf8Bytes(text),downloadedAt:now,verifiedAt:now,lastUsedAt:now,text};
+ let stored=false;
+ try{
+  await new Promise((resolve,reject)=>{
+   const t=d.transaction(STORE,'readwrite');const s=t.objectStore(STORE);
+   t.oncomplete=resolve;t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||fail('IDB_ABORT'));
+   const all=s.getAll();
+   all.onsuccess=()=>{
+    let live=all.result.filter(r=>r&&r.cartridgeId!==entry.id);
+    for(const r of live.slice())if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!protect.has(r.cartridgeId)){s.delete(r.cartridgeId);stats.purged++;live=live.filter(x=>x!==r)}
+    let total=live.reduce((n,r)=>n+recSize(r),0);
+    const lru=live.filter(r=>!protect.has(r.cartridgeId)).sort((a,b)=>(a.lastUsedAt||0)-(b.lastUsedAt||0));
+    while(total+size>LIMIT_BYTES&&lru.length){const v=lru.shift();s.delete(v.cartridgeId);total-=recSize(v);stats.evicted++}
+    if(total+size>LIMIT_BYTES){stats.notStored++;return}   // protected units alone fill the limit
+    s.put(rec);stored=true;
+   };
+  });
+ }catch(_e){stats.idbErrors++;stored=false}
+ if(stored)stats.stored++;
+ return stored;
+}
+async function purgeUnused(){
+ const d=await db();if(!d)return;
+ const now=Date.now();
+ try{await new Promise((resolve,reject)=>{
+  const t=d.transaction(STORE,'readwrite');const s=t.objectStore(STORE);
+  t.oncomplete=resolve;t.onerror=()=>reject(t.error);
+  const c=s.openCursor();
+  c.onsuccess=()=>{const cur=c.result;if(!cur)return;const r=cur.value;
+   if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!protect.has(r.cartridgeId)){cur.delete();stats.purged++}cur.continue()};
+ })}catch(_e){stats.idbErrors++}
+}
+/* ---------- validation (mirrors the GAS loader) ---------- */
+function validate(entry,text){
+ let data;try{data=JSON.parse(text)}catch(_e){throw fail('APPROVED_CONTENT_INVALID')}
+ if(!data||data.cartridgeId!==entry.id||data.questionSchemaVersion!==2||!Array.isArray(data.questions)||
+    data.questions.length!==entry.questionCount||!data.images||typeof data.images!=='object'||Array.isArray(data.images)||
+    !data.unitMeta||typeof data.unitMeta!=='object'||!data.tags||typeof data.tags!=='object'||Array.isArray(data.tags)||
+    data.questions.some(q=>!q||!q.rendererQuestion||!q.familyId||!q.type))throw fail('APPROVED_CONTENT_INVALID');
+ const qids=data.questions.map(q=>q.rendererQuestion.questionId);
+ if(qids.some(x=>typeof x!=='string'||!x)||new Set(qids).size!==qids.length)throw fail('APPROVED_CONTENT_INVALID');
+ for(const k of Object.keys(data.images))if(typeof data.images[k]!=='string'||!IMG_RE.test(data.images[k]))throw fail('APPROVED_CONTENT_MEDIA_INVALID');
+ for(const q of data.questions){const r=q.rendererQuestion;
+  const refs=(r.image?[r.image]:[]).concat((Array.isArray(r.media)?r.media:[]).filter(m=>m&&m.kind==='image').map(m=>m.asset));
+  if(refs.some(a=>typeof a!=='string'||!Object.prototype.hasOwnProperty.call(data.images,a)))throw fail('APPROVED_CONTENT_MEDIA_INVALID')}
+ for(const k of Object.keys(data.tags))if(!data.tags[k]||typeof data.tags[k]!=='object')throw fail('APPROVED_CONTENT_TAGS_INVALID');
+ return data;
+}
+/* ---------- download (pinned URL, shared per package, limited retries) ---------- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function fetchOnce(url){
+ const ctl=typeof AbortController==='function'?new AbortController():null;
+ const timer=ctl?setTimeout(()=>ctl.abort(),FETCH_TIMEOUT_MS):null;
+ try{
+  const res=await fetch(url,{method:'GET',mode:'cors',credentials:'omit',redirect:'error',cache:'default',signal:ctl?ctl.signal:undefined});
+  if(res.status!==200){const e=fail('APPROVED_CONTENT_FETCH_FAILED');e.retry=res.status>=500||res.status===429;throw e}
+  return await res.text();
+ }catch(e){if(e&&e.message==='APPROVED_CONTENT_FETCH_FAILED')throw e;const x=fail('APPROVED_CONTENT_FETCH_FAILED');x.retry=true;throw x}
+ finally{if(timer)clearTimeout(timer)}
+}
+function download(entry){
+ if(inflight.has(entry.sha256))return inflight.get(entry.sha256);
+ const url=RAW+entry.repo+'/'+entry.commit+'/'+entry.path;
+ const p=(async()=>{
+  let last;
+  for(let attempt=0;attempt<=RETRY_DELAYS.length;attempt++){
+   if(attempt)await sleep(RETRY_DELAYS[attempt-1]);
+   stats.downloadAttempts++;
+   try{
+    const text=await fetchOnce(url);
+    if(await sha256Hex(text)!==entry.sha256)throw fail('APPROVED_CONTENT_DIGEST_MISMATCH');
+    stats.downloads++;return text;
+   }catch(e){last=e;if(!e.retry)break}
+  }
+  throw last||fail('APPROVED_CONTENT_FETCH_FAILED');
+ })();
+ inflight.set(entry.sha256,p);
+ p.then(()=>inflight.delete(entry.sha256),()=>inflight.delete(entry.sha256));
+ return p;
+}
+/* One unit: verified cache hit, else shared verified download (+store). Returns {text} or {needsRelay:true}. */
+async function loadUnit(entry){
+ const rec=await idbGet(entry.id);
+ if(rec){
+  if(rec.packageSha256===entry.sha256&&typeof rec.text==='string'&&await sha256Hex(rec.text)===entry.sha256){
+   stats.hits++;idbTouch(rec);return {text:rec.text,source:'CACHE'};
+  }
+  stats.discarded++;await idbDelete(entry.id);   // other version or corrupted -> drop, re-download
+ }
+ stats.misses++;
+ let text;
+ try{text=await download(entry)}
+ catch(e){if(e&&e.message==='APPROVED_CONTENT_DIGEST_MISMATCH')throw e;return {needsRelay:true,error:e}}
+ validate(entry,text);                      // never store an invalid package
+ await idbStore(entry,text);
+ return {text,source:'NETWORK'};
+}
+async function get(names){
+ const entries=names.map(n=>catalog.get(n));
+ protect.clear();entries.forEach(e=>protect.add(e.id));
+ const loaded=await Promise.all(entries.map(loadUnit));
+ const relayIdx=loaded.map((r,i)=>r.needsRelay?i:-1).filter(i=>i>=0);
+ if(relayIdx.length){
+  let rel;
+  try{rel=await baseRpc('GET',relayIdx.map(i=>names[i]))}
+  catch(e){throw fail('문제 다운로드 실패 — 인터넷 연결을 확인해 주세요. ('+String(e&&e.message||e)+')')}
+  if(!Array.isArray(rel)||rel.length!==relayIdx.length)throw fail('APPROVED_CONTENT_FETCH_FAILED');
+  for(let k=0;k<relayIdx.length;k++){
+   const i=relayIdx[k],entry=entries[i],r=rel[k];
+   if(!r||r.sheetName!==names[i]||!r.data)throw fail('APPROVED_CONTENT_FETCH_FAILED');
+   stats.relayed++;
+   const text=JSON.stringify(r.data);
+   if(await sha256Hex(text)===entry.sha256){validate(entry,text);await idbStore(entry,text);loaded[i]={text,source:'RELAY'}}
+   else loaded[i]={data:r.data,source:'RELAY_UNCACHED'};   // server-verified, used once, not stored
+  }
+ }
+ return entries.map((e,i)=>({sheetName:names[i],data:loaded[i].text!=null?validate(e,loaded[i].text):loaded[i].data}));
+}
+function setCatalog(rows){
+ const next=new Map();
+ if(Array.isArray(rows))for(const r of rows){
+  const p=r&&r.pkg;
+  if(!p||typeof r.name!=='string')continue;
+  if(!ID_RE.test(String(p.id))||!SHA_RE.test(String(p.sha256))||!COMMIT_RE.test(String(p.commit))||REPOS.indexOf(String(p.repo))<0||
+     !PATH_RE.test(String(p.path))||String(p.path).indexOf('..')>=0||!Number.isSafeInteger(p.questionCount)||p.questionCount<1)continue;
+  next.set(r.name,{id:p.id,sha256:p.sha256,commit:p.commit,repo:p.repo,path:p.path,questionCount:p.questionCount,sourceCommit:String(p.sourceCommit||'')});
+ }
+ catalog=next;
+ purgeUnused();   // app entry: 90-day-unused clean-up (runs only while the app is open)
+}
+const handles=names=>Array.isArray(names)&&names.length>0&&names.every(n=>typeof n==='string'&&catalog.has(n));
+live.rpc=function(method,payload){
+ if(method==='LIST')return baseRpc('LIST',payload).then(rows=>{try{setCatalog(rows)}catch(_e){catalog=new Map()}return rows});
+ if(method==='GET'&&handles(payload))return get(payload);
+ return baseRpc(method,payload);
+};
+async function diagnose(){   // developer diagnostics only (not shown to students)
+ const d=await db();let units=[];
+ if(d)try{units=(await tx(d,'readonly',s=>s.getAll())||[]).map(r=>({id:r.cartridgeId,sha8:String(r.packageSha256).slice(0,8),bytes:r.bytes,lastUsedAt:r.lastUsedAt}))}catch(_e){}
+ return {idb:d?'OK':'UNAVAILABLE',limitBytes:LIMIT_BYTES,usedBytes:units.reduce((n,u)=>n+u.bytes+META_BYTES,0),units,stats:Object.assign({},stats),catalogUnits:catalog.size};
+}
+window.HOJA_APPROVED_PACKAGE_CACHE=Object.freeze({version:1,diagnose,get stats(){return Object.assign({},stats)}});
+})();
+</script>

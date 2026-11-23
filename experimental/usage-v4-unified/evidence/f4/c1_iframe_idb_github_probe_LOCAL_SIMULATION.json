@@ -1,0 +1,74 @@
+{
+ "1_fresh_write": {
+  "origin": "http://localhost:8782",
+  "isSecure": true,
+  "before": null,
+  "after": {
+   "at": 1795445146964,
+   "n": 1
+  },
+  "idb": "OK",
+  "persisted": false,
+  "quotaMB": 10240,
+  "fetch": {
+   "status": 200,
+   "bytes": 7609,
+   "sha256": "fe5fe5fcc546e906",
+   "ms": 283
+  }
+ },
+ "2_after_reload": {
+  "origin": "http://localhost:8782",
+  "isSecure": true,
+  "before": {
+   "at": 1795445146964,
+   "n": 1
+  },
+  "after": {
+   "at": 1795445146964,
+   "n": 1
+  },
+  "idb": "OK",
+  "persisted": false,
+  "quotaMB": 10240,
+  "fetch": {
+   "status": 200,
+   "bytes": 7609,
+   "sha256": "fe5fe5fcc546e906",
+   "ms": 1
+  }
+ },
+ "3_after_browser_restart": {
+  "origin": "http://localhost:8782",
+  "isSecure": true,
+  "before": {
+   "at": 1795445146964,
+   "n": 1
+  },
+  "after": {
+   "at": 1795445146964,
+   "n": 1
+  },
+  "idb": "OK",
+  "persisted": false,
+  "quotaMB": 10240,
+  "fetch": {
+   "status": 200,
+   "bytes": 7609,
+   "sha256": "fe5fe5fcc546e906",
+   "ms": 1
+  }
+ },
+ "4_sandbox_without_allow_same_origin": {
+  "origin": "http://localhost:8782",
+  "isSecure": true,
+  "idb": "ERR SecurityError",
+  "storageApi": "ERR TypeError",
+  "fetch": {
+   "status": 200,
+   "bytes": 7609,
+   "sha256": "fe5fe5fcc546e906",
+   "ms": 42
+  }
+ }
+}

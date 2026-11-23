@@ -1,0 +1,103 @@
+{
+ "scenarios": {
+  "A_fresh_download_store_one_A1": {
+   "pass": true,
+   "downloads": {
+    "math5-s2-u4": 1
+   },
+   "stored": [
+    "math5-s2-u4"
+   ],
+   "usageRowsAdded": 1,
+   "idb": "OK"
+  },
+  "B_same_unit_cache_hit": {
+   "pass": true,
+   "downloads": 0,
+   "questions": 31
+  },
+  "C_reload_cache_hit": {
+   "pass": true,
+   "downloads": 0,
+   "hits": 1
+  },
+  "D_browser_restart_cache_hit_via_ui": {
+   "pass": true,
+   "downloads": 0,
+   "hits": 1
+  },
+  "E_other_unit_only_it_downloads": {
+   "pass": true,
+   "downloads": {
+    "eng5-ham-u10": 1
+   }
+  },
+  "K_concurrent_same_unit_one_download": {
+   "pass": true,
+   "downloads": {
+    "soc6-s2-u3-1-common": 1
+   }
+  },
+  "G_tampered_cache_discarded_and_redownloaded": {
+   "pass": true,
+   "downloads": {
+    "math5-s2-u4": 1
+   },
+   "discarded": 1
+  },
+  "H_github_down_cache_plays_uncached_uses_relay": {
+   "pass": true,
+   "cachedPlayedWithZeroDownloads": true,
+   "relayedUncached": 1,
+   "relayResultCachedAfterHashCheck": true
+  },
+  "L_two_tabs_same_unit": {
+   "pass": true,
+   "downloads": 2,
+   "storedRecords": 1
+  },
+  "M_purge_90d_and_LRU_protects_in_use": {
+   "pass": true,
+   "purged91d": true,
+   "xKept": true,
+   "newStored": true,
+   "evicted": 1,
+   "usedBytes": 6022917,
+   "limit": 10485760
+  },
+  "N_23_units_exact_and_second_pass_zero_downloads": {
+   "pass": true,
+   "units": 23,
+   "shaOk": 23,
+   "questions": 732,
+   "images": 145,
+   "tagEntries": 732,
+   "firstPassDownloads": 17,
+   "secondPassDownloads": 0,
+   "secondPassHits": 23,
+   "storedUnits": 23,
+   "usedBytes": 5811184
+  },
+  "F_new_version_only_changed_unit_redownloaded": {
+   "pass": true,
+   "downloads": {
+    "math5-s2-u4": 1
+   }
+  },
+  "I_no_network_no_cache_clear_error_no_A1": {
+   "pass": true,
+   "modeScreenReached": false,
+   "usageRowsAdded": 0,
+   "dialog": [
+    "Project B 문제 로딩 실패: 문제 다운로드 실패 — 인터넷 연결을 확인해 주세요. (APPROVED_CONTENT_FETCH_FAILED"
+   ]
+  },
+  "J_indexeddb_unavailable_verified_one_time_runs": {
+   "pass": true,
+   "idb": "UNAVAILABLE",
+   "downloads": 2,
+   "stored": 0
+  }
+ },
+ "fails": []
+}

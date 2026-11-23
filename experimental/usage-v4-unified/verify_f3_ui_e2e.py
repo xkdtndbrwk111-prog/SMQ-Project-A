@@ -74,10 +74,11 @@ async def approved_iframe(page, want_min=2):
        imgs:[...d.querySelectorAll('#hqMedia img, #hqChoices img')].filter(i=>i.complete&&i.naturalWidth>0).length,
        choiceText:[...d.querySelectorAll('#hqChoices .hqChoiceLabel')].map(x=>x.innerText.trim())}}""")
 
+GH_HITS = []
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
-    ap.add_argument('--port', type=int, default=8765); ap.add_argument('--units', required=True); ap.add_argument('--fail-shot')
+    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8765); ap.add_argument('--units', required=True); ap.add_argument('--fail-shot')
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     phaser = Path(a.phaser).read_bytes()
@@ -94,6 +95,10 @@ async def main():
                     u = r.request.url
                     if u == f'http://127.0.0.1:{a.port}/game.html': await r.fulfill(body=html, content_type='text/html; charset=utf-8')
                     elif u.endswith('phaser.min.js'): await r.fulfill(body=phaser, content_type='application/javascript')
+                    elif a.github_packages and u.startswith('https://raw.githubusercontent.com/xkdtndbrwk111-prog/HOJA-QUESTION-BANK/'):
+                        rel = u.split('/', 6)[-1]; f = Path(a.github_packages) / rel  # .../<owner>/<repo>/<commit>/<path>
+                        GH_HITS.append(rel.rsplit('/', 1)[-1] + ('' if f.is_file() else ':404'))
+                        await r.fulfill(status=200 if f.is_file() else 404, body=f.read_bytes() if f.is_file() else b'', headers={'access-control-allow-origin': '*'})
                     elif u.startswith(('data:', f'http://127.0.0.1:{a.port}')): await r.continue_()
                     else: await r.abort()
                 await page.route('**/*', route)
@@ -151,6 +156,7 @@ async def main():
                 await ctx.close()
         await b.close()
     print('F3_UI_E2E_PASS ' + json.dumps({'cases': len(results)}))
+    if a.github_packages: print('GITHUB_STANDIN_REQUESTS', len(GH_HITS), 'distinct', len(set(GH_HITS)), 'notFound', sum(h.endswith(':404') for h in GH_HITS))
 
 async def run():
     try:

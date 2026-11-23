@@ -133,7 +133,15 @@ function hojaPublicSheets_() {
 
 function hojaListPublicCartridges() {
   const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
-  if(qa)return qa.entries.map(e=>({name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId}));
+  if(qa){
+    // F4 (40-6AD): with a pinned public content source, each row also carries the TRUSTED package pin the
+    // browser cache needs (the game itself only reads row.name).
+    const src=hojaApprovedSource_(qa);
+    return qa.entries.map(e=>{const row={name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId};
+      if(src)row.pkg={id:e.cartridgeId,sha256:e.packageSha256,path:e.contentPath,commit:src.commit,repo:src.repo,
+        questionCount:e.questionCount,sourceCommit:qa.sourceCommit};
+      return row;});
+  }
   const sheets=hojaPublicSheets_().sheets;
   hojaUsageCatalogPut_(sheets); // warms the telemetry cache: the game lists before it starts
   return sheets.map(p=>({name:p.title,cartridgeId:p.sheetId}));

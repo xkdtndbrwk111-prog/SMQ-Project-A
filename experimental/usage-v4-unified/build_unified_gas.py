@@ -47,6 +47,18 @@ def patch_telemetry(content):
     patched = content[:start] + new + content[end + len(b'</script>'):]
     return patched, hashlib.sha256(old).hexdigest(), hashlib.sha256(new).hexdigest()
 
+CACHE_MARK = b'<script id="hoja-approved-package-cache-v1">'
+def inject_package_cache(content):
+    """F4 (40-6AD): append the browser package cache (one <script>, wraps HOJA_B_LIVE.rpc only) before </body>.
+    Removing exactly this block restores the input bytes (checked by verify_release_candidate.py)."""
+    block = (GAS / 'ApprovedPackageCacheClient.html').read_bytes().strip()
+    if not block.startswith(CACHE_MARK) or not block.endswith(b'</script>') or block.count(b'<script') != 1:
+        raise SystemExit('PACKAGE_CACHE_BLOCK_INVALID')
+    if CACHE_MARK in content: raise SystemExit('PACKAGE_CACHE_ALREADY_PRESENT')
+    i = content.rfind(b'</body>')
+    if i < 0 or b'window.HOJA_B_LIVE=' not in content[:i]: raise SystemExit('PACKAGE_CACHE_ANCHOR_MISSING')
+    return content[:i] + block + b'\n' + content[i:], hashlib.sha256(block).hexdigest()
+
 def approved_rc_game(original_sha):
     """F3-3 release candidate: rebuild the verified trial game (only parts 14 and 22 differ from the
     pinned 2.0.0 snapshot) with the COMPOSED renderer (unchanged bridge + media + math extensions)
@@ -153,6 +165,11 @@ def main():
         if b'HOJA_TRIAL_APPROVED_HTML' not in content: raise SystemExit('NOT_A_TRIAL_GAME')
         sha = hashlib.sha256(content).hexdigest()
     patched, old_block, new_block = patch_telemetry(content)
+    cache_sha = None
+    if a.game == 'approved-rc':
+        rc['gameBeforePackageCacheSha256'] = hashlib.sha256(patched).hexdigest()
+        patched, cache_sha = inject_package_cache(patched)
+        rc['packageCacheBlockSha256'] = cache_sha
     (out / 'Game.html').write_bytes(patched)
     if b'getPublicUsageStatisticsV4' in patched:
         raise SystemExit('GAME_MUST_NOT_CALL_STATS')
