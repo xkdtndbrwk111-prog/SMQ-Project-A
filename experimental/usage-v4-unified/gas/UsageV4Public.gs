@@ -112,15 +112,37 @@ var HOJA_USAGE_V4_PUBLIC=(function(){
    daily,maps};
  }
  // ---------- public allowlist ----------
- const CART_PART=/^[3-6]-(국어|영어|수학|사회|과학|도덕|음악|미술|체육|실과)-[^-|]{1,20}-.{1,60}$/;
+ // Presentation-only canonical labels; original EVENT_LOG/V4 snapshot keys stay intact.
+ const SUBJECTS=new Set(['국어','영어','수학','사회','과학','도덕','음악','미술','체육','실과']);
+ const CONTACT_OR_MARKUP=/@|https?:|www\.|\d{2,4}-\d{3,4}-\d{4}|[<>\r\n\t]/;
+ const IDENTITY=/초등학교|중학교|고등학교|대학교|선생님|[0-9]+반\b|학생명|담임교사/;
  const RISKY=/@|https?:|www\.|\d{2,4}-\d{3,4}-\d{4}|학교|초등|중학|선생|교사|학생|[0-9]+반\b|[0-9]+반$/;
+ function standardizedCartridgePart(raw){
+  const s=String(raw==null?'':raw).normalize('NFC').trim().replace(/\s+/g,' ');
+  if(!s||s.length>145||CONTACT_OR_MARKUP.test(s)||IDENTITY.test(s))return null;
+  const acad=/^([3-6])(?:학년)?-([가-힣]+)-(.+)$/.exec(s);
+  if(acad&&SUBJECTS.has(acad[2])){
+   const grade=acad[1],subject=acad[2],tail=acad[3];
+   if(!tail||tail.length>120)return null;
+   if(subject==='영어'){
+    const eng=/^([^-]{1,25})-(.+)$/.exec(tail);
+    if(eng)return grade+'학년 · 영어 · '+eng[1]+' · '+eng[2];
+   }
+   return grade+'학년 · '+subject+' · '+tail;
+  }
+  const other=/^기타-([^-]{1,30})-(.+)$/.exec(s);
+  if(other)return '기타 · '+(other[1].toLowerCase()==='kpop'?'K-POP':other[1])+' · '+other[2];
+  return null;
+ }
  function safeCartridgeLabel(label){
   const s=String(label==null?'':label).trim();
-  if(!s||s.length>300)return OTHER_CART;
-  const parts=s.split(' | ');
-  if(parts.length>5)return OTHER_CART;
-  for(const p of parts)if(!CART_PART.test(p)||RISKY.test(p))return OTHER_CART;
-  return s;
+  if(!s||s.length>750)return OTHER_CART;
+  const pieces=s.split(' | ');
+  if(pieces.length>5)return OTHER_CART;
+  const normalized=pieces.map(standardizedCartridgePart);
+  if(normalized.some(x=>x===null))return OTHER_CART;
+  // A+B and B+A have the same combination identity.
+  return normalized.sort((a,b)=>a.localeCompare(b,'ko')).join(' + ');
  }
  const safeShortLabel=(label,max)=>{
   const s=String(label==null?'':label).trim();
