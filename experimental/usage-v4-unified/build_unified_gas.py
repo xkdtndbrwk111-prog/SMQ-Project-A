@@ -50,6 +50,7 @@ def patch_telemetry(content):
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--output', required=True)
     ap.add_argument('--variant', choices=['release', 'qa'], default='release'); ap.add_argument('--qa-dir')
+    ap.add_argument('--release-content-dir', help='F3-2: HOJA_QB_CONTENT_*.gs for EXACTLY the release-active ids (required when active > 0)')
     a = ap.parse_args()
     out = Path(a.output).resolve()
     if out == ROOT or ROOT in out.parents and out.parent == ROOT:
@@ -73,6 +74,24 @@ def main():
             shutil.copyfile(f, out / f.name); extra.append(f.name)
     elif a.qa_dir:
         raise SystemExit('QA_DIR_ONLY_WITH_QA_VARIANT')
+    else:
+        # RELEASE: active entries (teacher deployment approved) must ship their exact content, nothing more.
+        body = cat[cat.index('Object.freeze(') + len('Object.freeze('):cat.rindex(');')]
+        active = {e['cartridgeId']: e.get('packageSha256') for e in json.loads(body)['entries']}
+        if active:
+            d = Path(a.release_content_dir or '').resolve()
+            files = sorted(d.glob('HOJA_QB_CONTENT_*.gs')) if a.release_content_dir else []
+            got = {}
+            for f in files:
+                t = f.read_text(encoding='utf-8')
+                import re
+                m = re.search(r'HOJA_APPROVED_CONTENT_\[("[^"]+")\]=\{packageSha256:("[0-9a-f]{64}")', t)
+                if not m: raise SystemExit('RELEASE_CONTENT_FILE_INVALID ' + f.name)
+                got[json.loads(m.group(1))] = json.loads(m.group(2))
+            if got != active: raise SystemExit('RELEASE_CONTENT_MUST_MATCH_ACTIVE_IDS_AND_DIGESTS')
+            for f in files: shutil.copyfile(f, out / f.name); extra.append(f.name)
+        elif a.release_content_dir:
+            raise SystemExit('RELEASE_HAS_NO_ACTIVE_ENTRIES')
     content, sha = game_bytes()
     patched, old_block, new_block = patch_telemetry(content)
     (out / 'Game.html').write_bytes(patched)

@@ -132,7 +132,7 @@ function hojaPublicSheets_() {
 }
 
 function hojaListPublicCartridges() {
-  const qa=hojaApprovedQaCatalog_(); // 40-6 F3: QA build in the isolated project only
+  const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
   if(qa)return qa.entries.map(e=>({name:e.title,cartridgeId:e.cartridgeId}));
   const sheets=hojaPublicSheets_().sheets;
   hojaUsageCatalogPut_(sheets); // warms the telemetry cache: the game lists before it starts
@@ -179,15 +179,27 @@ function hojaApprovedActive_(){
   if(type==='QA_TEST_ONLY'){
     if(!hojaV4uEnabled_(PropertiesService.getScriptProperties()))
       throw new Error('APPROVED_QA_CATALOG_REQUIRES_ISOLATED_TEST_PROJECT');
+    // Q02 second defense: a QA bundle is bound at build time to the isolated project's script id.
+    const allowed=Array.isArray(c.allowedScriptIds)?c.allowedScriptIds:[];
+    if(!allowed.length||allowed.indexOf(ScriptApp.getScriptId())<0)
+      throw new Error('APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED');
   }else if(type!=='RELEASE')throw new Error('APPROVED_CATALOG_INVALID');
   return c;
 }
-/* 40-6 F3: the game's existing LIST/GET RPCs serve the approved catalog ONLY when the
- * TEST-ONLY QA catalog is embedded (which hojaApprovedActive_ refuses outside the isolated
- * project). The RELEASE catalog (0 active) never reroutes: legacy behaviour is unchanged. */
-function hojaApprovedQaCatalog_(){
+/* 40-6 F3/F3-2: the game's existing LIST/GET RPCs serve the approved catalog when
+ *  - the TEST-ONLY QA catalog is embedded (refused outside the isolated project), or
+ *  - the RELEASE catalog has teacher-deployment-approved entries AND the approved era has
+ *    started (HOJA_USAGE_APPROVED_ERA_START <= today KST). Active entries before the era
+ *    start fail closed (never silently fall back to, or mix with, the legacy Sheets list).
+ * RELEASE with 0 active entries (today) keeps the legacy behaviour unchanged. */
+function hojaApprovedGameCatalog_(){
   const c=hojaApprovedActive_();
-  return c.buildType==='QA_TEST_ONLY'?c:null;
+  if(c.buildType==='QA_TEST_ONLY')return c;
+  if(!c.entries.length)return null;
+  const today=Utilities.formatDate(new Date(),'Asia/Seoul','yyyy-MM-dd');
+  if(!hojaUsageEra_(PropertiesService.getScriptProperties(),today).approved)
+    throw new Error('APPROVED_ACTIVE_BEFORE_ERA_START');
+  return c;
 }
 function hojaApprovedIdsByTitle_(cat,names){
   if(!Array.isArray(names)||!names.length||names.length>5||
@@ -281,7 +293,7 @@ function hojaReadCartridge_(sheet) {
 }
 
 function hojaGetPublicQuestions(names) {
-  const qa=hojaApprovedQaCatalog_(); // 40-6 F3: QA build in the isolated project only
+  const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
   if(qa)return hojaGetApprovedQuestions(hojaApprovedIdsByTitle_(qa,names));
   if(!Array.isArray(names)||!names.length||names.length>5||
      names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>180)||

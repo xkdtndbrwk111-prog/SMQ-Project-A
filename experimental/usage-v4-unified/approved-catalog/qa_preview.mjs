@@ -9,7 +9,9 @@ import {createHash} from 'node:crypto';
 export const QA_SCHEMA = 'hoja-qa-preview-v1';
 const fail = c => { throw new Error('HOJA_QA_PREVIEW_' + c); };
 
-export function qaPreviewCatalog(index, report, manifest) {
+export function qaPreviewCatalog(index, report, manifest, {allowedScriptIds = []} = {}) {
+  if (!Array.isArray(allowedScriptIds) || !allowedScriptIds.length || allowedScriptIds.some(x => !/^[A-Za-z0-9_-]{20,80}$/.test(String(x))))
+    fail('ALLOWED_SCRIPT_ID_REQUIRED');
   if (!manifest || manifest.schemaVersion !== QA_SCHEMA || manifest.purpose !== 'TEST_ONLY_QA_NOT_DEPLOYMENT') fail('MANIFEST');
   if (manifest.sourceCommit !== index.sourceCommit || report.sourceCommit !== index.sourceCommit) fail('SOURCE_COMMIT_MISMATCH');
   const ready = new Map(report.entries.filter(r => r.status === 'READY').map(r => [r.cartridgeId, r]));
@@ -26,7 +28,7 @@ export function qaPreviewCatalog(index, report, manifest) {
       questionCount: e.questionCount, effectiveSha256: e.effectiveSha256, packageSha256: r.packageSha256,
       releaseId: e.releaseId, deploymentStatus: 'QA_PREVIEW_NOT_DEPLOYED', mediaRights: e.mediaRights.status};
   }).sort((a, b) => a.cartridgeId.localeCompare(b.cartridgeId));
-  return {schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'QA_TEST_ONLY',
+  return {schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'QA_TEST_ONLY', allowedScriptIds: allowedScriptIds.map(String),
     sourceRepo: index.sourceRepo, sourceCommit: index.sourceCommit, deploymentId: 'qa-preview-not-deployment', entries};
 }
 export function renderCatalogGs(cat) {

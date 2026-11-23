@@ -79,7 +79,7 @@ test('existing game RPCs in the single GAS are byte-identical to the root produc
  // telemetry catalog cache; the returned contract is unchanged.
  // 40-6 F3: the only other intended difference is the 2-line QA-catalog route at the top of
  // hojaListPublicCartridges / hojaGetPublicQuestions (inactive with the RELEASE catalog).
- const noQa=t=>t.replace(/\n\s*const qa=hojaApprovedQaCatalog_\(\);[^\n]*\n\s*if\(qa\)return [^\n]*/,'');
+ const noQa=t=>t.replace(/\n\s*const qa=hojaApprovedGameCatalog_\(\);[^\n]*\n\s*if\(qa\)return [^\n]*/,'');
  assert.equal(noQa(fn(uni,'hojaGetPublicQuestions')),fn(root,'hojaGetPublicQuestions'));
  const strip=t=>noQa(t).replace(/\n\s*const sheets=hojaPublicSheets_\(\)\.sheets;\n\s*hojaUsageCatalogPut_\(sheets\);[^\n]*\n\s*return sheets\.map/,'\n  return hojaPublicSheets_().sheets.map');
  assert.equal(strip(fn(uni,'hojaListPublicCartridges')),fn(root,'hojaListPublicCartridges'));

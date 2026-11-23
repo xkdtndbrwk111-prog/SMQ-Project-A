@@ -89,7 +89,8 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
    const o={file:name,title:'',meta:[],setTitle(t){o.title=t;return o;},
     addMetaTag(k,v){o.meta.push([k,v]);return o;},setXFrameOptionsMode(){return o;}};return o;}},
   UrlFetchApp:{fetch(){throw Error('NETWORK_DISABLED_IN_TEST');}},
-  ScriptApp:{getOAuthToken(){return 'x';},newTrigger(){throw Error('TRIGGER_FORBIDDEN');}},
+  ScriptApp:{getOAuthToken(){return 'x';},getScriptId(){return env.__scriptId;},newTrigger(){throw Error('TRIGGER_FORBIDDEN');}},
+  __scriptId:'MOCK_ISOLATED_TEST_SCRIPT_ID_0001',
   __active:activeEmail
  };
  const ctx=createContext(env);

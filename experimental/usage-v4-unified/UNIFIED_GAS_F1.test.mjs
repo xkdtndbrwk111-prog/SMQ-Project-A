@@ -12,7 +12,7 @@ import {buildContentPackages, extractConst, gameRow} from './approved-catalog/ap
 import {qaPreviewCatalog, renderCatalogGs, renderContentGs} from './approved-catalog/qa_preview.mjs';
 import {writeZip, sha256} from './approved-catalog/zip_reader.mjs';
 import {loadProject, MockSpreadsheet} from './mock_gas.mjs';
-import {buildCopy, standardHistory, ISOLATED_PROPS} from './fixture.mjs';
+import {buildCopy, standardHistory, ISOLATED_PROPS, id} from './fixture.mjs';
 
 const DIR = 'experimental/usage-v4-unified';
 const COMMIT = 'e'.repeat(40);
@@ -159,14 +159,16 @@ test('F1/F1-B REAL: 23 units / 732 questions packaged by three version-identifie
 });
 
 /* ---------------- GAS runtime loader (mock engine) ---------------- */
-function qaWorld({isolated = true, tamper = false} = {}) {
+function qaWorld({isolated = true, tamper = false, scriptId = 'MOCK_ISOLATED_TEST_SCRIPT_ID_0001'} = {}) {
   const fs = bank([['social/a/zz5-s1-u1', 'zz5-s1-u1'], ['social/b/zz5-s1-u2', 'zz5-s1-u2']]);
   const {index, report, packages} = build(fs);
-  const cat = qaPreviewCatalog(index, report, {schemaVersion: 'hoja-qa-preview-v1', purpose: 'TEST_ONLY_QA_NOT_DEPLOYMENT', sourceCommit: COMMIT, select: 'ALL_READY'});
+  const cat = qaPreviewCatalog(index, report, {schemaVersion: 'hoja-qa-preview-v1', purpose: 'TEST_ONLY_QA_NOT_DEPLOYMENT', sourceCommit: COMMIT, select: 'ALL_READY'},
+    {allowedScriptIds: ['MOCK_ISOLATED_TEST_SCRIPT_ID_0001']});
   const {ss} = buildCopy({history: standardHistory()});
   const p = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]),
     props: isolated ? ISOLATED_PROPS : {SMQ_USAGE_SPREADSHEET_ID: 'copy40'}});
   runInContext(renderCatalogGs(cat), p.ctx);
+  if (scriptId !== 'MOCK_ISOLATED_TEST_SCRIPT_ID_0001') { p.ctx.__scriptId = scriptId; }
   for (const pk of packages) {
     let gs = renderContentGs(pk.cartridgeId, pk);
     if (tamper && pk.cartridgeId === 'zz5-s1-u2') gs = gs.replace('Q1', 'Q1 (changed)');
@@ -295,4 +297,37 @@ test('F3 QA route: in the isolated QA build the game LIST/GET RPCs serve the SAM
   const {ss} = buildCopy({history: standardHistory()});
   const rel = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]), props: ISOLATED_PROPS});
   assert.deepEqual(rel.rpc('hojaListPublicCartridges').map(x => x.cartridgeId), ['101', '102']);
+});
+
+test('F3-2 (Q02) QA catalog is also bound to the isolated project script id', () => {
+  assert.throws(() => qaWorld({scriptId: 'SOME_OTHER_PROJECT_SCRIPT_ID_99'}).rpc('hojaListApprovedCartridges'), /SCRIPT_ID_NOT_ALLOWED/);
+  assert.throws(() => qaPreviewCatalog({sourceCommit: COMMIT, entries: []}, {sourceCommit: COMMIT, entries: []},
+    {schemaVersion: 'hoja-qa-preview-v1', purpose: 'TEST_ONLY_QA_NOT_DEPLOYMENT', sourceCommit: COMMIT, select: 'ALL_READY'}), /ALLOWED_SCRIPT_ID_REQUIRED/);
+});
+/* Synthetic TEST-ONLY "release with active entries" fixture: never written to active-deployment.json. */
+function releaseActiveWorld({era = '2026-11-23'} = {}) {
+  const fs = bank([['social/a/zz5-s1-u1', 'zz5-s1-u1'], ['social/b/zz5-s1-u2', 'zz5-s1-u2']]);
+  const {index, report, packages} = build(fs);
+  const e = index.entries.find(x => x.cartridgeId === 'zz5-s1-u2'), r = report.entries.find(x => x.cartridgeId === 'zz5-s1-u2');
+  const cat = {schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'RELEASE', sourceRepo: 'fixture', sourceCommit: COMMIT,
+    deploymentId: 'synthetic-test-only', entries: [{cartridgeId: e.cartridgeId, title: e.approvedTitle, grade: e.grade, subjectLabel: e.subjectLabel,
+      publisher: null, questionCount: e.questionCount, effectiveSha256: e.effectiveSha256, packageSha256: r.packageSha256, deploymentStatus: 'DEPLOYED'}]};
+  const {ss} = buildCopy({history: standardHistory()});
+  const p = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]),
+    props: {...ISOLATED_PROPS, ...(era ? {HOJA_USAGE_APPROVED_ERA_START: era} : {})}});
+  runInContext('HOJA_APPROVED_ACTIVE_CATALOG_=' + JSON.stringify(cat), p.ctx);
+  runInContext(renderContentGs('zz5-s1-u2', packages.find(x => x.cartridgeId === 'zz5-s1-u2')), p.ctx);
+  return p;
+}
+test('F3-2 RELEASE with active approved entries: the game LIST/GET serve that catalog (era started), fail closed before it', () => {
+  const w = releaseActiveWorld();
+  assert.deepEqual(w.rpc('hojaListPublicCartridges'), [{name: 'zz5-s1-u2 승인 제목', cartridgeId: 'zz5-s1-u2'}], 'only the deployed unit, no legacy sheets');
+  const got = w.rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']);
+  assert.equal(got[0].data.cartridgeId, 'zz5-s1-u2');
+  assert.throws(() => w.rpc('hojaGetPublicQuestions', ['zz5-s1-u1 승인 제목']), /PROJECT_B_CARTRIDGE_NOT_PUBLIC/, 'approved but not deployed');
+  // same catalog validates the usage record (A1)
+  assert.equal(w.rpc('recordUsageStartU1', {eventId: id(7001), mode: 'SOLO', repositoryKind: 'PUBLIC', cartridgeIds: ['zz5-s1-u2'], cartridgeCount: 1, teamCount: 1}).usageSchemaVersion, 'A1');
+  const before = releaseActiveWorld({era: ''});
+  assert.throws(() => before.rpc('hojaListPublicCartridges'), /APPROVED_ACTIVE_BEFORE_ERA_START/);
+  assert.throws(() => releaseActiveWorld({era: '2026-12-01'}).rpc('hojaGetPublicQuestions', ['zz5-s1-u2 승인 제목']), /APPROVED_ACTIVE_BEFORE_ERA_START/);
 });

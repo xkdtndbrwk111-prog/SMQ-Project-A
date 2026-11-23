@@ -349,3 +349,12 @@
 | 렌더러 무회귀·수학·사회5 동등성 재실행 | 539 동일 + media 6 OK(4해상도) / 수학 187/187 / 사회5 64/64 |
 | Node 전체 | **86/86 PASS** |
 **정직한 범위 표기:** 이번 3모드 시험은 기존 검증기 방식대로 게임의 `setServerQuestions` 시험 훅으로 소스를 주입한 것이다. **시작 화면에서 실제 카트리지 목록 클릭 → LIST/GET → 모드 버튼 → 시작까지의 완전한 UI 버튼 E2E는 NOT RUN.** 팀전 **우승 발표 후 오답 복습**, 아케이드 **실제 Phaser 풍선 라운드·FINISH·랭킹 차단**, 팀 SHORT 교사 판정 흐름, 단원 전 문항 순회, 실 GAS(QA 번들 배포)·전자칠판·85인치 터치는 **NOT RUN**(다음 F3 2차). 영어 천재·사회5 2-2의 승인 원본 대비 시각 동등성은 여전히 미검증(교사 QA 미리보기 대상). 운영·원본·active 0·미디어 권리 HOLD 무변경, 콘텐츠·스크린샷 미커밋.
+
+## F3-2 (1부) — 40-6S 필수 수정: 출시 LIST/GET·fail-closed 하네스·QA 이중 방어·교사 시각 검토 미리보기 (2026-11-23)
+- **Q03 출시 LIST/GET 공백 수정:** `hojaApprovedGameCatalog_()` — QA 카탈로그(격리 프로젝트)이거나 **RELEASE 카탈로그에 배포 승인 항목이 있고 승인 시대가 시작된 경우** 게임의 `hojaListPublicCartridges`/`hojaGetPublicQuestions`가 그 카탈로그만 사용(구형 Sheets와 혼합 없음). RELEASE 활성 항목이 있는데 시대 시작 전이면 `APPROVED_ACTIVE_BEFORE_ERA_START`로 **fail-closed**. RELEASE 활성 0(현재)은 구형 경로 그대로. 증명은 저장소의 `active-deployment.json`을 바꾸지 않고 **시험 코드 안의 합성 RELEASE-활성 fixture**로: 배포된 1단원만 목록·조회, 승인만 되고 미배포인 단원 거부, 같은 카탈로그로 A1 기록, 시대 전/미래 시작일 거부(`UNIFIED_GAS_F1.test.mjs`).
+- **출시 번들 콘텐츠 = 활성 ID:** `build_unified_gas.py` release 변형은 활성 항목이 있으면 `--release-content-dir`의 콘텐츠 파일이 **활성 ID·packageSha256과 정확히 일치**해야 빌드, 활성 0이면 콘텐츠 디렉터리 지정 자체를 거부(`RELEASE_HAS_NO_ACTIVE_ENTRIES`, 로컬 확인).
+- **Q03 하네스 fail-open 수정:** `run_f3_all_units.sh` 삭제 → `run_f3_all_units.py`. 단원 수(기본 23) 불일치, 검증기 비정상 종료, PASS 문자열 부재, 아케이드 PASS ≠ 2, 시간 초과 중 하나라도 있으면 **exit 1**, JSON 결과 저장. 음성 시험: 보기 하나를 비운 단원 → solo/team/arcade 모두 FAIL, exit 1; 단원 수 1≠23 → FAIL.
+- **Q02 이중 방어:** QA 카탈로그에 빌드 시 `allowedScriptIds`(격리 시험 프로젝트 ID, 저장소 미커밋 — `--qa-script-id` 필수) 기록, GAS가 `ScriptApp.getScriptId()` 불일치 시 `APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED`. 격리 속성 + 스크립트 ID 둘 다 맞아야 QA 카탈로그 동작.
+- **교사 시각 검토 미리보기:** `approved-catalog/build_visual_review_preview.mjs` → 저장소 밖 로컬 HTML 1개(저장소 내부 출력 거부). 영어 천재 6단원은 **승인 presentation 원본 화면 자체를 같은 문항으로 이동**시켜 왼쪽, 게임 공용 렌더러(팀 모드: 원래 보기 4개 표시)를 오른쪽에 나란히; 사회5 2-2는 승인 렌더러 화면이 없음을 명시하고 교사 검토 표시 데이터(문항·그림·보기·배치·정답)를 왼쪽에 표시. 문항별 같음/다름/보류 + 메모 저장·JSON 내보내기. 234문항, 로컬 Chromium 로드 오류 0. **콘텐츠 승인·공개 허가가 아님**을 화면 상단에 표기. 산출물(4.2MB, 승인 그림 포함)은 커밋하지 않음.
+- 발견(다음 작업): 게임 카탈로그 화면이 카트리지를 **구형 이름 형식 `N-과목-출판사-단원` 파싱**으로 학년/과목/출판사 분류 → 승인 제목은 모두 "기타/미분류"로 묶임. 승인 메타데이터로 분류하도록 수정 필요(F3-2 2부).
+- Node **88/88 PASS**. 실 GAS·UI 버튼 E2E는 다음 커밋.

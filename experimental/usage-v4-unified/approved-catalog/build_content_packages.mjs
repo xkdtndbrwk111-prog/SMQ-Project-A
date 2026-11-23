@@ -47,7 +47,8 @@ if (qaOut) {
   mkdirSync(out, {recursive: true});
   if (readdirSync(out).length) die('QA_OUT_NOT_EMPTY');
   const manifest = JSON.parse(readFileSync(opt('--qa', join(here, 'deployment/qa-preview.json')), 'utf8'));
-  const cat = qaPreviewCatalog(index, report, manifest);
+  const sid = opt('--qa-script-id') || die('--qa-script-id <isolated test project script id> required (not committed)');
+  const cat = qaPreviewCatalog(index, report, manifest, {allowedScriptIds: [sid]});
   writeFileSync(join(out, 'ApprovedActiveCatalog.gs'), renderCatalogGs(cat));
   const byId = new Map(packages.map(p => [p.cartridgeId, p]));
   cat.entries.forEach((e, i) => writeFileSync(join(out, 'HOJA_QB_CONTENT_' + String(i + 1).padStart(2, '0') + '.gs'),
