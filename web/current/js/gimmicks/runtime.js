@@ -38,6 +38,8 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
  }
  function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
  function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&s.y<v.y+v.height);}
+ // A short gap between neighbouring winds must remain a true no-wind area.
+ function inWind(body,s){const x=(body.left+body.right)/2,y=(body.top+body.bottom)/2;return x>=s.x&&x<s.x+s.w&&y>=s.y&&y<s.y+s.h;}
  // Sample the traversed path, including the player's previous physics position,
  // so a delayed frame cannot skip across a moving circular hazard.
  function crossed(body,c,from,to){
@@ -55,7 +57,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
     for(const e of entries){const s=model.state(e.cfg,elapsed),visible=inView(scene,e.cfg),cycle=e.cfg.kind==='flame'?Math.floor((elapsed+e.cfg.phase)/(e.cfg.wait+e.cfg.warn+e.cfg.active+e.cfg.cool)):null,warned=e.cfg.kind==='flame'&&e.warnCycle===cycle;e.art.all.forEach(o=>o.setVisible(visible));
      if(e.cfg.kind==='flame')e.warnShown=warned;
      if(visible){if(e.cfg.kind==='flame'&&s.active&&!warned){paint(scene,e,{...s,phase:'warn',active:false},elapsed);e.warnShown=true;e.warnCycle=cycle;}else{paint(scene,e,s,elapsed);if(e.cfg.kind==='flame'&&s.phase==='warn'){e.warnShown=true;e.warnCycle=cycle;}}}
-     if(e.cfg.kind==='fan'){if(s.active&&model.rectHit(body,s)){const grounded=!!(body.blocked?.down||body.touching?.down),amount=s.power*Math.min(delta,100)/1000;const opposingCap=grounded?Math.max(12,252-s.power*.3):Math.max(90,252-s.power*.2);if(s.direction==='left')body.setVelocityX(Math.min(body.velocity.x-amount*(grounded?1:.6),opposingCap));if(s.direction==='right')body.setVelocityX(Math.max(body.velocity.x+amount*(grounded?1:.6),-opposingCap));if(s.direction==='up')body.setVelocityY(Math.min(body.velocity.y-amount,-Math.min(150,s.power*.15)));if(s.direction==='down')body.setVelocityY(body.velocity.y+amount);}}
+     if(e.cfg.kind==='fan'){if(s.active&&inWind(body,s)){const grounded=!!(body.blocked?.down||body.touching?.down),amount=s.power*Math.min(delta,100)/1000;const opposingCap=grounded?Math.max(12,252-s.power*.3):Math.max(90,252-s.power*.2);if(s.direction==='left')body.setVelocityX(Math.min(body.velocity.x-amount*(grounded?1:.6),opposingCap));if(s.direction==='right')body.setVelocityX(Math.max(body.velocity.x+amount*(grounded?1:.6),-opposingCap));if(s.direction==='up')body.setVelocityY(Math.min(body.velocity.y-amount,-Math.min(150,s.power*.15)));if(s.direction==='down')body.setVelocityY(Math.min(180,Math.max(body.velocity.y+amount,Math.min(150,s.power*.15))));}}
      else if(e.cfg.kind==='flame'?s.active&&warned&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y,w:s.w*.6,h:s.h*.55}):crossed(body,e.cfg,before,elapsed)){scene.hojaGimmickHit=e.cfg.kind;try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
     }
    },destroy(){for(const e of entries){e.art.collider?.destroy();e.art.platform?.destroy();for(const o of e.art.all)o.destroy();}}};
