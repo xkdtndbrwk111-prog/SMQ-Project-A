@@ -1,0 +1,3 @@
+mutation: eventId dedupe disabled -> 8 failing R7 assertions/tests (caught)
+mutation: row day computed in UTC instead of KST -> 16 failing (caught)
+GAS sources restored byte-identical after mutation (git diff empty)

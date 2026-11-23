@@ -1,0 +1,16 @@
+✔ R7-1 normal rollover at the five instants: rows dated by KST, 11-24 sealed exactly, raw rows untouched, totals consistent (11.8645ms)
+✔ R7-7 public statistics just before and just after midnight: today / yesterday / 7 / 30 / all windows (2.091334ms)
+✔ R7-2 a day with zero starts: sealed as an explicit zero day, no error, totals unchanged (2.091458ms)
+✔ R7-3 started 23:59:59, reaches the server 00:00:03: one row, dated by SERVER receive day (existing policy; payload has no client time) (3.663208ms)
+✔ R7-4a committed at 23:59:59 but reply lost; same eventId re-sent after midnight -> duplicateIgnored (originalDate 11-24), zero extra rows (5.005209ms)
+✔ R7-4b failed before commit at 23:59:59; retried after midnight -> stored once on 11-25 (server-day policy); server-only first attempt = 0 rows (2.736292ms)
+✔ R7-4c after 11-24 is SEALED, a re-send of an 11-24 event is still recognised (dedupe window spans the last sealed day) -> no new row (1.270542ms)
+✔ R7-4d a start still QUEUED in localStorage from 11-24 when the page reopens on 11-25 is EXPIRED (dropped, never sent) — existing client policy (1.642666ms)
+✔ R7-5a a LATE 11-24 row written after 11-24 was sealed is never silently dropped or counted: reader, writer and seal all HOLD (2.632416ms)
+✔ R7-5b appended-but-uncommitted row (crash before the watermark) is invisible, then adopted once — no loss, no duplicate (1.631667ms)
+✔ R7-5c tampered sealed bucket -> public stats UNAVAILABLE (no numbers), restore -> OK; re-seal stays idempotent (2.198084ms)
+✔ R7-6 seal failures at each step converge to the same COMPLETE result and never publish a partial day (9.287667ms)
+ℹ tests 12
+ℹ pass 12
+ℹ fail 0
+exit=0

@@ -1,0 +1,15 @@
+# A. 2026-11-23 real-record audit (isolated 40-6U write copy) — NOT RUN (no approved read path from this machine)
+Reason: the isolated project's functions (hojaV4OpsStatus, hojaV4TestEvidenceU3, hojaV4TestTailU3) run only from the
+Apps Script editor (operator) or a test web-app deployment; both need the teacher. Reading the sheets with the
+teacher's personal OAuth token was not used (outside the approved isolation path). Nothing was sealed or modified.
+Design facts established from code (not from data):
+ - row day = SERVER commit time in KST (Code.gs recordUsageStartU1, inside the ScriptLock); client sends no event time
+ - daily seal = MANUAL operator call hojaV4OpsSealPendingDays (no trigger is installed; seal returns triggerInstalled:false)
+ - so 11-23 is EXPECTED to be still PROVISIONAL (LIVE) today unless an operator ran the seal; that is by design, not a fault
+ - public reader fails closed with SEAL_STALE when more than 3 finished days are unsealed (existing test) — with the copy sealed
+   through 2026-11-22, public stats would turn UNAVAILABLE from 2026-11-26 if nobody seals
+Read-only operator steps for the teacher (editor, isolated project only; paste the JSON outputs, no IDs):
+ 1. hojaV4OpsStatus()                    -> sealedThrough, sealedPrefixEndRow, committedWatermark, sourceLastRow, today
+ 2. hojaV4TestTailU3(<token>, <sealedPrefixEndRow>) -> rowsAdded, uniqueEventIds, duplicateRows, invalidRows, schema, watermark
+ 3. hojaV4TestEvidenceU3(<token>)        -> manifest/bucket SHA checks for sealed days + publicCompute (today/7/30/all, provisional days)
+ (do NOT run hojaV4OpsSealPendingDays until the audit numbers are recorded)
