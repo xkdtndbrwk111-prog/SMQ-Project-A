@@ -4865,6 +4865,7 @@ class HojaScene extends Phaser.Scene{
   }
 
   updatePipes(downPressed,grounded){
+    if(this.time.now<(this.pipeArrivalCooldownUntil||0))return false;
     let near=null;
     for(const p of this.pipes){
       const b=this.playerBody.body;
@@ -5037,6 +5038,14 @@ class HojaScene extends Phaser.Scene{
         const dest=(STAGE.makerObjects||[]).find(o=>['pipe','maker_start','maker_goal'].includes(o.type)&&o.id===arrival);
         HOJA_MAKER_ARRIVAL=null;
         if(dest){
+          if(dest.type==='pipe'){
+            const orientation=dest.orientation||'up',x=(dest.x+dest.w/2)*TILE,top=dest.y*TILE,bottom=(dest.y+dest.h)*TILE;
+            const sx=Math.max(20,Math.min(WORLD_W-20,x+(orientation==='left'?-52:orientation==='right'?52:0)));
+            const foot=orientation==='up'?top:orientation==='down'?bottom+44:bottom;
+            this.makerPipeArrival={orientation,x,top,bottom,foot,sx};
+            this.makerSpawnGroundY=foot;
+            return sx;
+          }
           for(const off of [6,-6,7,-7,8,-8,9,-9]){
             const px=(dest.x+dest.w/2+off)*TILE,desired=(dest.y+dest.h)*TILE;
             const ground=SOLIDS.filter(s=>s.kind==='ground'&&px>=s.x&&px<s.x+s.w).sort((a,b)=>Math.abs(a.y-desired)-Math.abs(b.y-desired))[0];
@@ -5069,6 +5078,8 @@ class HojaScene extends Phaser.Scene{
   }
 
   createPlayer(){
+    this.makerPipeArrival=null;
+    this.pipeArrivalCooldownUntil=0;
     const sx=this.spawnX();
     let gy=HOJA_MAKER_MODE?(this.makerSpawnGroundY??groundTopAt(sx)):groundTopAt(sx);
     if(!HOJA_MAKER_MODE&&STAGE.theme==='cave'){
@@ -5107,7 +5118,22 @@ class HojaScene extends Phaser.Scene{
     // only visible actor, exactly as in R1.1; the same camera draws the
     // sprite, enemies and terrain. Brake/SIT/STOMP mechanics are unchanged.
     this.facing=this.spawnKind==='exit'?-1:1;
-    if(this.spawnKind!=='start'){
+    if(this.makerPipeArrival){
+      const arrival=this.makerPipeArrival,side=arrival.orientation==='left'||arrival.orientation==='right';
+      this.transitioning=true;
+      body.body.enable=false;
+      if(side)this.facing=arrival.orientation==='left'?-1:1;
+      const startY=arrival.orientation==='up'?arrival.top+45:arrival.orientation==='down'?arrival.bottom-18:arrival.foot;
+      this.hoja.setPosition(arrival.x,startY).setDepth(4).setAlpha(1).setFlipX(this.facing>0);
+      this.hoja.play(side?'hoja-walk':'hoja-idle',true);
+      if(side)this.hoja.anims.timeScale=.65;
+      this.tweens.add({targets:this.hoja,x:arrival.sx,y:arrival.foot,duration:800,delay:100,ease:'Sine.InOut',onComplete:()=>{
+        this.hoja.setDepth(12);this.hoja.anims.timeScale=1;
+        body.body.reset(arrival.sx,arrival.foot-21);body.body.enable=true;
+        this.pipeArrivalCooldownUntil=this.time.now+500;
+        this.transitioning=false;this.makerPipeArrival=null;
+      }});
+    }else if(this.spawnKind!=='start'){
       // Step out of the door: fade in from the black silhouette.
       this.hoja.setAlpha(0);
       this.tweens.add({targets:this.hoja,alpha:1,duration:260,delay:80});
