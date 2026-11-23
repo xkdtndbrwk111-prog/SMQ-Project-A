@@ -143,7 +143,7 @@ test('real Project B revocation denies request BEFORE spreadsheet access',()=>{
 });
 test('late event after sealed watermark stops stats instead of silently miscounting',()=>{
  const t=setup({late:true});
- assert.throws(()=>t.run(),/HOJA_V4_LIVE_LATE_OR_FUTURE_EVENT_DAY/);
+ assert.throws(()=>t.run(),/HOJA_V4_LIVE_TRIAL_PARTIAL_OR_UNEXPECTED_TAIL_ROW/);
 });
 test('a missing zero day, mutated bucket or false canary rejects trial read',()=>{
  for(const options of [{dropZeroDay:true},{corruptBucket:true},{wrongCanary:true}]){
