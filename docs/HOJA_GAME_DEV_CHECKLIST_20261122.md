@@ -957,3 +957,17 @@
 - [ ] `F4/F5/G 이월` **HOLD:** 실제 익명 Apps Script + A1/watermark/시대 전환, R7 KST 자정, 서버 단독 19/40·80~120건, 종료/복구·R8 캐시·CI private pinned source drift SKIPPED, 학생명/QR/랭킹·오디오 실기, 비공개 교사 시각 검토 7단원/234문항, **미디어 권리 23/23 HOLD**, 실배포 active 0. 각 항목별 실제 시험 근거 전까지 유지.
 
 **운영/원본 불변:** `main`, 루트 `Code.gs`/`Game.html`, `versions/2.0.0`, 실제 Project A GAS·EVENT_LOG·랭킹/트리거, 원본 미디어/데이터, 실제 교실매니저 삭제, PR merge·실운영 배포 금지. 테스트 전용 synthetic catalog를 운영 manifest로 승격 금지.
+
+
+### 40-6V. F3-3 간헐 정오·점수 및 문항 전환 race — 미해결 BLOCKER (2026-11-23 20:37 KST)
+**출처/범위:** 사용자 전달 Claude 진행 로그(아직 코드·테스트 로그·최종 커밋 미제출); 독립 감수 당시 PR #6 개발 HEAD **`716a62ee9142c60154a5ab44087acc506d83c83b`**로 유지. 이번 항목은 **미검증 중간 보고와 감수 요청을 기록한 것**이며 실제 결함 원인을 확정한 것이 아님. 중앙 40-6T/U의 F3-3 미완료 항목과 연결하며 **같은 커밋에 체크리스트 갱신 규칙 계속 적용**.
+- [ ] **`F3-3-SCORE-RACE` 중요 기능 BLOCKER — FAIL 관측/원인 미상:** q20에서 공용 renderer가 정답으로 표시한 선택지를 눌렀는데 게임 점수는 **0점**이었다는 제출 보고. 강제 deck hook/문항 family·variant 불일치, stale judgment 텍스트, 원본→3지 답 매핑, `current()`와 게임 scoring 상태의 비동기 경쟁 중 어느 쪽인지 **확정되지 않음**. 59건 묶음 중 2건 실패하였으나 개별 재실행에서는 재현되지 않았다고 보고. **간헐 실패도 FAIL·미완료로 유지**; 정오 판정 테스트 결과가 불안정하면 게임 scoring PASS 금지. 팀전/아케이드/싱글 모두 영향을 받을 수 있는 공통 경로인지 확인 필수.
+- [ ] **`F3-3-CHOICE-TRANSITION` 중요 입력 race — FAIL 관측/원인 미상:** renderer `current()`가 OX 문제로 전환됐으나 실제 O/X 버튼 DOM은 아직 이전 상태인 시점에 입력/캡처 시도. 게임/렌더러에서 **문항 ID + 유형 + 화면 선택지 + 정답 매핑 + 실제 채점 대상**이 동일 run, 동일 question frame으로 일치하는지 추적. `700ms` 대기 추가는 **재현·진단 실험**이지 제품 결함 수정이나 PASS 증거가 아님. 사용자가 연속으로 빠르게 입력하는 상황(85인치 전자칠판 포함)에서 잘못된 문제를 채점/중복 채점하지 않아야 함.
+- [ ] **`F3-3-VERDICT-AUTHORITY` 검증기 신뢰성:** 기존 judgment 문구가 이전 문제의 상태일 수 있다고 보고. 텍스트를 성공 조건으로 삼지 않고 **게임의 누적 correct/answered/score 및 실제 문항 ID·선택지 응답 이벤트**를 함께 대조하되, correct counter만으로도 동일 문항의 정답 매핑이 올바른지 증명하지 못함. renderer answerId/visible options/host scoring payload·commit된 점수 변화까지 단일 입력 트랜잭션으로 비교. *정답임에도 0점*인 경우 게임 버그와 시험 훅 버그를 **각각 분리** 판정; 오류 감춰 정상 완료 처리 금지.
+- [ ] **`F3-3-REPRO` 필수 종료 증거:** 실패 seed/runId, questionId/familyId/type, 고정 deck source, 표시 선택지 ID·순서·정답 ID, 클릭 시 DOM ready 상태/타임스탬프, input focus·동작, game `answered/correct/score` before/after, scoring callback, review entry 중복 여부를 **문항 텍스트·이미지 없이** 로깅. (a) 2/59 재현, (b) 단독/연속/빠른 입력/느린 입력/다음 문제 전환, (c) mock/로컬 Chromium에서 수정 전 FAIL→수정 후 0 FAIL, (d) 신규 회귀 CI fail-closed, (e) 실제 게임 UI/승인 원본 3지·OX/그림 선택지 검증. 재현 실패 시에도 미원인 상태 명시, PASS 판정 금지.
+- [ ] **`F3-3-HINT` 전수 검증 진행 중:** `23개 단원` 전체 힌트/선택지/4지→3지 검사 실행 중이라는 제출 보고, 결과/로그 미제출. q21 답 단서 식재 음성 시험 감지 자체는 중간 도구 검증, **전수 PASS 아님**.
+- [ ] **`F3-3-RELEASE-AUDIT` 중간 보고:** 기존 승인 0개 RELEASE와 합성 23개 RELEASE의 릴리스 빌드 자산 감사 PASS, QA 산출물 4가지 마커 차단되었다는 진행 로그. `allowedScriptIds` 코드 문자열 오탐 수정 보고. **최신 코드/로그/commit SHA, 원본 게임과 diff·고정 hash 검증 미제출**이므로 자체 보고만으로 릴리스 후보 PASS 불가.
+- [ ] **`F3-3-TEAM-FINISH` 진행 중:** `button.teacher-judge.correct/incorrect`가 실제 교사 채점 UI임을 확인 후 팀 전체 **24턴** 드라이버 실행 중이라는 보고. 최종 우승, 오답 복습, SHORT 판정, 점수/랭킹 불변, A1 1행·중복 없음 결과가 **아직 미제출 NOT RUN 판정**.
+- [ ] **`F3-3-COMMIT-CHECKLIST` 누락:** 위 F3-3 진행 중 수정·시험 산출물의 **신규 PR 커밋은 아직 없음**(개발 HEAD `716a62e`), 작업별 중앙 체크리스트는 개발 브랜치에서 **40-6U 규칙 미동기화**. **코드와 이 항목들을 동일 커밋에** 반영하고 변경·테스트·실패/미완료/다음 단계·증거 및 CI URL 기재할 것. 중앙 문서만을 나중에 병합한 것만으로 작업별 갱신 책임 면제 안 됨.
+
+**출시/단계 게이트:** **F3-3은 간헐 정오/채점 불일치가 미해결이면 완료할 수 없다.** F4의 실제 GAS 사전 준비는 병행 가능하나 scoring race를 **F4 통계 문제로 이월해 보류 없이 통과시키거나 운영 배포해서는 안 됨.** F3-3 중간 자산 감사가 RELEASE 승인/미디어 공개권 허가를 뜻하지 않음. 실 활성 catalog=0, 미디어 권리 23/23 HOLD, 실 GAS·R7 자정·대규모 부하·교사 234 시각 확인·실전자칠판 모두 계속 NOT RUN/HOLD.
