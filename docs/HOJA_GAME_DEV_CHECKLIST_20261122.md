@@ -740,3 +740,12 @@
 - [x] 자동화는 새 코드나 시험 증거가 없을 때 결과를 임의로 완료 처리하지 않으며, 운영 코드·배포·원본 데이터는 절대 수정하지 않도록 제한.
 - [ ] 다음 Claude Code 코드 커밋과 시험 로그에 대한 **실제 감수는 아직 NOT STARTED**. 매시간 감시는 즉시/실시간 동기화가 아니므로 필요할 때는 커밋·PR 링크를 사용자 대화에 공유하여 즉시 리뷰 가능.
 - [ ] 모든 최종 운영 전환 및 실 원본 삭제·트리거 설치 HOLD.
+
+### 40-6E. 사용자 신규 결정: Project A 단일 GAS + 기존 교실매니저 폐기 예정 (2026-11-23)
+- [x] 사용자 결정: 통계 V4용 Project B 별도 Apps Script 구현은 중단하고, **Project A 하나의 Apps Script 프로젝트**로 기록·집계·조회·관리자 화면을 통합하도록 40-6 범위 변경.
+- [x] 기존 교실매니저 앱은 **유지/연동 필수 대상에서 제외**. Project B의 SUPER MARIO MANAGER 권한·화면 의존도 신규 V4에서는 제거. 단 '폐기'는 데이터 삭제/운영 배포 변경에 대한 승인으로 해석하지 않음.
+- [x] 신규 정본 작업 지시서 `docs/HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md` 작성. 기존 A/B 지시서·runbook에는 SUPERSEDED 안내 추가, 기존 PASS/FAIL 기록은 감사 추적을 위해 보존.
+- [x] 기존 교실매니저/Project B 인증 대신 **Project A 자체 서버 측 관리자 인증**을 설계해야 함. 익명 공개 게임에서 관리자 통계 RPC가 호출 가능한지 공격 관점으로 점검. `Session.getActiveUser().getEmail()` 단독 사용·클라이언트 비밀/화면 숨김으로 대체 금지.
+- [x] 현재 완료 항목은 **방향·문서 변경**뿐. 초기 40-6 코드·mock CI 성적은 유지하되, Project A 단일 GAS 실제 구현·관리자 인증·실 GAS 테스트는 새 범위에서 전부 NOT RUN.
+- [ ] Claude 40-6-U0 보안 설계 → U1 단일 GAS writer/rollup/reader → U2 관리자 인증·화면 → U3 동시성/날짜 경계/GAS → U4 GPT-6 독립 감수 및 운영 승인.
+- [ ] 운영 Code.gs, main/정식버전, 원본 EVENT_LOG, 랭킹, 기존 앱 실제 제거·사용자 데이터 삭제, 운영 GAS 배포, 보관·삭제 트리거는 모두 HOLD.

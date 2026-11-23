@@ -1,3 +1,5 @@
+> **2026-11-23 사용자 결정으로 대체됨:** Project B 별도 Apps Script 개발을 중단하고, 기존 교실매니저 폐기 방침에 따라 V4 통계를 **Project A 한 GAS 프로젝트**로 통합한다. 아래 문서는 과거 결정의 기록이며 신규 작업 지시로 사용하지 않는다. 최신 지시서: [40-6 통합 Project A](HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md). 운영 원본 삭제·배포는 여전히 금지.
+
 # Claude Code 작업 지시서 — HOJA/SMQ V4 40-6 실제 Project A/B 격리 연동 검증
 작성일: 2026-11-23 (KST)
 상태: 지시서 등록 / 실 GAS 연동 NOT RUN / 운영 전환 HOLD

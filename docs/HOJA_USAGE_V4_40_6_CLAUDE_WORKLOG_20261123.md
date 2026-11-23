@@ -14,3 +14,10 @@
 
 ## 작업 기록
 - 2026-11-23: GPT-6가 체크리스트 및 Claude 지시서를 초기화함. 구현 및 실제 GAS 시험은 아직 시작되지 않음.
+
+## 40-6-U 사용자 범위 변경 (2026-11-23, 구현 미착수)
+- **결정:** 기존 교실매니저 제품 폐기 예정, Project B 별도 GAS 통계 개발 취소, Project A 단일 Apps Script에 게임 기록·V4 집계·관리자 통계 통합.
+- 40-6의 과거 A/B 단계표는 SUPERSEDED로 취급한다. 과거 코드/CI 성공 증거는 삭제하지 않으며, 실제 GAS A/B 통합을 PASS로 승격하지 않는다.
+- 이후 구현자 신규 로그는 `40-6-U0` ~ `40-6-U4` 아래에 기록한다.
+- 상태: U0 설계 NOT STARTED, U1 단일 GAS NOT RUN, U2 권한·UI NOT RUN, U3 경계·실기 시험 NOT RUN, U4 감수 PENDING.
+- 최신 지시서: `docs/HOJA_USAGE_V4_40_6_UNIFIED_A_CLAUDE_DIRECTIVE_20261123.md`
