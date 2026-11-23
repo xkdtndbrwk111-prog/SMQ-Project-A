@@ -43,6 +43,7 @@ jobs:
           node --test experimental/usage-retention/HOJA_USAGE_V4_TRIAL_GAS.test.mjs
           node --test experimental/usage-retention/HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs
           node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TAIL.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs
       - name: Validate exact compressed arcade source bridge (static)
         run: |
           node --check experimental/unified-quiz-renderer/HOJA_ARCADE_APPROVED_RUNTIME.mjs
