@@ -2144,7 +2144,7 @@ function hojaMakerToStage(m,i){
       x:tx(o.x+1),y:tx(o.y+2),min:tx(o.patrol?.waypoints?.[0]?.x??o.x),max:tx(o.patrol?.waypoints?.[1]?.x??(o.x+8)),makerMode:o.aiMode||'native',makerSpeed:Number(o.speed)||80})),
     water:[],decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
-    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerObjects:objects,makerCave:m.theme==='cave',
+    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerParallaxAnchorY:Number.isFinite(m.parallaxAnchorY)?tx(m.parallaxAnchorY):null,makerObjects:objects,makerCave:m.theme==='cave',
     gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
     makerEvents:objects.filter(o=>o.type==='trigger')
   };
@@ -3325,7 +3325,7 @@ class HojaScene extends Phaser.Scene{
     this.bgLayerScale=this.bgCoverHeight/srcH;
     this.bgBaseY=VIEW_H/2;
     this.bgParallaxLimit=Math.max(42,Math.min(72,(this.bgCoverHeight-VIEW_H)*0.28));
-    this.bgInitialScrollY=HOJA_MAKER_MODE?Math.max(0,STAGE.makerSpawnY-VIEW_H*.68):Math.max(0,Math.min(Math.max(0,SURFACE_VIEW_BOTTOM-VIEW_H),F-VIEW_H*0.68));
+    this.bgInitialScrollY=HOJA_MAKER_MODE?Math.max(0,(STAGE.makerParallaxAnchorY===null?STAGE.makerSpawnY:STAGE.makerParallaxAnchorY)-VIEW_H*.68):Math.max(0,Math.min(Math.max(0,SURFACE_VIEW_BOTTOM-VIEW_H),F-VIEW_H*0.68));
 
     const specs=THEME.bg.map((l,i)=>({...l,depth:-50+i*4}));
 
