@@ -47,6 +47,8 @@ if(test){
  const reviewPath=path.join(root,'tools/teacher_review');
  reviewFiles['teacher-review.html']=fs.readFileSync(path.join(reviewPath,'index.html'),'utf8');
  reviewFiles['teacher-review.js']=fs.readFileSync(path.join(reviewPath,'client.js'),'utf8');
+ reviewFiles['maker-compat.html']=fs.readFileSync(path.join(root,'tools/maker_compat/maker.html'),'utf8');
+ reviewFiles['maker-compat-boot.js']=fs.readFileSync(path.join(root,'tools/maker_compat/boot.js'),'utf8');
  const gp=fs.readFileSync(path.join(source,'js/parent-gameplay.js'),'utf8');
  const needle="f.src='arcade.html?season='";
  if(gp.split(needle).length!==2)throw Error('review host anchor missing');
@@ -57,6 +59,8 @@ if(test){
  const modesCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/stepping-modes-course.json'),'utf8'));
  reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse,modesCourse);
  arcade=instrumentArcade(arcade);
+ if(arcade.split('</body>').length!==2)throw Error('Maker 시험판 삽입 위치 오류');
+ reviewFiles['maker-compat-arcade.html']=arcade.replace('</body>','<script src="maker-compat-boot.js"></script></body>');
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }
 // Preserve Phase 1 QR compatibility at the frozen baseline. Any source asset change
@@ -74,6 +78,7 @@ if((arcade.match(/__HOJA_ARCADE_BUILD_VERSION__/g)||[]).length!==1)throw Error('
 pages['arcade.html']=arcade.replace('__HOJA_ARCADE_BUILD_VERSION__',version);
 if(test){
  pages['teacher-review-arcade.html']=reviewFiles['teacher-review-arcade.html'].replace('__HOJA_ARCADE_BUILD_VERSION__',version);
+ pages['maker-compat-arcade.html']=reviewFiles['maker-compat-arcade.html'].replace('__HOJA_ARCADE_BUILD_VERSION__',version);
  const host='js/parent-gameplay.js';
  if(pages['play.html'].split(host).length!==2)throw Error('review page anchor missing');
  pages['teacher-review-play.html']=pages['play.html'].replace(host,'js/teacher-review-gameplay.js');
@@ -89,7 +94,7 @@ for(const name of Object.keys(pages)){
 }
 const template=JSON.parse(fs.readFileSync(path.join(source,'BUILD.json'),'utf8'));
 // Hash the exact bytes served, including every external module and cartridge.
-const generated=test?['teacher-review.html','teacher-review.js','teacher-review-arcade.html','teacher-review-play.html','js/teacher-review-gameplay.js']:[];
+const generated=test?['teacher-review.html','teacher-review.js','teacher-review-arcade.html','teacher-review-play.html','js/teacher-review-gameplay.js','maker-compat.html','maker-compat-arcade.html','maker-compat-boot.js']:[];
 const outputFiles=[...production,...generated];
 const artifacts = outputFiles.map(name => {
  const bytes = Object.hasOwn(pages,name) ? Buffer.from(pages[name]) : Object.hasOwn(reviewFiles,name)?Buffer.from(reviewFiles[name]):fs.readFileSync(path.join(source,name));

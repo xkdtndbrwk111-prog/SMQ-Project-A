@@ -2084,6 +2084,9 @@ const HOJA_V061_FORMAT='HOJA_MAKER_PROJECT';
 const HOJA_V061_SCHEMA=6101;
 let HOJA_MAKER_PROJECT=null;
 let HOJA_MAKER_IMPORTING=false;
+const HOJA_MAKER_QUEUE=[];
+let HOJA_MAKER_LAST_KEY=null;
+let HOJA_MAKER_LAST_REQUEST=null;
 let HOJA_MAKER_MODE=false;
 let HOJA_MAKER_ARRIVAL=null;
 let HOJA_MAKER_EVENT_PREVIEW=null;
@@ -2158,6 +2161,8 @@ async function hojaMakerPreload(p){
 }
 async function hojaMakerImport(p,previewEventId=null){
   hojaMakerValidateProject(p);
+  HOJA_MAKER_LAST_KEY=null;
+  HOJA_MAKER_LAST_REQUEST=null;
   await hojaMakerPreload(p);
   HOJA_MAKER_PROJECT=structuredClone(p);
   HOJA_MAKER_MODE=true;
@@ -2174,6 +2179,8 @@ async function hojaMakerImport(p,previewEventId=null){
 }
 function hojaMakerReturnBase(){
   HOJA_MAKER_MODE=false;HOJA_MAKER_PROJECT=null;HOJA_MAKER_ARRIVAL=null;
+  HOJA_MAKER_LAST_KEY=null;
+  HOJA_MAKER_LAST_REQUEST=null;
   RUN_STAGES=STAGES;
   const status=document.getElementById('v061Status');if(status)status.textContent='기존 HOJA 스테이지 실행 중';
   startStage(0,true,'start');
@@ -2184,19 +2191,34 @@ function hojaMakerDialogueLines(lines){
 }
 window.HOJA_V061_IMPORT=hojaMakerImport;
 window.HOJA_V061_STATUS=()=>({makerMode:HOJA_MAKER_MODE,stage:STAGE_INDEX,mapId:STAGE.makerId||null,project:HOJA_MAKER_PROJECT?.title||null});
-window.addEventListener('message',e=>{
-  // Only a Maker window that opened this client may submit a project.
-  if(e.source!==window.opener||e.data?.kind!=='HOJA_V061_LOAD')return;
-  const incoming=e.data;
+async function hojaMakerDrainQueue(){
   if(HOJA_MAKER_IMPORTING)return;
   HOJA_MAKER_IMPORTING=true;
-  // Maker retries until ready; ignore the repeated identical project after a valid load.
-  if(window.__v061MakerLoadedFrom===e.source&&window.__v061MakerKey===JSON.stringify(incoming.project))return;
-  const key=JSON.stringify(incoming.project);
-  hojaMakerImport(incoming.project,incoming.eventId).then(()=>{
-    window.__v061MakerLoadedFrom=e.source;window.__v061MakerKey=key;HOJA_MAKER_IMPORTING=false;
-    e.source?.postMessage({kind:'HOJA_V061_LOADED',mapCount:HOJA_MAKER_PROJECT.maps.length},'*');
-  }).catch(err=>{window.__v061MakerLoadedFrom=e.source;window.__v061MakerKey=key;HOJA_MAKER_IMPORTING=false;alert('Maker 파일 불러오기 오류: '+err.message)});
+  try{
+    while(HOJA_MAKER_QUEUE.length){
+      const {source,origin,incoming}=HOJA_MAKER_QUEUE.shift();
+      const reply=payload=>{try{source.postMessage({...payload,requestId:incoming.requestId??null,gameVersion:hojaArcadeVersion,dataVersion:HOJA_V061_SCHEMA},origin)}catch(_){}};
+      try{
+        if(incoming.dataVersion!=null&&incoming.dataVersion!==HOJA_V061_SCHEMA)throw Error('Maker 데이터 버전이 다릅니다.');
+        if(incoming.gameVersion!=null&&incoming.gameVersion!==hojaArcadeVersion)throw Error('게임 버전이 다릅니다. Maker를 새로고침해 주세요.');
+        const key=JSON.stringify([incoming.project,incoming.eventId??null]);
+        const requestId=incoming.requestId??null;
+        if(!HOJA_MAKER_MODE||key!==HOJA_MAKER_LAST_KEY||requestId!==HOJA_MAKER_LAST_REQUEST){
+          await hojaMakerImport(incoming.project,incoming.eventId);
+          HOJA_MAKER_LAST_KEY=key;
+          HOJA_MAKER_LAST_REQUEST=requestId;
+        }
+        reply({kind:'HOJA_V061_LOADED',mapCount:HOJA_MAKER_PROJECT.maps.length});
+      }catch(err){reply({kind:'HOJA_V061_ERROR',message:String(err.message||err)});}
+    }
+  }finally{HOJA_MAKER_IMPORTING=false;}
+}
+window.addEventListener('message',e=>{
+  // The opener and origin must both match; never send replies to a wildcard origin.
+  if(!window.opener||e.source!==window.opener||e.origin!==location.origin||e.origin==='null'||e.data?.kind!=='HOJA_V061_LOAD')return;
+  if(HOJA_MAKER_QUEUE.length>=32){e.source.postMessage({kind:'HOJA_V061_ERROR',requestId:e.data.requestId??null,message:'요청이 너무 많습니다.',gameVersion:hojaArcadeVersion,dataVersion:HOJA_V061_SCHEMA},e.origin);return;}
+  HOJA_MAKER_QUEUE.push({source:e.source,origin:e.origin,incoming:e.data});
+  void hojaMakerDrainQueue();
 });
 window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('v061ImportButton')?.addEventListener('click',()=>document.getElementById('v061ImportFile')?.click());
