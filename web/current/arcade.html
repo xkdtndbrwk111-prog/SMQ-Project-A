@@ -2148,6 +2148,7 @@ async function hojaMakerPreload(p){
   HOJA_MAKER_IMAGES.clear();
   const paths=new Set(['Free/Traps/Saw/On (38x38).png','Free/Traps/Fire/On (16x32).png','Free/Traps/Platforms/Brown On (32x8).png','Free/Traps/Platforms/Grey On (32x8).png','Free/Terrain/Terrain (16x16).png']);
   if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick')))for(const path of ['Free/Traps/Spiked Ball/Chain.png','Free/Traps/Spiked Ball/Spiked Ball.png','Free/Traps/Fan/Off.png','Free/Traps/Fan/On (24x8).png','Free/Traps/Fire/Off.png','Free/Other/Dust Particle.png'])paths.add(path);
+  if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick'&&o.gimmick?.kind==='stepping_blocks')))paths.add('Free/Traps/Blocks/Idle.png');
   for(const m of p.maps)for(const o of m.objects||[])if(o.type==='asset'&&o.assetPath)paths.add(o.assetPath);
   for(const path of paths){
     const data=HOJA_V061_PA1_ASSETS[path];if(!data)continue;

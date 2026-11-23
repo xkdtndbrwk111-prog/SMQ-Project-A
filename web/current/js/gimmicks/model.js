@@ -20,7 +20,12 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='saw'){const p=c.distance?((t*c.speed/1000/c.distance)%2):0,offset=c.distance*(p<=1?p:2-p);return {kind:c.kind,x:c.x+c.w/2+(c.axis==='x'?offset:0),y:c.y+c.h/2+(c.axis==='y'?offset:0),radius:c.radius,angle:(t*c.speed/350)%360};}
   if(c.kind==='pendulum'){const a=Math.sin(t*c.speed/1000+c.phase)*c.amplitude*Math.PI/180;return {kind:c.kind,anchorX:c.x+c.w/2,anchorY:c.y,x:c.x+c.w/2+Math.sin(a)*c.length,y:c.y+Math.cos(a)*c.length,radius:c.radius,angle:a};}
   if(c.kind==='fan')return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,direction:c.direction,power:c.power,active:(t+c.phase)%c.period<c.on};
-  if(c.kind==='stepping_blocks'){const step=Math.floor(t/c.interval)%(2*c.steps),offset=step<=c.steps?step:2*c.steps-step,sign=c.direction==='right'?1:-1;return {kind:c.kind,offset,x:c.x,y:c.y,blocks:Array.from({length:5},(_,i)=>({id:i,x:c.x+sign*(offset+((i-offset)%5+5)%5)*32,y:c.y}))};}
+  if(c.kind==='stepping_blocks'){
+   const tick=Math.floor(t/c.interval),cycle=2*c.steps,position=n=>{const p=n%cycle;return p<=c.steps?p:cycle-p;};
+   const offset=position(tick),next=position(tick+1),progress=(t%c.interval)/c.interval,sign=c.direction==='right'?1:-1;
+   const at=(i,k)=>c.x+sign*(k+((i-k)%5+5)%5)*32;
+   return {kind:c.kind,offset,progress,x:c.x,y:c.y,blocks:Array.from({length:5},(_,i)=>{const from=at(i,offset),to=at(i,next);return {id:i,x:from+(to-from)*progress,y:c.y,moving:from!==to};})};
+  }
   const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,phase,active:phase==='active'};
  }
  function rectHit(b,r){return b.right>r.x&&b.left<r.x+r.w&&b.bottom>r.y&&b.top<r.y+r.h;}
