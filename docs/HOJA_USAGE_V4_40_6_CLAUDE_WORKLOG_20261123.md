@@ -235,3 +235,10 @@
 | 빌더 | 패치 범위 검증: 접두·접미 바이트 동일, 원본 게임 SHA `4ac5c4ef…`, 패치 게임 SHA `1bff25cb…` |
 **CI:** 제안 워크플로(`ci/usage-v4-unified-qa.yml`)에 A/B/D 단계와 정본 pin 체크아웃 drift 검사(읽기 토큰 secret 있을 때만) 추가. 현재 OAuth 토큰에 `workflow` 권한이 없어 `.github/workflows/`에 올릴 수 없음 → **GitHub Actions NOT RUN**.
 **데이터 유출:** 없음(합성 fixture만). **남은 위험:** 실 엔진 동시성은 mock으로 증명 불가 — 아래 실 GAS R6 재시험 필요. 캐시 TTL(300초) 동안 공개 해제된 구형 카트리지 시작이 계수될 수 있음(문항 제공은 차단). 브라우저 저장소가 막힌 환경에서는 재로드 복구 불가(페이지 내 재시도만).
+
+### CI 활성화 — GitHub Actions 실행 증거 (2026-11-23)
+- 사용자가 `workflow` 권한으로 재인증 → `.github/workflows/usage-v4-unified-qa.yml` 활성화(커밋 `4bf80c2`). Google 접근·배포 없음, mock/오프라인 전용.
+- 실행 [#45107912487](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45107912487) (HEAD `4bf80c2`): **success**. 통과 단계: GAS 문법 검사, 기존 V4 회귀 6종, U1, U2, U3, A 카탈로그 시험, B 내장 목록 drift, B/C/D 시험, 오프라인 Chromium.
+- **SKIPPED:** 정본 저장소 pin 체크아웃 + 인덱스 재생성 drift 검사 — 저장소 secret `HOJA_QBANK_READ_TOKEN`(HOJA-QUESTION-BANK 읽기 전용 토큰) 미설정. 로컬에서는 `--check` PASS.
+- 정정: 앞 절의 패치 Game.html SHA `1bff25cb…`는 재시도 결함 수정 전 값. 시험 프로젝트에 올린 현재 값은 `f9647ad6…`.
+- 실 Apps Script R6 재시험·R7 자정 시험: 여전히 **NOT RUN**.
