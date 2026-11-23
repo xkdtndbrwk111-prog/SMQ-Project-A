@@ -1,0 +1,6 @@
+eng5-ham-u10 {"questions": 31, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng6-ham-u11 {"questions": 59, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+math5-s2-u4 {"questions": 59, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+{"units": 3, "questions": 59, "mcq": 47, "ox": 12, "pictureChoice": 4, "cueChecked": 1, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+F3_HINT_MAPPING_PASS
+exit=0

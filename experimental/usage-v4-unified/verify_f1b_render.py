@@ -14,7 +14,8 @@ COMPOSED = Path(sys.argv[2]).read_text(encoding='utf-8')
 SNAP = """async()=>{await HOJA_APPROVED_RENDERER.stable();const s=document.getElementById('screen');
  const m=document.getElementById('hqMedia');const imgs=[...m.querySelectorAll('img')];
  await Promise.all(imgs.map(i=>i.decode().catch(()=>null)));
- return {html:s.outerHTML,text:(s.innerText||'').trim().length,figs:m.querySelectorAll('figure').length,
+ // the F3-3 input guard's only DOM change is a data-hoja-qid stamp on choice buttons; compare without it
+ return {html:s.outerHTML.replace(/ data-hoja-qid="[^"]*"/g,''),text:(s.innerText||'').trim().length,figs:m.querySelectorAll('figure').length,
   caps:[...m.querySelectorAll('figure>figcaption')].map(c=>c.textContent),
   imgs:imgs.length,loaded:imgs.filter(i=>i.complete&&i.naturalWidth>0).length,freq:m.querySelectorAll('.hojaFreq').length}}"""
 async def page_for(b, html, vp):

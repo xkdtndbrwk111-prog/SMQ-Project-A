@@ -996,3 +996,20 @@
 - [ ] **`F4/F5/G` 그대로 HOLD:** 신규 승인 A1 실제 GAS 및 익명 통계, R7 자정/복구/동시 80–120, 7단원·234문항 교사 시각 검토, QBank pin CI, 85인치·실 랭킹, 미디어 공개 권리 23/23 HOLD, 운영 활성 0개. PR Draft/운영 원본·데이터 수정/실배포·merge 금지.
 
 **감수 결론:** 이전 40-6V의 'q20 정답 클릭 0점'을 게임 버그로 단정한 서술은 **시험 하네스 오류라는 후속 증거로 우선 정정**. 그렇다고 새 identity guard의 실기 안정성까지 입증된 것은 아니므로 **F3-3 기능·회귀 종료 및 운영 배포는 계속 HOLD**. 실재 버그와 테스트 오류를 분리하고, 원인 불명 항목은 완료로 닫지 않는다.
+
+
+### 40-6Y. Claude 제출 — F3-3 최종 검증 결과 동기화 (2026-11-23, 지시 comment 7101029329)
+**작성자/경계:** Claude Code 자체 측정 보고(로컬 오프라인 Chromium + mock GAS). **GPT-6 독립 감수 전이며 자체 종합 PASS·운영 승인 아님.** 40-6V/W/X 항목은 이력으로 그대로 두고 여기에 결과를 연결한다. 코드·검증 도구·원시 로그·작업 로그(`docs/HOJA_USAGE_V4_40_6_CLAUDE_WORKLOG_20261123.md` §F3-3)와 같은 커밋. 증거: `experimental/usage-v4-unified/evidence/f3_3/`.
+
+| ID | 상태 | 근거 범위 / 수치 | 증거 | 남은 것 / 다음 |
+|---|---|---|---|---|
+| `F3-3-HARNESS-CAUSE` | **PASS(로컬, 원인 정정)** | 이전 q20/q14·2/59 실패 = 시험기가 `show` 전 기본 렌더를 정답 근거로 읽은 결함. 엄격 시험에서 수정 전 빌드 3/3 PASS(각 59문항 오류 0). 실제 게임 오채점 재현 **0** | `PREFIX_strict_harness_run1..3.txt`, `HISTORY_*` | GPT-6 독립 재실행 |
+| `F3-3-TIMER-GUARD` | **폐기(이력 보존)** | 150ms 창: 정상 빠른 탭 57 차단 → 폐기. rule 4(첫 답 소비): 호스트가 버린 탭 뒤 잠김 → 제거. 시간 대기로 통과시키지 않음 | `HISTORY_race_20_instant_taps_all_unregistered.json`, 작업 로그 §2 | — |
+| `F3-3-IDENTITY-GUARD` | **PASS(로컬 범위)** | guard v2 SHA `82b6b937…`, 규칙 1–3, 시간창 없음, 채점 코드 무변경. 브리지 `12b76fbb…` 무수정 | `composed_renderer_shas.json` | 실기기(전자칠판) 촉감 F4 |
+| `F3-3-RACE-SWEEP` | **PASS(로컬 범위)** | 동일 오라클, 2단원 × 21탭 × 지연 0–300ms. 수정 전 42/30/hazard 0/dropped 12, 수정 후 동일(추가 손실 0). **수정 전 RED 재현 안 됨 — 가짜 RED 없음.** 채점기 직접 비교 재실행: 전 42/31/0/11 scorerMismatch 0 exit 0, 후 42/30/0/12 scorerMismatch 0 exit 0 | `race_sweep_PREFIX_no_guard.json`, `race_sweep_FIXED_guard_v2.json`, `race_scorer_*.json`; 오탐 이력 `HISTORY_race_sweep_FALSE_HAZARD_*.json` | 0·16ms 탭은 전후 모두 호스트 미수락 → UX 판단 F4 |
+| `F3-3-HINT` | **PASS(로컬)** | 23단원 196문항(MCQ 158·OX 38·그림 12·cue 1), leaks 0·mappingFail 0·verdictFail 0, settle 0ms·700ms 모두 exit 0 | `scoring_hint_FIXED_settle0.txt`, `..._settle700.txt` | — |
+| `F3-3-TEAM-WINNER` | **IN PROGRESS** | guard 전 RC: 3단원 각 24턴, SHORT 교사 판정 2+2, 우승, 오답 12=복습 12, 점수 불변, A1 TEAM 1행, 랭킹 RPC 0 PASS. guard v2 RC 재실행 1/3: math5 24턴·SHORT 3·12=12·A1 1행·RPC 0 PASS, eng5·soc6 실행 중 | `team_full_PRE_GUARD_*.txt`, 후속 커밋 | 실 GAS F4 |
+| `F3-3-RC-AUDIT` | **PASS(로컬)** | 원본 `4ac5c4ef…`, 부품 14/22만, RC 게임 `617f2228…`; release 0/0, synthetic 23/23 표시, QA 물질 0, 음성 시험 FAIL(의도) | `rc_audit_release.txt`, `rc_audit_synthetic.txt`, `rc_*_build.json` | 실 RELEASE 승인은 별도(활성 0 유지) |
+| `F3-3-FULL-REGRESSION` | **IN PROGRESS** (힌트 23단원 0/700ms PASS·Node 90/90 PASS 완료) | UI E2E 23×2, 렌더 732×4, 수학·사회5 동등성, 아케이드 2단원 | 후속 커밋 | — |
+| `F3-3-CHECKLIST-SYNC` | **이 커밋으로 동기화** | 코드+도구+원시 로그+작업 로그+본 체크리스트 동일 커밋 | 커밋 SHA는 PR #6 코멘트 | 후속 결과도 같은 방식 |
+- [ ] **이월 → F4/F5/G (NOT RUN/HOLD 그대로):** 실 GAS A1·익명 통계, R7 자정, 80–120 동시 부하, 탭 닫힘 복구, 7단원 234문항 교사 시각 검토, private QBank pin CI(SKIPPED), 85인치 실기·실 랭킹, 미디어 권리 23/23 HOLD, 운영 활성 0. PR Draft, merge/배포 금지.

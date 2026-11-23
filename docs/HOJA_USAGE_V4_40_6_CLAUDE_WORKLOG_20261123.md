@@ -374,3 +374,44 @@
 | **실제 Phaser 아케이드 전 과정** (기존 검증기 + `--sources` 승인 단원): 풍선 25개 원본 `showQuiz` 판정·점수, 26번째 차단, **오답 복습 12문항(점수 불변)**, FINISH 결과, **랭킹 화면 읽기 전용(serverSaved=false)**, 한글 IME 이름, TIME UP | **7단원 전부 PASS**(수학5-2 4, 영어 천재 5-10(q21)·6-10(빈도표), YBM 6-10, 사회5 2-2(overlay)·3-1, 사회6 3-1) — 각 31개 검사점, 기존 사회6 샘플 기본 실행도 재확인 PASS (`evidence/f3_2_ui_e2e_20261123.log`) |
 - 검증기 수정: 같은 묶음(groupId)에 MC·OX 변형이 있는 단원(사회5 2-2)에서 기록된 유형까지 맞춰 문항 선택, 아케이드 문항·복습 확인을 화면 텍스트 대신 렌더러 `current().id`로(승인 수학 표기는 `[[frac:a/b]]` 원문을 분수로 그려 텍스트가 정상적으로 달라짐), 단원 카드는 전체 제목 일치로(영어 천재 제목 앞부분 중복), 떠다니는 풍선은 강제 포인터 클릭(애니메이션 중 클릭이 실제 사용).
 **여전히 NOT RUN:** 팀전 **전 풍선 진행 → 최종 결과(다음×3) → 우승 → [오답 복습 시작]** 전체 흐름(경로 확인: `advanceFinal` stage 3에서 오답 수만큼 복습 버튼), 팀 SHORT 교사 판정 흐름, 그림 보기 22문항 내부 대체 라벨이 결과/복습 화면에 노출되지 않는지, 실 GAS(QA 번들 실제 배포)·전자칠판·85인치·QR·오디오 실제 재생. 운영·원본·active 0·미디어 권리 HOLD 무변경.
+
+## F3-3 — 출시 후보 조립 · 실제 힌트/정답 단서 검사 · 팀전 끝까지 · 입력 경합 재평가 (2026-11-23, 40-6T/V/W/X)
+**경계:** 아래 수치는 모두 **Claude 로컬 오프라인 Chromium + mock GAS** 측정이며 GPT-6 독립 감수 전이다. 실 GAS·실 기기·교사 승인·운영 배포와 무관. `active-deployment.json` entries 0, 미디어 권리 23/23 HOLD, 운영/원본/`versions/2.0.0` 무변경. 원시 로그(ID·수치만, 문항/미디어 본문 없음, 로컬 경로는 `<SCRATCH>`/`<REPO>`로 치환)는 `experimental/usage-v4-unified/evidence/f3_3/`.
+
+### 1. 출시 후보(RC) 조립 — `build_unified_gas.py --game approved-rc`
+- 고정 2.0.0 스냅샷 `4ac5c4ef…` 검증 → 부품 **14/22만** 교체(part14 `cc872d05…`, part22 `f8b623b5…`) → 합성 렌더러(브리지 `12b76fbb…` 무수정 + media `6e8a77f1…` + math `04ac96ba…` + input-guard v2 `82b6b937…`, 합성 `d9e5547d…`) → RC 게임 `617f2228…`. 상세: `rc_release_build.json`, `composed_renderer_shas.json`.
+- 시험용 RELEASE 경로: `approved-catalog/make_synthetic_release.mjs`가 **저장소 밖**에 `SYNTHETIC-TEST-ONLY-NOT-A-DEPLOYMENT` 23개 항목 카탈로그를 생성(각 `deploymentStatus: SYNTHETIC_TEST_ONLY_NOT_DEPLOYED`). 빌더는 `--synthetic-release-catalog`일 때 출력이 저장소 밖인지 mkdir 전에 확인하고 deploymentId 접두어를 강제.
+- **RC 감사 `verify_release_candidate.py`:** 원본 SHA·변경 부품·브리지 SHA·게임 SHA·마커(media/math/input-guard/HOJA_TRIAL_APPROVED_HTML/hoja_usage_pending_v1)·구 텔레메트리 블록 부재·QA 전용 물질 금지 목록(QA_TEST_ONLY 빌드 타입, qa-preview, hojaV4TestEvidenceU3/SetupU3, qa_mock_gas_server, MOCK_ISOLATED_TEST_SCRIPT_ID, QA_PREVIEW_NOT_DEPLOYED)·카탈로그에 `allowedScriptIds` 없음.
+  - 커밋 기준 RELEASE 빌드(활성 0/콘텐츠 0): **PASS** (`rc_audit_release.txt`).
+  - 합성 RELEASE 빌드(23/23 SYNTHETIC 표시): **PASS** (`rc_audit_synthetic.txt`).
+  - 음성 시험: QA 번들을 RELEASE로 위장 → **FAIL**(의도대로).
+  - 오탐 1건 수정 이력: Code.gs의 QA 가드 **코드** 문자열 `allowedScriptIds`가 걸림 → 검사 범위를 카탈로그 데이터로 한정.
+
+### 2. 입력 경합 — 원인 재평가(40-6X)와 identity guard
+- **하네스 원인(정정):** 이전 "q20/q14 오채점"은 시험기가 `load` 직후(게임 `show` 약 30ms 전) 브리지의 **기본 첫 문항**을 정답 근거로 읽고, 선택자 클릭이 실제 문항의 같은 choice id로 재지정된 결과였다. `show` 확인 후 클릭하는 엄격 시험에서 **수정 전 빌드도 3/3 PASS**(`PREFIX_strict_harness_run1..3.txt`, 각 3단원 59문항 오류 0). 당시 실패 로그는 보존(`HISTORY_scoring_hint_old_harness_1fail_of_196.txt`, `HISTORY_captured_default_render_click*.{txt,json}`, `HISTORY_hint_run_settle*_exit1_tail.txt`).
+- **폐기한 방식(이력):** ① 150ms 시간창 — 빠른 정상 탭 57회 차단(40-6W 보고) → 폐기. ② "첫 답 후 소비" rule 4 — 호스트가 버린 탭 뒤에도 해당 문항을 잠가 진행 정지 → 제거. ③ 초기 측정 20탭 전부 미등록(`HISTORY_race_20_instant_taps_all_unregistered.json`). ④ hazard 7건으로 보였던 측정은 **탭 시점이 아니라 대기 전 visibleQ를 읽은 시험기 결함**(`HISTORY_race_sweep_FALSE_HAZARD_visibleQ_read_before_delay.json`) — 시험 오탐으로 기록.
+- **최종 guard v2(`HOJA_RENDERER_INPUT_GUARD.js`, 시간창 없음):** 1) `load`~`show` 사이 선택지 숨김·무효, 2) 누름과 뗌이 같은 그리기 세대의 같은 버튼일 때만 유효, 3) 다른 문항 ID로 찍힌 버튼 무효. 채점 코드 무변경(차단 탭은 오답이 아니라 미입력).
+- **사전/사후 동일 오라클 비교(`verify_f3_input_race.py`, 2단원 × 21탭, 지연 0/16/33/50/100/200/300ms, 탭 순간 표시 문항 vs 게임 문항):**
+  - 수정 전 rcA: probes 42, registered 30, **hazard 0**, dropped 12(0·16ms 탭 — 호스트가 `show` 안정화 전 답을 받지 않음).
+  - 수정 후 rcE: **동일** 42/30/0/12 → guard로 인한 **추가 입력 손실 0**.
+  - 따라서 "수정 전 빨간 시험"은 **재현되지 않았다**(가짜 RED 만들지 않음). guard는 실측 결함 수정이 아니라 `load`~`show` 창의 방어적 보호로 분류.
+  - 채점기 직접 비교(scorerMismatch: 등록된 탭의 correct 증가량 == 탭한 보기가 게임 문항 정답인지): 결과는 아래 표.
+
+### 3. 최종 회귀(수정 후 rcE 합성 RELEASE Game.html)
+| 시험 | 결과 / exit | 증거 |
+|---|---|---|
+| 23단원 정답·단서·3지/OX·그림 보기 라벨 비노출, settle 0ms | **PASS** 196문항(MCQ 158·OX 38·그림 12·cue 1), leaks 0·mappingFail 0·verdictFail 0, exit 0 | `scoring_hint_FIXED_settle0.txt` |
+| 동일, settle 700ms | **PASS** 동일 수치, exit 0 | `scoring_hint_FIXED_settle700.txt` |
+| RC 감사(release / synthetic) | **PASS / PASS** | `rc_audit_*.txt` |
+| 입력 경합 + 채점기 직접 비교(재실행) | 수정 전 rcA: 42/31/hazard 0/dropped 11/**scorerMismatch 0**, exit 0 · 수정 후 rcE: 42/30/hazard 0/dropped 12/**scorerMismatch 0**, exit 0 (0ms 탭 전후 모두 0/6 등록, 16ms 탭 전 1/6·후 0/6 — 호스트 안정화 타이밍 편차) | `race_scorer_PREFIX.*`, `race_scorer_FIXED.*` |
+| 팀전 전체(3단원) | **IN PROGRESS 1/3:** math5-s2-u4 24턴(MCQ 16·OX 5·SHORT 3 교사 판정), 우승, 오답 12=복습 12, 210:40, A1 TEAM 1행, 랭킹 RPC 0. eng5·soc6 실행 중 | 후속 커밋 |
+| UI E2E 23단원 × 싱글/팀 | IN PROGRESS | — |
+| F1-B 렌더 732×4, 수학·사회5 동등성 | IN PROGRESS | — |
+| 아케이드 2단원 | IN PROGRESS | — |
+- **guard 이전 RC(rcA)로 이미 끝난 시험(이력):** 팀전 math5-s2-u4·eng5-ham-u10·soc6-s2-u3-1-common 각 24턴, SHORT 교사 판정 eng5/soc6 각 2, 우승 발표, 오답 12 = 복습 12, 복습 후 점수 불변, A1 TEAM 1행, 랭킹 RPC 0 → **PASS**(`team_full_PRE_GUARD_*.txt`). UI E2E 46/46 PASS(150ms guard 빌드, `ui_e2e_PRE_GUARD_rc_release_46.txt`).
+
+- Node 단위 시험(usage-v4-unified + approved-catalog): **90/90 PASS, exit 0** (`node_tests_90.txt`).
+
+### 4. 남은 것 / 이월(F4)
+- 실 GAS A1·익명 통계, R7 자정, 80–120 동시 부하, 탭 닫힘 복구, 교사 234문항 시각 검토, private QBank pin CI(SKIPPED), 85인치 실기, 미디어 권리 23/23 HOLD → **NOT RUN/HOLD 그대로 F4/F5/G 이월**.
+- 0·16ms 즉시 탭은 수정 전후 모두 호스트가 받지 않음(학생은 다시 탭). UX 영향 판단은 실기기(전자칠판) 시험에서 확인 필요 → F4.

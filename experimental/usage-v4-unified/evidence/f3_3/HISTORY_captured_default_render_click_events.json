@@ -1,0 +1,60 @@
+[
+ {
+  "q": "eng5-ham-u10:q03",
+  "clickRace": "Locator.click: Timeout 8000ms exceeded.",
+  "expected": "c1",
+  "atClick": {
+   "buttons": [
+    "c2",
+    "c3",
+    "c4"
+   ],
+   "rendererCurrent": "eng5-ham-u10:q01",
+   "overlayHidden": false,
+   "state": {
+    "page": "quiz",
+    "season": "spring",
+    "answered": 0,
+    "correct": 0,
+    "activeQuiz": true,
+    "jumping": false
+   }
+  },
+  "events": [
+   [
+    19,
+    "cmd:embed",
+    ""
+   ],
+   [
+    19,
+    "balloon",
+    "eng5-ham-u10:q01 {\"page\":\"quiz\",\"season\":\"spring\",\"answered\":0,\"correct\":0,\"activeQuiz\":false,\"jumping\":false}"
+   ],
+   [
+    138,
+    "cmd:capture",
+    ""
+   ],
+   [
+    161,
+    "cmd:load",
+    ""
+   ],
+   [
+    185,
+    "click",
+    "c1 buttons=c1,c2,c3 familyId=eng5-ham-u10:q03 type=MULTIPLE"
+   ],
+   [
+    194,
+    "cmd:show",
+    "eng5-ham-u10:q01|omit=c1"
+   ]
+  ]
+ },
+ {
+  "q": "eng5-ham-u10:q21",
+  "cueQuestionNotShown": true
+ }
+]

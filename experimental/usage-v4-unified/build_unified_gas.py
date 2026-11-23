@@ -47,20 +47,60 @@ def patch_telemetry(content):
     patched = content[:start] + new + content[end + len(b'</script>'):]
     return patched, hashlib.sha256(old).hexdigest(), hashlib.sha256(new).hexdigest()
 
+def approved_rc_game(original_sha):
+    """F3-3 release candidate: rebuild the verified trial game (only parts 14 and 22 differ from the
+    pinned 2.0.0 snapshot) with the COMPOSED renderer (unchanged bridge + media + math extensions)
+    and the approved arcade runtime. Temp files only; nothing in the repository is written."""
+    import subprocess, sys, tempfile
+    trial_dir = ROOT / 'experimental/unified-quiz-renderer/game-trial'
+    rdir = ROOT / 'experimental/unified-quiz-renderer'
+    orig = [(VER / 'Game.html.parts' / f'part-{i:02d}.txt').read_bytes() for i in range(1, 26)]
+    trial = [(trial_dir / f'part-{i:02d}.txt').read_bytes() for i in range(1, 26)]
+    if hashlib.sha256(b''.join(orig)).hexdigest() != original_sha: raise SystemExit('ORIGINAL_SNAPSHOT_CHANGED')
+    changed = [i + 1 for i, (x, y) in enumerate(zip(orig, trial)) if x != y]
+    if changed != [14, 22]: raise SystemExit('UNEXPECTED_TRIAL_PART_CHANGES ' + str(changed))
+    with tempfile.TemporaryDirectory() as td:
+        comp = Path(td) / 'composed.html'
+        info = json.loads(subprocess.check_output(['node', str(rdir / 'compose_renderer.mjs'), str(comp)]).decode())
+        sys.path.insert(0, str(trial_dir))
+        import build_trial
+        game = Path(td) / 'Game.rc.html'
+        import contextlib, io
+        with contextlib.redirect_stdout(io.StringIO()): build_trial.build(game, comp)
+        data = game.read_bytes()
+    if b'HOJA_TRIAL_APPROVED_HTML' not in data or any(m not in data for m in (b'hoja-ext-media-v1', b'hoja-ext-math-v1', b'hoja-ext-input-guard-v1')):
+        raise SystemExit('RC_RENDERER_NOT_EMBEDDED')
+    return data, {'originalSha256': original_sha, 'changedParts': changed,
+                  'part14Sha256': hashlib.sha256(trial[13]).hexdigest(), 'part22Sha256': hashlib.sha256(trial[21]).hexdigest(),
+                  'bridgeSha256': info['bridgeSha256'], 'mediaExtSha256': info['extSha256'], 'mathExtSha256': info['mathExtSha256'], 'inputGuardSha256': info['inputGuardSha256'],
+                  'composedRendererSha256': info['composedSha256'], 'rcGameSha256': hashlib.sha256(data).hexdigest()}
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--output', required=True)
     ap.add_argument('--variant', choices=['release', 'qa'], default='release'); ap.add_argument('--qa-dir')
     ap.add_argument('--trial-game', help='QA only: trial Game.html built by game-trial/build_trial.py --renderer <composed> (approved renderer in the game)')
+    ap.add_argument('--game', choices=['original', 'approved-rc'], default='original',
+                    help='approved-rc (F3-3): release-candidate game = pinned 2.0.0 snapshot + verified trial parts 14/22 + composed approved renderer + approved arcade runtime')
+    ap.add_argument('--synthetic-release-catalog', help='TEST ONLY: RELEASE catalog marked deploymentId SYNTHETIC-TEST-ONLY-* (never the committed manifest); output must be outside the repo')
     ap.add_argument('--release-content-dir', help='F3-2: HOJA_QB_CONTENT_*.gs for EXACTLY the release-active ids (required when active > 0)')
     a = ap.parse_args()
     out = Path(a.output).resolve()
     if out == ROOT or ROOT in out.parents and out.parent == ROOT:
         raise SystemExit('REFUSE_REPO_ROOT')
+    if a.synthetic_release_catalog and (ROOT in out.parents or out == ROOT):
+        raise SystemExit('SYNTHETIC_OUTPUT_MUST_BE_OUTSIDE_REPO')
     out.mkdir(parents=True, exist_ok=True)
     if any(out.iterdir()):
         raise SystemExit('OUTPUT_NOT_EMPTY')
     for f in FILES:
         shutil.copyfile(GAS / f, out / f)
+    synthetic = False
+    if a.synthetic_release_catalog:
+        if a.variant != 'release': raise SystemExit('SYNTHETIC_CATALOG_ONLY_WITH_RELEASE_VARIANT')
+        if ROOT in out.parents or out == ROOT: raise SystemExit('SYNTHETIC_OUTPUT_MUST_BE_OUTSIDE_REPO')
+        sc = Path(a.synthetic_release_catalog).read_text(encoding='utf-8')
+        if '"deploymentId": "SYNTHETIC-TEST-ONLY-' not in sc: raise SystemExit('NOT_A_SYNTHETIC_TEST_CATALOG')
+        (out / 'ApprovedActiveCatalog.gs').write_text(sc, encoding='utf-8'); synthetic = True
     cat = (out / 'ApprovedActiveCatalog.gs').read_text(encoding='utf-8')
     if '"buildType": "RELEASE"' not in cat or 'QA_TEST_ONLY' in cat:
         raise SystemExit('RELEASE_CATALOG_REQUIRED')
@@ -94,6 +134,10 @@ def main():
         elif a.release_content_dir:
             raise SystemExit('RELEASE_HAS_NO_ACTIVE_ENTRIES')
     content, sha = game_bytes()
+    rc = None
+    if a.game == 'approved-rc':
+        if a.trial_game: raise SystemExit('USE_EITHER_GAME_OR_TRIAL_GAME')
+        content, rc = approved_rc_game(sha)
     if a.trial_game:
         if a.variant != 'qa': raise SystemExit('TRIAL_GAME_ONLY_WITH_QA_VARIANT')
         content = Path(a.trial_game).read_bytes()
@@ -106,7 +150,8 @@ def main():
     print(json.dumps({'output': str(out), 'variant': a.variant, 'files': FILES + extra + ['Game.html'], 'gameSha256': sha,
                       'catalogSha256': hashlib.sha256((out / 'ApprovedActiveCatalog.gs').read_bytes()).hexdigest(),
                       'contentFiles': len(extra), 'contentBytes': sum((out / f).stat().st_size for f in extra),
-                      'patchedGameSha256': hashlib.sha256(patched).hexdigest(),
+                      'patchedGameSha256': hashlib.sha256(patched).hexdigest(), 'game': a.game, 'releaseCandidate': rc,
+                      'syntheticReleaseCatalog': synthetic,
                       'telemetryBlockOldSha256': old_block, 'telemetryBlockNewSha256': new_block}))
 
 if __name__ == '__main__':

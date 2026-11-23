@@ -162,4 +162,5 @@ async def run():
             try: await STEP['page'].screenshot(path=shot)
             except Exception: pass
         print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:300]); sys.exit(1)
-asyncio.run(run())
+if __name__ == '__main__':
+    asyncio.run(run())

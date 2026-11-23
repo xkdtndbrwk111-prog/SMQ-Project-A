@@ -194,8 +194,11 @@ function hojaApprovedActive_(){
  * RELEASE with 0 active entries (today) keeps the legacy behaviour unchanged. */
 function hojaApprovedGameCatalog_(){
   const c=hojaApprovedActive_();
+  if(c.buildType!=='QA_TEST_ONLY'&&!c.entries.length)return null;
+  // Two active units must never resolve to the same game catalog name (fail closed, explicitly).
+  const names=c.entries.map(hojaApprovedGameName_);
+  if(new Set(names).size!==names.length)throw new Error('APPROVED_GAME_NAME_COLLISION');
   if(c.buildType==='QA_TEST_ONLY')return c;
-  if(!c.entries.length)return null;
   const today=Utilities.formatDate(new Date(),'Asia/Seoul','yyyy-MM-dd');
   if(!hojaUsageEra_(PropertiesService.getScriptProperties(),today).approved)
     throw new Error('APPROVED_ACTIVE_BEFORE_ERA_START');
@@ -215,7 +218,7 @@ function hojaApprovedGameName_(e){
 }
 function hojaApprovedIdsByTitle_(cat,names){
   if(!Array.isArray(names)||!names.length||names.length>5||
-     names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>200)||
+     names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>400)||
      new Set(names.map(n=>n.trim())).size!==names.length)throw new Error('PROJECT_B_SELECTION_INVALID');
   return names.map(n=>{
     const hits=cat.entries.filter(e=>hojaApprovedGameName_(e)===n.trim());

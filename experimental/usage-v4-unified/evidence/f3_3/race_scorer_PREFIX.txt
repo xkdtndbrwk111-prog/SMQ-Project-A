@@ -1,0 +1,6 @@
+eng5-ham-u10 {"probes": 21, "registered": 16, "hazard": 0, "dropped": 5, "registeredCorrectlyForGameQuestion": 16, "scorerMismatch": 0} guardBlocked None
+math5-s2-u4 {"probes": 42, "registered": 31, "hazard": 0, "dropped": 11, "registeredCorrectlyForGameQuestion": 31, "scorerMismatch": 0} guardBlocked None
+{"probes": 42, "registered": 31, "hazard": 0, "dropped": 11, "registeredCorrectlyForGameQuestion": 31, "scorerMismatch": 0}
+byDelayMs {"0": {"taps": 6, "registered": 0, "hazard": 0}, "16": {"taps": 6, "registered": 1, "hazard": 0}, "33": {"taps": 6, "registered": 6, "hazard": 0}, "50": {"taps": 6, "registered": 6, "hazard": 0}, "100": {"taps": 6, "registered": 6, "hazard": 0}, "200": {"taps": 6, "registered": 6, "hazard": 0}, "300": {"taps": 6, "registered": 6, "hazard": 0}}
+F3_INPUT_RACE_PASS
+exit=0

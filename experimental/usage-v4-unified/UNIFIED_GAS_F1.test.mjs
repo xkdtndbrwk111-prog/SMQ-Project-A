@@ -270,6 +270,13 @@ test('F1-B composed renderer: bridge file SHA-pinned and untouched; only the med
   assert.ok(r.html.startsWith(bridge.slice(0, at)) && r.html.endsWith(bridge.slice(at)), 'bridge bytes preserved around the insertion');
   assert.equal((r.html.match(/<script id="hoja-ext-media-v1">/g) || []).length, 1);
   assert.equal((r.html.match(/<script id="hoja-ext-math-v1">/g) || []).length, 1);
+  // 40-6V: the input guard is part of every composed renderer, appended LAST (after all re-render wrappers)
+  assert.equal((r.html.match(/<script id="hoja-ext-input-guard-v1">/g) || []).length, 1);
+  assert.ok(r.html.lastIndexOf('hoja-ext-input-guard-v1') > r.html.lastIndexOf('hoja-ext-math-v1'));
+  const guard = readFileSync('experimental/unified-quiz-renderer/HOJA_RENDERER_INPUT_GUARD.js', 'utf8');
+  assert.match(guard, /stopImmediatePropagation\(\)/, 'blocked taps are dropped');
+  const guardCode = guard.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+  assert.doesNotMatch(guardCode, /postMessage|HOJA_UNIFIED_ANSWER|score|verdict/i, 'the guard never answers or scores');
   const ext = readFileSync('experimental/unified-quiz-renderer/HOJA_RENDERER_MEDIA_EXT.js', 'utf8');
   assert.doesNotMatch(ext, /selectAnswer|setFeedback|HOJA_APPROVED_RENDERER_CAPTURE|score|rank/i, 'extension never touches answers/scoring');
 });
@@ -333,4 +340,38 @@ test('F3-2 RELEASE with active approved entries: the game LIST/GET serve that ca
   const before = releaseActiveWorld({era: ''});
   assert.throws(() => before.rpc('hojaListPublicCartridges'), /APPROVED_ACTIVE_BEFORE_ERA_START/);
   assert.throws(() => releaseActiveWorld({era: '2026-12-01'}).rpc('hojaGetPublicQuestions', ['5-1학기-사회-zz5-s1-u2 승인 제목']), /APPROVED_ACTIVE_BEFORE_ERA_START/);
+});
+
+/* ---------------- F3-3 future titles / ids (40-6T item 4) ---------------- */
+function nameWorld(entries) {
+  const {ss} = buildCopy({history: standardHistory()});
+  const p = loadProject({spreadsheets: new Map([['copy40', ss], ['prod', new MockSpreadsheet('prod')], ['cert', new MockSpreadsheet('cert')]]),
+    props: {...ISOLATED_PROPS, HOJA_USAGE_APPROVED_ERA_START: '2026-11-23'}});
+  runInContext('HOJA_APPROVED_ACTIVE_CATALOG_=' + JSON.stringify({schemaVersion: 'hoja-active-cartridge-catalog-v1', buildType: 'RELEASE',
+    sourceRepo: 'f', sourceCommit: COMMIT, deploymentId: 'SYNTHETIC-TEST-ONLY-names', entries}), p.ctx);
+  return p;
+}
+const ent = (id, o = {}) => ({cartridgeId: id, title: '제목 ' + id, grade: 5, semester: 2, subject: 'social', subjectLabel: '사회',
+  publisher: null, author: null, questionCount: 3, packageSha256: 'a'.repeat(64), ...o});
+test('F3-3 game names: hyphen/slash titles, English publisher/author, no semester, long titles all round-trip to the stable id', () => {
+  const long = '긴 승인 단원 제목 '.repeat(20).trim();
+  const w = nameWorld([ent('zz5-s2-u1', {title: '3-1. 세계-지도/읽기 (A-B)'}),
+    ent('zz6-u10', {subject: 'english', subjectLabel: '영어', semester: null, publisher: 'YBM', author: '김-작가', title: 'Lesson 10 Where-Is/It?'}),
+    ent('zz6-u11', {subject: 'english', subjectLabel: '영어', semester: 2, publisher: '천재/교과서', author: null, title: 'Lesson 11'}),
+    ent('zz5-s2-u9', {title: long})]);
+  const list = w.rpc('hojaListPublicCartridges');
+  assert.equal(list.length, 4);
+  // the game's own parser (copied rule): grade-[N학기-]subject-[publisher-]label
+  const parse = n => { const m = /^([1-6])-(?:([12])학기-)?([^-]+)-(.+)$/.exec(n); return {grade: m[1], subject: m[3], tail: m[4]}; };
+  assert.deepEqual(parse(list[0].name), {grade: '5', subject: '사회', tail: '3-1. 세계-지도/읽기 (A-B)'});
+  assert.equal(parse(list[1].name).tail.split('-')[0], 'YBM(김 작가)', 'publisher segment has no separator, so the label keeps its own hyphens');
+  assert.equal(parse(list[2].name).tail.split('-')[0], '천재 교과서');
+  // GET resolves every listed name back to exactly its stable id (same resolver hojaGetPublicQuestions uses)
+  for (const x of list) assert.deepEqual(w.call('hojaApprovedIdsByTitle_(HOJA_APPROVED_ACTIVE_CATALOG_,' + JSON.stringify([x.name]) + ')'), [x.cartridgeId]);
+  assert.ok(list[3].name.length > 200 && list[3].name.length <= 400, 'long approved title still resolvable');
+});
+test('F3-3 game names: two active units resolving to the same name fail closed explicitly', () => {
+  const w = nameWorld([ent('zz5-s2-u1', {title: '같은 제목'}), ent('zz5-s2-u2', {title: '같은 제목'})]);
+  assert.throws(() => w.rpc('hojaListPublicCartridges'), /APPROVED_GAME_NAME_COLLISION/);
+  assert.throws(() => w.rpc('hojaGetPublicQuestions', ['5-2학기-사회-같은 제목']), /APPROVED_GAME_NAME_COLLISION/);
 });
