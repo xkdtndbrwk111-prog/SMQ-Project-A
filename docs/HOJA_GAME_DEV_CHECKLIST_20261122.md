@@ -1040,3 +1040,19 @@
 | `F3-3-FULL-REGRESSION` | **PASS(로컬 범위)** — 40-6Y IN PROGRESS 해결 | 위 항목 + 40-6Y의 race sweep·RC 감사·Node 90/90 | 위 | GPT-6 독립 재실행 |
 | `F3-3-CHECKLIST-SYNC` | **이 커밋으로 동기화** | 검증기 수정 + 원시 로그 + 작업 로그 + 본 체크리스트 동일 커밋 | 커밋 SHA는 PR #6 코멘트 | — |
 - [ ] **이월 → F4/F5/G (변경 없음, NOT RUN/HOLD):** 실 GAS A1·익명 통계, R7 자정, 80–120 동시 부하, 탭 닫힘 복구, 7단원 234문항 교사 시각 검토, private QBank pin CI(Actions SKIPPED), 85인치 실기·실 랭킹, 0·16ms 즉시 탭 UX 판단, 미디어 권리 23/23 HOLD, 운영 활성 0. PR Draft, merge/배포 금지.
+
+
+### 40-6AB. GPT-6 독립 증거 감수 — **F3-3 로컬 기능 검증 게이트 PASS / F4 진입 허용** (2026-11-23)
+**대상:** PR #6 개발 커밋 `9b1c84d39b81aff5b032ae908c89fd1a6c3804b8` + `da75d15e9d4fc98760b1b51c2880812a78a950c1`; 이 항목은 Claude의 로컬 Chromium + mock GAS 실행을 **기존 코드·원시 로그·실패 이력·CI 결과와 교차 대조한 독립 증거 검토**이다. GPT-6가 동일 Windows 실기나 모든 브라우저 시험을 재실행했다는 의미는 **아님**. **새 테스트 요구 없음**.
+- [x] **`F3-3-HINT-SAMPLE` 표본 PASS 확정:** 40-6Z 교사 결정에 따라 실제 수행 **7단원 196/633문항**(MCQ 158/OX 38, 비무작위, 0ms·700ms 양쪽 `exit=0`, 매핑·단서 누설·정오 오류 0)을 해당 기능의 채점/힌트 **표본 검증 완료**로 승인. 누락 437문항 전수시험은 **요구하지 않음**. 23단원 전체 검사로 오기 금지.
+- [x] **`F3-3-TEAM-FULL` 로컬 PASS:** `team_full_FIXED_guard_v2_3units.txt` 직접 확인. **3/3 단원**, 각 24턴, 교사 SHORT **3/2/1**, 각 오답 12↔복습 12, 복습 뒤 점수 불변, A1 TEAM **모의 사용량 1행씩**, 랭킹 호출 0, `exit=0`.
+- [x] **`F3-3-UI-E2E` 로컬 PASS:** `ui_e2e_FIXED_guard_v2_23x2.txt` 실제 로그 **46개 케이스/23단원 × SOLO·TEAM**, `F3_UI_E2E_PASS`, `exit=0`. TEAM E2E는 첫 문항 노출 확인, 전체 팀전은 별도 3단원 검사이므로 구분.
+- [x] **`F3-3-ARCADE` 로컬 PASS:** `arcade_FIXED_guard_v2_{eng5-ham-u10,math5-s2-u4}.txt` 및 Claude 제출, 실제 Phaser로 25풍선·정답/오답/종료/TIME UP/랭킹 읽기전용 `exit=0`; **이번 추가 확인은 2개 대표 단원**, 다른 단원 모든 게임 루프를 전수 실행한 것은 아님.
+- [x] **`F3-3-RENDER/PARITY` 로컬 PASS:** 렌더 732문항 × 4화면에서 무미디어 539 DOM 동일/미디어 6 OK/프로필 187/blank 0/JS error 0, `exit=0`; 수학 **187/187 × 2해상도** `exit=0`, 사회5 **64/64 × 2해상도** `exit=0`. 근거 `render_732x4_FIXED_checker.txt`, `math_parity_187_FIXED_checker.txt`, `soc5_parity_64_FIXED_checker.txt`. 이 검사는 **DOM/구성 일치**, 모든 문항의 교사 육안 시각 승인으로 과장 금지.
+- [x] **`F3-3-VALIDATOR-REPAIR` 증거 검토 PASS:** 최초 실패 로그 `HISTORY_render_732x4_FAIL_checker_missed_data-hoja-gen.txt` / `HISTORY_math_parity_FAIL_checker_missed_guard_attrs.txt`는 guard 전용 속성 `data-hoja-qid`, `data-hoja-gen` 비교 오류; 변경 스크립트는 이 두 이름만 제외하도록 수정. 사회5는 과거 도구가 64 DOM 차이를 보고하면서도 `exit=0`이었던 **실제 fail-open 검증기 버그**; 현 스크립트는 차이가 있으면 `exit=1`, 고의의 비정상 속성에 대해 `NEGATIVE_soc5_parity_unexpected_attr_exit1.txt` **FAIL exit 1** 확인. 과거 잘못된 PASS 출력/실패 이력 삭제 금지.
+- [x] **`F3-3-CI` 정적/Node PASS:** Actions [45178910848](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45178910848) `head_sha=da75d15e`, `success`. **비공개 QBank 체크아웃 및 pinned source drift 비교 2개는 SKIPPED**, 성공 판정에서 반드시 제외. 전체 오프라인 Chromium 시험은 CI가 아닌 제출 로컬 증거임.
+- [x] **`F3-3-CHECKLIST-CHAIN` PASS:** 40-6Z 교사 결정 반영, 40-6AA가 40-6Y의 “23단원 196문항”을 **7단원 196문항**으로 정정(원문 이력 보존), 검증기 수정·실패/음성시험/정상 로그·작업 로그·체크리스트가 `da75d15e` **동일 커밋**에 있음.
+- [x] **`F3-3-STAGE-GATE` 독립 증거 검토 판정:** **F3-3의 합성 RELEASE 후보 및 mock GAS 기반 로컬 기능 검증 범위 종료, F4 실제 GAS 시험 준비/착수 허용.** 단 F3-3 코드와 시험 결과를 `main`/운영 앱에 병합하거나 자동 배포하라는 승인은 아님. 추가 F3-3 표본 확대·반복 테스트 요구 없음.
+- [ ] **`F4/F5/G` 독립 HOLD 유지:** **실 GAS A1 사용량/공개 익명 통계, R7 자정·80–120 부하·탭 종료 후 복구·실 랭킹, 85인치 전자칠판 0/16ms 즉시 탭 UX**, 교사 육안 **7단원 234문항**, 비공개 QBank pinned CI 검증 SKIPPED, **미디어 권리 23/23 HOLD**, 실제 활성 `active-deployment.json` = 0, PR Draft. 학생/교사 개인정보·이전 EVENT_LOG·실 GAS·운영 원본 변경, PR merge, 라이브 배포는 별도 승인까지 금지.
+
+**결론:** F3-3을 “전체 게임 출시 완료”가 아닌 **“로컬/모의 서버 기능 검증 완료(F4 진입 가능)”**로 명확히 구분한다. 다음 작업은 새 F3-3 검사 추가가 아니라 **F4의 승인된 격리 환경에서 실제 GAS 사용량·권한·통계 경계 확인**이다.
