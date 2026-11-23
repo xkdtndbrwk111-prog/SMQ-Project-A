@@ -717,3 +717,10 @@
 - [x] docs/HOJA_USAGE_V4_40_6_AB_GAS_TRIAL_RUNBOOK_20261123.md 추가. A/B 시험 프로젝트 각자의 Script Properties, 복사본 canary, 기존 U2 대조, 권한 취소, 중복 ID, 오류 시 중단, 실시간 동시성 시험과 NO DEPLOY 정책 정리.
 - [x] 기존 실제 복사본 canary와 V4 감사 인증서 시트 내용 조회 재확인. 오늘의 0건은 복사본 스냅샷일 뿐 실제 운영 통계가 아님.
 - [ ] 실제 Apps Script 실행기에서 문서대로 호출 및 동시성/인가 시험 미실시; 운영 전환 HOLD.
+
+
+### 40-6B. 2026-11-23 새 A/B 복사본 경계 CI 최종 PASS
+- [x] Project A 가드 및 Project B 오늘 꼬리 오류 차단 반영 커밋 d25b90f 이후, 테스트 기대 차단 코드만 갱신한 136c0aa에서 GitHub Actions 45089478163 전체 PASS.
+- [x] 신규 A 시험: 실제 recordUsageStartU1 함수의 mock 호출 7종, 동일 ID 재전송/내용 충돌/전일 재전송/날짜 역행/잘못된 복사본/기존 플래그 미설정 동작. 신규 B 시험: 불완전·PRIVATE 오늘 꼬리 모두 차단. 기존 V4 집계/조회, 승인 렌더러 빌드 및 Chromium smoke도 해당 워크플로 PASS.
+- [x] A/B 호출·시트 시험은 GitHub mock과 Google Sheets 연결 API로만 확인. 실제 Apps Script 자체 실행이나 실제 서로 다른 두 프로젝트 간 동시 접수 실행을 한 것으로 해석하지 않음.
+- [ ] 별도 Phaser 실기 smoke 워크플로는 이 통계 CI와 다른 검증이며, 완료 여부에 따라 별도 기록. 운영 Project A/B 배포 및 원본/랭킹 변경 없음.
