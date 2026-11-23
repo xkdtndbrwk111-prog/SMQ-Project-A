@@ -36,7 +36,7 @@ window.HOJA_GIMMICK_MODEL=(()=>{
    const point=n=>c.path?{x:c.x+c.path[n][0]*32,y:c.y+c.path[n][1]*32}:{x:c.x+sign*n*32,y:c.y};
    return {kind:c.kind,offset,progress,x:c.x,y:c.y,blocks:Array.from({length:c.count},(_,i)=>{const from=index(i,offset),to=index(i,next),distance=Math.abs(to-from),walk=progress*distance,part=Math.min(Math.floor(walk),Math.max(0,distance-1)),fraction=distance?walk-part:0,dir=Math.sign(to-from),a=point(from+part*dir),b=point(from+(part+(distance?1:0))*dir);return {id:i,x:a.x+(b.x-a.x)*fraction,y:a.y+(b.y-a.y)*fraction,moving:distance>0};})};
   }
-  const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,length:c.length,rise:phase==='active'?[0,.5,1,.5][Math.floor((p-c.wait-c.warn)/220)%4]:0,phase,active:phase==='active'};
+  const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,length:c.length,rise:phase!=='active'?0:(p-c.wait-c.warn)<220?0:(p-c.wait-c.warn)<440?.5:(p-c.wait-c.warn)<2440?1:(p-c.wait-c.warn)<2660?.5:0,phase,active:phase==='active'};
  }
  function rectHit(b,r){return b.right>r.x&&b.left<r.x+r.w&&b.bottom>r.y&&b.top<r.y+r.h;}
  function circleHit(b,c){const x=Math.max(b.left,Math.min(c.x,b.right)),y=Math.max(b.top,Math.min(c.y,b.bottom));return (x-c.x)**2+(y-c.y)**2<c.radius**2;}

@@ -1161,7 +1161,7 @@
             "kind": "flame",
             "wait": 2400,
             "warn": 1200,
-            "active": 1200,
+            "active": 3000,
             "cool": 1200,
             "length": 5
           }
