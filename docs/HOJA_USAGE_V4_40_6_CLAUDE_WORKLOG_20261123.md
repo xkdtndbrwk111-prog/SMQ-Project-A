@@ -76,3 +76,17 @@
 **실 Apps Script 엔진**: NOT RUN (U3에서 판단).
 **운영**: 운영 GAS/EVENT_LOG/랭킹/배포/트리거 무변경. 루트 `Code.gs`·`UsageRollupU3S.gs` 무변경.
 **미해결**: 최근창 멱등은 2일 이상 지난 재전송 미탐지 가능(설계 문서 3장 색인안), Ops 가드 실측 필요, 실 사본 수치 대조 미실시.
+
+## U2 — 익명 공개 통계 UI (2026-11-23 KST)
+**신규/변경**: `gas/Stats.html`(공개 통계 페이지), `build_unified_gas.py`(단일 GAS 폴더 조립, Game.html SHA-256 검증), `make_stats_payloads.mjs`(실제 `gas/*.gs`가 합성 사본에서 만든 응답), `verify_stats_chromium.py`, `UNIFIED_GAS_U2.test.mjs`, `evidence/stats_desktop.png`·`stats_mobile.png`(합성 데이터 화면).
+- 화면: 기간 카드 4개(오늘 잠정), 일별 막대(확정 단색/잠정 빗금, hover tooltip, 표 보기), 개인전/팀전, 팀 2~7, 학년·교과·출판사, TOP20. 단일 계열 차트만 사용(색상 1개, 식별은 텍스트). 진입 시 RPC 1회 + 수동 새로고침(10초 제한). 외부 리소스 0, 데이터는 `textContent`로만 렌더링. 오류 시 코드·설명만, **숫자 미표시**. 교실매니저 UI 복제 없음. Game.html 무수정 → 게임 홈·인트로 통계 호출 0.
+
+**시험 결과**
+| 종류 | 결과 |
+|---|---|
+| GitHub mock `UNIFIED_GAS_U2.test.mjs` (로컬) | 7/7 PASS — 익명 공개 Reader 인자 무시·allowlist 동일·쓰기/락 0, Ops 거부(저장소 open 0), 악성 시작 기록 12종 append 0·저장소ID 미노출, `doGet` 파일 선택 불가, 기존 게임 RPC 18개 함수 루트 `Code.gs`와 동일, Stats.html RPC 1종·외부 리소스 0, 조립 Game.html SHA-256 `4ac5c4ef…` 동일·통계 호출 0 |
+| 오프라인 Chromium (로컬 Playwright 1.x/Chromium, 새 컨텍스트·쿠키 없음·모든 네트워크 차단, `google.script.run` 스텁) | PASS — 데스크톱 수치/잠정 배너/막대 수/표/TOP20/tooltip, 모바일 375px 가로 넘침 0, stale 표시, INTEGRITY·NOT_CONFIGURED·NETWORK 오류 시 숫자 0개 표시, 라벨 XSS 텍스트 처리 |
+| **실 Apps Script 웹앱 익명 브라우저 e2e** | **NOT RUN** — 실 GAS 배포 필요(U3 runbook, 승인 대기) |
+| GitHub Actions CI | **NOT RUN** — workflow scope 문제(U1 참조). 제안 워크플로에 U2/U3/Chromium 단계 추가 |
+
+**운영**: 무변경.

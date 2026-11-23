@@ -33,3 +33,15 @@ jobs:
           node --test experimental/usage-retention/HOJA_USAGE_V4_APPEND_GUARD_TRIAL.test.mjs
       - name: 40-6-U1 single GAS writer / seal / public reader (mock GAS)
         run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs
+      - name: 40-6-U2 anonymous RPC surface + game bytes unchanged (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs
+      - name: 40-6-U3 boundaries / storms / scale (mock GAS, not the real engine)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
+      - name: Install Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: 40-6-U2 offline anonymous Stats.html browser test (no network, stubbed RPC)
+        run: |
+          node experimental/usage-v4-unified/make_stats_payloads.mjs "$RUNNER_TEMP/payloads.json"
+          python3 experimental/usage-v4-unified/verify_stats_chromium.py "$RUNNER_TEMP/payloads.json"
