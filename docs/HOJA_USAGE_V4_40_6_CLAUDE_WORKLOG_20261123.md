@@ -256,3 +256,41 @@
 
 **판단 근거(자기 승인 아님):** 이전 R6 10/40 유실은 실제 게임 경로에서 40/40·중복 0·유실 0으로 해소됨을 응답·원본 행·watermark·공개 통계로 교차 확인. 단 서버 단독으로는 잠금 보유 약 1초 × 40건 직렬이라 20초 대기 안에 다 못 받음(R6a 19/40) — **유실 방지는 클라이언트 같은 eventId 재시도에 의존**. 브라우저를 즉시 닫는 등 재시도 기회가 없으면 같은 날 다음 로드 때 복구, 그 전에는 미기록. 40건 초과(예: 여러 반 동시) 규모는 미시험.
 **여전히 NOT RUN:** R7 KST 자정 seal(실 엔진), 정본 저장소 drift CI(토큰 secret 없음), 승인 정본 게임 렌더링 연동.
+
+---
+
+## F0 — 기존 통합 렌더러·로더 진입점과 계약 (2026-11-23, 지시서 `HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md` @ `7b45bf5`)
+- **렌더러(재사용, 무변경):** `experimental/unified-quiz-renderer/HOJA_APPROVED_RENDERER_BRIDGE.html` — `HOJA_APPROVED_RENDERER.load({questions,originalQuestions,images,tags,unitMeta,mode})`, `show({questionId,mode,omitChoiceId})`, `embed()`, `stable()`, `reveal()`; 질문 필드 `id/type(MCQ|OX|SHORT)/prompt/image(1개)/imageAlt/dialogue/choices[{id,text,image}]/answer/renderTags/layoutHint`. **문항당 그림 1장만 표현 가능**. `HOJA_RENDER_TAGS[q.id].layout.preferredLayout`이 A/C/D 선택, 없으면 `image?C:A`.
+- **게임 측 계약(재사용):** 기존 내장 시험판 `gas-test/HOJA_QB_UNIT_S6U3x.gs`의 단원 패키지 `{questionSchemaVersion:2, sourceSheetVersion:2, cartridgeId, unitId, questions:[{familyId,question,answer,type(MULTIPLE|OX|SUBJECTIVE),options,explanation,rendererQuestion,originalQuestion}], images, tags, unitMeta}`, 응답 `[{sheetName,data}]`(= 게임 `HOJA_B_LIVE.setSources()` 입력). 팀 바인딩 `HOJA_TEAM_APPROVED_BINDING.mjs`·오답 `HOJA_REVIEW_SESSION.mjs`·iframe 호스트 `HOJA_UNIFIED_FRAME_HOST.mjs`·아케이드 `HOJA_ARCADE_APPROVED_*.mjs`·7MB 시험 재조립 `game-trial/build_trial.py`(part-22만 패치)는 F2/F3에서 연결.
+- **승인 표시 데이터의 실제 형태(정본 @9573f91):** 수학·사회6·YBM 승인 화면 HTML = 브리지와 같은 renderer-v2 상수(`DATA_ORIGINAL/DATA_CONCISE/IMAGES/UNIT_META/HOJA_RENDER_TAGS`). 사회5 3-1/3-2 승인 화면 = renderer-v2 문항·그림(UNIT_META/태그 없음, `layoutHint` 내장). 영어 천재 승인 화면 = 다른 형식(`DATA/MEDIA/NAMES`, 블록·다중 그림). 사회5 2-2 = `display/presentation.json`(블록 오버레이) 뿐.
+- **수학 승인 화면 고유 스크립트 2개**(`hoja-math-priority-and-notation-v1` 분수·격자 표기, `hoja-math-teacher-final-wrap-v4` 보기 4개 줄바꿈)는 브리지에 없음 → F2 연결 시 승인 HTML의 해당 스크립트를 브리지 어댑터로 재사용해야 함(새 렌더러 작성 아님).
+
+## F1 — 승인 정본 '문항+그림+태그' 내장 로더 (2026-11-23)
+**구현(`experimental/usage-v4-unified/approved-catalog/`):**
+- `approved_content_packager.mjs`: A단계 인덱스의 각 단원에 대해 **선언된 필드로만** 승인 표시 데이터 위치를 찾음(단원 manifest `reviewedPresentation`, YBM manifest `approvedPresentation`, ZIP `release/approval.json`의 `display`). `const NAME=` JSON 리터럴을 eval 없이 추출. renderer-v2 데이터를 **승인 effective 콘텐츠와 교차검증**(문항 ID·유형·보기 ID·정답 키·그림 유무·보기 그림 수, YBM은 승인 questions/tags/images 표와 완전 일치) → 불일치 시 실패. 그림 data URI 존재 확인 + effective 자산과 바이트 SHA 대조. 승인 화면 SHA가 manifest에 있으면 재계산 대조.
+- 교사 배치 결정: ZIP `presentation/layout-preferences.json`을 **schemaVersion으로만** 해석 — `hoja-math-presentation-v1`은 승인 HTML의 `teacherCLayoutIds`와 3자 대조 후 승인 HTML과 동일하게 `preferredLayout='C'` 적용, `choiceWrap` 기록; `hoja-layout-preferences-v1`은 고정 C 배치가 태그와 일치하는지 검증; 그 밖 스키마 → 실패.
+- 출력 패키지 = 기존 게임 계약 그대로. **회귀: 사회6 2단원 패키지가 기존 `gas-test/HOJA_QB_UNIT_S6U31.gs`·`S6U32.gs`와 바이트 단위 동일**(로컬 실행).
+- 표현 불가 단원은 변환·추측하지 않고 **BLOCKED + 사유**.
+- `build_content_packages.mjs`: 정본 pin 불일치(drift)·작업트리 변경 시 거부. `generated/approved-content-report.json`(문항 본문·그림 없음, 20KB) 커밋, `--check` drift 검사. `--qa-out`은 저장소 밖 출력 폴더에 QA 번들 생성.
+- **문항 본문·그림은 이 저장소에 커밋하지 않음**(미디어 권리 23/23 HOLD) — QA 번들은 pin된 정본 체크아웃에서 매번 생성.
+- **출시/QA 분리:** `qa_preview.mjs` + `deployment/qa-preview.json`(`TEST_ONLY_QA_NOT_DEPLOYMENT`, `ALL_READY`) → `buildType:'QA_TEST_ONLY'`, `deploymentStatus:'QA_PREVIEW_NOT_DEPLOYED'`, 교사 배포 승인·미디어 권리 해제 주장 없음. 출시 카탈로그는 `buildType:'RELEASE'`, 활성 0개(배포 승인 0 유지), 활성 ID는 READY 패키지 + `packageSha256` pin 필수. `build_unified_gas.py --variant release|qa`: release는 QA 카탈로그·콘텐츠 파일이 있으면 빌드 거부.
+- **GAS 런타임(`gas/Code.gs` 시험 번들):** `hojaApprovedActive_()`가 QA 카탈로그를 격리 시험 프로젝트(`HOJA_V4_UNIFIED_ISOLATION=COPY_40_6U_ONLY`) 밖에서는 거부. `hojaGetApprovedQuestions(ids)`가 선택된 단원만 지연 로드, 활성 카탈로그의 `packageSha256`과 실제 문자열 SHA-256 재계산 대조, 구조 검증 후 `[{sheetName:승인 제목, data}]`. GitHub/Sheets 원격 조회 없음.
+
+**실데이터 결과(정본 @9573f91, 로컬):**
+| 구분 | 단원/문항 | 내용 |
+|---|---|---|
+| **READY** | **16 / 498** | YBM 6(183), 수학 6(187), 사회6 2(64), 사회5 3-1·3-2(64). 유형 MCQ 350·OX 84·SHORT 64. 그림 107개 effective 자산과 **바이트 일치 107/107**. 수학 교사 C **19개 적용**(전체 A120/C67 = 승인 HTML 표기와 일치), 보기 줄바꿈 4개 기록, 사회6 교사 고정 C 11개 일치 |
+| **BLOCKED** | **7 / 234** | 영어 천재 6(201): 승인 화면이 renderer-v2가 아님 + 5학년 10단원 q21 **그림 2장(학교+시계 오버레이)**을 브리지가 1장만 표현 가능. 사회5 2-2(33): 승인 renderer 데이터 없음(블록 오버레이 JSON만) |
+| 주의 | — | 사회5 3-1·3-2는 승인 화면에 렌더 태그·UNIT_META가 없어 `layoutHint`+인덱스 제목 사용(승인 화면 렌더러 v0.1.0-preview.2 ↔ 브리지 v0.2 동일성 **미검증**). 수학은 분수·줄바꿈 표기 스크립트가 브리지에 없음(F2 과제) |
+
+**시험:**
+| 시험 | 종류 | 결과 |
+|---|---|---|
+| `UNIFIED_GAS_F1.test.mjs` 14개 | Node/mock(합성 정본) + 커밋된 실데이터 보고서 | **14/14 PASS** — 패키지 형식·정답 매핑, 정답/보기/유형/그림 불일치·미지 배치 스키마 fail-closed, 교사 C 적용, BLOCKED 사유 3종, 새 단원 자동 패키징, QA 카탈로그 격리 밖 거부, 지연 로드(목록은 0건 파싱·선택 단원만 파싱), 변조 패키지 거부, release 빌드 콘텐츠 0·배포 승인 0 |
+| 전체 Node 묶음 | Node/mock | **80/80 PASS** |
+| 실콘텐츠 GAS 로더 | mock GAS + 실제 QA 번들(16단원 4.06MB, 파일 17개) | 498문항, 누락 그림 0, 단원당 로드 최대 5ms(Node; 실 GAS 시간 **NOT RUN**) |
+| **실콘텐츠 브리지 렌더** | 오프라인 Chromium, 기존 브리지 무변경 | **498/498 × 1920×1080·1280×720·1024×768 표시, 빈 화면 0, 문항 그림 미표시 0, JS 오류 0** (`evidence/f1_real_content_20261123.log`) |
+| 정본 재생성 drift | CI | secret 없으면 SKIPPED; 로컬 `--check` PASS |
+**구분:** 위는 Node/mock·로컬 Chromium 결과. 게임 버튼 E2E·실 GAS·전자칠판 **NOT RUN**. 픽셀 단위 승인 화면 대조는 이번 범위 아님(사회6 192건 기존 결과만 존재).
+**데이터 안전:** 운영 GAS·원본·루트 Code.gs/Game.html·versions 무변경, `active-deployment.json` 0건·미디어 권리 HOLD 유지, 커밋에 문항 본문/그림 없음.
+**남은 위험/다음:** BLOCKED 7단원(234문항)은 교사 승인 renderer-v2 데이터(또는 다중 그림 지원 결정)가 있어야 게임 사용 가능 — 결정 필요. F2: 싱글 문제풀이 실제 버튼 연결 + 수학 표기 스크립트 재사용.

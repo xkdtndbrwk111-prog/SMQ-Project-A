@@ -6,7 +6,10 @@ from versions/2.0.0 parts with SHA-256 verification. 40-6-U D: exactly ONE block
 <script id="hojaProdUsageTelemetry">, is replaced by gas/UsageTelemetryClient.html
 (same-eventId retry); every other game byte is unchanged and both SHAs are printed.
 Never writes into the repository root and never deploys anything.
-Usage: python3 build_unified_gas.py --output <empty dir outside the repo root>
+F1: --variant release (default) ships the committed RELEASE ApprovedActiveCatalog.gs and
+NO approved content; --variant qa --qa-dir <dir from build_content_packages.mjs --qa-out>
+replaces the catalog with the TEST-ONLY QA preview catalog + per-unit content files.
+Usage: python3 build_unified_gas.py --output <empty dir outside the repo root> [--variant qa --qa-dir D]
 """
 import argparse, hashlib, json, shutil
 from pathlib import Path
@@ -46,7 +49,9 @@ def patch_telemetry(content):
 
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument('--output', required=True)
-    out = Path(ap.parse_args().output).resolve()
+    ap.add_argument('--variant', choices=['release', 'qa'], default='release'); ap.add_argument('--qa-dir')
+    a = ap.parse_args()
+    out = Path(a.output).resolve()
     if out == ROOT or ROOT in out.parents and out.parent == ROOT:
         raise SystemExit('REFUSE_REPO_ROOT')
     out.mkdir(parents=True, exist_ok=True)
@@ -54,12 +59,28 @@ def main():
         raise SystemExit('OUTPUT_NOT_EMPTY')
     for f in FILES:
         shutil.copyfile(GAS / f, out / f)
+    cat = (out / 'ApprovedActiveCatalog.gs').read_text(encoding='utf-8')
+    if '"buildType": "RELEASE"' not in cat or 'QA_TEST_ONLY' in cat:
+        raise SystemExit('RELEASE_CATALOG_REQUIRED')
+    extra = []
+    if a.variant == 'qa':
+        qa = Path(a.qa_dir or '').resolve()
+        qcat = (qa / 'ApprovedActiveCatalog.gs').read_text(encoding='utf-8')
+        if '"buildType": "QA_TEST_ONLY"' not in qcat:
+            raise SystemExit('QA_CATALOG_REQUIRED')
+        shutil.copyfile(qa / 'ApprovedActiveCatalog.gs', out / 'ApprovedActiveCatalog.gs')
+        for f in sorted(qa.glob('HOJA_QB_CONTENT_*.gs')):
+            shutil.copyfile(f, out / f.name); extra.append(f.name)
+    elif a.qa_dir:
+        raise SystemExit('QA_DIR_ONLY_WITH_QA_VARIANT')
     content, sha = game_bytes()
     patched, old_block, new_block = patch_telemetry(content)
     (out / 'Game.html').write_bytes(patched)
     if b'getPublicUsageStatisticsV4' in patched:
         raise SystemExit('GAME_MUST_NOT_CALL_STATS')
-    print(json.dumps({'output': str(out), 'files': FILES + ['Game.html'], 'gameSha256': sha,
+    print(json.dumps({'output': str(out), 'variant': a.variant, 'files': FILES + extra + ['Game.html'], 'gameSha256': sha,
+                      'catalogSha256': hashlib.sha256((out / 'ApprovedActiveCatalog.gs').read_bytes()).hexdigest(),
+                      'contentFiles': len(extra), 'contentBytes': sum((out / f).stat().st_size for f in extra),
                       'patchedGameSha256': hashlib.sha256(patched).hexdigest(),
                       'telemetryBlockOldSha256': old_block, 'telemetryBlockNewSha256': new_block}))
 

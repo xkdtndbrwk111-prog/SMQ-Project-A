@@ -45,6 +45,8 @@ jobs:
         run: node experimental/usage-v4-unified/approved-catalog/build_active_catalog.mjs --check
       - name: 40-6-U B/C/D active gate, legacy/approved era, R6 loss fix incl. client retry (mock GAS)
         run: node --test experimental/usage-v4-unified/UNIFIED_GAS_D.test.mjs
+      - name: 40-6 F1 approved content packager, GAS lazy loader, QA/release build split (fixture + committed report)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs
       - name: Pinned HOJA-QUESTION-BANK checkout (only if a read token secret is configured)
         id: qbank
         if: ${{ env.QBANK_TOKEN != '' }}
@@ -58,7 +60,9 @@ jobs:
           path: qbank
       - name: 40-6-U A rebuild index from the pinned source and fail on drift
         if: ${{ steps.qbank.outcome == 'success' }}
-        run: node experimental/usage-v4-unified/approved-catalog/build_approved_index.mjs --qbank qbank --check
+        run: |
+          node experimental/usage-v4-unified/approved-catalog/build_approved_index.mjs --qbank qbank --check
+          node experimental/usage-v4-unified/approved-catalog/build_content_packages.mjs --qbank qbank --check
       - name: Install Chromium
         run: |
           python -m pip install playwright

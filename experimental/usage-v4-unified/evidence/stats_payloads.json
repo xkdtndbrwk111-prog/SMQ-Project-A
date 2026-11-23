@@ -1,0 +1,311 @@
+{
+ "ok": {
+  "schema": "HOJA_PUBLIC_USAGE_V4",
+  "status": "OK",
+  "asOf": "2026-11-24",
+  "historyStart": "2026-11-19",
+  "generatedAt": "2026-11-23T15:10:00.000Z",
+  "todayStatus": "LIVE_PROVISIONAL",
+  "historyStatus": "COMPLETE",
+  "provisionalDays": [
+   "2026-11-23",
+   "2026-11-24"
+  ],
+  "cache": {
+   "ageSeconds": 0,
+   "maxAgeSeconds": 60,
+   "stale": false
+  },
+  "totals": {
+   "today": 1,
+   "days7": 13,
+   "days30": 13,
+   "all": 13
+  },
+  "daily": [
+   {
+    "date": "2026-11-19",
+    "count": 2
+   },
+   {
+    "date": "2026-11-20",
+    "count": 0
+   },
+   {
+    "date": "2026-11-21",
+    "count": 2
+   },
+   {
+    "date": "2026-11-22",
+    "count": 2
+   },
+   {
+    "date": "2026-11-23",
+    "count": 6
+   },
+   {
+    "date": "2026-11-24",
+    "count": 1
+   }
+  ],
+  "mode": [
+   {
+    "label": "SOLO",
+    "count": 7,
+    "share": 53.85
+   },
+   {
+    "label": "TEAM",
+    "count": 6,
+    "share": 46.15
+   }
+  ],
+  "grade": [
+   {
+    "label": "6학년",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "5학년",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "subject": [
+   {
+    "label": "사회",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "수학",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "publisher": [
+   {
+    "label": "천재",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "비상",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "topCartridges": [
+   {
+    "label": "6-사회-천재-2단원",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "기타(소수)",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "era": {
+   "current": "LEGACY",
+   "approvedSince": "",
+   "legacy": null
+  }
+ },
+ "stale": {
+  "schema": "HOJA_PUBLIC_USAGE_V4",
+  "status": "OK",
+  "asOf": "2026-11-24",
+  "historyStart": "2026-11-19",
+  "generatedAt": "2026-11-23T15:10:00.000Z",
+  "todayStatus": "LIVE_PROVISIONAL",
+  "historyStatus": "COMPLETE",
+  "provisionalDays": [
+   "2026-11-23",
+   "2026-11-24"
+  ],
+  "cache": {
+   "ageSeconds": 120,
+   "maxAgeSeconds": 600,
+   "stale": true
+  },
+  "totals": {
+   "today": 1,
+   "days7": 13,
+   "days30": 13,
+   "all": 13
+  },
+  "daily": [
+   {
+    "date": "2026-11-19",
+    "count": 2
+   },
+   {
+    "date": "2026-11-20",
+    "count": 0
+   },
+   {
+    "date": "2026-11-21",
+    "count": 2
+   },
+   {
+    "date": "2026-11-22",
+    "count": 2
+   },
+   {
+    "date": "2026-11-23",
+    "count": 6
+   },
+   {
+    "date": "2026-11-24",
+    "count": 1
+   }
+  ],
+  "mode": [
+   {
+    "label": "SOLO",
+    "count": 7,
+    "share": 53.85
+   },
+   {
+    "label": "TEAM",
+    "count": 6,
+    "share": 46.15
+   }
+  ],
+  "grade": [
+   {
+    "label": "6학년",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "5학년",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "subject": [
+   {
+    "label": "사회",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "수학",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "publisher": [
+   {
+    "label": "천재",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "비상",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "topCartridges": [
+   {
+    "label": "6-사회-천재-2단원",
+    "count": 11,
+    "share": 84.62
+   },
+   {
+    "label": "기타(소수)",
+    "count": 2,
+    "share": 15.38
+   }
+  ],
+  "era": {
+   "current": "LEGACY",
+   "approvedSince": "",
+   "legacy": null
+  }
+ },
+ "integrity": {
+  "schema": "HOJA_PUBLIC_USAGE_V4",
+  "status": "UNAVAILABLE",
+  "code": "INTEGRITY",
+  "generatedAt": "2026-11-23T15:20:00.000Z"
+ },
+ "notConfigured": {
+  "schema": "HOJA_PUBLIC_USAGE_V4",
+  "status": "UNAVAILABLE",
+  "code": "NOT_CONFIGURED",
+  "generatedAt": "2026-11-23T03:00:00.000Z"
+ },
+ "approved": {
+  "schema": "HOJA_PUBLIC_USAGE_V4",
+  "status": "OK",
+  "asOf": "2026-11-23",
+  "historyStart": "2026-11-23",
+  "generatedAt": "2026-11-23T03:00:00.000Z",
+  "todayStatus": "LIVE_PROVISIONAL",
+  "historyStatus": "COMPLETE",
+  "provisionalDays": [
+   "2026-11-23"
+  ],
+  "cache": {
+   "ageSeconds": 0,
+   "maxAgeSeconds": 60,
+   "stale": false
+  },
+  "totals": {
+   "today": 6,
+   "days7": 6,
+   "days30": 6,
+   "all": 6
+  },
+  "daily": [
+   {
+    "date": "2026-11-23",
+    "count": 6
+   }
+  ],
+  "mode": [
+   {
+    "label": "SOLO",
+    "count": 6,
+    "share": 100
+   }
+  ],
+  "grade": [
+   {
+    "label": "5학년",
+    "count": 6,
+    "share": 100
+   }
+  ],
+  "subject": [
+   {
+    "label": "사회",
+    "count": 6,
+    "share": 100
+   }
+  ],
+  "publisher": [],
+  "topCartridges": [
+   {
+    "label": "가 정본 단원 + 나 정본 단원",
+    "count": 6,
+    "share": 100
+   }
+  ],
+  "era": {
+   "current": "APPROVED",
+   "approvedSince": "2026-11-23",
+   "legacy": {
+    "from": "2026-11-19",
+    "through": "2026-11-22",
+    "all": 6
+   }
+  }
+ }
+}

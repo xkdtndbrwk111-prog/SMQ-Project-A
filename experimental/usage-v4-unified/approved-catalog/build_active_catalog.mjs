@@ -24,6 +24,15 @@ export function renderGs(active) {
     'var HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze(' + body + ');\n';
 }
 const active = activeApprovedCatalog(index, deployment);
+// F1: an active (deployed) id must have a READY content package; pin its digest too.
+const report = JSON.parse(readFileSync(join(here, 'generated/approved-content-report.json'), 'utf8'));
+if (report.sourceCommit !== index.sourceCommit) { console.error('CONTENT_REPORT_SOURCE_MISMATCH'); process.exit(1); }
+for (const e of active.entries) {
+  const r = report.entries.find(x => x.cartridgeId === e.cartridgeId);
+  if (!r || r.status !== 'READY') { console.error('ACTIVE_ID_CONTENT_NOT_READY:' + e.cartridgeId); process.exit(1); }
+  e.packageSha256 = r.packageSha256;
+}
+active.buildType = 'RELEASE';
 const text = renderGs(active);
 if (args.includes('--check')) {
   if (!existsSync(out) || readFileSync(out, 'utf8') !== text) { console.error('DRIFT ApprovedActiveCatalog.gs'); process.exit(1); }

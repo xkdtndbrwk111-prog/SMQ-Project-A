@@ -172,21 +172,45 @@ function hojaApprovedActive_(){
   const c=typeof HOJA_APPROVED_ACTIVE_CATALOG_==='object'?HOJA_APPROVED_ACTIVE_CATALOG_:null;
   if(!c||c.schemaVersion!=='hoja-active-cartridge-catalog-v1'||!Array.isArray(c.entries)||
      !/^[a-f0-9]{40}$/.test(String(c.sourceCommit)))throw new Error('APPROVED_CATALOG_INVALID');
+  const type=c.buildType||'RELEASE';
+  // F1: a TEST-ONLY QA preview catalog is refused anywhere but the isolated 40-6U test project.
+  if(type==='QA_TEST_ONLY'){
+    if(!hojaV4uEnabled_(PropertiesService.getScriptProperties()))
+      throw new Error('APPROVED_QA_CATALOG_REQUIRES_ISOLATED_TEST_PROJECT');
+  }else if(type!=='RELEASE')throw new Error('APPROVED_CATALOG_INVALID');
   return c;
 }
 function hojaListApprovedCartridges(){
-  return hojaApprovedActive_().entries.map(e=>({cartridgeId:e.cartridgeId,title:e.title,
+  const c=hojaApprovedActive_();
+  return c.entries.map(e=>({cartridgeId:e.cartridgeId,title:e.title,
     grade:e.grade,semester:e.semester,subject:e.subjectLabel,publisher:e.publisher,
-    unit:e.unit,questionCount:e.questionCount}));
+    unit:e.unit,questionCount:e.questionCount,qaPreview:c.buildType==='QA_TEST_ONLY'}));
 }
+/* F1: lazy, per-unit approved content (only the selected units are parsed). The package
+ * text is SHA-256 pinned by the SAME active catalog that list/usage validation use. */
 function hojaGetApprovedQuestions(ids){
-  const active=new Map(hojaApprovedActive_().entries.map(e=>[e.cartridgeId,e]));
-  if(!Array.isArray(ids)||!ids.length||ids.length>5||
+  const cat=hojaApprovedActive_();
+  const active=new Map(cat.entries.map(e=>[e.cartridgeId,e]));
+  if(!Array.isArray(ids)||!ids.length||ids.length>5||new Set(ids).size!==ids.length||
      ids.some(id=>typeof id!=='string'||!HOJA_APPROVED_ID_RE_.test(id)))
     throw new Error('APPROVED_SELECTION_INVALID');
   if(ids.some(id=>!active.has(id)))throw new Error('APPROVED_CARTRIDGE_NOT_ACTIVE');
-  // Content packaging for the game renderer is a separate, not-yet-approved gate.
-  throw new Error('APPROVED_CONTENT_NOT_PACKAGED');
+  const reg=typeof HOJA_APPROVED_CONTENT_==='object'&&HOJA_APPROVED_CONTENT_?HOJA_APPROVED_CONTENT_:{};
+  return ids.map(id=>{
+    const e=active.get(id);
+    const p=Object.prototype.hasOwnProperty.call(reg,id)?reg[id]:null;
+    if(!p||typeof p.load!=='function')throw new Error('APPROVED_CONTENT_NOT_PACKAGED');
+    if(!/^[a-f0-9]{64}$/.test(String(e.packageSha256))||p.packageSha256!==e.packageSha256)
+      throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+    const text=p.load();
+    if(hojaV4uSha256_(text)!==e.packageSha256)throw new Error('APPROVED_CONTENT_DIGEST_MISMATCH');
+    const data=JSON.parse(text);
+    if(data.cartridgeId!==id||data.questionSchemaVersion!==2||!Array.isArray(data.questions)||
+       data.questions.length!==e.questionCount||!data.images||!data.unitMeta||
+       data.questions.some(q=>!q||!q.rendererQuestion||!q.familyId||!q.type))
+      throw new Error('APPROVED_CONTENT_INVALID');
+    return {sheetName:e.title,data};
+  });
 }
 
 function hojaRows_(name) {

@@ -6,5 +6,6 @@ var HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze({
  "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
  "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
  "deploymentId": "none-approved-yet",
- "entries": []
+ "entries": [],
+ "buildType": "RELEASE"
 });

@@ -1,0 +1,7 @@
+{
+ "schemaVersion": "hoja-qa-preview-v1",
+ "purpose": "TEST_ONLY_QA_NOT_DEPLOYMENT",
+ "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+ "select": "ALL_READY",
+ "note": "Isolated QA preview only. Not a teacher deployment approval, not a media-rights clearance. The release catalog (active-deployment.json) stays at 0 entries."
+}
