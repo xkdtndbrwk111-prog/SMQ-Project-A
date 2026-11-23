@@ -2105,14 +2105,15 @@ function hojaMakerValidateProject(p){
     for(const t of [...m.terrain,...m.objects]){
       if(!t||!Number.isFinite(t.x)||!Number.isFinite(t.y)||!Number.isFinite(t.w)||!Number.isFinite(t.h)||t.w<=0||t.h<=0)throw Error('잘못된 지형/오브젝트 위치');
       if(t.x<0||t.y<0||t.x+t.w>m.width||t.y+t.h>m.height)throw Error(`오브젝트가 맵 밖에 있습니다: ${t.id||'unknown'}`);
+      if(t.type==='pipe'&&t.pipeLength!==undefined){const n=t.pipeLength,extra=n-4,dir=t.orientation||'up';if(!Number.isInteger(n)||n<4||n>128)throw Error(`토관 ${t.id}: 길이는 4~128칸입니다.`);if((dir==='up'&&t.y+t.h+extra>m.height)||(dir==='down'&&t.y-extra<0)||(dir==='left'&&t.x+t.w+extra>m.width)||(dir==='right'&&t.x-extra<0))throw Error(`토관 ${t.id}: 몸통이 맵 밖에 있습니다.`);}
     }
   }
   if(objectCount>4000)throw Error('총 오브젝트 수 초과');
   for(const m of p.maps)for(const o of m.objects){
-    if(o.type!=='pipe'||o.pipeMode==='solid'||(!o.targetMapId&&o.pipeMode!=='linked'))continue;
+    if(!['pipe','maker_start','maker_goal'].includes(o.type)||o.type==='pipe'&&(o.pipeMode==='solid'||(!o.targetMapId&&o.pipeMode!=='linked'))||o.type!=='pipe'&&!o.targetMapId)continue;
     if(!o.targetMapId||!o.targetPortalId)throw Error(`연결 토관 ${o.id}: 도착 맵과 도착 토관을 지정하세요. 빈 토관은 '빈 토관'으로 전환하세요.`);
     const dst=p.maps.find(x=>x.id===o.targetMapId);
-    if(!dst||!dst.objects.some(x=>x.type==='pipe'&&x.id===o.targetPortalId))throw Error(`토관 ${o.id} 연결 대상이 없습니다.`);
+    if(!dst||!dst.objects.some(x=>['pipe','maker_start','maker_goal'].includes(x.type)&&x.id===o.targetPortalId))throw Error(`연결 지점 ${o.id} 대상이 없습니다.`);
   }
   return true;
 }
@@ -2127,13 +2128,14 @@ function hojaMakerCustomTerrain(t){
 }
 function hojaMakerToStage(m,i){
   const tx=v=>Math.round(Number(v)*TILE);
-  const theme=['grassland','autumn','tropics','winter'].includes(m.theme)?m.theme:'grassland';
+  const theme=['grassland','autumn','tropics','winter','cave'].includes(m.theme)?m.theme:'grassland';
   const objects=m.objects||[];
+  const startNode=objects.find(o=>o.type==='maker_start'),goalNode=objects.find(o=>o.type==='maker_goal');
   const bricks=objects.filter(o=>o.type==='brick').flatMap(o=>{
     const a=[];for(let yy=0;yy<o.h;yy+=2)for(let xx=0;xx<o.w;xx+=2)a.push({x:tx(o.x+xx),y:tx(o.y+yy),type:'stone',hiddenQuiz:false});return a;
   });
   return {
-    id:i+1,theme,worldW:m.width,worldH:tx(m.height),goal:m.width-3,start:m.spawn?.x??6,
+    id:i+1,theme,worldW:m.width,worldH:tx(m.height),goal:goalNode?goalNode.x+goalNode.w/2:m.width-3,start:startNode?startNode.x+startNode.w/2:m.spawn?.x??6,
     checkpoints:[m.spawn?.x??6],
     solids:m.terrain.filter(t=>!hojaMakerCustomTerrain(t)).map(t=>({x:tx(t.x),y:tx(t.y),w:tx(t.w),h:tx(t.h),kind:t.kind==='ground'?'ground':'platform'})),
     moving:objects.filter(o=>o.type==='moving').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:8,makerSkin:o.platformSkin==='grey'?'grey':'brown',makerStandable:o.standable!==false,axis:'x',min:tx(o.x),max:tx(o.x+10),speed:Number(o.speed)||60,
@@ -2142,7 +2144,7 @@ function hojaMakerToStage(m,i){
       x:tx(o.x+1),y:tx(o.y+2),min:tx(o.patrol?.waypoints?.[0]?.x??o.x),max:tx(o.patrol?.waypoints?.[1]?.x??(o.x+8)),makerMode:o.aiMode||'native',makerSpeed:Number(o.speed)||80})),
     water:[],decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
-    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(m.spawn?.y??(m.height-5)),makerObjects:objects,makerCave:m.theme==='cave',
+    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerObjects:objects,makerCave:m.theme==='cave',
     gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
     makerEvents:objects.filter(o=>o.type==='trigger')
   };
@@ -2152,6 +2154,7 @@ async function hojaMakerPreload(p){
   const paths=new Set(['Free/Traps/Saw/On (38x38).png','Free/Traps/Fire/On (16x32).png','Free/Traps/Platforms/Brown On (32x8).png','Free/Traps/Platforms/Grey On (32x8).png','Free/Terrain/Terrain (16x16).png']);
   if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick')))for(const path of ['Free/Traps/Spiked Ball/Chain.png','Free/Traps/Spiked Ball/Spiked Ball.png','Free/Traps/Fan/Off.png','Free/Traps/Fan/On (24x8).png','Free/Traps/Fire/Off.png','Free/Other/Dust Particle.png'])paths.add(path);
   if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick'&&o.gimmick?.kind==='stepping_blocks')))paths.add('Free/Traps/Blocks/Idle.png');
+  if(p.maps.some(m=>(m.objects||[]).some(o=>o?.type==='gimmick'&&o.gimmick?.kind==='spike_head')))for(const path of ['Free/Traps/Spike Head/Idle.png','Free/Traps/Spike Head/Bottom Hit (54x52).png'])paths.add(path);
   for(const m of p.maps)for(const o of m.objects||[])if(o.type==='asset'&&o.assetPath)paths.add(o.assetPath);
   for(const path of paths){
     const data=HOJA_V061_PA1_ASSETS[path];if(!data)continue;
@@ -2945,10 +2948,10 @@ let HOJA_C1_MANUAL_CAMERA=true;
 class HojaScene extends Phaser.Scene{
   constructor(){super('HojaScene');}
   preload(){
-    if(HOJA_MAKER_MODE)return;
+    if(HOJA_MAKER_MODE&&!(STAGE.makerObjects||[]).some(o=>o.type==='maker_checkpoint'))return;
     const api=window.HOJA_STAGE_DECOR;if(!api)throw new Error('Stage decoration module missing');
     this.load.imageLoadType='HTMLImageElement';
-    for(const id of new Set([...(STAGE.theme==='cave'?[]:api.atlasList(STAGE.theme)),'street'])){
+    for(const id of new Set([...(HOJA_MAKER_MODE||STAGE.theme==='cave'?[]:api.atlasList(STAGE.theme)),'street'])){
       const key='hojaStageDecor_'+id;
       if(!this.textures.exists(key))this.load.image(key,api.ATLASES[id].path);
     }
@@ -3033,6 +3036,7 @@ class HojaScene extends Phaser.Scene{
     this.prepareStaticCulling();
     this.createDoors();
     this.createPlayer();
+    if(HOJA_MAKER_MODE)this.createMakerCheckpoints();
     this.createPipes();
     if(!HOJA_MAKER_MODE&&STAGE.theme==='cave')this.createCaveCheckpoint();
     this.createStreetLamps();
@@ -3295,7 +3299,7 @@ class HojaScene extends Phaser.Scene{
       if(this.caveBackground)this.caveBackground.destroy();
       if(this.bgLayers)for(const layer of this.bgLayers)layer.sprite.destroy();
       this.bgLayers=null;
-      this.caveBackground=this.add.tileSprite(0,0,CAVE_SIDE,CAVE_SIDE,'caveBg')
+      this.caveBackground=this.add.tileSprite(0,0,HOJA_MAKER_MODE?WORLD_W:CAVE_SIDE,HOJA_MAKER_MODE?STAGE.makerHeight:CAVE_SIDE,'caveBg')
         .setOrigin(0,0).setDepth(-49).setTint(HOJA_CAVE_BG_TINT);
       this.caveBackground.setTileScale(1,1);
       this.bgLayerScale=1;
@@ -3381,7 +3385,8 @@ class HojaScene extends Phaser.Scene{
     if(HOJA_V2_RENDER){this.hojaV2DeleteStaleTextures();this.hojaV2CaveArt=[];}
     this.solidGroup=this.physics.add.staticGroup();
     this.oneWayGroup=this.physics.add.staticGroup();
-    this.add.rectangle(CAVE_SIDE/2,CAVE_SIDE/2,CAVE_SIDE,CAVE_SIDE,0x100e1e,.38).setDepth(-40);
+    const caveW=HOJA_MAKER_MODE?WORLD_W:CAVE_SIDE,caveH=HOJA_MAKER_MODE?STAGE.makerHeight:CAVE_SIDE;
+    this.add.rectangle(caveW/2,caveH/2,caveW,caveH,0x100e1e,.38).setDepth(-40);
     // Solid/semisolid collision stays on the source 16px grid.
     for(const s of SOLIDS){
       const r=this.add.rectangle(s.x+s.w/2,s.y+s.h/2,s.w,s.h,0,0);
@@ -3649,6 +3654,11 @@ class HojaScene extends Phaser.Scene{
   }
 
   // Shared visual-only vending checkpoint, also used in the cave.
+  createMakerCheckpoints(){
+    this.makerCheckpoints=(STAGE.makerObjects||[]).filter(o=>o.type==='maker_checkpoint').map(o=>{const x=(o.x+o.w/2)*TILE,y=(o.y+o.h)*TILE,visual=this.createCheckpointMachine(x,y,STAGE.theme==='cave');let glow=null;if(STAGE.theme==='cave'){const lightY=y-40;glow=this.add.image(x,lightY,this.createRadialLampTexture()).setDisplaySize(260,260).setBlendMode(Phaser.BlendModes.ADD).setDepth(16).setAlpha(.85);this.caveLanterns.push({x,y:lightY,glow});this.hojaStep136Cullables?.push(glow);}return {id:o.id,x,y,...visual,glow};});
+    this.makerCheckpointId=this.mem.makerCheckpointId||null;
+    this.makerStartAnchor={x:this.playerBody.x,y:this.playerBody.y+21};
+  }
   createCheckpointMachine(x,y,cave,scale=2){
     const spec=window.HOJA_STAGE_DECOR.item('street:vending-machine');
     const tex=this.textures.get('hojaStageDecor_street'),frame='stage_'+spec.name;
@@ -4585,11 +4595,13 @@ class HojaScene extends Phaser.Scene{
     // stone blocks, springs, doors or flowers; trees/bushes are avoided when
     // possible. Previously one clamped tile per ground piece was tried.
     const decorRects=(this._v055DecorArt||[]).map(o=>{try{return o.getBounds();}catch(_){return null;}}).filter(Boolean);
-    const doorXs=[...(STAGE_INDEX>0?[entryDoorX()]:[]),exitDoorX()];
+    const doorXs=HOJA_MAKER_MODE?(this.doors||[]).map(d=>d.x):[...(STAGE_INDEX>0?[entryDoorX()]:[]),exitDoorX()];
     const lampClear=(tx,ground)=>{
       if(hojaFlatGround(tx,10)!==ground)return false;
       if(doorXs.some(x=>Math.abs(x-tx)<4*TILE))return false;
       if(this.hojaCheckpoint&&Math.abs(this.hojaCheckpoint.mid-tx)<66)return false;
+      if(HOJA_MAKER_MODE&&(this.makerCheckpoints||[]).some(c=>Math.abs(c.x-tx)<66))return false;
+      if(HOJA_MAKER_MODE&&(this.pipeGroup?.getChildren()||[]).some(p=>{const b=p.body;return b&&tx+18>b.left&&tx-18<b.right&&ground>b.top&&ground-136<b.bottom;}))return false;
       if(FLOWERS.some(f=>Math.abs(f.x-tx)<24&&f.y>ground-150&&f.y<=ground+4))return false;
       return true;
     };
@@ -4748,13 +4760,33 @@ class HojaScene extends Phaser.Scene{
     const mk=(x,groundY,target,name,options={})=>{
       const top=groundY-64;
       const orientation=options.orientation||'up';
-      const art=this.add.image(x,groundY,'pipeMint').setOrigin(.5,1).setScale(2).setDepth(5);
+      const art=this.add.image(x,groundY,'pipeMint','__BASE').setOrigin(.5,1).setScale(2).setDepth(5);
       if(options.portalId)art.setOrigin(.5,.5).setPosition(x,top+32).setAngle(orientation==='left'?-90:orientation==='right'?90:orientation==='down'?180:0);
       // Sprite is 32x32 at 2x -> a 64x64 world object.
       // Full-height, side-blocking static obstacle. Top can be landed on.
       const collision=this.add.rectangle(x,top+32,60,64,0,0);
+      if(options.portalId)collision.__makerPipeId=options.portalId;
       this.physics.add.existing(collision,true);
       this.pipeGroup.add(collision);
+      // Maker-only extension: the original 64px head stays interactive; each
+      // added segment reuses the original pipe body and has solid collision.
+      if(options.length>4){
+        const key='hojaMakerPipeBody';
+        if(!this.textures.exists(key)){
+          const source=this.textures.get('pipeMint').getSourceImage(),tex=this.textures.createCanvas(key,32,16),ctx=tex.getContext();
+          ctx.imageSmoothingEnabled=false;
+          // Continue the clean bottom edge vertically; exclude the original
+          // mouth/body seam and its short horizontal highlights.
+          for(let row=0;row<16;row++)ctx.drawImage(source,0,31,32,1,0,row,32,1);
+          tex.refresh();tex.add('half',0,0,0,32,8);
+        }
+        const steps=options.length-4;
+        for(let i=0;i<steps;i+=2){
+          const length=Math.min(2,steps-i)*16,offset=32+i*16+length/2,dx=orientation==='left'?offset:orientation==='right'?-offset:0,dy=orientation==='up'?offset:orientation==='down'?-offset:0;
+          this.add.image(x+dx,top+32+dy,key,length<32?'half':'__BASE').setDisplaySize(64,length).setAngle(orientation==='left'||orientation==='right'?90:0).setDepth(4);
+          const hit=this.add.rectangle(x+dx,top+32+dy,dx?length:60,dy?length:60,0,0);hit.__makerPipeId=options.portalId;this.physics.add.existing(hit,true);this.pipeGroup.add(hit);
+        }
+      }
       const label=this.add.text(x,top-23,`${orientation==='up'?'↓':orientation==='down'?'↑':orientation==='left'?'→':'←'} ${name}`,{
         fontFamily:'monospace',fontSize:'11px',color:'#beffe2',fontStyle:'bold',
         stroke:'#172735',strokeThickness:3
@@ -4772,7 +4804,7 @@ class HojaScene extends Phaser.Scene{
         const linked=p.pipeMode!=='solid'&&!!p.targetMapId;
         const idx=linked?HOJA_MAKER_PROJECT.maps.findIndex(m=>m.id===p.targetMapId):-1;
         mk(x,groundY,idx>=0?idx:null,linked?'연결':'빈 토관',{
-          orientation:p.orientation,portalId:p.id,targetPortalId:p.targetPortalId
+          orientation:p.orientation,portalId:p.id,targetPortalId:p.targetPortalId,length:p.pipeLength??4
         });
       }
     }else if(STAGE.theme==='cave'){
@@ -4885,12 +4917,11 @@ class HojaScene extends Phaser.Scene{
 
   // V0.23 black silhouette doors (sized for Hoja: 60x64 arch).
   createDoors(){
-    if(HOJA_MAKER_MODE){this.doors=[];return;}
     this.doors=[];
-    if(STAGE.theme==='cave')return;
+    if(!HOJA_MAKER_MODE&&STAGE.theme==='cave')return;
     const last=STAGE_INDEX===3;
-    const mk=(x,kind,label)=>{
-      const y=groundTopAt(x);
+    const mk=(x,kind,label,node=null)=>{
+      const y=node?(node.y+node.h)*TILE:groundTopAt(x);
       const W=60,H=64,R=W/2;
       let house=null,bubble=null,comeIn=null;
       if(kind==='entry'){
@@ -4928,8 +4959,9 @@ class HojaScene extends Phaser.Scene{
         stroke:'#1b2430',strokeThickness:4
       }).setOrigin(.5,1).setDepth(13).setAlpha(0);
       this.tweens.add({targets:hint,y:hint.y-5,duration:420,yoyo:true,repeat:-1,ease:'Sine.InOut'});
-      this.doors.push({x,y,kind,label,txt,hint,house,bubble,comeIn,armedUntil:0});
+      this.doors.push({x,y,kind,label,txt,hint,house,bubble,comeIn,armedUntil:0,node});
     };
+    if(HOJA_MAKER_MODE){for(const node of STAGE.makerObjects||[]){if(node.type==='maker_start')mk((node.x+node.w/2)*TILE,'entry','START',node);if(node.type==='maker_goal')mk((node.x+node.w/2)*TILE,node.targetMapId?'exit':'finish','FINISH',node);}return;}
     if(STAGE_INDEX>0)mk(entryDoorX(),'entry',`◀ STAGE ${STAGE_INDEX}`);
     mk(exitDoorX(),last?'finish':'exit',last?'FINISH':`STAGE ${STAGE_INDEX+2} ▶`);
   }
@@ -4938,6 +4970,7 @@ class HojaScene extends Phaser.Scene{
   updateDoors(time,upPressed,grounded){
     let near=null;
     for(const d of this.doors){
+      if(HOJA_MAKER_MODE&&d.kind==='entry'&&!d.node?.targetMapId)continue;
       const close=grounded&&Math.abs(this.playerBody.x-d.x)<24&&Math.abs(this.playerBody.body.bottom-d.y)<6;
       d.hint.setAlpha(close&&d.kind==='entry'?1:0);
       if(close)near=d;
@@ -4959,6 +4992,7 @@ class HojaScene extends Phaser.Scene{
     if(d.house)d.house.setFrame('open');
     this.tweens.add({targets:this.hoja,x:d.x,alpha:0,duration:260,ease:'Quad.In'});
     SFX.hop();
+    if(HOJA_MAKER_MODE&&d.node?.targetMapId){const target=HOJA_MAKER_PROJECT.maps.findIndex(m=>m.id===d.node.targetMapId);if(target<0){this.transitioning=false;return;}HOJA_MAKER_ARRIVAL=d.node.targetPortalId;this.cameras.main.fadeOut(260,0,0,0);this.time.delayedCall(290,()=>startStage(target,false,'makerPortal'));return;}
     if(d.kind==='finish'){
       d.armedUntil=0;d.txt.setText(d.label).setColor('#ffffff').setFontSize(10);d.txt.x=d.x;
       this.time.delayedCall(280,()=>{
@@ -5000,15 +5034,17 @@ class HojaScene extends Phaser.Scene{
     if(HOJA_MAKER_MODE){
       const arrival=HOJA_MAKER_ARRIVAL;
       if(arrival){
-        const dest=(STAGE.makerObjects||[]).find(o=>o.type==='pipe'&&o.id===arrival);
+        const dest=(STAGE.makerObjects||[]).find(o=>['pipe','maker_start','maker_goal'].includes(o.type)&&o.id===arrival);
         HOJA_MAKER_ARRIVAL=null;
         if(dest){
           for(const off of [6,-6,7,-7,8,-8,9,-9]){
-            const px=(dest.x+2+off)*TILE;
-            if(px>20&&px<WORLD_W-20&&groundTopAt(px)<STAGE.makerHeight)return px;
+            const px=(dest.x+dest.w/2+off)*TILE,desired=(dest.y+dest.h)*TILE;
+            const ground=SOLIDS.filter(s=>s.kind==='ground'&&px>=s.x&&px<s.x+s.w).sort((a,b)=>Math.abs(a.y-desired)-Math.abs(b.y-desired))[0];
+            if(px>20&&px<WORLD_W-20&&ground&&Math.abs(ground.y-desired)<=128){this.makerSpawnGroundY=ground.y;return px;}
           }
         }
       }
+      this.makerSpawnGroundY=STAGE.makerSpawnY;
       return Math.max(20,Math.min(WORLD_W-20,(STAGE.start||6)*TILE));
     }
     if(STAGE.theme==='cave'){
@@ -5034,8 +5070,8 @@ class HojaScene extends Phaser.Scene{
 
   createPlayer(){
     const sx=this.spawnX();
-    let gy=groundTopAt(sx);
-    if(STAGE.theme==='cave'){
+    let gy=HOJA_MAKER_MODE?(this.makerSpawnGroundY??groundTopAt(sx)):groundTopAt(sx);
+    if(!HOJA_MAKER_MODE&&STAGE.theme==='cave'){
       const i=this.spawnKind.startsWith('fromSurface:')?Number(this.spawnKind.split(':')[1]):0;
       gy=CAVE_PORTALS[Math.max(0,Math.min(3,i))].groundY;
     }
@@ -6187,7 +6223,7 @@ class HojaScene extends Phaser.Scene{
     // Do not let a stale one-frame ground flag suppress the next landing edge.
     this.clearWasGrounded=grounded && b.velocity.y>=0;
 
-    const lastStage=STAGE_INDEX===3;
+    const lastStage=HOJA_MAKER_MODE||STAGE_INDEX===3;
     if(!this.clearTextShown&&this.clearElapsedMs>=CLEAR_CFG.clearTextDelayMs){
       this.clearTextShown=true;
       if(lastStage)settlement.finalizeFinish(this);
@@ -7260,7 +7296,10 @@ class HojaScene extends Phaser.Scene{
   }
 
   updateCheckpointAndHazards(){
-    if(this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'){
+    if(HOJA_MAKER_MODE&&this.makerCheckpoints){
+      const body=this.playerBody.body;
+      for(const cp of this.makerCheckpoints){const close=Math.abs(this.playerBody.x-cp.x)<48&&Math.abs(body.bottom-cp.y)<48;if(close&&this.makerCheckpointId!==cp.id){this.makerCheckpointId=cp.id;this.mem.makerCheckpointId=cp.id;this.showHojaToast('체크포인트 저장!');}this.updateCheckpointMachine(cp,this.makerCheckpointId===cp.id);}
+    }else if(this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'){
       const c=this.hojaCheckpoint,x=this.playerBody.x;
       if(window.HOJA_STAGE_DECOR.crossed(c.previousX,x,c.line)){
         if(c.active!=='mid')this.showHojaToast('중간 체크포인트 저장!');
@@ -7292,7 +7331,7 @@ class HojaScene extends Phaser.Scene{
     }
 
     // Dry pit / off-world fallback follows the same disappear-first rule.
-    if(STAGE.theme==='cave'&&b.bottom>CAVE_SIDE+24){this.startDeath('pit');return;}
+    if(!HOJA_MAKER_MODE&&STAGE.theme==='cave'&&b.bottom>CAVE_SIDE+24){this.startDeath('pit');return;}
     if(wy===null&&fullyBelowScreen&&b.bottom>(HOJA_MAKER_MODE?STAGE.makerHeight:WORLD_H)+24){
       this.startDeath('pit');
     }
@@ -7450,7 +7489,8 @@ class HojaScene extends Phaser.Scene{
   }
 
   respawnNow(){
-    const x=STAGE.theme==='cave'&&this.caveRespawnAnchor
+    const makerAnchor=HOJA_MAKER_MODE?(this.makerCheckpoints?.find(c=>c.id===this.makerCheckpointId)||this.makerStartAnchor):null;
+    const x=makerAnchor?makerAnchor.x:STAGE.theme==='cave'&&this.caveRespawnAnchor
       ?this.caveRespawnAnchor.x
       :this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'
         ?this.hojaCheckpoint[this.hojaCheckpoint.active]
@@ -7459,7 +7499,7 @@ class HojaScene extends Phaser.Scene{
     // Clear damaging enemies from the checkpoint zone before Hoja returns.
     this.suppressEnemiesNearRespawn(x);
 
-    const gy=STAGE.theme==='cave'&&this.caveRespawnAnchor
+    const gy=makerAnchor?makerAnchor.y:STAGE.theme==='cave'&&this.caveRespawnAnchor
       ?this.caveRespawnAnchor.groundY:groundTopAt(x);
     const b=this.playerBody.body;
     this.setHojaSitting(false);
@@ -7557,7 +7597,7 @@ class HojaScene extends Phaser.Scene{
 
   startClear(){
     if(this.clear||this.dying||this.timeUp||RUN.endReason)return;
-    if(STAGE_INDEX===3)RUN.endReason='FINISH';
+    if(HOJA_MAKER_MODE||STAGE_INDEX===3)RUN.endReason='FINISH';
     this.clear=true;
     this.hojaClearEye=hojaPickHappyEye();
     this.setHojaSitting(false);

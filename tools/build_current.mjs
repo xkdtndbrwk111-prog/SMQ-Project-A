@@ -60,7 +60,7 @@ if(test){
  reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse,modesCourse);
  arcade=instrumentArcade(arcade);
  if(arcade.split('</body>').length!==2)throw Error('Maker 시험판 삽입 위치 오류');
- reviewFiles['maker-compat-arcade.html']=arcade.replace('</body>','<script src="maker-compat-boot.js"></script></body>');
+ reviewFiles['maker-compat-arcade.html']=arcade.replace('</body>','<style>#hojaTestControls,#hojaTestDialogueControls{display:none!important}</style><script src="maker-compat-boot.js"></script></body>');
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }
 // Preserve Phase 1 QR compatibility at the frozen baseline. Any source asset change
