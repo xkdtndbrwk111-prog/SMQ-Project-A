@@ -69,7 +69,7 @@ function getUsageStatisticsU4TrialShadow(creatorToken){
     if(r[0]!==date||r[2]!=='COMPLETE'||sourceDays.has(date))
       throw Error('HOJA_V4_LIVE_TRIAL_MISSING_COMPLETE_DAY_'+date);
     sourceDays.add(date);
-    if(b.length!==Number(r[8])||
+    if(r[1]!==r[7]||b.length!==Number(r[8])||
        b.some(x=>x.generation!==r[1]))
       throw Error('HOJA_V4_LIVE_TRIAL_BUCKET_GENERATION_MISMATCH_'+date);
     if(Number(r[11])!==lastPrefix+Number(r[5]))
@@ -86,8 +86,10 @@ function getUsageStatisticsU4TrialShadow(creatorToken){
         count:x.count,displayLabel:x.displayLabel}))
     });
   }
-  if(perDay.size!==sourceDays.size)
-    throw Error('HOJA_V4_LIVE_TRIAL_UNEXPECTED_BUCKET_DATE');
+  // Certified zero-use days intentionally have no bucket rows.
+  for(const date of perDay.keys())
+    if(!sourceDays.has(date))
+      throw Error('HOJA_V4_LIVE_TRIAL_UNEXPECTED_BUCKET_DATE_'+date);
   if(end!==expected[expected.length-1])
     throw Error('HOJA_V4_LIVE_TRIAL_BACKFILL_CERT_OUTDATED');
   if(lastPrefix!==Number(cert[8]))
