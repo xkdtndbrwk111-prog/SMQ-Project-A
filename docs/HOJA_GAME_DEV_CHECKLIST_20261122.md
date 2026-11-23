@@ -690,11 +690,13 @@
 - [x] 실제 저장된 V4 요약만으로 `HOJA_USAGE_V4_CORE.report()` 실행: **11/22 기준 전체 17,670회 / 당일 6 / 7일 1,451 / 30일 4,291**, 학년·교과 각각 전체 17,670, 팀 분류 합계 일치, TOP20 20종, 별도 단원 선택 18,659회.
 - [ ] **실 Google Apps Script 런타임에서 V4 함수 실행 NOT RUN.** 이번 실집계는 Google Sheets 연결 API로 안전한 시험 복사본을 직접 갱신한 것. 실제 Project A/B 운영 프로젝트 및 자동 보관 트리거 무변경·원본 삭제 없음.
 
+- [x] **전체 복사본 원본 17,672행을 독립적으로 다시 집계한 원본-U2 의미 기준 감사 PASS**: 동일 ID의 완전 동일 게임 내용 재전송 2건 억제 후 V4 요약 전체 17,670회. `MODE` 2종(17,670), `TEAM_SIZE` 6종(4,874), `GRADE` 5종(17,670), `SUBJECT` 8종(17,670), `PUBLISHER` 4종(12,970), `CARTRIDGE_COMBINATION` 251종(17,670) 모두 **그룹명과 그룹별 횟수까지 완전 일치**.
+
 ### 40-5. 2026-11-23 이전 COMPLETE 요약 + 오늘 원본 꼬리만 읽는 V4 병렬 조회
 - [x] `HOJA_USAGE_V4_LIVE_TAIL.js` 신설: 최초 인증된 날짜~어제까지 매일 COMPLETE+버킷 SHA256+원본 구간 연결 검증, 오늘 행은 마지막 `sourcePrefixEndRow+1`부터만 읽으며 `LIVE_PROVISIONAL`로 집계. 지연 전일 이벤트, 미래 날짜, 꼬리 행 수 불일치, 중복 매니페스트/누락 0일은 fail-closed.
 - [x] `getUsageStatisticsU4TrialShadow(creatorToken)` 신설. **기존 Project B의 `requireUsageStatisticsAccessU3_`를 Sheets 접근보다 먼저 호출**. 구글 복사본 표식/운영 ID 다름 확인, 인증된 V4 매니페스트·버킷만 조회하고 `EVENT_LOG`는 오늘 꼬리 범위만 읽음. 기존 `getUsageStatisticsU2()` 수정하지 않음. `productionSwitchAllowed:false` 및 `rawDeletion:'HOLD'` 고정.
 - [x] 실제 격리 시트에서 완료 61일 + 2026-11-23 오늘 꼬리 0건을 `HOJA_USAGE_V4_LIVE_TAIL.project()`로 조합: **11/23 기준 전체 17,670 / 오늘 0 / 7일 1,298 / 30일 4,290**, TOP20과 팀 인원 합계 정합성 PASS. **오늘 0건은 복사본 스냅샷만 의미하고 운영 실시간 원본 통계값을 뜻하지 않음**.
-- [x] Node 기반 `HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs`, `HOJA_USAGE_V4_LIVE_TAIL.test.mjs`, `HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs` 신규 작성 및 `unified-trial-qa.yml` 연결. AUTH 우선, 실 이력 원본 재읽기 차단, 팀7, 임시 오늘, 비공개행, 지연 이벤트, 손상 요약·누락 날짜 검증. 최종 GitHub CI 결과 별도 확인 후 PASS 명시.
+- [x] Node 기반 `HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs`, `HOJA_USAGE_V4_LIVE_TAIL.test.mjs`, `HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs` 신규 작성 및 `unified-trial-qa.yml` 연결. AUTH 우선, 실 이력 원본 재읽기 차단, 팀7, 임시 오늘, 비공개행, 지연 이벤트, 손상 요약·누락 날짜 검증. **GitHub Actions 45088127059 PASS** (추가된 실제 GAS mock trial reader 포함).
 - [x] 상세 근거·출처·범위·운영 보류 조건 `docs/HOJA_USAGE_V4_REAL_COPY_BACKFILL_20261123.md` 정리.
 - [ ] Apps Script 실행기에서 실제 `getUsageStatisticsU4TrialShadow` 권한·실행 시간·Manager UI 연동 시험은 아직 NOT RUN. 교차 프로젝트 ScriptLock이 공유된다고 가정하면 안 됨. Project A append 날짜 비역행/지연 재전송 방어 및 실제 양 프로젝트 전환은 후속.
 - [ ] **원본 `EVENT_LOG` 삭제/보관 30일/12개월 자동화 설치 및 Project A/B 운영 배포 금지 유지.** 독립 백업·복구 및 운영 사용자 승인 전까지 HOLD.
