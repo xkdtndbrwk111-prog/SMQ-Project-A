@@ -56,3 +56,15 @@
 - 표시 시 HTML injection을 막되, 자연스러운 한글/영어/숫자/기호와 사용자가 만든 단원명은 그대로 표현할 것. 실패 유형을 원문 유출 없는 건수로 보고한다.
 - 현재 엄격한 형식 규칙으로 **251개 조합 중 112개, 4,700회(약 26.6%)**가 '기타'로 가려진다. 개선 후 정확히 몇 개 조합과 몇 회가 실제 이름으로 복원되는지 시험 증거를 제출한다. 기존 `k<5` 소수 셀 보호 정책은 별도 검토 전 유지한다.
 - 기존 게임의 PUBLIC 카탈로그 자체는 수정하지 않고, PR 시험 번들 및 테스트만 수정. 운영 배포·원본 데이터는 불변. 성능/40건 동시 기록 누락 R6 FAIL 해결은 계속 최우선이다.
+
+## 7. 최신 정책 — GitHub 정본 카트리지 자동 분류, 구형 카트리지 제외 (2026-11-23)
+**사용자 최신 결정으로 6절의 '과거 승인 카트리지명 복원/표준화' 요구는 SUPERSEDED.** 기존 61일 구형 Sheets 카트리지 77개/251개 조합의 이름 정리·복원·활용 작업을 중단한다.
+
+- **유일한 신규 콘텐츠 출처:** `xkdtndbrwk111-prog/HOJA-QUESTION-BANK`의 `approved/catalog.json`, 각 승인 단원 manifest, SHA-256 검증된 승인 ZIP `effective/` 및 `release/` 오버레이. 후보/source-candidate/검수 HTML은 활성 카트리지로 간주하지 말 것.
+- **소프트 코딩:** 특정 단원명이나 카트리지 ID를 소스 코드에 하드코딩하지 말 것. 빌드 시 `approved/catalog.json`의 가변 과목·영어 출판사·저자·단원 목록과 하위 manifest/JSON을 순회하여 공통 `{id,grade,semester,subject,publisher,author,unit,title,contentDigest}` 인덱스를 **자동 생성**한다. GitHub에 새 승인 단원이 추가돼도 같은 규칙으로 자동 발견되어야 한다.
+- **현재 승인 색인(2026-11-22):** 영어 12개(천재 함순애 6 + YBM 김혜리 6), 사회 5개, 수학 6개 = **23개 단원/732문항**. 형식이 이질적이므로 영어 `units` 또는 `unitCounts`+승인 문항의 `questionId`, 사회 `subjects.social.paths`, 수학 `subjects.math.manifest.units` 등 **소스 manifest 구조를 기반으로 분류**. 모든 23개는 `gameDeployment: NOT_DEPLOYED`이며 교사 승인만으로 게임에서 자동 활성화하지 않는다.
+- **정식 제목 표시:** 단원명은 승인 ZIP 내 실제 `effective/cartridge.json` 및 승인 메타데이터에서 읽는다. 카테고리를 나타내는 임시 이름과 교사 승인 제목을 구별한다. 영어 천재 5학년 10단원 q21의 승인 시계 이미지 오버레이 등 승인 최종 presentation과 다른 원본 ZIP 주의. 미디어 공개 권리 조건 또한 배포 전 확인.
+- **활성화 계약:** 실제 게임 패키지의 배포 manifest에서 교사 배포 승인과 콘텐츠 해시가 pin된 승인 ID만 게임 내장·기록·공개 통계에 포함. 승인 등록과 실제 게임 배포를 혼동하지 말 것. GAS 런타임에서는 GitHub·구형 Sheets 카탈로그를 읽지 않는다. 신규 등록을 자동 감지하되 **교사 승인 없이 운영 배포는 금지**한다.
+- **통계 경계:** 이전 61일 V4 17,670회는 원본 보존·동시성/무결성 회귀 시험에만 사용한다. 새 정본 카트리지 이용 통계로 합산하지 않으며 원본 삭제·리셋하지도 않는다. 신규 통계의 카트리지 조합은 승인된 안정 ID 집합 기준으로 순서 무관하게 계산.
+- **초기 소프트 코딩 코드 후보:** `work/usage-v4-approved-catalog-index-20261123`의 `experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.mjs`, 동적 추가 테스트 및 `docs/HOJA_USAGE_V4_APPROVED_CATALOG_SOFTCODING_20261123.md`. 이 후보는 실제 승인 메타데이터 23개/732문항 분류를 독립 조회로 확인했으나, ZIP effective 제목 검증·통합 빌드·실 GAS·CI는 아직 NOT RUN. Claude는 이 코드를 검토하여 현재 PR 개발 브랜치에 연동하고 증거를 제출할 것.
+- **기존 40-6K 레거시 이름 표준화 브랜치의 코드 병합 금지.** R6 동시 40건 중 30건 실패는 여전히 U3 FAIL 및 운영 전환 HOLD이다.

@@ -806,3 +806,15 @@
 - [x] 실 버킷 이름에 대한 동일 변환 알고리즘 읽기 전용 시뮬레이션: 251개 원래 표현 **전부 허용(형식 탓 기타=0)**, 순서 정규화 뒤 196개 비순서 조합, `k<5` 익명성 보호에 따른 100종·158회는 계속 `기타(소수)`로 병합. 임의 학교 식별자/연락처/HTML 마스킹은 유지. 집계 시뮬레이션은 실제 브랜치의 GAS 코드 실행 증거로 혼동 금지.
 - [x] Claude의 기존 [PR #6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089900093)에 별도 브랜치·코드·테스트·수치·적용 지시 전달. 격리 구현 브랜치 변경이며 Claude PR #6에는 아직 미반영.
 - [ ] 신규 `UNIFIED_GAS_LABELS.test.mjs` Node 실행·GitHub Actions 및 실제 GAS 공개 통계 출력 재시험: **NOT RUN**. Claude R6 40건 중 30건 유실은 별개 **FAIL**, U3/U4 최종 승인·운영 배포 전부 HOLD. 변경된 표시명을 외부로 공개할 시 승인된 PUBLIC 범위 및 XSS/PII 회귀도 재검증할 것.
+
+
+### 40-6L. 사용자 정책 재확정 — GitHub 승인 정본만 사용, 소프트 코딩 분류 (2026-11-23)
+- [x] **최종 사용자 결정:** 앞으로 게임에 쓰는 카트리지는 `HOJA-QUESTION-BANK/approved/`의 교사 승인 정본만. 과거 77개 Sheets 카트리지명·251종 조합을 복원/통일하여 신규 콘텐츠로 사용할 계획은 **SUPERSEDED**. 기존 40-6J/K의 레거시 표준화 코드는 운영 PR에 병합 금지.
+- [x] 승인 색인 `approved/catalog.json` 및 영어 2개 그룹 manifest, 사회 5개 개별 manifest, 수학 집계 및 6개 개별 manifest 확인. **승인 23단원/732문항**(영어 12·사회 5·수학 6), 게임 운영 배포는 전체 `NOT_DEPLOYED`. 과목별 파일 구조 차이 확인.
+- [x] Claude PR [#6에 최신 정책 전달](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089981753). **단원명/카트리지 ID 하드코딩 금지**, 정본 catalog→manifest→effective 내용에서 빌드 시 자동 생성 및 GAS 내장, 신규 승인 단원 확장, 교사 배포 승인·SHA pin 게이트를 요구.
+- [x] 별도 실험 브랜치 [`work/usage-v4-approved-catalog-index-20261123`](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/tree/work/usage-v4-approved-catalog-index-20261123)에 `approved_catalog_normalizer.mjs` 및 `approved_catalog_normalizer.test.mjs` 추가(커밋 `969cdec1c257bd1dc25a86c9353368baac638be8`). 구현자는 이름/ID 목록 대신 승인 manifest 메타데이터를 순회하여 학년·교과·학기·영어 출판사·저자를 분류. 코드 후보 및 설명을 [PR #6 추가 의견](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7090030322)에 전달.
+- [x] **순수 JS 실제 승인 메타데이터 분류 검증 PASS (한정):** 승인 `catalog.json`과 실 영어/사회 manifest 및 YBM 전체 승인 문항 JSON, 수학 aggregate의 단원별 메타데이터로 23개/732문항과 학년·교과·출판사 분류 일치 확인. 수학 6개 각 개별 manifest도 상위 id·문항 수·SHA-256 **표기 값**과 교차 확인 PASS. **ZIP 실바이트 SHA 재계산은 실시하지 않음**.
+- [x] **승인 vs 배포 분리:** 23개 전부 `gameDeployment=NOT_DEPLOYED`. 자동 분류 시 `approvedContentTitle:false`로 확인된 23개 정식 제목은 실제 승인 ZIP effective 데이터를 추출해 교체해야 한다. 임시 분류 라벨을 게임 승인 제목으로 오인하거나 자동 활성화하지 않도록 게이트 설정.
+- [ ] `approved_catalog_normalizer.test.mjs`를 Node 실제 프로세스에서 실행 및 GitHub Actions CI: **NOT RUN**. ZIP effective 승인 제목/오버레이·미디어 권리 검사, 빌드 결과 GAS 내장·게임/통계 연동, 실 GAS 확인: **NOT RUN**.
+- [ ] 기존 V4 61일 17,670회는 보존·회귀용; 새 정본 게임 통계에 혼합 금지. 신규 이벤트 스키마/카트리지 ID 구분의 실 구현·검증 필요.
+- [ ] 동시 시작 R6 40회 중 30회 유실 **FAIL 유지**. 운영 GAS·Code.gs·main/versions/2.0.0·원본 EVENT_LOG·랭킹·삭제/보관 트리거·기존 교실매니저 실제 폐기는 모두 **HOLD**.
