@@ -89,3 +89,27 @@ function hojaV4TestClearCacheU3(token){
  const c=CacheService.getScriptCache();c.removeAll([HOJA_V4U_CACHE_FRESH_,HOJA_V4U_CACHE_GOOD_]);
  return true;
 }
+/* 40-6-U D (R6 rerun): counts only, never ids. Rows after `fromRow` up to the last row. */
+function hojaV4TestTailU3(token,fromRow){
+ const want=PropertiesService.getScriptProperties().getProperty('HOJA_V4_U3_TEST_TOKEN')||'';
+ if(!want||token!==want)throw Error('HOJA_V4_U3_TEST_DENIED');
+ const ctx=hojaV4uOpen_(PropertiesService.getScriptProperties());
+ const last=ctx.event.getLastRow(),from=Number(fromRow);
+ if(!Number.isSafeInteger(from)||from<1||from>last)throw Error('BAD_FROM');
+ const rows=last>from?ctx.event.getRange(from+1,1,last-from,15).getDisplayValues():[];
+ const ids=new Map(),schema={};
+ let invalid=0;
+ for(const r of rows){ids.set(r[0],(ids.get(r[0])||0)+1);schema[r[13]]=(schema[r[13]]||0)+1;
+  if(!HOJA_USAGE_V4_PUBLIC.validTailRow(r))invalid++;}
+ return {lastRow:last,rowsAdded:rows.length,uniqueEventIds:ids.size,
+  duplicateRows:rows.length-ids.size,invalidRows:invalid,schema,watermark:hojaV4uReadWatermark_(ctx)};
+}
+/* Cold-start burst: drop the writer caches (catalog / sealed state / canary) and public caches. */
+function hojaV4TestColdU3(token){
+ const want=PropertiesService.getScriptProperties().getProperty('HOJA_V4_U3_TEST_TOKEN')||'';
+ if(!want||token!==want)throw Error('HOJA_V4_U3_TEST_DENIED');
+ const ctx=hojaV4uOpen_(PropertiesService.getScriptProperties());
+ CacheService.getScriptCache().removeAll([HOJA_USAGE_CATALOG_CACHE_KEY_,HOJA_V4U_SEALED_CACHE_,
+  HOJA_V4U_VERIFIED_CACHE_+ctx.tag,HOJA_V4U_CACHE_FRESH_,HOJA_V4U_CACHE_GOOD_]);
+ return true;
+}

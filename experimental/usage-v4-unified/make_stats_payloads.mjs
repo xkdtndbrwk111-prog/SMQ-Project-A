@@ -2,6 +2,7 @@
 // running on the synthetic isolated-copy fixture (mock GAS), for the offline
 // anonymous browser test. Usage: node make_stats_payloads.mjs <out.json>
 import {writeFileSync} from 'node:fs';
+import {runInContext} from 'node:vm';
 import {loadProject,MockSpreadsheet} from './mock_gas.mjs';
 import {buildCopy,standardHistory,ISOLATED_PROPS,id} from './fixture.mjs';
 
@@ -31,6 +32,16 @@ const out={};
 {
  const w=world({SMQ_USAGE_SPREADSHEET_ID:'copy40'});
  out.notConfigured=w.rpc('getPublicUsageStatisticsV4');
+}
+{
+ // 40-6-U C: approved era (synthetic active catalog; real one is empty = nothing deployed)
+ const w=world({...ISOLATED_PROPS,HOJA_USAGE_APPROVED_ERA_START:'2026-11-23'});
+ runInContext('HOJA_APPROVED_ACTIVE_CATALOG_='+JSON.stringify({schemaVersion:'hoja-active-cartridge-catalog-v1',
+  sourceRepo:'fixture',sourceCommit:'a'.repeat(40),deploymentId:'t',entries:[
+  {cartridgeId:'zz5-s2-u1',title:'가 정본 단원',grade:5,subjectLabel:'사회',publisher:null},
+  {cartridgeId:'zz5-s2-u2',title:'나 정본 단원',grade:5,subjectLabel:'사회',publisher:null}]}),w.ctx);
+ for(let i=0;i<6;i++)w.rpc('recordUsageStartU1',req(300+i,1,i%2?['zz5-s2-u2','zz5-s2-u1']:['zz5-s2-u1','zz5-s2-u2']));
+ out.approved=w.rpc('getPublicUsageStatisticsV4');
 }
 writeFileSync(process.argv[2],JSON.stringify(out,null,1));
 console.log(JSON.stringify({ok:out.ok.status,totals:out.ok.totals,stale:out.stale.cache,

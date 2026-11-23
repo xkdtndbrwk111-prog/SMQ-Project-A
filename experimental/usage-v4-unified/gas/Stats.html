@@ -66,6 +66,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--text-secondary)}
   <button id="refresh" type="button">새로고침</button>
   <span class="note" id="meta" aria-live="polite">불러오는 중…</span>
  </div>
+ <p class="note" id="era" aria-live="polite"></p>
  <div id="banner" class="banner warn hidden" role="status"></div>
  <div id="error" class="banner err hidden" role="alert"></div>
  <section id="content" class="hidden" aria-label="통계">
@@ -174,6 +175,12 @@ details summary{cursor:pointer;font-size:13px;color:var(--text-secondary)}
   $('t-30').textContent=fmt(s.totals.days30);$('t-all').textContent=fmt(s.totals.all);
   $('t-since').textContent=s.historyStart+'부터';
   var prov=s.provisionalDays||[];
+  // 40-6-U C: say which source the numbers come from; the other era is never added in.
+  var era=s.era||{},ln=$('era');
+  ln.textContent=era.current==='APPROVED'?
+   '교사 승인 정본 카트리지 이용 통계입니다 ('+era.approvedSince+'부터).'+
+   (era.legacy?' 이전 게임 기록 '+fmt(era.legacy.all)+'회('+era.legacy.from+'~'+era.legacy.through+')는 합산하지 않습니다.':''):
+   '이전 게임(구글 시트 카트리지) 기록입니다. 승인 정본 카트리지 통계는 운영 전환 후 따로 집계됩니다.';
   var b=$('banner');
   b.textContent='오늘'+(prov.length>1?'과 아직 확정되지 않은 '+(prov.length-1)+'일':'')+'의 숫자는 잠정값이며 새로고침하면 바뀔 수 있습니다.'+
    (s.cache&&s.cache.stale?' 요청이 많아 '+s.cache.ageSeconds+'초 전 집계를 보여 드리고 있습니다.':'');

@@ -25,7 +25,9 @@ test('public RPC surface of the whole single GAS project equals the allowlist',(
   .matchAll(/^function\s+([A-Za-z0-9_$]+)\s*\(/gm))if(!m[1].endsWith('_'))pub.add(m[1]);
  assert.deepEqual([...pub].sort(),['doGet','getPublicUsageStatisticsV4','hojaGetPublicQuestions',
   'hojaListPublicCartridges','hojaRankList','hojaRankSave','hojaV4OpsSealPendingDays',
-  'hojaV4OpsStatus','recordUsageStartU1'].sort());
+  'hojaV4OpsStatus','recordUsageStartU1',
+  // 40-6-U B: read-only approved-catalog RPCs (embedded active list only)
+  'hojaListApprovedCartridges','hojaGetApprovedQuestions'].sort());
  const src=readFileSync(GAS_DIR+'/UsageV4Unified.gs','utf8');
  for(const ops of ['hojaV4OpsSealPendingDays','hojaV4OpsStatus'])
   assert.match(src,new RegExp('function '+ops+'\\(\\)\\{\\n hojaV4uRequireOperator_\\(\\);'));
@@ -150,7 +152,7 @@ test('writer: crash between append and commit is adopted later; partial orphan h
 });
 
 // ---------------- public reader ----------------
-const ALLOWED_KEYS=['asOf','cache','daily','generatedAt','grade','historyStart','historyStatus',
+const ALLOWED_KEYS=['asOf','cache','daily','era','generatedAt','grade','historyStart','historyStatus',
  'mode','provisionalDays','publisher','schema','status','subject','todayStatus',
  'topCartridges','totals'];
 test('reader: exact numbers from sealed summaries + committed tail, fixed allowlist, no secrets',()=>{

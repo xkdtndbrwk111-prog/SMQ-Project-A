@@ -97,6 +97,19 @@ async def main():
                 assert (await page.locator(sel).inner_text()) == '', sel
             assert reqs == [] and errors == [], (reqs, errors)
             await ctx.close(); results.append(f'{key} -> {code} OK')
+        # 4b) era label: legacy view says so; approved view never adds the legacy history
+        ctx, page, reqs, errors = await page_with(browser, ok, {'width': 1280, 'height': 900})
+        assert '이전 게임' in await page.locator('#era').inner_text()
+        await ctx.close()
+        ap = P['approved']
+        ctx, page, reqs, errors = await page_with(browser, ap, {'width': 1280, 'height': 900})
+        era = await page.locator('#era').inner_text()
+        assert '교사 승인 정본' in era and '합산하지 않습니다' in era and f"{ap['era']['legacy']['all']:,}회" in era, era
+        assert (await page.locator('#t-all').inner_text()) == f"{ap['totals']['all']:,}"
+        assert '가 정본 단원 + 나 정본 단원' in await page.locator('#top').inner_text()
+        assert reqs == [] and errors == [], (reqs, errors)
+        await page.screenshot(path=str(Path(sys.argv[1]).with_name('stats_approved_era.png')), full_page=True)
+        await ctx.close(); results.append('era labels OK')
         # 5) hostile label text is rendered as text, never markup
         evil = json.loads(json.dumps(ok))
         evil['topCartridges'][0]['label'] = '<img src=x onerror="window.__xss=1">'

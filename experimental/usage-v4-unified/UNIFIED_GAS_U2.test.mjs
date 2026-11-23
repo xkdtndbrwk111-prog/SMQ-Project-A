@@ -68,13 +68,17 @@ test('doGet: no parameter can select another HTML file',()=>{
 });
 test('existing game RPCs in the single GAS are byte-identical to the root production candidate',()=>{
  const fn=(src,name)=>{const i=src.indexOf('function '+name+'(');assert.ok(i>=0,name);
-  const j=src.indexOf('\nfunction ',i+1);return src.slice(i,j<0?undefined:j).trim();};
+  const j=src.indexOf('\n}',i+1);return src.slice(i,j+2).trim();}; // to the column-0 closing brace
  const root=readFileSync('Code.gs','utf8'),uni=readFileSync(GAS_DIR+'/Code.gs','utf8');
  for(const n of ['hojaApiGet_','hojaPublicName_','hojaCatalogRead_','hojaPublicSheets_',
-  'hojaListPublicCartridges','hojaRows_','hojaReadCartridge_','hojaGetPublicQuestions',
+  'hojaRows_','hojaReadCartridge_','hojaGetPublicQuestions',
   'hojaRankNormalizeName_','hojaRankValidName_','hojaRankSheet_','hojaRankCartridge_',
   'hojaRankRows_','hojaRankPublicRows_','hojaRankList','hojaRankSave','hojaUsageText_',
   'hojaUsageClassification_'])assert.equal(fn(uni,n),fn(root,n),n);
+ // 40-6-U D: the ONLY intended difference in this function is warming the
+ // telemetry catalog cache; the returned contract is unchanged.
+ const strip=t=>t.replace(/\n\s*const sheets=hojaPublicSheets_\(\)\.sheets;\n\s*hojaUsageCatalogPut_\(sheets\);[^\n]*\n\s*return sheets\.map/,'\n  return hojaPublicSheets_().sheets.map');
+ assert.equal(strip(fn(uni,'hojaListPublicCartridges')),fn(root,'hojaListPublicCartridges'));
 });
 test('Stats.html: lazy single RPC, no external resources, data rendered as text only',()=>{
  const html=readFileSync(GAS_DIR+'/Stats.html','utf8');
@@ -89,7 +93,10 @@ test('assembled single GAS: Game.html bytes unchanged and game never calls stati
  try{
   const r=JSON.parse(execFileSync('python3',['experimental/usage-v4-unified/build_unified_gas.py','--output',join(out,'gas')]).toString());
   assert.equal(r.gameSha256,'4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6');
+  // 40-6-U D: exactly the telemetry block is replaced; every other byte is the verified game
+  assert.equal(r.telemetryBlockOldSha256,'18bc5697b7e812e6237e000131ab556a0a2b5c078dad92f729e38c5bdf828aa2');
   const game=readFileSync(join(out,'gas','Game.html'),'utf8');
+  assert.ok(game.includes('hoja_usage_pending_v1')&&!game.includes('withFailureHandler(()=>{}).recordUsageStartU1'));
   assert.ok(!game.includes('getPublicUsageStatisticsV4')&&!game.includes('view=stats'));
   for(const rpc of ['hojaListPublicCartridges','hojaGetPublicQuestions','hojaRankList','hojaRankSave','recordUsageStartU1'])
    assert.ok(game.includes(rpc),rpc);

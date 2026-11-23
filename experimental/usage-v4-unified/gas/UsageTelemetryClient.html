@@ -1,0 +1,97 @@
+<script id="hojaProdUsageTelemetry">
+/* Anonymous, best-effort game start. Must never prevent game play.
+ * 40-6-U D (R6 loss fix): the SAME eventId is re-sent with bounded exponential
+ * backoff (full jitter) on transient failures (lock timeout, Sheets 429, rate
+ * limit, network). Permanent input/config errors stop immediately. The payload
+ * is persisted BEFORE the first attempt and removed only on a server reply, so
+ * an exhausted retry budget is re-sent by a bounded in-page re-flush (every
+ * 60 s, at most 10 rounds) and a closed tab on the next load, same KST day. The server dedupes by eventId: every re-send is idempotent,
+ * including when a success reply was lost. No UI, never throws. */
+window.HOJA_USAGE=(function(){
+  'use strict';
+  const KEY='hoja_usage_pending_v1',MAX_ATTEMPTS=6,BASE_MS=1000,CAP_MS=16000,MAX_QUEUE=200; // ~200 B each; a class burst must never evict pending starts
+  const REFLUSH_MS=60000,MAX_REFLUSH_ROUNDS=10;
+  const PERMANENT=/USAGE_(INVALID_REQUEST|EVENT_ID_INVALID|REPOSITORY_INVALID|MODE_INVALID|CARTRIDGE_IDS_INVALID|TEAM_COUNT_INVALID|PUBLIC_CARTRIDGE_NOT_PLAYABLE|APPROVED_CARTRIDGE_NOT_ACTIVE|EVENT_ID_CONFLICT|STORAGE_NOT_CONFIGURED|STORAGE_WRONG_SPREADSHEET|SHEET_NOT_FOUND|SHEET_SCHEMA_INVALID|V4_DAY_ALREADY_SEALED|V4_NON_MONOTONE_DAY|V4_REPLAY_STORM|APPROVED_ERA_NOT_STARTED|LEGACY_CATALOG_RETIRED|ERA_CONFIG_INVALID)|HOJA_V4U_(WRITER_STORAGE_MISMATCH|WRITER_SCHEMA|DEDUPE_WINDOW_TOO_LARGE|ISOLATION|PRODUCTION_ID|CANARY)/;
+  const status={tracked:0,delivered:0,duplicateIgnored:0,retries:0,permanent:0,queued:0,expired:0,lastError:''};
+  const kstDay=()=>new Date(Date.now()+9*3600000).toISOString().slice(0,10);
+  const store=()=>{try{return window.localStorage||null}catch(_e){return null}};
+  function load(){
+    try{const a=JSON.parse(store()?.getItem(KEY)||'[]');
+      return Array.isArray(a)?a.filter(x=>x&&x.payload&&typeof x.payload.eventId==='string'):[]}catch(_e){return []}
+  }
+  function save(a){try{store()?.setItem(KEY,JSON.stringify(a.slice(-MAX_QUEUE)))}catch(_e){}status.queued=Math.min(a.length,MAX_QUEUE)}
+  function persist(p){const a=load().filter(x=>x.payload.eventId!==p.eventId);a.push({day:kstDay(),payload:p});save(a)}
+  function forget(id){save(load().filter(x=>x.payload.eventId!==id))}
+  function send(p){
+    return new Promise((resolve,reject)=>{
+      const gs=window.google?.script?.run;
+      if(!gs){reject(new Error('NO_APPS_SCRIPT_RUNNER'));return}
+      try{gs.withSuccessHandler(resolve).withFailureHandler(e=>reject(new Error(String(e?.message||e||'NETWORK'))))
+        .recordUsageStartU1(p)}catch(e){reject(e)}
+    });
+  }
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const inFlight=new Set();
+  async function deliver(p){
+    if(inFlight.has(p.eventId))return 'IN_FLIGHT';
+    inFlight.add(p.eventId);
+    try{
+      persist(p);
+      for(let attempt=1;attempt<=MAX_ATTEMPTS;attempt++){
+        try{
+          const r=await send(p);
+          forget(p.eventId);status.delivered++;
+          if(r&&r.duplicateIgnored)status.duplicateIgnored++;
+          return 'DELIVERED';
+        }catch(e){
+          const m=String(e?.message||e);status.lastError=m.slice(0,80);
+          if(PERMANENT.test(m)){forget(p.eventId);status.permanent++;return 'PERMANENT'}
+          if(attempt===MAX_ATTEMPTS)break;
+          status.retries++;
+          const cap=Math.min(CAP_MS,BASE_MS*2**(attempt-1));
+          await sleep(cap/2+Math.random()*cap/2);
+        }
+      }
+      persist(p); // re-assert: still pending after the in-call budget
+      scheduleFlush();
+      return 'QUEUED';
+    }finally{inFlight.delete(p.eventId)}
+  }
+  let flushTimer=null,flushRounds=0;
+  function scheduleFlush(){
+    if(flushTimer||flushRounds>=MAX_REFLUSH_ROUNDS)return;
+    flushRounds++;
+    try{flushTimer=setTimeout(()=>{flushTimer=null;flush().catch(()=>{})},REFLUSH_MS)}catch(_e){flushTimer=null}
+  }
+  let flushing=false;
+  async function flush(){
+    if(flushing)return;flushing=true;
+    try{
+      const today=kstDay(),all=load(),keep=all.filter(x=>x.day===today);
+      status.expired+=all.length-keep.length; // a past day's start can no longer be dated correctly
+      save(keep);
+      for(const x of keep)await deliver(x.payload);
+    }finally{flushing=false}
+    // only entries nobody is currently delivering justify another round
+    if(load().some(x=>!inFlight.has(x.payload.eventId)))scheduleFlush();
+  }
+  try{setTimeout(()=>{flush().catch(()=>{})},2000+Math.floor(Math.random()*3000))}catch(_e){}
+  return Object.freeze({
+    track(mode,teamCount){
+      try{
+        const sources=window.HOJA_B_LIVE?.sources;
+        if(!window.google?.script?.run||!Array.isArray(sources)||sources.length<1||sources.length>5)return;
+        const ids=sources.map(x=>String(x?.data?.cartridgeId||'').trim());
+        if(ids.some(x=>!/^[0-9]{1,11}$/.test(x)))return;
+        const eventId=window.crypto?.randomUUID?.();
+        if(!eventId)return;
+        status.tracked++;
+        deliver({eventId,mode,repositoryKind:'PUBLIC',cartridgeCount:ids.length,cartridgeIds:ids,teamCount})
+          .catch(()=>{});
+      }catch(_ignored){}
+    },
+    flush,
+    status:()=>Object.assign({},status)
+  });
+})();
+</script>

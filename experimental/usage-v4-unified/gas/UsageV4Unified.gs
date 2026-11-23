@@ -39,6 +39,11 @@ const HOJA_V4U_LIMITS_={manifestRows:400,bucketRows:40000,tailRows:25000,
  freshSeconds:60,staleSeconds:600,sealDaysPerRun:7};
 const HOJA_V4U_CACHE_FRESH_='HOJA_V4U_PUBLIC_FRESH_V1';
 const HOJA_V4U_CACHE_GOOD_='HOJA_V4U_PUBLIC_GOOD_V1';
+// 40-6-U D (R6): writer-side caches. Both are safe-direction: a stale entry can
+// only widen the dedupe window or repeat a verification, never skip a guard.
+const HOJA_V4U_SEALED_CACHE_='HOJA_V4U_SEALED_STATE_V1';
+const HOJA_V4U_VERIFIED_CACHE_='HOJA_V4U_WRITER_VERIFIED_V1_';
+const HOJA_V4U_VERIFIED_SECONDS_=300;
 
 /* ----------------------------- basics ----------------------------- */
 function hojaV4uSha256_(payload){
@@ -58,7 +63,7 @@ function hojaV4uEnabled_(props){
  if(flag!==HOJA_V4U_ISOLATION_VALUE_)throw Error('HOJA_V4U_ISOLATION_MODE_DENIED');
  return true;
 }
-function hojaV4uOpen_(props){
+function hojaV4uOpen_(props,opts){
  const storageId=String(props.getProperty(SMQ_USAGE_SPREADSHEET_ID_KEY_U1)||'').trim();
  const prod=String(props.getProperty(HOJA_V4U_PROD_PROP_)||'').trim();
  const cert=String(props.getProperty(HOJA_V4U_CERT_PROP_)||'').trim();
@@ -69,27 +74,63 @@ function hojaV4uOpen_(props){
   if(String(props.getProperty(key)||'').trim()===storageId)
    throw Error('HOJA_V4U_PRODUCTION_ID_REJECTED');
  if(storageId===hojaProdPublicId_())throw Error('HOJA_V4U_PRODUCTION_ID_REJECTED');
+ const tag=hojaV4uSha256_('W|'+storageId).slice(0,16);
  const ss=SpreadsheetApp.openById(storageId);
- const canary=ss.getSheetByName(HOJA_V4U_CANARY_TAB_);
- const marks=canary?canary.getRange(1,1,1,2).getDisplayValues()[0]:[];
- if(String(marks[0]||'').trim()!==HOJA_V4U_CANARY_A1_||
-    String(marks[1]||'').trim()!==HOJA_V4U_CANARY_B1_)
-  throw Error('HOJA_V4U_CANARY_REQUIRED');
+ // Writer only: the canary (+ EVENT_LOG header) verification of THIS storage id
+ // is cached briefly; the key is bound to the storage id, so any property change
+ // re-verifies. Readers and the seal always verify.
+ const cache=opts&&opts.writer?CacheService.getScriptCache():null;
+ const verified=cache?String(cache.get(HOJA_V4U_VERIFIED_CACHE_+tag)||''):'';
+ if(!verified){
+  const canary=ss.getSheetByName(HOJA_V4U_CANARY_TAB_);
+  const marks=canary?canary.getRange(1,1,1,2).getDisplayValues()[0]:[];
+  if(String(marks[0]||'').trim()!==HOJA_V4U_CANARY_A1_||
+     String(marks[1]||'').trim()!==HOJA_V4U_CANARY_B1_)
+   throw Error('HOJA_V4U_CANARY_REQUIRED');
+  if(cache)cache.put(HOJA_V4U_VERIFIED_CACHE_+tag,'CANARY',HOJA_V4U_VERIFIED_SECONDS_);
+ }
  const event=ss.getSheetByName(SMQ_USAGE_SHEET_U1);
  if(!event)throw Error('HOJA_V4U_EVENT_LOG_NOT_CONFIGURED');
- return {ss,props,storageId,event,tag:hojaV4uSha256_('W|'+storageId).slice(0,16)};
+ return {ss,props,storageId,event,tag,headerVerified:verified==='CANARY+HEADER'};
 }
-function hojaV4uReadWatermark_(ctx){
+function hojaV4uReadWatermarkFull_(ctx){
  const raw=String(ctx.props.getProperty(HOJA_V4U_WATERMARK_PROP_)||'').trim();
  if(!raw)return null;
  let v;try{v=JSON.parse(raw);}catch(_e){throw Error('HOJA_V4U_WATERMARK_INVALID');}
- if(!v||v.tag!==ctx.tag||!Number.isSafeInteger(v.row)||v.row<1)
+ if(!v||v.tag!==ctx.tag||!Number.isSafeInteger(v.row)||v.row<1||
+    (v.date!==undefined&&!/^\d{4}-\d{2}-\d{2}$/.test(String(v.date))))
   throw Error('HOJA_V4U_WATERMARK_INVALID');
- return v.row;
+ return v;
 }
-function hojaV4uWriteWatermark_(ctx,row){
+function hojaV4uReadWatermark_(ctx){
+ const v=hojaV4uReadWatermarkFull_(ctx);
+ return v?v.row:null;
+}
+/* `date` = KST date of the row at `row` (lets the writer skip one read). */
+function hojaV4uWriteWatermark_(ctx,row,date){
  if(!Number.isSafeInteger(row)||row<1)throw Error('HOJA_V4U_WATERMARK_INVALID');
- ctx.props.setProperty(HOJA_V4U_WATERMARK_PROP_,JSON.stringify({row,tag:ctx.tag}));
+ const v={row,tag:ctx.tag};
+ if(date&&/^\d{4}-\d{2}-\d{2}$/.test(String(date)))v.date=String(date);
+ ctx.props.setProperty(HOJA_V4U_WATERMARK_PROP_,JSON.stringify(v));
+}
+function hojaV4uSealedInvalidate_(){
+ try{CacheService.getScriptCache().remove(HOJA_V4U_SEALED_CACHE_);}catch(_e){}
+}
+/* Sealed state for the WRITER: only changes when the seal (same ScriptLock)
+ * publishes a day, which invalidates this entry. */
+function hojaV4uWriterSealedState_(ctx){
+ const cache=CacheService.getScriptCache();
+ const raw=cache.get(HOJA_V4U_SEALED_CACHE_);
+ if(raw){
+  try{const v=JSON.parse(raw);
+   if(v&&v.tag===ctx.tag&&typeof v.lastDate==='string'&&Number.isSafeInteger(v.prefix)&&
+      Number.isSafeInteger(v.windowStart))return Object.assign(v,{cached:true});
+  }catch(_e){}
+ }
+ const st=hojaV4uManifestState_(ctx,false);
+ const v={tag:ctx.tag,lastDate:st.lastDate,prefix:st.prefix,windowStart:st.windowStart};
+ cache.put(HOJA_V4U_SEALED_CACHE_,JSON.stringify(v),21600);
+ return Object.assign(v,{cached:false});
 }
 function hojaV4uTab_(ss,name,header,create){
  let sh=ss.getSheetByName(name);
@@ -150,16 +191,16 @@ function hojaV4uRecoverWatermark_(ctx,sh,state,today){
     throw Error('HOJA_V4U_UNCOMMITTED_TAIL_HOLD');
    floor=d;
   }
- }
- if(W!==last){hojaV4uWriteWatermark_(ctx,last);W=last;}
+  hojaV4uWriteWatermark_(ctx,last,floor);W=last;
+ }else if(W!==last){hojaV4uWriteWatermark_(ctx,last);W=last;}
  return W;
 }
 /* ------------------------------ writer ------------------------------ */
-function hojaV4uWriterContext_(sh,storageId){
+function hojaV4uWriterContext_(storageId){
  const props=PropertiesService.getScriptProperties();
  if(!hojaV4uEnabled_(props))return null;
- const ctx=hojaV4uOpen_(props);
- if(ctx.storageId!==storageId||!sh.getParent()||sh.getParent().getId()!==storageId)
+ const ctx=hojaV4uOpen_(props,{writer:true});
+ if(ctx.storageId!==storageId||ctx.ss.getId()!==storageId)
   throw Error('HOJA_V4U_WRITER_STORAGE_MISMATCH');
  const cache=CacheService.getScriptCache();
  const key='HOJA_V4U_W_'+Math.floor(Date.now()/60000);
@@ -168,16 +209,26 @@ function hojaV4uWriterContext_(sh,storageId){
  cache.put(key,String(n+1),120);
  return ctx;
 }
-/* Called INSIDE recordUsageStartU1's ScriptLock, before appendRow. */
-function hojaV4uWriterGuard_(ctx,sh,usageRow){
+function hojaV4uMarkHeaderVerified_(ctx){
+ try{CacheService.getScriptCache().put(HOJA_V4U_VERIFIED_CACHE_+ctx.tag,'CANARY+HEADER',
+  HOJA_V4U_VERIFIED_SECONDS_);}catch(_e){}
+}
+/* Called INSIDE recordUsageStartU1's ScriptLock. Sealed-day / monotone-day /
+ * eventId dedupe guard, append, flush, readback of exactly row W+1, then the
+ * commit watermark. Spreadsheet calls in the lock (new event): getLastRow,
+ * TextFinder, appendRow, flush, one 15-cell readback (+1 property write). */
+function hojaV4uWriterAppend_(ctx,sh,usageRow){
+ const schema=String(usageRow[13]);
  if(!Array.isArray(usageRow)||usageRow.length!==15||usageRow[4]!=='PUBLIC'||
-    usageRow[13]!=='U3S1')throw Error('HOJA_V4U_WRITER_SCHEMA');
+    (schema!=='U3S1'&&schema!=='A1'))throw Error('HOJA_V4U_WRITER_SCHEMA');
  const today=String(usageRow[2]);
- const state=hojaV4uManifestState_(ctx,false);
+ const state=hojaV4uWriterSealedState_(ctx);
  if(state.lastDate&&today<=state.lastDate)throw Error('USAGE_V4_DAY_ALREADY_SEALED');
  const W=hojaV4uRecoverWatermark_(ctx,sh,state,today);
  if(W>1){
-  const prior=String(sh.getRange(W,3).getDisplayValue()||'').trim();
+  const wm=hojaV4uReadWatermarkFull_(ctx);
+  const prior=wm&&wm.row===W&&wm.date?wm.date:
+   String(sh.getRange(W,3).getDisplayValue()||'').trim();
   if(!/^\d{4}-\d{2}-\d{2}$/.test(prior)||prior>today)
    throw Error('USAGE_V4_NON_MONOTONE_DAY');
  }
@@ -196,20 +247,19 @@ function hojaV4uWriterGuard_(ctx,sh,usageRow){
      sig(old)!==expected)throw Error('USAGE_EVENT_ID_CONFLICT');
   originalDate=originalDate||String(old[2]);
  }
- if(hits.length)return {watermark:W,replay:{ok:true,repositoryKind:'PUBLIC',
-  cartridgeCount:Number(usageRow[9]),usageSchemaVersion:'U3S1',
-  duplicateIgnored:true,originalDate}};
- return {watermark:W,replay:null};
-}
-/* Called INSIDE the same lock right after appendRow + flush. */
-function hojaV4uWriterCommit_(ctx,sh,usageRow,W){
- const last=sh.getLastRow();
- if(last!==W+1)throw Error('HOJA_V4U_COMMIT_ROW_MISMATCH');
- const back=sh.getRange(last,1,1,15).getDisplayValues()[0];
- if(String(back[0]).trim()!==String(usageRow[0])||String(back[2]).trim()!==String(usageRow[2])||
+ const base={ok:true,repositoryKind:'PUBLIC',cartridgeCount:Number(usageRow[9]),
+  usageSchemaVersion:schema};
+ // Same eventId already committed (e.g. the success reply was lost and the
+ // client retried): idempotent, no new row.
+ if(hits.length)return Object.assign(base,{duplicateIgnored:true,originalDate});
+ sh.appendRow(usageRow);
+ SpreadsheetApp.flush();
+ const back=sh.getRange(W+1,1,1,15).getDisplayValues()[0];
+ if(String(back[0]).trim()!==String(usageRow[0])||String(back[2]).trim()!==today||
     !HOJA_USAGE_V4_PUBLIC.validTailRow(back))
   throw Error('HOJA_V4U_COMMIT_READBACK_MISMATCH');
- hojaV4uWriteWatermark_(ctx,last);
+ hojaV4uWriteWatermark_(ctx,W+1,today);
+ return base;
 }
 /* ------------------------------ daily seal ------------------------------ */
 function hojaV4uRequireOperator_(){
@@ -307,6 +357,7 @@ function hojaV4uSealNextDay_(ctx){
   }else{
    if(now.preparing.length)throw Error('HOJA_V4U_SEAL_OTHER_PREPARING_MANUAL_REVIEW');
    if(storedFor().length)throw Error('HOJA_V4U_SEAL_ORPHAN_BUCKETS_MANUAL_REVIEW');
+   hojaV4uSealedInvalidate_();
    mRow=m.getLastRow()+1;
    const created=new Date().toISOString();
    const mr=[target,gen,'PREPARING',count?prefix+1:0,count?newPrefix:0,count,
@@ -330,6 +381,7 @@ function hojaV4uSealNextDay_(ctx){
    throw Error('HOJA_V4U_SEAL_BUCKET_DIGEST_MISMATCH');
   m.getRange(mRow,11).setValue(new Date().toISOString());SpreadsheetApp.flush();
   m.getRange(mRow,3).setValue('COMPLETE');SpreadsheetApp.flush();
+  hojaV4uSealedInvalidate_();
   if(m.getRange(mRow,3).getDisplayValue()!=='COMPLETE')
    throw Error('HOJA_V4U_SEAL_PUBLISH_FAILED');
   return {date:target,starts:snap.starts,retriesSuppressed:snap.retriesSuppressed,
@@ -345,6 +397,11 @@ function hojaV4uHistoryStart_(ctx){
  if(!HOJA_V4U_AUDIT_SCOPES_.includes(rows[1][0])||!/^\d{4}-\d{2}-\d{2}$/.test(rows[1][1]))
   throw Error('HOJA_V4U_AUDIT_UNVERIFIED_HISTORY');
  return rows[1][1];
+}
+function hojaV4uApprovedEraStart_(props){
+ const v=String(props.getProperty(HOJA_USAGE_ERA_PROP_)||'').trim();
+ if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v))throw Error('HOJA_V4U_ERA_NOT_CONFIGURED');
+ return v;
 }
 function hojaV4uComputePublic_(now){
  const props=PropertiesService.getScriptProperties();
@@ -395,7 +452,8 @@ function hojaV4uComputePublic_(now){
   });
   return HOJA_USAGE_V4_PUBLIC.project(HOJA_USAGE_V4_CORE,past,tail,{
    asOf:today,historyStart,initialHistoryAudited:true,initialPrefixEndRow:1,
-   certifiedPrefixEndRow:prefix,committedWatermark:W,hashBuckets:hojaV4uSha256_});
+   certifiedPrefixEndRow:prefix,committedWatermark:W,hashBuckets:hojaV4uSha256_,
+   approvedEraStart:hojaV4uApprovedEraStart_(props)});
  }
  throw Error('HOJA_V4U_CHANGED_DURING_READ');
 }
@@ -422,7 +480,8 @@ function getPublicUsageStatisticsV4(){
   }
   cache.put(key,String(n+1),120);
   const view=HOJA_USAGE_V4_PUBLIC.publicView(hojaV4uComputePublic_(now),
-   {generatedAt,ageSeconds:0,maxAgeSeconds:HOJA_V4U_LIMITS_.freshSeconds});
+   {generatedAt,ageSeconds:0,maxAgeSeconds:HOJA_V4U_LIMITS_.freshSeconds,
+    approvedTitles:new Map(hojaApprovedActive_().entries.map(e=>[e.cartridgeId,e.title]))});
   const json=JSON.stringify(view);
   cache.put(HOJA_V4U_CACHE_FRESH_,json,HOJA_V4U_LIMITS_.freshSeconds);
   cache.put(HOJA_V4U_CACHE_GOOD_,json,HOJA_V4U_LIMITS_.staleSeconds);

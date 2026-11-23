@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {createContext,runInContext} from 'node:vm';
 
 export const GAS_DIR='experimental/usage-v4-unified/gas';
-export const GAS_FILES=['Code.gs','UsageV4Core.gs','UsageV4Public.gs','UsageV4Unified.gs'];
+export const GAS_FILES=['Code.gs','ApprovedActiveCatalog.gs','UsageV4Core.gs','UsageV4Public.gs','UsageV4Unified.gs'];
 export const EVENT_HEADER=['eventId','timestamp','date','mode','repositoryKind','grade',
  'subject','publisher','cartridge','cartridgeCount','teamCount','cartridgeIds',
  'publicRepositoryNamespace','usageSchemaVersion','cartridgeTitlesJson'];
@@ -76,7 +76,8 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
    releaseLock(){trace.push('UNLOCK');locks.held=false;}};}},
   CacheService:{getScriptCache(){return{
    get:k=>{const e=cache.get(k);return e&&e.exp>clock.ms?e.v:null;},
-   put:(k,v,ttl)=>{cache.set(k,{v:String(v),exp:clock.ms+ttl*1000});}};}},
+   put:(k,v,ttl)=>{cache.set(k,{v:String(v),exp:clock.ms+ttl*1000});},
+   remove:k=>{cache.delete(k);}};}},
   Session:{getActiveUser:()=>({getEmail:()=>env.__active}),
    getEffectiveUser:()=>({getEmail:()=>effectiveEmail})},
   Utilities:{DigestAlgorithm:{SHA_256:'SHA_256'},Charset:{UTF_8:'UTF_8'},

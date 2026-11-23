@@ -201,3 +201,37 @@
 **구분 보고:** Node 시험 PASS / 실데이터 빌드 PASS(로컬) / GitHub Actions **NOT RUN**(워크플로 미활성) / 게임 연동·실 GAS **NOT RUN**(단계 B·D).
 **데이터 유출:** 산출물은 ID·승인 제목·해시·commit만 포함. 문항 본문·이미지·학생/교사/학교 정보·시트 ID·토큰 없음. 정본 저장소는 읽기만 함(쓰기 0).
 **남은 위험:** YBM 학기·학년 메타데이터가 승인 자료에 없어 ID 규칙에 의존; 미디어 권리 23/23 HOLD라 현재 어떤 단원도 활성화 불가(정상 동작); 사회 6학년 그룹 manifest(`unitArchives`)는 catalog가 참조하지 않아 교차검증 대상 외.
+
+---
+
+## U-APPROVED-CATALOG(B) + C 경계 + U-R6-FIX(코드·mock) — 2026-11-23
+### B. 승인 ≠ 배포: 교사 배포 manifest 게이트 + 내장 active catalog
+- `approved-catalog/deployment/active-deployment.json`: **entries 0개**(교사 배포 승인 없음). 지금 어떤 승인 단원도 게임에 활성화되지 않음이 정상.
+- `approved-catalog/build_active_catalog.mjs` → `gas/ApprovedActiveCatalog.gs`(생성 파일, 메타데이터만, 문항 본문 없음, `--check` drift 검사). GAS 런타임은 GitHub·구형 Sheets를 읽지 않고 이 상수만 사용.
+- `gas/Code.gs`(시험 번들): `hojaListApprovedCartridges()`·`hojaGetApprovedQuestions(ids)`·`recordUsageStartU1` 승인 ID 검증이 **같은 내장 목록**을 사용. 목록에 없는 ID → `APPROVED_CARTRIDGE_NOT_ACTIVE`/`USAGE_APPROVED_CARTRIDGE_NOT_ACTIVE`. 활성 ID라도 문항 패키징·게임 렌더러 연동은 별도 게이트라 `APPROVED_CONTENT_NOT_PACKAGED`(Game.html 승인 정본 렌더링은 **미구현**).
+- 기존 게임 계약 유지: `hojaListPublicCartridges` 반환값 동일(차이는 텔레메트리 캐시 예열 1줄, U2 시험이 그 차이만 허용하도록 정확히 비교), 질문 로드 `hojaGetPublicQuestions`는 실시간 카탈로그+재확인 그대로.
+
+### C. 구형 61일 기록과 신규 승인 통계의 경계 (migration-free)
+- 행 스키마를 명시적으로 구분: `U3S1`(구형, 숫자 시트 ID, `PUBLIC:` 네임스페이스) / `A1`(승인 정본, **정렬된 안정 ID**, `APPROVED:<정본 commit 12자>`, cartridge 열=`a + b`, 제목 JSON=승인 제목). 기존 15열 스키마·원본 행·V4 CORE(인증본과 바이트 동일) 무변경.
+- **시대(era) 경계** Script Property `HOJA_USAGE_APPROVED_ERA_START`: 미설정 → 구형만 기록(승인 ID 거부), 설정일 이후 → 승인만 기록(구형 `USAGE_LEGACY_CATALOG_RETIRED`). 하루 안에서 두 스키마가 섞이지 않음. 공개 계산은 날짜 기준으로 era별 집계·era별 정합성 검사, 섞이면 `ERA_SCHEMA_MIXED` → `UNAVAILABLE/LATE_OR_UNSORTED_EVENT`(숫자 미표시).
+- 공개 응답 allowlist에 `era:{current, approvedSince, legacy:{from,through,all}|null}` 추가. 승인 era에서는 totals/daily/분포/TOP20이 **승인 기록만**, 이전 17,670회는 "합산하지 않음" 문구와 함께 별도 숫자로만 표기. A+B=B+A(ID 정렬). 표시명은 내장 승인 제목에서만, k=5 소수 셀 보호 유지. 구형 이름 정규화·복원은 하지 않음.
+- `Stats.html`: 어떤 출처의 숫자인지 한 줄 표기(구형/승인).
+
+### D. R6 데이터 유실 수정 (코드 + mock; 실 GAS 재시험은 아래 별도 기록)
+원인 분리(실 R6: 429 17 + lock 13)에 맞춰 각각 수정 — 단순 잠금시간 연장만이 아님.
+1. **Sheets API 429 제거:** 시작 기록의 구형 카탈로그 검증을 CacheService 300초 캐시로(`hojaListPublicCartridges`가 게임 목록 표시 때 예열). 40회 시작에 카탈로그 API 읽기 **40×2회 → 최대 1×2회**(mock 계측: 첫 1건 LIVE, 39건 CACHE, `sheetsApiCalls` 0). 캐시는 *기록 검증*에만 쓰며 문항 제공은 계속 실시간.
+2. **잠금 안 작업 축소:** 봉인 상태(마지막 COMPLETE·prefix·dedupe 창)를 캐시(봉인 함수가 같은 잠금에서 무효화), 직전 행 날짜를 watermark에 저장해 읽기 생략, canary/헤더 확인은 저장소 ID에 묶인 5분 캐시(잠금 밖). 잠금 안 호출(새 이벤트, 캐시 warm): **manifest 읽기·헤더 확인·직전 날짜 읽기·getLastRow 재확인 제거** → `getLastRow → TextFinder(창) → appendRow → flush → W+1 한 행 readback → watermark 속성` 만 남음(mock trace로 고정). eventId 멱등 검사는 잠금 안 유지(동시 재전송 경합 방지).
+3. **잠금 대기 10초 → 20초** + 비식별 계측 `perf{catalog, catalogMs, sheetsApiCalls, lockWaitMs, lockHoldMs, totalMs}` 응답 포함.
+4. **클라이언트 재시도(가장 중요):** 시험 번들 빌드에서 Game.html의 `<script id="hojaProdUsageTelemetry">` **한 블록만** `gas/UsageTelemetryClient.html`로 교체(원본 블록 SHA `18bc5697…` 확인 후 교체, 나머지 바이트 동일 — 빌더가 원본/교체 SHA 출력; 루트·versions Game.html 무변경). 같은 eventId 유지, 지수 백오프(1→16s, full jitter) 최대 6회, 영구 오류(입력/설정/충돌/봉인) 즉시 중단, 일시 오류(락/429/네트워크/응답 유실)만 재시도. 첫 시도 **전에** localStorage에 저장하고 서버 응답 시에만 삭제 → 예산 소진 시 페이지 내 60초 간격 재플러시(최대 10회), 탭을 닫았으면 같은 KST 날 다음 로드에서 재전송, 지난 날짜분은 날짜를 바르게 기록할 수 없으므로 폐기·`expired` 계수. UI 변화 없음, 게임 진행 차단 없음.
+   - mock 시험 중 실제 결함 2건 발견·수정: ① 대기열 상한 20 때문에 40건 동시 시작 시 앞선 대기분이 밀려나 재시도 소진분 2건 유실 → 상한 200 + 소진 시 재저장 ② 로드 시 플러시가 진행 중 항목을 보고 재플러시 10회를 헛소모 → 진행 중이 아닌 대기분이 있을 때만 재예약.
+
+### 시험 (Node/mock — 실 엔진 아님)
+| 묶음 | 결과 |
+|---|---|
+| `UNIFIED_GAS_D.test.mjs` (신규) | **13/13 PASS**, 8회 반복 실행 모두 PASS. B 3, C 3, D 서버 4(캐시 1회 읽기·잠금 내 호출 고정·응답 유실 재전송 duplicateIgnored·봉인 시 캐시 무효화), D 클라이언트 4(**40건 동시 + 락 타임아웃·429·응답 유실 주입 → 행 +40, 고유 40, 중복 0, watermark +40, 공개 합계 +40**; 영구 오류 1회만 호출; 6회 소진→대기열→재로드 복구 3/3; 페이지 내 재플러시 복구) |
+| U1/U2/U3 기존 + A 카탈로그 | 53/53 PASS (의도된 계약 변경 3곳만 시험 갱신: 공개 RPC 2개 추가, 응답 키 `era` 추가, `hojaListPublicCartridges` 캐시 예열 1줄) |
+| 기존 V4 회귀(usage-retention) | CORE 11/11, TRIAL_GAS 9/9 PASS |
+| 오프라인 Chromium(Stats.html) | **U2_STATS_CHROMIUM_PASS** — 데스크톱/모바일/stale/오류 3종/XSS + **era 표기**(구형 문구, 승인 era에서 이전 6회 "합산하지 않음"·TOP 승인 제목) |
+| 빌더 | 패치 범위 검증: 접두·접미 바이트 동일, 원본 게임 SHA `4ac5c4ef…`, 패치 게임 SHA `1bff25cb…` |
+**CI:** 제안 워크플로(`ci/usage-v4-unified-qa.yml`)에 A/B/D 단계와 정본 pin 체크아웃 drift 검사(읽기 토큰 secret 있을 때만) 추가. 현재 OAuth 토큰에 `workflow` 권한이 없어 `.github/workflows/`에 올릴 수 없음 → **GitHub Actions NOT RUN**.
+**데이터 유출:** 없음(합성 fixture만). **남은 위험:** 실 엔진 동시성은 mock으로 증명 불가 — 아래 실 GAS R6 재시험 필요. 캐시 TTL(300초) 동안 공개 해제된 구형 카트리지 시작이 계수될 수 있음(문항 제공은 차단). 브라우저 저장소가 막힌 환경에서는 재로드 복구 불가(페이지 내 재시도만).

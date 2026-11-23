@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  QBANK_TOKEN: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
 jobs:
   unified:
     runs-on: ubuntu-latest
@@ -37,6 +39,26 @@ jobs:
         run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs
       - name: 40-6-U3 boundaries / storms / scale (mock GAS, not the real engine)
         run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
+      - name: 40-6-U A approved-source index (fixture shapes, auto-discovery, fail-closed, committed real index)
+        run: node --test experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+      - name: 40-6-U B embedded active catalog equals index + teacher deployment manifest (drift)
+        run: node experimental/usage-v4-unified/approved-catalog/build_active_catalog.mjs --check
+      - name: 40-6-U B/C/D active gate, legacy/approved era, R6 loss fix incl. client retry (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_D.test.mjs
+      - name: Pinned HOJA-QUESTION-BANK checkout (only if a read token secret is configured)
+        id: qbank
+        if: ${{ env.QBANK_TOKEN != '' }}
+        env:
+          QBANK_TOKEN: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
+        uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 9573f91d2845a9667e2540df051f499d937dd94a
+          token: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
+          path: qbank
+      - name: 40-6-U A rebuild index from the pinned source and fail on drift
+        if: ${{ steps.qbank.outcome == 'success' }}
+        run: node experimental/usage-v4-unified/approved-catalog/build_approved_index.mjs --qbank qbank --check
       - name: Install Chromium
         run: |
           python -m pip install playwright

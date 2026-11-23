@@ -132,7 +132,61 @@ function hojaPublicSheets_() {
 }
 
 function hojaListPublicCartridges() {
-  return hojaPublicSheets_().sheets.map(p=>({name:p.title,cartridgeId:p.sheetId}));
+  const sheets=hojaPublicSheets_().sheets;
+  hojaUsageCatalogPut_(sheets); // warms the telemetry cache: the game lists before it starts
+  return sheets.map(p=>({name:p.title,cartridgeId:p.sheetId}));
+}
+
+/* 40-6-U D (R6): game-start telemetry validates LEGACY public ids against a
+ * short-lived cache of the same public catalog instead of two Sheets API calls
+ * per start (17/40 SHEETS_HTTP_429 in the real R6 run). Question loading still
+ * uses the live catalog with its recheck. A cartridge unpublished within the
+ * TTL can only still be COUNTED (never served) for at most this many seconds. */
+const HOJA_USAGE_CATALOG_CACHE_KEY_='HOJA_USAGE_PUBLIC_CATALOG_V1';
+const HOJA_USAGE_CATALOG_CACHE_SECONDS_=300;
+function hojaUsageCatalogPut_(sheets){
+  try{
+    CacheService.getScriptCache().put(HOJA_USAGE_CATALOG_CACHE_KEY_,
+      JSON.stringify({sheets:sheets.map(s=>({sheetId:String(s.sheetId),title:String(s.title)}))}),
+      HOJA_USAGE_CATALOG_CACHE_SECONDS_);
+  }catch(_e){} // cache is an optimisation only
+}
+function hojaUsageLegacyCatalog_(perf){
+  const hit=CacheService.getScriptCache().get(HOJA_USAGE_CATALOG_CACHE_KEY_);
+  if(hit){
+    try{const v=JSON.parse(hit);
+      if(v&&Array.isArray(v.sheets)){perf.catalog='CACHE';return v.sheets;}}catch(_e){}
+  }
+  const t=Date.now();
+  const sheets=hojaPublicSheets_().sheets;
+  perf.catalog='LIVE';perf.catalogMs=Date.now()-t;perf.sheetsApiCalls+=2;
+  hojaUsageCatalogPut_(sheets);
+  return sheets.map(s=>({sheetId:String(s.sheetId),title:String(s.title)}));
+}
+
+/* 40-6-U B: approved (HOJA-QUESTION-BANK) cartridges. The ONLY runtime source
+ * is the build-time generated HOJA_APPROVED_ACTIVE_CATALOG_ (ApprovedActiveCatalog.gs):
+ * teacher deployment-approved, effective-SHA-pinned ids. GitHub is never read. */
+const HOJA_APPROVED_ID_RE_=/^[a-z0-9][a-z0-9-]{2,63}$/;
+function hojaApprovedActive_(){
+  const c=typeof HOJA_APPROVED_ACTIVE_CATALOG_==='object'?HOJA_APPROVED_ACTIVE_CATALOG_:null;
+  if(!c||c.schemaVersion!=='hoja-active-cartridge-catalog-v1'||!Array.isArray(c.entries)||
+     !/^[a-f0-9]{40}$/.test(String(c.sourceCommit)))throw new Error('APPROVED_CATALOG_INVALID');
+  return c;
+}
+function hojaListApprovedCartridges(){
+  return hojaApprovedActive_().entries.map(e=>({cartridgeId:e.cartridgeId,title:e.title,
+    grade:e.grade,semester:e.semester,subject:e.subjectLabel,publisher:e.publisher,
+    unit:e.unit,questionCount:e.questionCount}));
+}
+function hojaGetApprovedQuestions(ids){
+  const active=new Map(hojaApprovedActive_().entries.map(e=>[e.cartridgeId,e]));
+  if(!Array.isArray(ids)||!ids.length||ids.length>5||
+     ids.some(id=>typeof id!=='string'||!HOJA_APPROVED_ID_RE_.test(id)))
+    throw new Error('APPROVED_SELECTION_INVALID');
+  if(ids.some(id=>!active.has(id)))throw new Error('APPROVED_CARTRIDGE_NOT_ACTIVE');
+  // Content packaging for the game renderer is a separate, not-yet-approved gate.
+  throw new Error('APPROVED_CONTENT_NOT_PACKAGED');
 }
 
 function hojaRows_(name) {
@@ -325,7 +379,24 @@ function hojaUsageClassification_(names){
   const common=field=>meta.every(m=>m[field]===meta[0]?.[field])?meta[0]?.[field]||'':'';
   return {grade:common('grade'),subject:common('subject'),publisher:common('publisher')};
 }
+/* Era boundary (40-6-U C): Script Property HOJA_USAGE_APPROVED_ERA_START (yyyy-MM-dd).
+ * Unset            -> only LEGACY public ids are recorded (approved ids refused).
+ * today <  start   -> LEGACY only.   today >= start -> APPROVED only.
+ * One KST day therefore never mixes legacy and approved rows, and the 61-day
+ * legacy history (17,670) is never re-labelled or added to approved usage. */
+const HOJA_USAGE_ERA_PROP_='HOJA_USAGE_APPROVED_ERA_START';
+function hojaUsageEra_(props,today){
+  const start=String(props.getProperty(HOJA_USAGE_ERA_PROP_)||'').trim();
+  if(!start)return {start:'',approved:false};
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(start))throw new Error('USAGE_ERA_CONFIG_INVALID');
+  return {start,approved:today>=start};
+}
+function hojaUsageCommon_(values){
+  return values.every(v=>v===values[0])?String(values[0]==null?'':values[0]):'';
+}
 function recordUsageStartU1(payload){
+  const t0=Date.now();
+  const perf={catalog:'NONE',catalogMs:0,sheetsApiCalls:0,lockWaitMs:0,lockHoldMs:0,totalMs:0};
   if(!payload||typeof payload!=='object'||Array.isArray(payload))throw new Error('USAGE_INVALID_REQUEST');
   const eventId=hojaUsageText_(payload.eventId,80);
   if(!/^[a-f0-9-]{32,40}$/i.test(eventId))throw new Error('USAGE_EVENT_ID_INVALID');
@@ -336,45 +407,82 @@ function recordUsageStartU1(payload){
   if(mode!=='SOLO'&&mode!=='TEAM')throw new Error('USAGE_MODE_INVALID');
   const ids=Array.isArray(payload.cartridgeIds)?payload.cartridgeIds.map(x=>String(x||'').trim()):[];
   const count=Number(payload.cartridgeCount);
+  const legacyIds=ids.every(id=>/^[0-9]{1,11}$/.test(id));
+  const approvedIds=ids.every(id=>HOJA_APPROVED_ID_RE_.test(id)&&!/^[0-9]+$/.test(id));
   if(!Number.isInteger(count)||count<1||count>5||ids.length!==count||new Set(ids).size!==count||
-     ids.some(id=>!/^[0-9]{1,11}$/.test(id)))throw new Error('USAGE_CARTRIDGE_IDS_INVALID');
+     !(legacyIds||approvedIds))throw new Error('USAGE_CARTRIDGE_IDS_INVALID');
   const teams=mode==='SOLO'?1:Number(payload.teamCount);
   if(mode==='TEAM'&&(!Number.isInteger(teams)||teams<2||teams>7))throw new Error('USAGE_TEAM_COUNT_INVALID');
-  const listing=hojaPublicSheets_().sheets;
-  const byId=new Map(listing.map(s=>[String(s.sheetId),String(s.title)]));
-  const names=ids.map(id=>{
-    if(!byId.has(id))throw new Error('USAGE_PUBLIC_CARTRIDGE_NOT_PLAYABLE');
-    return byId.get(id);
-  });
-  const statsId=String(PropertiesService.getScriptProperties()
-    .getProperty(SMQ_USAGE_SPREADSHEET_ID_KEY_U1)||'').trim();
+  const props=PropertiesService.getScriptProperties();
+  const era=hojaUsageEra_(props,Utilities.formatDate(new Date(),'Asia/Seoul','yyyy-MM-dd'));
+  let fields;
+  if(legacyIds){
+    if(era.approved)throw new Error('USAGE_LEGACY_CATALOG_RETIRED');
+    const byId=new Map(hojaUsageLegacyCatalog_(perf).map(s=>[s.sheetId,s.title]));
+    const names=ids.map(id=>{
+      if(!byId.has(id))throw new Error('USAGE_PUBLIC_CARTRIDGE_NOT_PLAYABLE');
+      return byId.get(id);
+    });
+    const extra=hojaUsageClassification_(names);
+    fields={grade:extra.grade,subject:extra.subject,publisher:extra.publisher,
+      cartridge:hojaUsageText_(names.join(' | '),500),ids:ids.join('|'),
+      namespace:'PUBLIC:'+hojaProdPublicId_(),schema:'U3S1',titles:JSON.stringify(names),n:names.length};
+  }else{
+    if(!era.start)throw new Error('USAGE_APPROVED_ERA_NOT_STARTED');
+    if(!era.approved)throw new Error('USAGE_APPROVED_ERA_NOT_STARTED');
+    const cat=hojaApprovedActive_();
+    const byId=new Map(cat.entries.map(e=>[e.cartridgeId,e]));
+    // Stable-ID grouping: A+B and B+A are the same combination.
+    const sorted=ids.slice().sort();
+    const entries=sorted.map(id=>{
+      if(!byId.has(id))throw new Error('USAGE_APPROVED_CARTRIDGE_NOT_ACTIVE');
+      return byId.get(id);
+    });
+    perf.catalog='EMBEDDED';
+    fields={grade:hojaUsageCommon_(entries.map(e=>e.grade)),
+      subject:hojaUsageCommon_(entries.map(e=>e.subjectLabel)),
+      publisher:hojaUsageCommon_(entries.map(e=>e.publisher||'')),
+      cartridge:sorted.join(' + '),ids:sorted.join('|'),
+      namespace:'APPROVED:'+String(cat.sourceCommit).slice(0,12),schema:'A1',
+      titles:JSON.stringify(entries.map(e=>e.title)),n:entries.length};
+  }
+  const statsId=String(props.getProperty(SMQ_USAGE_SPREADSHEET_ID_KEY_U1)||'').trim();
   if(!statsId)throw new Error('USAGE_STORAGE_NOT_CONFIGURED');
   if(statsId===hojaProdPublicId_())throw new Error('USAGE_STORAGE_WRONG_SPREADSHEET');
-  const sh=SpreadsheetApp.openById(statsId).getSheetByName(SMQ_USAGE_SHEET_U1);
+  const v4=hojaV4uWriterContext_(statsId); // null => original U1 behaviour (V4 verifies storage itself)
+  const sh=v4?v4.event:SpreadsheetApp.openById(statsId).getSheetByName(SMQ_USAGE_SHEET_U1);
   if(!sh)throw new Error('USAGE_SHEET_NOT_FOUND');
   // Preserve existing 15-column schema and all historical rows; never recreate.
-  const actual=sh.getRange(1,1,1,SMQ_USAGE_HEADERS_U1.length).getDisplayValues()[0];
-  if(actual[0]!=='eventId'||actual[1]!=='timestamp'||actual[2]!=='date'||
-     actual[11]!=='cartridgeIds'||actual[13]!=='usageSchemaVersion')
-    throw new Error('USAGE_SHEET_SCHEMA_INVALID');
-  const extra=hojaUsageClassification_(names);
-  const v4=hojaV4uWriterContext_(sh,statsId); // null => original U1 behaviour
+  if(!v4||!v4.headerVerified){
+    const actual=sh.getRange(1,1,1,SMQ_USAGE_HEADERS_U1.length).getDisplayValues()[0];
+    if(actual[0]!=='eventId'||actual[1]!=='timestamp'||actual[2]!=='date'||
+       actual[11]!=='cartridgeIds'||actual[13]!=='usageSchemaVersion')
+      throw new Error('USAGE_SHEET_SCHEMA_INVALID');
+    if(v4)hojaV4uMarkHeaderVerified_(v4);
+  }
   const lock=LockService.getScriptLock();
-  if(!lock.tryLock(10000))throw new Error('USAGE_APPEND_LOCK_TIMEOUT');
+  const tw=Date.now();
+  if(!lock.tryLock(20000))throw new Error('USAGE_APPEND_LOCK_TIMEOUT');
+  const th=Date.now();perf.lockWaitMs=th-tw;
   try{
     const now=new Date(),date=Utilities.formatDate(now,'Asia/Seoul','yyyy-MM-dd');
+    // The day may have rolled over while waiting: re-check the era for the row date.
+    if(hojaUsageEra_(props,date).approved!==era.approved)throw new Error('USAGE_ERA_CHANGED_RETRY');
     const usageRow=[
-      eventId,now,date,mode,'PUBLIC',extra.grade,extra.subject,extra.publisher,
-      hojaUsageText_(names.join(' | '),500),names.length,teams,ids.join('|'),
-      'PUBLIC:'+hojaProdPublicId_(),'U3S1',JSON.stringify(names)
+      eventId,now,date,mode,'PUBLIC',fields.grade,fields.subject,fields.publisher,
+      fields.cartridge,fields.n,teams,fields.ids,fields.namespace,fields.schema,fields.titles
     ];
-    // V4 (isolated copy only): sealed-day / monotone-day / dedupe guard and
-    // commit watermark, all inside this same ScriptLock.
-    const guard=v4?hojaV4uWriterGuard_(v4,sh,usageRow):null;
-    if(guard&&guard.replay)return guard.replay;
-    sh.appendRow(usageRow);
-    SpreadsheetApp.flush();
-    if(v4)hojaV4uWriterCommit_(v4,sh,usageRow,guard.watermark);
-    return {ok:true,repositoryKind:'PUBLIC',cartridgeCount:names.length,usageSchemaVersion:'U3S1'};
+    let result;
+    if(v4){
+      // V4 (isolated copy only): sealed-day / monotone-day / dedupe guard and
+      // commit watermark, all inside this same ScriptLock.
+      result=hojaV4uWriterAppend_(v4,sh,usageRow);
+    }else{
+      sh.appendRow(usageRow);
+      SpreadsheetApp.flush();
+      result={ok:true,repositoryKind:'PUBLIC',cartridgeCount:fields.n,usageSchemaVersion:fields.schema};
+    }
+    perf.lockHoldMs=Date.now()-th;perf.totalMs=Date.now()-t0;
+    return Object.assign(result,{perf});
   }finally{lock.releaseLock()}
 }
