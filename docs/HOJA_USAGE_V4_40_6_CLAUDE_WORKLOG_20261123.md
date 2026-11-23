@@ -164,3 +164,40 @@
 
 ### 추가 발견 — 카트리지 이름 공개 규칙이 과도
 실 버킷 251개 조합 중 **112개(플레이 4,700회, 약 27%)**가 이름 형식 규칙에 걸려 `기타 공개 카트리지`로 가려짐(5회 미만 소수 조합은 별도 93개). 실제 이름 형식을 확인해 규칙을 완화할지 교사/감수자 결정 필요(개인정보 위험 판단 포함).
+
+---
+
+## U-APPROVED-CATALOG — 단계 A: 승인 정본 인덱스 자동 생성 (2026-11-23, 지시서 `HOJA_USAGE_V4_40_6_CLAUDE_NEXT_STEPS_20261123.md`)
+**정본 고정:** `xkdtndbrwk111-prog/HOJA-QUESTION-BANK` @ `9573f91d2845a9667e2540df051f499d937dd94a` (로컬 클린 체크아웃, `approved/` 변경 없음 확인 후 빌드). 빌드 타임 전용 — GAS 런타임은 GitHub를 읽지 않음.
+
+**후보 `969cdec` 검토 결과(실행 증거):** 후보 자체 테스트 4/4 PASS. 그러나 같은 코드를 **실제 승인 데이터**에 돌리면 23/732는 맞지만 다음 결함 확인 → 선별 반영하지 않고 재작성.
+1. 승인 effective 제목 추출 없음 → 실데이터에서 **정식 제목 0/23**(전부 임시 `N학년 과목 N단원`), 따라서 후보의 배포 게이트는 영원히 통과 불가.
+2. ZIP을 열지 않음: 아카이브 SHA-256 재계산·내부 파일표·문항 수 검증 없음(manifest 표기값만 신뢰).
+3. `subjects.math`에 `paths`와 `manifest`가 함께 있을 때 `paths`만 사용 → 수학 상위 manifest의 단원별 SHA pin을 대조하지 않음.
+4. 학년/단원을 ID 정규식으로만 판정(+과목 코드 고정표) — 지시서의 "이름 문자열 정규식으로 판정 금지"에 저촉, 표에 없는 새 과목은 실패.
+5. 영어 천재 6개 단원 문항 수 `null`(미검증), q21 시계 오버레이 미적용·미검증.
+6. YBM: 단원 파일과 승인 데이터의 일치, 태그·이미지 표 누락 검사 없음, 제목 없음.
+7. 배포 게이트가 `teacherDeploymentApproval:true`와 **임의의 64자 hex**만 보면 통과 — 실제 effective digest와 대조 안 함, 렌더러/문항검증/미디어 권리 게이트 없음. 정본 commit pin·잠금 파일 없음.
+
+**구현(`experimental/usage-v4-unified/approved-catalog/`):**
+- `zip_reader.mjs`: 무의존 ZIP 리더(중앙 디렉터리, stored/deflate, ZIP64·암호화·경로 이탈·중복·크기 위조 거부) + 시험용 writer.
+- `approved_catalog_normalizer.mjs`: `catalog.json → manifest → 승인 아카이브`를 **필드 형태(shape)**로 해석. 4개 형태: `unit-effective-zip`(사회 paths), `aggregate-units`(수학 manifest.units → 단원 manifest; `paths`와 불일치 시 실패), `bundle-source-zips`(영어 천재: 외부 ZIP `release/approval.json` + 중첩 원본 ZIP + `release/media-overlay.json`), `bundle-unit-questions`(영어 YBM: 승인 문항/태그/이미지 표 + 승인 화면 `UNIT_META`). 알 수 없는 형태·루트 섹션 → **fail-closed 진단**.
+- 각 단원: 아카이브 SHA-256 재계산, 내부 파일표(`file-manifest`/`FILES_SHA256`/`SHA256SUMS`) 전 파일 재해시, effective 문항 수·ID 접두·중복, 참조 이미지 존재, 승인 기록 제목과 effective 제목 일치, 분류는 **effective metadata 우선**(ID 규칙은 메타데이터 없는 YBM의 fallback이며, 둘 다 있으면 교차검증 불일치 시 실패).
+- 출력 레코드: `cartridgeId, subject, subjectLabel, grade, semester, unit, subunit, publisher, author, unitTitle, approvedTitle, titleSource, questionCount, types, releaseId, sourceRepo, sourceCommit, sourceManifest, archiveSha256, effectiveSha256, presentationSha256, mediaOverlay, mediaRights, approvalStatus, deploymentStatus`.
+- `build_approved_index.mjs`: 빌드/`--check`(재생성 결과가 커밋본과 다르면 실패 — CI drift 검사용). 산출물 `generated/approved-source-index.json`(23 entries), `generated/approved-source-index.lock.json`(정본 commit, catalog SHA, 읽은 소스 파일 54개 SHA, index digest `4e64ec40…`).
+- `activeApprovedCatalog(index, deployment)`: 승인 ≠ 배포. 교사 배포 승인(`'APPROVED'`+날짜), **실제 effectiveSha256 pin 일치**, 같은 정본 commit, `rendererGate`/`questionValidationGate` = PASS, 미디어 권리 CLEARED(또는 명시 확인) 모두 충족한 ID만 활성.
+
+**실데이터 결과(Node, 정본 @9573f91):** 23단원 / 732문항 — 영어 12/384(천재 6/201 + YBM 6/183), 사회 5/161, 수학 6/187. 23개 모두 `NOT_DEPLOYED`.
+| 항목 | 결과 |
+|---|---|
+| 아카이브 SHA-256 재계산 | 17개 ZIP(외부 1 + 중첩 6 + 사회 5 + 수학 6 중 외부/단원) **전부 일치**, 내부 파일표 재해시 전부 일치 |
+| 정식 제목 | **23/23 승인 자료에서 추출**: effective `cartridge.json` 11, 영어 천재 중첩 원본 cartridge 제목(= `release/approval.json` 제목과 일치 검증) 6, YBM 승인 화면 `UNIT_META` 6 |
+| 분류 출처 | effective metadata 17, ID 규칙 fallback 6(YBM — 승인 자료에 학년/단원 메타데이터 없음) |
+| q21 시계 오버레이 | `eng5-ham-u10:q21`에 적용·검증(원본 이미지 2개 존재, 대체 표시 자산 존재·해시, 정답 c4 일치), 해당 단원 effective digest에 포함 |
+| 미디어 공개 권리 | **23/23 HOLD**(CLEARED 표기 없음: `NOT_AUDITED`·`PENDING_Q07`·미기재). 자동 승인으로 변환하지 않음 |
+| 진단 | YBM 학기 미기재 6, YBM manifest `rawQuestionsSHA256`/`rawImagesTableSHA256`은 저장소 파일과 다른 원본 기준 값이라 **저장소에서 재검증 불가**(보고만) |
+
+**시험:** `node --test approved_catalog_normalizer.test.mjs` **16/16 PASS**(Node/mock). 합성 정본에 4개 형태 모두 포함; **새 사회 단원 + 새 과학 과목을 catalog/manifest만 추가 → 코드 수정 없이 자동 발견·NOT_DEPLOYED**; 알 수 없는 루트/형태·미승인·ZIP 바이트 변조·수학 SHA pin 불일치·수량 위조·이미지 누락·제목 누락·paths/manifest 불일치·오버레이 정답 불일치·파일표 위조 → 전부 실패; 배포 게이트 8개 경로; 빌더 소스에 실제 ID/제목 문자열 0개(소프트코딩 검사). `--check` drift 검사 PASS.
+**구분 보고:** Node 시험 PASS / 실데이터 빌드 PASS(로컬) / GitHub Actions **NOT RUN**(워크플로 미활성) / 게임 연동·실 GAS **NOT RUN**(단계 B·D).
+**데이터 유출:** 산출물은 ID·승인 제목·해시·commit만 포함. 문항 본문·이미지·학생/교사/학교 정보·시트 ID·토큰 없음. 정본 저장소는 읽기만 함(쓰기 0).
+**남은 위험:** YBM 학기·학년 메타데이터가 승인 자료에 없어 ID 규칙에 의존; 미디어 권리 23/23 HOLD라 현재 어떤 단원도 활성화 불가(정상 동작); 사회 6학년 그룹 manifest(`unitArchives`)는 catalog가 참조하지 않아 교차검증 대상 외.

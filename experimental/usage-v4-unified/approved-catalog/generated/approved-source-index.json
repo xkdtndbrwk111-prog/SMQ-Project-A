@@ -1,0 +1,1181 @@
+{
+ "schemaVersion": "hoja-approved-source-index-v2",
+ "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+ "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+ "catalogUpdatedAt": "2026-11-22",
+ "approvalUnits": 23,
+ "approvalQuestions": 732,
+ "subjects": {
+  "english": {
+   "units": 12,
+   "questions": 384
+  },
+  "social": {
+   "units": 5,
+   "questions": 161
+  },
+  "math": {
+   "units": 6,
+   "questions": 187
+  }
+ },
+ "gameDeployment": "NOT_DEPLOYED",
+ "entries": [
+  {
+   "cartridgeId": "eng5-ybm-kim-u10",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 5,
+   "semester": null,
+   "unit": 10,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "What’s Wrong?",
+   "approvedTitle": "What’s Wrong?",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 30,
+   "types": {
+    "MCQ": 22,
+    "OX": 4,
+    "SHORT": 4
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "e1b5c4e7ec3109b99af97c27ab0e3cfebf8c9755877fdb9b58ee11dc0af4b6b3",
+   "effectiveFiles": 66,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng5-ybm-kim-u11",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 5,
+   "semester": null,
+   "unit": 11,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "Where Is the Library?",
+   "approvedTitle": "Where Is the Library?",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 33,
+   "types": {
+    "MCQ": 24,
+    "OX": 4,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "3b9e0cae41cba379354e6e52dd7df38bb41b8f4729cde20ac79139b02e8ce04c",
+   "effectiveFiles": 71,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng5-ybm-kim-u12",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 5,
+   "semester": null,
+   "unit": 12,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "What Will You Do This Winter?",
+   "approvedTitle": "What Will You Do This Winter?",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 29,
+   "types": {
+    "MCQ": 22,
+    "OX": 4,
+    "SHORT": 3
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "47d1f6a3504f7887ae5c24a29055ad47bda69c14118bd4a00544445a446222e1",
+   "effectiveFiles": 64,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng5-ham-u10",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 10,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "What Time Do You Get Up?",
+   "approvedTitle": "초등학교 영어 5 (천재·함순애) Lesson 10 What Time Do You Get Up?",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 5 (천재·함순애) Lesson 10 What Time Do You Get Up?",
+   "questionCount": 36,
+   "types": {
+    "MCQ": 25,
+    "OX": 6,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 4,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng5-ham-u10-rev4-classified.zip",
+   "nestedArchiveSha256": "3950d42de6d0b8d96032c9e7484f11c53caf977560788dbe0354f383b996bdde",
+   "effectiveSha256": "8d5aa7b8bce0dd23c617001d9fd08c11da65eb64d3e9df86e7dd04aa125ed227",
+   "effectiveFiles": 27,
+   "presentationSha256": null,
+   "mediaOverlay": {
+    "questionId": "eng5-ham-u10:q21",
+    "replacedAssets": 2,
+    "overlaySha256": "83e70868c31daff5e51dfd97f9e33ae6040d7b5c656d758fedd0064b9f88dccc",
+    "applied": true
+   },
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng5-ham-u11",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 11,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "My Favorite Subject Is Math",
+   "approvedTitle": "초등학교 영어 5 (천재·함순애) Lesson 11 My Favorite Subject Is Math",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 5 (천재·함순애) Lesson 11 My Favorite Subject Is Math",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 23,
+    "OX": 5,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng5-ham-u11-candidate-r3-v0.3.0-rc4.zip",
+   "nestedArchiveSha256": "521ac2c52afb58f3b2d0872387ac948ae1183fffc4206b9b1c1fbbaf1cf54617",
+   "effectiveSha256": "a9713a6b9df5dbc371ad7903ae212b3ad7557a5547ee37c55cdda7a4325ccdbc",
+   "effectiveFiles": 21,
+   "presentationSha256": null,
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng5-ham-u12",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 12,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "What Do You Want to Be?",
+   "approvedTitle": "초등학교 영어 5 (천재·함순애) Lesson 12 What Do You Want to Be?",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 5 (천재·함순애) Lesson 12 What Do You Want to Be?",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 23,
+    "OX": 5,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng5-ham-u12-candidate-r3-v0.3.0-rc4.zip",
+   "nestedArchiveSha256": "3baff003285155e5dc34a8deedaed92e672591e9f1b0ae4599fa1fc8f86a30ca",
+   "effectiveSha256": "813d3c5908114644f33962fcb89f4de15f0c55c3edfedaf1c56ac2189e35008f",
+   "effectiveFiles": 21,
+   "presentationSha256": null,
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u10",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 6,
+   "semester": null,
+   "unit": 10,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "What Season Do You Like?",
+   "approvedTitle": "What Season Do You Like?",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 30,
+   "types": {
+    "MCQ": 22,
+    "OX": 4,
+    "SHORT": 4
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "97a1243becd6f6109a093bcf368be71b7ad576191f5dda048a1600dddd47fa8c",
+   "effectiveFiles": 64,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u11",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 6,
+   "semester": null,
+   "unit": 11,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "I Think It Looks Bright",
+   "approvedTitle": "I Think It Looks Bright",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 29,
+   "types": {
+    "MCQ": 22,
+    "OX": 4,
+    "SHORT": 3
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "e327646a02ee243658a646d5679e11cd14e9d555184790262cee2b1dbc915077",
+   "effectiveFiles": 64,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u12",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "CATALOG_KEY",
+   "grade": 6,
+   "semester": null,
+   "unit": 12,
+   "subunit": null,
+   "classificationSource": "UNIT_ID_CONVENTION",
+   "publisher": "YBM",
+   "author": "김혜리",
+   "unitTitle": "Do You Know Anything About Jige?",
+   "approvedTitle": "Do You Know Anything About Jige?",
+   "titleSource": "APPROVED_PRESENTATION_UNIT_META",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 23,
+    "OX": 4,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ybm-kim-grade5-6-u10-12-20261122-r1",
+   "effectiveRevision": null,
+   "sourceShape": "bundle-unit-questions",
+   "sourceManifest": "approved/english/ybm-kim/grade5-6-u10-12/r1/manifest.json",
+   "archivePath": null,
+   "archiveSha256": null,
+   "archiveFilesVerified": 0,
+   "effectiveSha256": "8b7618efa9c6c9df69db166bd623c6e18027626ae85e3adef77a3d80901dc80d",
+   "effectiveFiles": 68,
+   "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ham-u10",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 10,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "How Often Do You Eat Vegetables?",
+   "approvedTitle": "초등학교 영어 6 (천재·함순애) Lesson 10 How Often Do You Eat Vegetables?",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 6 (천재·함순애) Lesson 10 How Often Do You Eat Vegetables?",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 23,
+    "OX": 5,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng6-ham-u10-rev2-candidate-v0.3.0-rc4.zip",
+   "nestedArchiveSha256": "7bd60dbb8604a1f87b224c9b4f3e909efccdf2b6018ca57aee070c0042325c8c",
+   "effectiveSha256": "cfadf777f5e79df61f06a8f2533757cd92cc1ffc1ceba1b23cec1f9026319907",
+   "effectiveFiles": 17,
+   "presentationSha256": null,
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ham-u11",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 11,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "Do You Know Anything About Tuho?",
+   "approvedTitle": "초등학교 영어 6 (천재·함순애) Lesson 11 Do You Know Anything About Tuho?",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 6 (천재·함순애) Lesson 11 Do You Know Anything About Tuho?",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 5
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng6-ham-u11-rev2-candidate-v0.3.0-rc4.zip",
+   "nestedArchiveSha256": "a33142a3fe7b02cd4de1371bcd28ea96bf2a70195db9e69ae9deddff0bc13c12",
+   "effectiveSha256": "1a13eea859eb6349372fb807393000956d00b1478a0c6e450970444bf804df9a",
+   "effectiveFiles": 17,
+   "presentationSha256": null,
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "eng6-ham-u12",
+   "subject": "english",
+   "subjectLabel": "영어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 12,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "천재교과서",
+   "author": "함순애",
+   "unitTitle": "We Made a Class Album",
+   "approvedTitle": "초등학교 영어 6 (천재·함순애) Lesson 12 We Made a Class Album",
+   "titleSource": "APPROVED_SOURCE_CARTRIDGE_TITLE+RELEASE_APPROVAL",
+   "approvalRecordTitle": "초등학교 영어 6 (천재·함순애) Lesson 12 We Made a Class Album",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 22,
+    "OX": 5,
+    "SHORT": 6
+   },
+   "releaseId": "eng-ham-grade5-6-u10-12-teacher-20261121-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "bundle-source-zips",
+   "sourceManifest": "approved/english/cheonjae-ham/grade5-6-u10-12/manifest.json",
+   "archivePath": "approved/english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip",
+   "archiveSha256": "dc1cad5e5cbf76b2d83d370fb29e2872cc109784543234bbf648ddca13dffdac",
+   "archiveFilesVerified": 16,
+   "nestedArchive": "source-candidates/eng6-ham-u12-rev2-candidate-v0.3.0-rc4.zip",
+   "nestedArchiveSha256": "3664d22ca1acf3f64cac7f15a510bf77c3c43cc1eb0bab26c153860b42987f45",
+   "effectiveSha256": "eef14cd78547833be25b6a06bb030a95e78a14da74e159cab97b6f2c5504e449",
+   "effectiveFiles": 17,
+   "presentationSha256": null,
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math5-s2-u4",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 4,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "소수의 곱셈",
+   "approvedTitle": "초등 수학 5-2 4단원. 소수의 곱셈",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "5-2-4 소수의 곱셈",
+   "questionCount": 31,
+   "types": {
+    "MCQ": 21,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math5-s2-u4-teacher-20261122-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade5/semester2/math5-s2-u4/manifest.json",
+   "archivePath": "approved/math/grade5/semester2/math5-s2-u4/HOJA_MATH5_S2_U4_APPROVED_20261122_r1.zip",
+   "archiveSha256": "d5691d67f668c69d7983f2772e9e1fbe1cfec17fa50a9c7b852646803f252749",
+   "archiveFilesVerified": 11,
+   "effectiveSha256": "c30d44e8dcbf0ab4a830762fa0d32609178dd76300ac1dae3e63bd2f8487855d",
+   "effectiveFiles": 6,
+   "presentationSha256": "e1315cde70a7000e8f4d6a238085e003abed92c9e3c6c4bacbd53ed333263edd",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math5-s2-u5",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 5,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "직육면체",
+   "approvedTitle": "초등 수학 5-2 5단원. 직육면체",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "5-2-5 직육면체",
+   "questionCount": 33,
+   "types": {
+    "MCQ": 23,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math5-s2-u5-teacher-20261122-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade5/semester2/math5-s2-u5/manifest.json",
+   "archivePath": "approved/math/grade5/semester2/math5-s2-u5/HOJA_MATH5_S2_U5_APPROVED_20261122_r1.zip",
+   "archiveSha256": "aadc71d4c18aefe6d78d07845d02b93b62510e54a0028096ee8a12db8d664d43",
+   "archiveFilesVerified": 13,
+   "effectiveSha256": "ef2872c9c4414f24297de3e24ed01c47b0d6d44a552c40b48632153cf5b01df0",
+   "effectiveFiles": 8,
+   "presentationSha256": "e5be4f49c64901a03657f8b00c03a581743f3e8481b54cf110b449b7e89dcc12",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math5-s2-u6",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 6,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "평균과 가능성",
+   "approvedTitle": "초등 수학 5-2 6단원. 평균과 가능성",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "5-2-6 평균과 가능성",
+   "questionCount": 30,
+   "types": {
+    "MCQ": 20,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math5-s2-u6-teacher-20261122-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade5/semester2/math5-s2-u6/manifest.json",
+   "archivePath": "approved/math/grade5/semester2/math5-s2-u6/HOJA_MATH5_S2_U6_APPROVED_20261122_r1.zip",
+   "archiveSha256": "3d0d34cc213e71bfa87465e905b6cda0a02f4b7e4186dd421a2e7a1262bdc275",
+   "archiveFilesVerified": 12,
+   "effectiveSha256": "1810a55da396b832c7e11c5f357fcbe3a4bd67e06119d355562510c2dff6e878",
+   "effectiveFiles": 7,
+   "presentationSha256": "517cea0f1c09f750471aa52ce3438d8f9425e94ffbe05e02fdfea0e230fcbc79",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math6-s2-u4",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 4,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "비례식과 비례배분",
+   "approvedTitle": "초등 수학 6-2 4단원. 비례식과 비례배분",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6-2-4 비례식과 비례배분",
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math6-s2-u4-teacher-20261122-r1",
+   "effectiveRevision": 2,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade6/semester2/math6-s2-u4/manifest.json",
+   "archivePath": "approved/math/grade6/semester2/math6-s2-u4/HOJA_MATH6_S2_U4_APPROVED_20261122_r1.zip",
+   "archiveSha256": "b9d3a7bf9b720df14c5092f9fb7ce84f2157d9d79b1d5dbf9ed908a76c22489e",
+   "archiveFilesVerified": 11,
+   "effectiveSha256": "0bd25c188f9c1c411ba72b2087115ab65ded5223ec0ce5cbf75e46a54b8f008e",
+   "effectiveFiles": 6,
+   "presentationSha256": "f8e2bcba421c747617c496a577a1b69d96296a069d7379ad7cedf05e6f686399",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math6-s2-u5",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 5,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "원의 둘레와 넓이",
+   "approvedTitle": "초등 수학 6-2 5단원. 원의 둘레와 넓이",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6-2-5 원의 둘레와 넓이",
+   "questionCount": 31,
+   "types": {
+    "MCQ": 21,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math6-s2-u5-teacher-20261122-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade6/semester2/math6-s2-u5/manifest.json",
+   "archivePath": "approved/math/grade6/semester2/math6-s2-u5/HOJA_MATH6_S2_U5_APPROVED_20261122_r1.zip",
+   "archiveSha256": "76e6f36225f02128fdc82d4e0a2be8d7146cffbed77e6d949a04f2e0d4699906",
+   "archiveFilesVerified": 13,
+   "effectiveSha256": "558da21a65faa935e6242b17c4e67abb7161e42cf43c9d9763d29214c39693bd",
+   "effectiveFiles": 8,
+   "presentationSha256": "ec51b4020fc3cd864f0761209eb4e5b3517d4e5635f140aa3316dbcd94a0fa54",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "math6-s2-u6",
+   "subject": "math",
+   "subjectLabel": "수학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 6,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "원기둥, 원뿔, 구",
+   "approvedTitle": "초등 수학 6-2 6단원. 원기둥, 원뿔, 구",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6-2-6 원기둥·원뿔·구",
+   "questionCount": 30,
+   "types": {
+    "MCQ": 20,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "math6-s2-u6-teacher-20261122-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "aggregate-units/unit-effective-zip",
+   "sourceManifest": "approved/math/grade6/semester2/math6-s2-u6/manifest.json",
+   "archivePath": "approved/math/grade6/semester2/math6-s2-u6/HOJA_MATH6_S2_U6_APPROVED_20261122_r1.zip",
+   "archiveSha256": "75421b9313419f243cbc8c0613f8af55813781ad27ce015f1d7f16fd4b050cda",
+   "archiveFilesVerified": 12,
+   "effectiveSha256": "83f8b35b1087d443605a686f9e2e649fdfd4956aa32453fab1f4ad6197929518",
+   "effectiveFiles": 7,
+   "presentationSha256": "a6dd3700468960120196fddad6e72e55b07de6895f87ffc506bd61b86eae01c3",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "soc5-s2-u2-2-common",
+   "subject": "social",
+   "subjectLabel": "사회",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 2,
+   "subunit": 2,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "달라지는 시대, 변화하는 생활 모습 - 조선 후기 사회 변화와 개항기 생활 모습",
+   "approvedTitle": "초등학교 사회 5-2 (출판사 공통) 2. 달라지는 시대, 변화하는 생활 모습 - 조선 후기 사회 변화와 개항기 생활 모습",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 33,
+   "types": {
+    "MCQ": 23,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "soc5-s2-u2-2-common-editorial-20261121-r2",
+   "effectiveRevision": 3,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/social/grade5/semester2/soc5-s2-u2-2-common/manifest.json",
+   "archivePath": "approved/social/grade5/semester2/soc5-s2-u2-2-common/HOJA_SOC5_S2_U2_2_COMMON_APPROVED_20261121_r2.zip",
+   "archiveSha256": "b575868cf5b2e2281d3cea9c6f08b1e002b224c049ac1f57c3c0965d1921e821",
+   "archiveFilesVerified": 36,
+   "effectiveSha256": "63dafa7eca706cdd339ca734aa678ca49844a5aa96ed3ff0034e5c9c5ae15dd2",
+   "effectiveFiles": 8,
+   "presentationSha256": "eb08aee7d4a7b81058c4f8ebba2886ab3053448edabdb542e3a3eeb7abc12a4f",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "PENDING_Q07",
+     "q07:TEACHER_APPROVED_VISUAL__REDISTRIBUTION_RIGHTS_PENDING"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "soc5-s2-u3-1-common",
+   "subject": "social",
+   "subjectLabel": "사회",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 3,
+   "subunit": 1,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "식민 통치와 저항, 전쟁이 바꾼 사회와 생활 - 일제 식민 통치와 우리 민족의 저항",
+   "approvedTitle": "초등 사회 5-2 3-1. 일제 식민 통치와 우리 민족의 저항 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "soc5-s2-u3-1-common-teacher-20261121-r1",
+   "effectiveRevision": 4,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/social/grade5/semester2/soc5-s2-u3-1-common/manifest.json",
+   "archivePath": "approved/social/grade5/semester2/soc5-s2-u3-1-common/HOJA_SOC5_S2_U3_1_COMMON_APPROVED_20261121_r1.zip",
+   "archiveSha256": "5c5f62e04c5aecc05e18dc09689ccae5144f5ba5e545035218a051d59d60dce0",
+   "archiveFilesVerified": 6,
+   "effectiveSha256": "ccb6d5bfc3d6b0a427c5db3ed4e426fd91898893f81c07e6b564baf582f23412",
+   "effectiveFiles": 3,
+   "presentationSha256": "4dc3e724acff4243797e91ea29bfc0dbe495b560422cfd3f108ed584033cc532",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "NOT_AUDITED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "soc5-s2-u3-2-common",
+   "subject": "social",
+   "subjectLabel": "사회",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 3,
+   "subunit": 2,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "식민 통치와 저항, 전쟁이 바꾼 사회와 생활 - 8·15 광복과 6·25 전쟁",
+   "approvedTitle": "초등 사회 5-2 3-2. 8·15 광복과 6·25 전쟁 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "soc5-s2-u3-2-common-teacher-20261121-r1",
+   "effectiveRevision": 5,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/social/grade5/semester2/soc5-s2-u3-2-common/manifest.json",
+   "archivePath": "approved/social/grade5/semester2/soc5-s2-u3-2-common/HOJA_SOC5_S2_U3_2_COMMON_APPROVED_20261121_r1.zip",
+   "archiveSha256": "7d6d5dd278f138e1d130d2822d7e633e7aa3ee7a60c13b50ab5b4096d5d72edd",
+   "archiveFilesVerified": 6,
+   "effectiveSha256": "0eb66fa69064f6672d12e012fe3231cff827460f020ce3ed441285250d051067",
+   "effectiveFiles": 3,
+   "presentationSha256": "4dc3e724acff4243797e91ea29bfc0dbe495b560422cfd3f108ed584033cc532",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "NOT_AUDITED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "soc6-s2-u3-1-common",
+   "subject": "social",
+   "subjectLabel": "사회",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 3,
+   "subunit": 1,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "지구촌 사람들 - 세계의 인구 분포",
+   "approvedTitle": "초등 사회 6-2 3-1. 세계의 인구 분포 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "soc6-s2-u3-1-common-teacher-20261122-r1",
+   "effectiveRevision": 4,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/social/grade6/semester2/soc6-s2-u3-1-common/manifest.json",
+   "archivePath": "approved/social/grade6/semester2/soc6-s2-u3-1-common/HOJA_SOC6_S2_U3_1_COMMON_APPROVED_20261122_r1.zip",
+   "archiveSha256": "1d3e3db0cd2006adbc61eeecf6c73c129e277c20261494e95501870fd6448955",
+   "archiveFilesVerified": 31,
+   "effectiveSha256": "c10a50fd9d8e7a4a258fb340470d4b62b85b4e9e0eae9dfde7eafc60f4ef7d3a",
+   "effectiveFiles": 8,
+   "presentationSha256": "b54e3f6cf68e3af7f50635261f076a4adb91fed5a5ff4211fbde1a7d764640ed",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "NOT_AUDITED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "soc6-s2-u3-2-common",
+   "subject": "social",
+   "subjectLabel": "사회",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 6,
+   "semester": 2,
+   "unit": 3,
+   "subunit": 2,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "지구촌 사람들 - 지속가능한 지구촌",
+   "approvedTitle": "초등 사회 6-2 3-2. 지속가능한 지구촌 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "soc6-s2-u3-2-common-teacher-20261122-r1",
+   "effectiveRevision": 4,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/social/grade6/semester2/soc6-s2-u3-2-common/manifest.json",
+   "archivePath": "approved/social/grade6/semester2/soc6-s2-u3-2-common/HOJA_SOC6_S2_U3_2_COMMON_APPROVED_20261122_r1.zip",
+   "archiveSha256": "ebb2c76f9b2475028460f5169c0bdc112fd99625ea679109175cb9d6188cbdb5",
+   "archiveFilesVerified": 37,
+   "effectiveSha256": "d6645f4d4d9e6dbaf7aebb0f0b05b2e1e8bc8b818a28503aac47473d60772daf",
+   "effectiveFiles": 11,
+   "presentationSha256": "d2811bda318d67e7d974faf6b3a1c43b3097b38074c3dc598eca5a749c0bb6b8",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "NOT_AUDITED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  }
+ ],
+ "diagnostics": [
+  {
+   "id": "eng5-ham-u10",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ham-u11",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ham-u12",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ybm-kim-u10",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ybm-kim-u10",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "eng5-ybm-kim-u11",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ybm-kim-u11",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "eng5-ybm-kim-u12",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng5-ybm-kim-u12",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "eng6-ham-u10",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ham-u11",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ham-u12",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ybm-kim-u10",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ybm-kim-u10",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "eng6-ybm-kim-u11",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ybm-kim-u11",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "eng6-ybm-kim-u12",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "eng6-ybm-kim-u12",
+   "code": "SEMESTER_UNSTATED"
+  },
+  {
+   "id": "math5-s2-u4",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "math5-s2-u5",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "math5-s2-u6",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "math6-s2-u4",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "math6-s2-u5",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "math6-s2-u6",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": null,
+   "code": "UNVERIFIABLE_RAW_HASH:ybm-kim/grade5-6-u10-12/r1:rawImagesTableSHA256"
+  },
+  {
+   "id": null,
+   "code": "UNVERIFIABLE_RAW_HASH:ybm-kim/grade5-6-u10-12/r1:rawQuestionsSHA256"
+  },
+  {
+   "id": "soc5-s2-u2-2-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "soc5-s2-u3-1-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "soc5-s2-u3-2-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "soc6-s2-u3-1-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "soc6-s2-u3-2-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  }
+ ]
+}
