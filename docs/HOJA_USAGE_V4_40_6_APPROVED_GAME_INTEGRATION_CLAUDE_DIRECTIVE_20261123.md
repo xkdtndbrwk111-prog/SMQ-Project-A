@@ -71,3 +71,15 @@ Claude는 F 매 커밋마다 작업 로그에 `Q번호 | 현재 상태 | 구현 
 F1 제출 HEAD `408ce4e`의 독립 검토 결과는 [별도 지시서](HOJA_USAGE_V4_40_6_F1B_APPROVED_RENDERER_COMPAT_20261123.md) 및 체크리스트 40-6R 참조. **기존 정본을 다시 만들도록 요구하는 대신**, 승인 presentation 버전별 무손실 변환 + 공용 A/C/D 렌더러의 최소 하위호환 확장으로 해결한다. 영어 천재 201문항/6단원, 사회5 2-2 33문항/1단원은 QA BLOCKED 유지하되 F1-B에서 풀 것. 수학 분수/4건의 선택지 줄바꿈과 사회5 3-1·3-2(승인 태그 없음)도 F2 필수 시각 파리티 과제.
 
 **중요:** F1의 16/498 'READY'는 로컬 renderer-v2 표시 시험의 패키지화 통과이지 실제 승인 화면 시각 동일성·운영/미디어 배포 승인이 아니다. CI의 승인 source drift는 token secret 없어 SKIPPED, GAS 실게임 E2E NOT RUN. 교사 배포 승인/미디어 권리 23/23 HOLD 유지. F1-B→F2→F3 커밋별 증거와 잔여 실패를 40-6Q/R 상태로 이어가라.
+
+
+## 9. F3-2 후속 실행 지시(40-6S, 2026-11-23)
+중앙 [40-6S](HOJA_GAME_DEV_CHECKLIST_20261122.md)와 [PR #6 독립 감수](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7094565277)를 반드시 읽어라. 기존 F1-B 23/732 준비, F2 수학187·사회5 64 DOM parity, F3 smoke 23/23은 **코드/로컬 제출 범위의 PASS**이나 실질 게임 E2E·실 GAS·미디어 권리/배포는 HOLD.
+
+**즉시 F3-2 착수:**
+1. `gas/Code.gs` release 경로도 **실제 교사 배포 manifest에 활성화된 approved ID만 게임 LIST/GET·문항 로드·시작 기록·공개 통계에** 연결할 수 있도록 소프트 코딩. 현재 entries=0 유지하며 별도 synthetic test-only deployment fixture로 future active>0 시험. 승인 없이 실제 배포 목록을 채우지 말 것. 구형 Sheets 목록을 신규 정본 출시 UI에 섞지 말 것.
+2. `game-trial/run_f3_all_units.sh`는 에러/NO_RESULT/arcade count 0을 실패 종료하지 않을 수 있다. 개별 모드 verifier의 종료코드 및 정확한 PASS 문구를 검증하고, 입력 23개/중복 ID 0/단원별 3모드 모두 PASS 아닐 때 **CI와 셸 프로세스 nonzero**. 실제 승인 원본 pin 재생성 검사는 private qbank secret 없음으로 SKIPPED이므로 별도 과제로 유지.
+3. 진짜 게임 **시작 화면 카트리지 선택→싱글 판정→종료**, **팀전 주관식 교사판정·우승 발표→오답 풀이**, **아케이드 실제 Phaser 풍선·FINISH·오답→랭킹**을 *직접 UI 클릭·키보드·터치* 기반 Chromium으로 테스트. 그림보기 22문항 레거시 내부 대체 이름표/3지 셔플의 표시·정답·접근성·복습 혼선 방지 및 전자칠판 최소 해상도 UI 시험 포함. iframe/오디오/게임 tick/이중 정산 누수 금지.
+4. 교사 확인용 **격리 QA 미리보기**를 기존 23/732 정본에서 생성하되 콘텐츠·그림을 SMQ 공개 GitHub·운영 사이트/번들에 업로드하지 말 것. 원본 approved presentation 없는 사회5 2-2와 형식 변환된 천재 영어 6개 단원의 234문항에 대해 전수 네비게이션·스크린샷 비교·차이 체크 옵션 제공. 교사 확인을 배포/미디어 공개권 승인으로 간주하지 말 것.
+5. Q04 mock A1 telemetry PASS를 **실 approved GAS E2E와 구분**하고 F4에서 격리 GAS 시험, Q05~Q12 G 후속 검증을 준비. QA_TEST_ONLY 속성 플래그 외 격리 프로젝트 identity·재배포 방지; release contents 0/active 0을 CI에서 검증.
+6. 40-6Q/R/S의 **모든 미완료 항목**을 작업 로그 `Q번호 | 상태 | SHA | mock/CI/Chromium/실 GAS | 남은 과제`에 이월하고 독립 검수 전 완료로 닫지 마라. 운영/원본/배포/PR merge 금지.
