@@ -724,3 +724,12 @@
 - [x] 신규 A 시험: 실제 recordUsageStartU1 함수의 mock 호출 7종, 동일 ID 재전송/내용 충돌/전일 재전송/날짜 역행/잘못된 복사본/기존 플래그 미설정 동작. 신규 B 시험: 불완전·PRIVATE 오늘 꼬리 모두 차단. 기존 V4 집계/조회, 승인 렌더러 빌드 및 Chromium smoke도 해당 워크플로 PASS.
 - [x] A/B 호출·시트 시험은 GitHub mock과 Google Sheets 연결 API로만 확인. 실제 Apps Script 자체 실행이나 실제 서로 다른 두 프로젝트 간 동시 접수 실행을 한 것으로 해석하지 않음.
 - [ ] 별도 Phaser 실기 smoke 워크플로는 이 통계 CI와 다른 검증이며, 완료 여부에 따라 별도 기록. 운영 Project A/B 배포 및 원본/랭킹 변경 없음.
+
+
+### 40-6C. Claude Code 작업 인수인계 및 독립 감수 착수 (2026-11-23)
+- [x] Claude Code 실행 지시서 `docs/HOJA_USAGE_V4_40_6_CLAUDE_CODE_DIRECTIVE_20261123.md` 저장. 기존 실집계 인증 사본을 **다시 복사한 40-6 전용 새 쓰기 사본**에서만 A append/B live 조회를 검증하도록 조건 강화.
+- [x] 구현자 단위 작업 로그 `docs/HOJA_USAGE_V4_40_6_CLAUDE_WORKLOG_20261123.md` 별도 초기화. 중앙 `HOJA_GAME_DEV_CHECKLIST_20261122.md`의 최종 PASS/FAIL/HOLD와 승인 판단은 GPT-6 독립 감수 담당; Claude의 자기 보고를 승인으로 간주하지 않음.
+- [x] 인수인계 기준 커밋 `fb5ea4375460f14d58b69160b8284ceaa9f859b9`; 종전 통계·렌더러 CI `45089478163` PASS, 별도 Phaser 시험 `45089478081` PASS 확인.
+- [ ] Claude 40-6 작업 브랜치 생성/사본 분리/실 Apps Script 권한 시험: NOT STARTED.
+- [ ] A 실제 기록 재전송·내용 충돌·자정 보호, B 권한 우선·기존 U2 패리티, A/B 동시 조회: NOT RUN.
+- [ ] 리뷰 담당자가 Claude의 새 커밋/CI/실 GAS 증거를 개별 검토하고 중앙 체크리스트를 다음 단계마다 갱신할 것. 실제 운영 배포·삭제·트리거 HOLD.
