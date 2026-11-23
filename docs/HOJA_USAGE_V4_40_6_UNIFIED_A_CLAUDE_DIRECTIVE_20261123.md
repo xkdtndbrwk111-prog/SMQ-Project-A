@@ -1,3 +1,5 @@
+> **클로드 코드 다음 실행 지시서:** [HOJA_USAGE_V4_40_6_CLAUDE_NEXT_STEPS_20261123.md](HOJA_USAGE_V4_40_6_CLAUDE_NEXT_STEPS_20261123.md). 기존 통합 정본 최신 7절을 구체화한 U-APPROVED-CATALOG/R6/R7 실행 절차이며, 과거 구형 카트리지명 정리 요청은 적용하지 않는다.
+
 # Claude Code 실행 지시서 — HOJA V4 공개 통계 / 40-6-U 정본 rev.2
 작성일: 2026-11-23 KST. **이 문서가 과거 Project A/B 분리·관리자 인증·기존 교실매니저 연동 지시보다 우선한다.**
 현재 상태: 정책 확정, 단일 GAS 실제 구현 및 실기 시험 NOT RUN, 운영 배포 HOLD.

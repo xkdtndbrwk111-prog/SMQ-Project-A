@@ -818,3 +818,11 @@
 - [ ] `approved_catalog_normalizer.test.mjs`를 Node 실제 프로세스에서 실행 및 GitHub Actions CI: **NOT RUN**. ZIP effective 승인 제목/오버레이·미디어 권리 검사, 빌드 결과 GAS 내장·게임/통계 연동, 실 GAS 확인: **NOT RUN**.
 - [ ] 기존 V4 61일 17,670회는 보존·회귀용; 새 정본 게임 통계에 혼합 금지. 신규 이벤트 스키마/카트리지 ID 구분의 실 구현·검증 필요.
 - [ ] 동시 시작 R6 40회 중 30회 유실 **FAIL 유지**. 운영 GAS·Code.gs·main/versions/2.0.0·원본 EVENT_LOG·랭킹·삭제/보관 트리거·기존 교실매니저 실제 폐기는 모두 **HOLD**.
+
+
+### 40-6M. Claude Code 후속 실행 지시서 발행 (2026-11-23)
+- [x] 사용자 최신 정책에 맞춰 별도 `docs/HOJA_USAGE_V4_40_6_CLAUDE_NEXT_STEPS_20261123.md` 작성: 정본 23단원/732문항의 **소프트 코딩 자동 분류**(이름/ID 하드코딩 금지), 승인 vs 실제 배포 게이트, 승인 effective 제목/오버레이/SHA 검증, 새로운 정본 통계와 구형 61일 기록 분리, 미래 카트리지 확장, Project A 단일 GAS/익명 비식별 집계.
+- [x] PR #6 HEAD `4fe3345c986ee2a745b4deb977d2cce51823112c`, 후보 브랜치 `work/usage-v4-approved-catalog-index-20261123` @ `969cdec1`, 승인 정본 메타데이터 정책 등 현행 기준 확인. 구형 Sheets 카트리지명 정규화 시안은 SUPERSEDED.
+- [x] R6 동시 40 중 30 실패(429 17/lock 13) **FAIL**을 최우선 운영 차단 조건으로 기록하고, 동일 eventId 재시도·캐시·락 최적화·실 GAS 40/40 증거 요구. R7 자정 실 GAS 및 신규 GitHub Actions CI NOT RUN을 별도 증거로 요구.
+- [ ] A 인덱스 생성 및 승인 effective 추출, B 배포 manifest와 게임/통계 연동, D 동시 기록 유실 해결, E 안전성 실기 검증: **Claude 구현 전/독립 감수 대기**. 지시서·중앙 체크리스트 갱신은 구현 PASS가 아니다.
+- [ ] 운영 프로젝트/Code.gs/main/versions/2.0.0/EVENT_LOG/랭킹/교실매니저 실제 삭제/트리거/배포는 **HOLD**.
