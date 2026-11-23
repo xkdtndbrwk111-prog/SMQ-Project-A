@@ -83,3 +83,18 @@ F1 제출 HEAD `408ce4e`의 독립 검토 결과는 [별도 지시서](HOJA_USAG
 4. 교사 확인용 **격리 QA 미리보기**를 기존 23/732 정본에서 생성하되 콘텐츠·그림을 SMQ 공개 GitHub·운영 사이트/번들에 업로드하지 말 것. 원본 approved presentation 없는 사회5 2-2와 형식 변환된 천재 영어 6개 단원의 234문항에 대해 전수 네비게이션·스크린샷 비교·차이 체크 옵션 제공. 교사 확인을 배포/미디어 공개권 승인으로 간주하지 말 것.
 5. Q04 mock A1 telemetry PASS를 **실 approved GAS E2E와 구분**하고 F4에서 격리 GAS 시험, Q05~Q12 G 후속 검증을 준비. QA_TEST_ONLY 속성 플래그 외 격리 프로젝트 identity·재배포 방지; release contents 0/active 0을 CI에서 검증.
 6. 40-6Q/R/S의 **모든 미완료 항목**을 작업 로그 `Q번호 | 상태 | SHA | mock/CI/Chromium/실 GAS | 남은 과제`에 이월하고 독립 검수 전 완료로 닫지 마라. 운영/원본/배포/PR merge 금지.
+
+
+## 10. F3-3 긴급 후속 — 진짜 RELEASE 게임 렌더러 조립·팀전 완료·그림보기 검증 (2026-11-23)
+필독: 중앙 체크리스트 **40-6T**와 [독립 PR 감수](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7096996604). F3-2 로컬 오프라인 브라우저 **SOLO 첫 답/TEAM 첫 문제 46/46**과 대표 7개 단원 실제 Phaser 25풍선·복습·FINISH는 해당 범위 PASS지만 실 서버/모든 모드 완료를 뜻하지 않음.
+
+**F3-3 최우선 BLOCKER:** `build_unified_gas.py`는 RELEASE에서 원본 게임을 읽고 **telemetry만 교체**하고 있다. 승인 원본 공용 렌더러 + `HOJA_RENDERER_MEDIA_EXT.js` + 수학 표기 `HOJA_RENDERER_MATH_EXT.js` 및 approved arcade runtime은 별도 trial Game.html 주입에만 존재한다. 현재 RELEASE active>0 approved LIST/GET 가능해도 정본 732문항의 승인 A/C/D·두 그림/수학 표기 게임 화면은 연결되지 않을 수 있다. **운영 원본·main·versions 변경 없이 새 candidate/test-only 빌드 프로필**로 주입 대상 앵커 수·원본 SHA/패치 diff·렌더러 해시·기존 일반 게임 회귀를 fail-closed로 검증하라. 교사 승인 없이 release manifest 활성화/권리 승인/운영 배포 금지. synthetic active>0 **실제 release-candidate Game.html**에서 LIST/GET/iframe/정답/오답/오디오 및 텔레메트리 mock 검증, QA로만 통과한 결과를 그대로 reuse하여 PASS 주장 금지.
+
+**다음 세 검사:**
+- 팀전 모든 풍선→SHORT 교사 수동 판정→우승 발표 `stage===3`→오답 복습 진입, 점수/랭킹 불변·미출제 문제 제외를 실제 버튼 E2E로 검증. TEAM 23/23은 첫 문제 표시뿐임.
+- 영문 approved ID A1 mock 성공과 실제 Google Apps Script/실 랭킹·통계는 별개. F4에는 격리 GAS 사용, R6/replay/watermark 및 익명 공개 allowlist 검증.
+- `verify_f3_ui_e2e.py`의 항상 false인 빈 hint 검사 삭제: **q21 시계 정답 단서·그림 선택지 22개 내부 라벨 및 4지→3지 셔플·교사 SHORT/오답 복습**이 화면·접근성·음성/결과에 새지 않는 실제 assert. 테스트 실패시 nonzero 종료.
+- 기설계 카탈로그명은 승인 메타데이터에서 동적 생성한 것으로 유지하되, **동일 제목/출판사/학기·구분자 변형/긴 제목/새 과목**의 선택·GET ID 안정성 fixture 추가. 개별 이름/ID 하드코딩 금지.
+- 교사 시각 검토 HTML은 개인 비공개 로컬 저장. 영어6+사회5 2-2(7단원·234문항)는 교사 검토 결과 없으므로 HOLD, 공개 미디어 권리 별도 HOLD.
+
+**변경/시험/증거:** 모든 Q01–Q12 상태를 40-6T 이후 계속 보존. F3-3→F4→F5→G로 잔여 항목을 이월하고 작성 완료 전 PR Draft·운영/원본 데이터·Game.html·Code.gs·versions/2.0.0·트리거·랭킹·교실매니저 삭제·실 배포·merge 금지. R7 자정 시험은 F3-3 선행 조건이 아니다.
