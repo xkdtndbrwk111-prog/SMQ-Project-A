@@ -1,0 +1,6 @@
+{"viewport": "1920x1080", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1280x720", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1024x768", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "390x844", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+F1B_RENDER_PASS
+exit=0

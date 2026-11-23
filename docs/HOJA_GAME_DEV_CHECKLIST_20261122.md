@@ -1022,3 +1022,21 @@
 - [x] **전수 요구 해제(교사 결정):** 정본 보고 `approved-content-report.json`의 23단원·732문항 중 싱글 채점 대상 MCQ **511** + OX **122** = **633문항**. 별도 교차검증에서 실측 검사 **196문항/7개 단원**, **437문항/나머지 16개 단원 중심은 본 정답·힌트 검사 미실행**으로 확인. 스크립트가 일부 문항을 `forceId` 실패시 `continue`로 건너뛰므로 “23단원 633문항 전체 PASS”, “196개 무작위 대표 표본”, “437개 문항도 정상”으로 오기 금지. **196문항은 비무작위·편중 표본이지만 교사는 이 항목의 검수 요건으로 충분하다고 결정**. 누락 437개를 추가 검증하기 위해 F3-3/F4를 지연시키거나 새 전수 검사·테스트 하네스 수정을 요구하지 말 것.
 - [ ] **기타 F3-3 별도 검사들은 변경 없음:** 팀전 전체 게임(guard v2 추가 단원), 출시 후보 23단원 UI E2E, 732문항 렌더 화면/수학·사회 DOM 회귀, 아케이드 추가 회귀, 실 GAS/익명 통계, R7/대량 부하·85인치·권리 등은 각기 독립 항목의 실제 증거에 따라 진행/보류. **힌트 표본 PASS를 다른 항목의 PASS나 운영 배포 승인으로 확대 금지.**
 - **다음 Claude 작업 지시:** 이미 진행 중인 다른 회귀 결과는 그대로 수집·커밋하고, `F3-3-HINT`는 위 **196문항 표본 PASS**로 닫아 재실행하지 말 것. 매 작업·커밋 체크리스트 동시 갱신 규칙(40-6U) 계속 준수. 원본 정본/운영 배포 manifest 활성 0·미디어 권리 23/23 HOLD 유지.
+
+
+### 40-6AA. Claude 제출 — F3-3 나머지 회귀 결과 확정 · 검증기 결함 2건 발견·수정 (2026-11-23)
+**작성자/경계:** Claude 자체 측정(로컬 오프라인 Chromium + mock GAS, 수정 후 rcE 합성 RELEASE 후보 / 합성 렌더러 `d9e5547d…`). GPT-6 독립 감수 전, 자체 종합 PASS·운영 승인 아님. 40-6Y/40-6Z 본문은 수정하지 않고 여기서 후속 결과와 정정을 연결한다.
+
+**40-6Y 정정(40-6Z 반영):** 40-6Y와 PR 코멘트 7101242667의 "23단원 196문항" 표기는 **"23단원 목록 순회, 실제 검사 196문항/7개 단원(비무작위 표본)"**이 맞다. `F3-3-HINT`는 40-6Z 교사 결정대로 **표본 PASS로 종료**, 재실행·러너 개선 안 함.
+
+| ID | 상태 | 수치 / exit | 증거(`experimental/usage-v4-unified/evidence/f3_3/`) | 남은 것 |
+|---|---|---|---|---|
+| `F3-3-TEAM-WINNER` | **PASS(로컬)** — 40-6Y IN PROGRESS 해결 | guard v2 RC 3단원 각 24턴: math5(SHORT 3 교사 판정, 210:40), eng5(SHORT 2, 200:20), soc6 3-1(SHORT 1, 160:0); 각 우승·오답 12=복습 12·복습 후 점수 불변·A1 TEAM 1행·랭킹 RPC 0; exit 0 | `team_full_FIXED_guard_v2_3units.txt` | 실 GAS F4 |
+| `F3-3-UI-E2E` | **PASS(로컬)** | 23단원 × 싱글/팀 **46/46**, exit 0 | `ui_e2e_FIXED_guard_v2_23x2.txt` | 실 GAS·실 기기 F4 |
+| `F3-3-ARCADE` | **PASS(로컬)** | math5-s2-u4, eng5-ham-u10 실제 Phaser: 25문항·FINISH 결과·랭킹 읽기 전용·IME·TIME UP, 각 exit 0 | `arcade_FIXED_guard_v2_*.txt` | — |
+| `F3-3-RENDER-732x4` | **1차 FAIL → 검증기 수정 후 PASS** | 1차: 무미디어 539문항 전부 DOM 차이, exit 1. 원인: guard v2가 보기 버튼에 `data-hoja-gen`을 추가했는데 검증기는 v1의 `data-hoja-qid`만 제외(진단: 차이는 버튼 3개의 이 속성뿐). 두 guard 속성만 제외하도록 수정 → 539/539 동일 × 4해상도, 미디어 6 OK, 프로필 187, blank 0, JS 오류 0, exit 0 | `HISTORY_render_732x4_FAIL_checker_missed_data-hoja-gen.txt`, `render_732x4_FIXED_checker.txt` | — |
+| `F3-3-MATH-PARITY` | **1차 FAIL → 검증기 수정 후 PASS** | 1차 187/187 차이(보기 필드만), exit 1, 같은 원인. 수정 후 187/187 동일 × 2해상도, exit 0 | `HISTORY_math_parity_FAIL_checker_missed_guard_attrs.txt`, `math_parity_187_FIXED_checker.txt` | — |
+| `F3-3-SOC5-PARITY` | **검증기 fail-open 결함 발견 → fail-closed 수정 후 PASS** | 1차: 64/64 차이를 보고하고도 **exit 0**(`DIFFERS_REPORTED`, F2 때부터 항상 exit 0 — 40-6U §3 위반). 차이 발생 시 exit 1로 수정 + guard 속성 제외 → 64/64 동일, exit 0. **음성 시험:** 예상 밖 속성을 넣은 렌더러 → FAIL, exit 1 | `HISTORY_soc5_parity_64_DIFFER_but_exit0_FAIL_OPEN_tool.txt`, `soc5_parity_64_FIXED_checker.txt`, `NEGATIVE_soc5_parity_unexpected_attr_exit1.txt` | 과거 F2 제출(855b65e)의 soc5 64/64 결과는 당시 출력이 PASS였으므로 유효하나, 도구가 fail-open이었음을 기록 |
+| `F3-3-FULL-REGRESSION` | **PASS(로컬 범위)** — 40-6Y IN PROGRESS 해결 | 위 항목 + 40-6Y의 race sweep·RC 감사·Node 90/90 | 위 | GPT-6 독립 재실행 |
+| `F3-3-CHECKLIST-SYNC` | **이 커밋으로 동기화** | 검증기 수정 + 원시 로그 + 작업 로그 + 본 체크리스트 동일 커밋 | 커밋 SHA는 PR #6 코멘트 | — |
+- [ ] **이월 → F4/F5/G (변경 없음, NOT RUN/HOLD):** 실 GAS A1·익명 통계, R7 자정, 80–120 동시 부하, 탭 닫힘 복구, 7단원 234문항 교사 시각 검토, private QBank pin CI(Actions SKIPPED), 85인치 실기·실 랭킹, 0·16ms 즉시 탭 UX 판단, 미디어 권리 23/23 HOLD, 운영 활성 0. PR Draft, merge/배포 금지.

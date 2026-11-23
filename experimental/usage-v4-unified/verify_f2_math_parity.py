@@ -12,7 +12,8 @@ APPROVED = (Path(QB) / 'approved/math/grade5-6/semester2/HOJA_MATH_187_APPROVED_
 UNITS = [u for u in json.loads(Path(PAY).read_text(encoding='utf-8')) if u['payload']['questions'][0].get('displayProfile')]
 COMPOSED = Path(COMP).read_text(encoding='utf-8')
 SNAP = """async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const s=document.getElementById('screen');
- const clean=h=>h.replace(/ style="[^"]*"/g,'');
+ // F3-3 input guard v2 stamps data-hoja-qid/data-hoja-gen on choice buttons only; strip exactly those (plus inline style, as before)
+ const clean=h=>h.replace(/ style="[^"]*"/g,'').replace(/ data-hoja-(?:qid|gen)="[^"]*"/g,'');
  return {q:clean(document.getElementById('hqQuestion').innerHTML),c:clean(document.getElementById('hqChoices').innerHTML),
   flags:[s.dataset.mathGridChoice||'',s.dataset.mathPartGrid||'',s.dataset.mathReviewLines||''].join('|'),layout:s.dataset.layout,
   fr:document.querySelectorAll('#hqQuestion .hoja-fraction,#hqChoices .hoja-fraction').length,

@@ -3,7 +3,7 @@
 (presentation/HOJA_SOC5_U3_1_U3_2_APPROVED_64Q_20261121.html inside the approved ZIP, renderer
 v0.1.0-preview.2, run offline as-is) and the composed shared renderer (bridge v0.2 + extensions).
 Compares question/choice DOM (inline styles stripped), stimulus panel and chosen layout per question.
-Reports differences; it does not hide them. Usage: verify_f2_soc5_parity.py <qbank> <payloads.json> <composed.html>"""
+Reports differences and exits 1 on any difference (fail-closed since F3-3). Usage: verify_f2_soc5_parity.py <qbank> <payloads.json> <composed.html>"""
 import asyncio, json, sys, zipfile, glob
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -13,7 +13,8 @@ APPROVED = zipfile.ZipFile(z).read('presentation/HOJA_SOC5_U3_1_U3_2_APPROVED_64
 UNITS = [u for u in json.loads(Path(PAY).read_text(encoding='utf-8')) if u['id'] in ('soc5-s2-u3-1-common', 'soc5-s2-u3-2-common')]
 COMPOSED = Path(COMP).read_text(encoding='utf-8')
 SNAP = """async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));const s=document.getElementById('screen');
- const clean=h=>h.replace(/ style="[^"]*"/g,'');const st=document.getElementById('hqStimulus');const m=document.getElementById('hqMedia');
+ // F3-3 input guard v2 stamps data-hoja-qid/data-hoja-gen on choice buttons only; strip exactly those (plus inline style, as before)
+ const clean=h=>h.replace(/ style="[^"]*"/g,'').replace(/ data-hoja-(?:qid|gen)="[^"]*"/g,'');const st=document.getElementById('hqStimulus');const m=document.getElementById('hqMedia');
  return {q:clean(document.getElementById('hqQuestion').innerHTML),c:clean(document.getElementById('hqChoices').innerHTML),
   stim:st&&!st.hidden?clean(st.innerHTML):'',media:m&&!m.hidden?m.querySelectorAll('img').length:0,layout:s.dataset.layout,
   comp:document.getElementById('hqCard').dataset.composition||''}}"""
@@ -49,5 +50,6 @@ async def main():
             ok &= not diffs and not pages[1][2]
             for c, _, _ in pages: await c.close()
         await b.close()
-    print('F2_SOC5_PARITY_' + ('PASS' if ok else 'DIFFERS_REPORTED')); sys.exit(0)
+    # fail-closed since F3-3 (previously always exit 0, which could hide a parity difference)
+    print('F2_SOC5_PARITY_' + ('PASS' if ok else 'FAIL')); sys.exit(0 if ok else 1)
 asyncio.run(main())
