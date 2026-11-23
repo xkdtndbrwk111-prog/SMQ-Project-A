@@ -113,6 +113,158 @@ function applyLayoutPreferences(pref, tags, conc, presText, where) {
   return out;
 }
 
+/* ------------------------- F1-B version-identified adapters ------------------------- */
+const MIME = {webp: 'image/webp', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml'};
+const dataUri = (name, buf) => 'data:' + (MIME[String(name).split('.').pop().toLowerCase()] || fail('MIME:' + name)) + ';base64,' + buf.toString('base64');
+/* content blocks (qb1 effective / presentation v3 / display overlay) -> renderer-v2 fields.
+ * Text blocks join with "\n" (the renderer-v2 multi-line prompt convention). One image -> `image`
+ * (unchanged single-image contract). Two+ images or a structured block -> additionally `media[]`
+ * in source order (rendered by the shared renderer's media extension). Unknown kinds -> unsupported. */
+export function blocksToV2(blocks, imgKey) {
+  const texts = [], images = [], dialogues = [], extra = [];
+  for (const b of blocks || []) {
+    if (b.kind === 'text') texts.push(String(b.text));
+    else if (b.kind === 'image') images.push({kind: 'image', asset: imgKey(b.src), alt: String(b.alt || ''), src: b.src});
+    else if (b.kind === 'dialogue') dialogues.push((b.lines || []).map(l => ({speaker: String(l.speaker), text: String(l.text)})));
+    else if (b.kind === 'frequency') extra.push({kind: 'frequency', period: String(b.period || ''), labels: (b.labels || []).map(String), marks: (b.marks || []).map(Boolean)});
+    else return {unsupported: String(b.kind)};
+  }
+  if (dialogues.length > 1) return {unsupported: 'multiple-dialogue'};
+  const out = {prompt: texts.join('\n'), image: images[0] ? images[0].asset : null, imageAlt: images[0] ? images[0].alt : '',
+    dialogue: dialogues[0] || null};
+  if (images.length > 1 || extra.length) out.media = [...images, ...extra].map(({src, ...m}) => m);
+  out._imageSrcs = images.map(i => i.src);
+  return out;
+}
+function choicesToV2(choices, imgKey, key) {
+  return (choices || []).map(c => {
+    const bl = c[key] || [];
+    if (bl.length === 1 && bl[0].kind === 'text') return {id: c.id, text: String(bl[0].text), image: null, imageAlt: ''};
+    if (bl.length === 1 && bl[0].kind === 'image') return {id: c.id, text: '', image: imgKey(bl[0].src), imageAlt: String(bl[0].alt || '')};
+    return {unsupported: c.id};
+  });
+}
+const stripPriv = q => { delete q._imageSrcs; return q; };
+/* Full-shape render tag DERIVED from an approved layout field (NOT a teacher-approved render tag):
+ * the shared renderer's tag consumers need images/texts/constraints/layout; values beyond the
+ * approved layout decision are neutral defaults, flagged needsHumanReview. */
+function derivedTag(q, preferredLayout, basis, extra = {}) {
+  const imgs = q.media ? q.media.filter(m => m.kind === 'image').map(m => m.asset) : (q.image ? [q.image] : []);
+  return {schemaVersion: 'hoja-derived-layout-v1', questionId: q.id, questionType: q.type,
+    images: imgs.map(a => ({asset: a, position: 'question', kind: 'general', subtype: 'scene', needsFineDetail: false, priority: 'normal'}))
+      .concat(q.choices.filter(c => c.image).map(c => ({asset: c.image, position: 'choice', kind: 'general', subtype: 'scene', needsFineDetail: false, priority: 'normal'}))),
+    texts: ['question', ...(q.dialogue ? ['dialogue'] : []), ...(q.type === 'MCQ' ? ['choices'] : [])],
+    constraints: {speakerTurnsVertical: false, preserveOriginalText: true, minimumImageDetail: 'normal',
+      elementPriority: {question: 'high', reading: 'low', dialogue: q.dialogue ? 'medium' : 'low', image: imgs.length ? 'medium' : 'low', choices: 'medium'}},
+    layout: {recommendedFamily: 'derived', preferredLayout: String(preferredLayout), rendererHint: null, selectionBasis: basis, ...extra},
+    confidence: 'derived', needsHumanReview: true, evidence: [basis]};
+}
+/* approved presentation v3 (const DATA/MEDIA/NAMES) + release/media-overlay.json */
+function adaptPresentationV3(p, e, outerZip, nestedZip, effAccepted) {
+  const items = p.v3data.filter(q => q.unit === e.cartridgeId);
+  const imgKey = s => e.cartridgeId + '/' + s;
+  const images = {}, tags = {}, notes = [];
+  const add = (k) => { const uri = p.v3media[k]; if (typeof uri !== 'string') fail('V3_MEDIA_MISSING:' + k); images[k] = uri; };
+  const qs = items.map(it => {
+    const v = blocksToV2(it.blocks, imgKey);
+    if (v.unsupported) fail('V3_BLOCK_UNSUPPORTED:' + v.unsupported + ':' + it.id);
+    // v3 display splits the approved text block into prompt + stimulus; the text block itself is the source.
+    const joined = it.stimulus ? [it.prompt + '\n' + it.stimulus, it.prompt + '\n\n' + it.stimulus] : [it.prompt];
+    if (!joined.includes(v.prompt)) fail('V3_PROMPT_BLOCK_DISAGREES:' + it.id);
+    const choices = choicesToV2(it.choices, imgKey, 'blocks');
+    if (choices.some(c => c.unsupported)) fail('V3_CHOICE_UNSUPPORTED:' + it.id);
+    choices.forEach((c, i) => { if (c.text && c.text !== it.choices[i].text) fail('V3_CHOICE_TEXT_DISAGREES:' + it.id); });
+    const q = {id: it.id, localId: it.id.split(':')[1], questionId: it.id, unit: e.cartridgeId, type: it.type, ...v, choices,
+      answer: it.answer, explanation: it.answerText, accepted: effAccepted(it.id), source: '', group: null};
+    for (const k of [q.image, ...(q.media || []).filter(m => m.kind === 'image').map(m => m.asset), ...choices.map(c => c.image)].filter(Boolean)) add(k);
+    q._layout = it.layout;
+    return q;
+  });
+  let overlay = null;
+  if (outerZip.has('release/media-overlay.json')) {
+    const raw = outerZip.json('release/media-overlay.json');
+    for (const o of Array.isArray(raw.overlays) ? raw.overlays : [raw]) {
+      if (o.unit !== e.cartridgeId) continue;
+      const q = qs.find(x => x.questionId === o.questionId);
+      if (!q) fail('OVERLAY_QUESTION_MISSING:' + o.questionId);
+      if (o.answerId && q.answer?.choiceId !== o.answerId) fail('OVERLAY_ANSWER_DISAGREES:' + o.questionId);
+      const imgs = q.media ? q.media.filter(m => m.kind === 'image') : [{asset: q.image}];
+      (o.replace || []).forEach((r, i) => {
+        const slot = q._imageSrcs.indexOf(r.source);
+        if (slot < 0 || !nestedZip.has(r.source)) fail('OVERLAY_SOURCE_NOT_IN_QUESTION:' + r.source);
+        if (!outerZip.has(r.presentation)) fail('OVERLAY_PRESENTATION_MISSING:' + r.presentation);
+        const key = e.cartridgeId + '/overlay/' + r.presentation.split('/').pop();
+        images[key] = dataUri(r.presentation, outerZip.read(r.presentation));
+        const m = imgs[slot];
+        if (q.image === m.asset && slot === 0) q.image = key;
+        m.asset = key;
+      });
+      (o.displayCardLabels || []).forEach((label, i) => { if (imgs[i]) imgs[i].label = String(label); });
+      // the overlay's doNotDisplay answer cues must not appear in anything shown before answering
+      for (const d of o.doNotDisplay || []) {
+        const cue = String(d).replace(/\s*\([^)]*\)\s*$/, '').trim();
+        const shown = [q.prompt, ...imgs.map(m => m.label || ''), ...imgs.map(m => m.alt || ''), ...q.choices.map(c => c.text)];
+        if (cue && shown.some(t => t.includes(cue) && !q.choices.some(c => c.text === t))) fail('OVERLAY_DO_NOT_DISPLAY_VISIBLE:' + o.questionId);
+      }
+      overlay = {questionId: o.questionId, replaced: (o.replace || []).length, labels: (o.displayCardLabels || []).length,
+        doNotDisplay: o.doNotDisplay || [], overlaySha256: sha256(outerZip.read('release/media-overlay.json'))};
+      notes.push('OVERLAY_APPLIED_FROM_RELEASE_MEDIA_OVERLAY_JSON');
+    }
+  }
+  for (const k of Object.keys(images)) if (!qs.some(q => [q.image, ...(q.media || []).map(m => m.asset), ...q.choices.map(c => c.image)].includes(k))) delete images[k];
+  qs.forEach(stripPriv);
+  for (const q of qs) { tags[q.id] = derivedTag(q, q._layout, 'approved presentation v3 layout field'); delete q._layout; }
+  const name = p.v3names && p.v3names[e.cartridgeId];
+  if (typeof name !== 'string' || !name.includes(' · ')) fail('V3_UNIT_NAME_MISSING:' + e.cartridgeId);
+  const [label, ...rest] = name.split(' · ');
+  return {original: qs, concise: JSON.parse(JSON.stringify(qs)), images, tags,
+    unitMeta: {[e.cartridgeId]: {label, title: rest.join(' · '), count: qs.length}}, overlay, notes,
+    adapter: 'presentation-v3', renderTagsSource: 'DERIVED_FROM_APPROVED_V3_LAYOUT', unitMetaSource: 'APPROVED_PRESENTATION_V3_NAMES'};
+}
+/* approved display overlay (display/presentation.json, hoja-presentation-overlay-v1) over effective qb1 */
+function adaptDisplayOverlay(e, zip) {
+  const ov = zip.json('display/presentation.json');
+  if (ov.schema !== 'hoja-presentation-overlay-v1' || ov.cartridgeId !== e.cartridgeId) fail('OVERLAY_SCHEMA:' + e.cartridgeId);
+  const cart = zip.json('effective/cartridge.json');
+  if (ov.sourceRevision != null && Number(ov.sourceRevision) !== Number(cart.revision)) fail('OVERLAY_REVISION_DISAGREES:' + e.cartridgeId);
+  const byQ = new Map(ov.entries.map(x => [x.questionId, x]));
+  if (byQ.size !== cart.questions.length || cart.questions.some(q => !byQ.has(q.questionId))) fail('OVERLAY_COVERAGE:' + e.cartridgeId);
+  const unitId = e.cartridgeId, imgKey = s => e.cartridgeId + '/' + s;
+  const images = {}, tags = {}, notes = [];
+  let fromDisplay = 0;
+  const addImg = src => {
+    const k = imgKey(src);
+    const d = 'display/' + src, f = 'effective/' + src;
+    const path = zip.has(d) ? d : zip.has(f) ? f : fail('OVERLAY_IMAGE_MISSING:' + src);
+    if (path === d) fromDisplay++;
+    images[k] = dataUri(src, zip.read(path));
+  };
+  const mk = (q, blocks, choices, ck) => {
+    const v = blocksToV2(blocks, imgKey);
+    if (v.unsupported) fail('OVERLAY_BLOCK_UNSUPPORTED:' + v.unsupported + ':' + q.questionId);
+    const ch = q.type === 'MCQ' ? choicesToV2(choices, imgKey, ck) : [];
+    if (ch.some(c => c.unsupported)) fail('OVERLAY_CHOICE_UNSUPPORTED:' + q.questionId);
+    const lid = q.questionId.split(':')[1];
+    return stripPriv({id: unitId + ':' + lid, localId: lid, questionId: q.questionId, unit: unitId, type: q.type, ...v, choices: ch,
+      answer: q.answer, explanation: q.explanation || '', accepted: Array.isArray(q.acceptedAnswers) ? q.acceptedAnswers.map(String) : [],
+      source: '', group: q.groupId || null});
+  };
+  const original = [], concise = [];
+  for (const q of cart.questions) {
+    const d = byQ.get(q.questionId);
+    if (d.reviewedByTeacher !== true) fail('OVERLAY_ENTRY_NOT_TEACHER_REVIEWED:' + q.questionId);
+    const o = mk(q, q.content, q.choices, 'content'), c = mk(q, d.displayContent, d.displayChoices, 'content');
+    if (JSON.stringify(o.choices.map(x => x.id)) !== JSON.stringify(c.choices.map(x => x.id))) fail('OVERLAY_CHOICE_IDS_DISAGREE:' + q.questionId);
+    for (const b of [...(d.displayContent || []), ...(q.content || [])]) if (b.kind === 'image') addImg(b.src);
+    tags[c.id] = derivedTag(c, d.layoutFamily, 'approved display overlay layoutFamily', {arrangement: String(d.preferredArrangement || '')});
+    original.push(o); concise.push(c);
+  }
+  notes.push('NO_APPROVED_RENDERER_PRESENTATION__GENERATED_FROM_EFFECTIVE_PLUS_TEACHER_REVIEWED_DISPLAY_OVERLAY');
+  if (fromDisplay) notes.push('IMAGES_FROM_DISPLAY_ASSETS:' + fromDisplay);
+  return {original, concise, images, tags, unitMeta: null, overlay: null, notes, adapter: 'display-overlay-v1',
+    renderTagsSource: 'DERIVED_FROM_APPROVED_OVERLAY_LAYOUT_FAMILY', unitMetaSource: 'APPROVED_INDEX_TITLE'};
+}
+
 export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) {
   const files = new Map();
   const bytes = p => { if (!src.exists(p)) fail('MISSING_FILE:' + p); const b = src.readBytes(p); files.set(p, sha256(b)); return b; };
@@ -145,7 +297,8 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
       presCache.set(where, {where, sha, shaVerified: !!claimedSha,
         original: extractConst(text, 'DATA_ORIGINAL'), concise: extractConst(text, 'DATA_CONCISE'),
         images: extractConst(text, 'IMAGES'), unitMeta: extractConst(text, 'UNIT_META'),
-        tags: extractConst(text, 'HOJA_RENDER_TAGS'), text, scripts: scriptIds(text)});
+        tags: extractConst(text, 'HOJA_RENDER_TAGS'), text, scripts: scriptIds(text),
+        v3data: extractConst(text, 'DATA'), v3media: extractConst(text, 'MEDIA'), v3names: extractConst(text, 'NAMES')});
     }
     return presCache.get(where);
   }
@@ -161,15 +314,25 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
   for (const e of index.entries) {
     const r = {cartridgeId: e.cartridgeId, questionCount: e.questionCount, status: 'READY', reasons: []};
     const block = why => { r.status = 'BLOCKED'; r.reasons.push(why); };
-    const p = presentationFor(e);
-    r.presentation = p.where ? p.where.replace(/^approved\//, '') : null;
-    if (!p.where) block('NO_APPROVED_RENDERER_PRESENTATION');
-    else if (!Array.isArray(p.original) || !Array.isArray(p.concise) || !p.images) block('PRESENTATION_NOT_RENDERER_V2');
+    const raw = presentationFor(e);
+    r.presentation = raw.where ? raw.where.replace(/^approved\//, '') : null;
     const eff = effectiveQuestions(e);
     const effById = eff ? new Map(eff.map(q => [q.questionId, effectiveFacts(q)])) : null;
-    if (effById) {
-      const multi = [...effById.entries()].filter(([, f]) => f.images > 1).map(([id]) => id);
-      if (multi.length) block('MULTI_IMAGE_QUESTIONS_NOT_REPRESENTABLE:' + multi.length);
+    const effAccepted = id => { const q = eff && eff.find(x => x.questionId === id);
+      return q && Array.isArray(q.acceptedAnswers) ? q.acceptedAnswers.map(String) : []; };
+    let p, adapted = null;
+    if (raw.where && Array.isArray(raw.original) && Array.isArray(raw.concise) && raw.images) {
+      p = raw; r.adapter = 'renderer-v2';
+    } else if (raw.where && Array.isArray(raw.v3data) && raw.v3media && raw.v3names && e.sourceShape === 'bundle-source-zips') {
+      adapted = adaptPresentationV3(raw, e, zipOf(e.archivePath), readZip(zipOf(e.archivePath).read(e.nestedArchive)), effAccepted);
+    } else if (!raw.where && e.archivePath && zipOf(e.archivePath).has('display/presentation.json')) {
+      adapted = adaptDisplayOverlay(e, zipOf(e.archivePath));
+    } else block(raw.where ? 'PRESENTATION_SCHEMA_UNKNOWN' : 'NO_APPROVED_RENDERER_PRESENTATION');
+    if (adapted) {
+      p = {where: raw.where || null, sha: raw.sha || null, shaVerified: !!raw.shaVerified, text: raw.text || '', scripts: raw.scripts || [],
+        original: adapted.original, concise: adapted.concise, images: adapted.images, tags: adapted.tags, unitMeta: adapted.unitMeta};
+      Object.assign(r, {adapter: adapted.adapter, adapterNotes: adapted.notes, mediaOverlay: adapted.overlay,
+        renderTagsSourceDetail: adapted.renderTagsSource, unitMetaSourceDetail: adapted.unitMetaSource});
     }
     if (r.status === 'BLOCKED') { report.push(r); continue; }
     const mine = q => String(q.questionId || '').startsWith(e.cartridgeId + ':');
@@ -192,14 +355,17 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
         if (JSON.stringify(f.choiceIds) !== JSON.stringify(q.choices.map(c => c.id).sort())) fail('CHOICE_IDS_DISAGREE:' + q.questionId);
         if (JSON.stringify(f.answer) !== JSON.stringify(q.answer) &&
             !(q.type === 'SHORT' && f.answer && q.answer && f.answer.text === q.answer.text)) fail('ANSWER_DISAGREES:' + q.questionId);
-        if ((f.images > 0) !== !!q.image) fail('IMAGE_PRESENCE_DISAGREES:' + q.questionId);
+        const shown = q.media ? q.media.filter(m => m.kind === 'image').length : (q.image ? 1 : 0);
+        if (f.images !== shown) fail('IMAGE_PRESENCE_DISAGREES:' + q.questionId);
         if (f.choiceImages !== q.choices.filter(c => c.image).length) fail('CHOICE_IMAGE_DISAGREES:' + q.questionId);
       }
-      for (const img of [q.image, ...q.choices.map(c => c.image)].filter(Boolean)) {
+      for (const img of [q.image, ...(q.media || []).filter(m => m.kind === 'image').map(m => m.asset), ...q.choices.map(c => c.image)].filter(Boolean)) {
         const uri = p.images[img];
         if (typeof uri !== 'string' || !/^data:image\/(webp|png|jpeg|svg\+xml);base64,/.test(uri)) fail('IMAGE_MISSING:' + q.questionId);
-        if (e.archivePath && e.sourceShape !== 'bundle-source-zips') {
-          const z = zipOf(e.archivePath), cand = 'effective/assets/' + img.split('/').pop();
+        if (img.includes('/overlay/')) continue; // approved overlay replacement: not an effective asset by design
+        if (e.archivePath) {
+          const z = e.sourceShape === 'bundle-source-zips' ? readZip(zipOf(e.archivePath).read(e.nestedArchive)) : zipOf(e.archivePath);
+          const cand = (e.sourceShape === 'bundle-source-zips' ? 'assets/' : 'effective/assets/') + img.split('/').pop();
           if (z.has(cand)) { imageBytesChecked++;
             if (sha256(Buffer.from(uri.split(',')[1], 'base64')) !== sha256(z.read(cand))) imageBytesDiffer++; }
         }
@@ -221,7 +387,7 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
           if (aImgs[img] !== p.images[img]) fail('APPROVED_IMAGE_DISAGREES:' + a.questionId);
       }
     }
-    const used = [...new Set(conc.flatMap(q => [q.image, ...q.choices.map(c => c.image)]).filter(Boolean))].sort();
+    const used = [...new Set(conc.flatMap(q => [q.image, ...(q.media || []).filter(m => m.kind === 'image').map(m => m.asset), ...q.choices.map(c => c.image)]).filter(Boolean))].sort();
     const tags = {};
     if (p.tags) for (const q of conc) if (p.tags[q.id]) tags[q.id] = JSON.parse(JSON.stringify(p.tags[q.id]));
     let layoutPrefs = null;
@@ -238,10 +404,13 @@ export function buildContentPackages(src, index, {bridgeScriptIds = null} = {}) 
     const text = JSON.stringify(pkg);
     Object.assign(r, {unitId, presentationSha256: p.sha, presentationShaVerified: p.shaVerified,
       types: Object.fromEntries(Object.entries(pkg.questions.reduce((a, q) => (a[q.type] = (a[q.type] || 0) + 1, a), {})).sort()),
-      images: used.length, tags: Object.keys(tags).length, renderTags: p.tags ? 'APPROVED' : 'NONE_IN_APPROVED_SOURCE',
+      images: used.length, tags: Object.keys(tags).length,
+      renderTags: adapted ? r.renderTagsSourceDetail : p.tags ? 'APPROVED' : 'NONE_IN_APPROVED_SOURCE',
+      mediaQuestions: conc.filter(q => q.media).length,
       layoutPreferences: layoutPrefs, layoutCounts: Object.fromEntries(Object.entries(layoutCounts).sort()),
       presentationScriptsNotInBridge: scriptsNotInBridge,
-      unitMetaSource: p.unitMeta && p.unitMeta[unitId] ? 'APPROVED_PRESENTATION' : 'APPROVED_INDEX_TITLE',
+      unitMetaSource: adapted ? r.unitMetaSourceDetail : p.unitMeta && p.unitMeta[unitId] ? 'APPROVED_PRESENTATION' : 'APPROVED_INDEX_TITLE',
+      visualParity: adapted || !p.tags ? 'NOT_VERIFIED' : 'SOURCE_RENDERER_DATA',
       crossCheck: effById ? 'EFFECTIVE_CONTENT' : 'APPROVED_TABLES', promptsShortenedForDisplay: textDiffs,
       imageBytesCheckedAgainstEffective: imageBytesChecked, imageBytesDifferFromEffective: imageBytesDiffer,
       packageBytes: Buffer.byteLength(text), packageSha256: sha256(Buffer.from(text)), effectiveSha256: e.effectiveSha256});

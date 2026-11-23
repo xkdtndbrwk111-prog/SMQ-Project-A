@@ -294,3 +294,26 @@
 **구분:** 위는 Node/mock·로컬 Chromium 결과. 게임 버튼 E2E·실 GAS·전자칠판 **NOT RUN**. 픽셀 단위 승인 화면 대조는 이번 범위 아님(사회6 192건 기존 결과만 존재).
 **데이터 안전:** 운영 GAS·원본·루트 Code.gs/Game.html·versions 무변경, `active-deployment.json` 0건·미디어 권리 HOLD 유지, 커밋에 문항 본문/그림 없음.
 **남은 위험/다음:** BLOCKED 7단원(234문항)은 교사 승인 renderer-v2 데이터(또는 다중 그림 지원 결정)가 있어야 게임 사용 가능 — 결정 필요. F2: 싱글 문제풀이 실제 버튼 연결 + 수학 표기 스크립트 재사용.
+
+## F1-B — 승인 형식 버전별 무손실 어댑터 + 공용 렌더러 media[] 확장 (2026-11-23, 지시서 `HOJA_USAGE_V4_40_6_F1B_APPROVED_RENDERER_COMPAT_20261123.md`, 40-6R Q01/Q03)
+**원칙:** 승인 콘텐츠(문항·정답·보기·그림·오버레이·교사 배치)는 수정하지 않음. 정본 pin `9573f91`. 형식은 **선언된 상수/스키마로만** 식별, 모호하면 실패.
+
+**어댑터(`approved_content_packager.mjs`):**
+| 어댑터 | 대상 | 변환 규칙(근거) |
+|---|---|---|
+| `renderer-v2` | 16단원(F1 그대로) | 승인 화면 `DATA_*` 그대로. **F1 패키지 16개 SHA 변화 없음** |
+| `presentation-v3` | 영어 천재 6단원/201 | ZIP `release/approval.json.display`(SHA `htmlSHA256` 대조)의 `DATA/MEDIA/NAMES`. 텍스트 블록 = v3 `prompt`(+`stimulus`) 정확히 일치 검증 후 `\n` 결합(브리지의 다줄 prompt 규약), 그림 1장 = 기존 `image`, **그림 2장 이상·빈도표 = `media[]`(원본 순서)**, 대화 블록 = `dialogue`, 보기 블록 = text 또는 image 1개, 정답·해설 = v3, 허용 답 = 중첩 원본 cartridge `acceptedAnswers`. `release/media-overlay.json`을 **그대로** 적용: q21 원본 그림 2장을 승인 표시 자산(`school_no_clock_review.webp`, `clock_8_20_vector.svg`)으로 교체 + 카드 캡션 "자료 1 · 등교 장면 / 자료 2 · 시계", `doNotDisplay`("8시 20분") 문구가 답 이전 표시 요소(문항·캡션·alt)에 있으면 실패. 단원명 = v3 `NAMES` |
+| `display-overlay-v1` | 사회5 2-2/33 | **승인 renderer 화면이 없다는 사실을 보고서에 명시**(`NO_APPROVED_RENDERER_PRESENTATION__GENERATED_FROM_EFFECTIVE_PLUS_TEACHER_REVIEWED_DISPLAY_OVERLAY`). 표시 = 승인 `display/presentation.json`(전 문항 `reviewedByTeacher:true` 필수, revision 일치, 보기 ID·순서 일치), 정답·허용 답·해설 = 승인 `effective/cartridge.json`, 원본 문항(originalQuestion) = effective 그대로, 그림 = `display/assets` 우선(4개) |
+- v3·오버레이의 A/C/D 결정은 승인 필드(`layout`/`layoutFamily`)만 사용하되 렌더러 태그 형식이 필요해 **`hoja-derived-layout-v1` 태그(needsHumanReview:true, confidence:'derived')**로 생성 — 보고서 `renderTags: DERIVED_FROM_…`, `visualParity: NOT_VERIFIED`. 교사 승인 태그로 표기하지 않음.
+- effective 대비 교차검증(ID·유형·보기 ID·정답·**그림 장수**)은 그대로 적용. renderer-v2 화면이 그림 1장인데 원본이 2장이면 실패.
+
+**공용 렌더러 확장(새 렌더러 아님):** `experimental/unified-quiz-renderer/HOJA_RENDERER_MEDIA_EXT.js` + `compose_renderer.mjs`. 브리지 파일은 **수정하지 않고 SHA `12b76fbb…`로 고정**, `</body>` 앞에 확장 스크립트 1개만 추가. `media[]`가 있는 문항만 `renderQuestion` 이후 브리지 **자체 크기 클래스**(`imageCompare`: 2자료, `imageWide`: 표)를 써서 항목을 원본 순서·캡션과 함께 표시. 정답·점수·capture 코드 접근 없음.
+- 실제 결함 2건 발견·수정(비교 시험으로 확인): ① 확장이 `data-media-count`를 남겨 q21 이후 707문항 DOM이 달라짐 → 매 렌더 초기화 ② 부분 태그가 브리지 교사용 태그 검사기에서 JS 오류 → 전체 형식 derived 태그. 육안 확인: q21 첫 시도는 문항 문구가 가려지고 캡션이 흐림 → 브리지 고유 `imageCompare` 크기 규칙 재사용으로 수정.
+
+**결과(정본 @9573f91, 로컬):** **23단원 / 732문항 패키지**(renderer-v2 16, v3 6, overlay 1), BLOCKED 0. 그림 바이트 effective 대조 **199/199 일치**(오버레이 교체분 제외), media 문항 6(q21 1 + 빈도표 5).
+| 시험 | 종류 | 결과 |
+|---|---|---|
+| 기존 브리지(무변경) vs 합성 렌더러, **732문항 × 1920×1080·1280×720·1024×768·390×844** | 오프라인 Chromium | **media 없는 726문항 #screen DOM 완전 동일(측정 후)**, media 6문항 항목 수·캡션·그림 디코드·빈도표 OK, 빈 화면 0, JS 오류 0 → `F1B_RENDER_PASS` (`evidence/f1b_real_content_20261123.log`) |
+| mock GAS 지연 로더(QA 번들 23단원) | Node | 732문항, 누락 그림 0, 단원당 ≤5ms |
+| Node 전체 | Node/mock | **83/83 PASS** (F1-B 신규: blocksToV2, 오버레이 어댑터 fail-closed 3종, 합성 렌더러 SHA·삽입 범위, 실보고서 23/732·어댑터 분포·q21·derived 표기) |
+**구분/미완료:** 위 DOM 동일성은 *브리지 대비 무회귀* 증거이지 **승인 원본 HTML과의 시각 동등성 증거가 아님** — 영어 천재(v3 화면), 사회5 2-2(화면 없음), 사회5 3-1·3-2(v0.1 렌더러)는 `visualParity: NOT_VERIFIED`, 교사 시각 검토용 QA 미리보기 대상. 수학 분수·줄바꿈 스크립트(F2) 미연결. 실 GAS·게임 버튼·전자칠판 **NOT RUN**. 합성 v3 어댑터 단위 fixture는 실데이터 보고서 시험으로 대체(전용 fixture는 후속). 콘텐츠·이미지·스크린샷 미커밋, active 0·미디어 권리 23/23 HOLD 유지.

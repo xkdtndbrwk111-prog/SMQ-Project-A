@@ -3,10 +3,10 @@
  "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
  "indexDigestSource": "hoja-approved-source-index-v2",
  "units": 23,
- "ready": 16,
- "readyQuestions": 498,
- "blocked": 7,
- "blockedQuestions": 234,
+ "ready": 23,
+ "readyQuestions": 732,
+ "blocked": 0,
+ "blockedQuestions": 0,
  "entries": [
   {
    "cartridgeId": "eng5-ybm-kim-u10",
@@ -14,6 +14,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g5u10",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -25,6 +26,7 @@
    "images": 6,
    "tags": 30,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 25,
@@ -32,6 +34,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -46,6 +49,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g5u11",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -57,6 +61,7 @@
    "images": 5,
    "tags": 33,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 25,
@@ -64,6 +69,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -78,6 +84,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g5u12",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -89,6 +96,7 @@
    "images": 6,
    "tags": 29,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 24,
@@ -96,6 +104,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -107,30 +116,130 @@
   {
    "cartridgeId": "eng5-ham-u10",
    "questionCount": 36,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2",
-    "MULTI_IMAGE_QUESTIONS_NOT_REPRESENTABLE:1"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [
+    "OVERLAY_APPLIED_FROM_RELEASE_MEDIA_OVERLAY_JSON"
    ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "mediaOverlay": {
+    "questionId": "eng5-ham-u10:q21",
+    "replaced": 2,
+    "labels": 2,
+    "doNotDisplay": [
+     "8시 20분 (정답 단서)"
+    ],
+    "overlaySha256": "83e70868c31daff5e51dfd97f9e33ae6040d7b5c656d758fedd0064b9f88dccc"
+   },
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng5-ham-u10",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 25,
+    "OX": 6,
+    "SUBJECTIVE": 5
+   },
+   "images": 15,
+   "tags": 36,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 1,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 7,
+    "C": 28,
+    "D": 1
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 21,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 375436,
+   "packageSha256": "5254303e0ff3ac292b8b796441de55daf9818e600a5d1b0d405a57aac29d7723",
+   "effectiveSha256": "8d5aa7b8bce0dd23c617001d9fd08c11da65eb64d3e9df86e7dd04aa125ed227"
   },
   {
    "cartridgeId": "eng5-ham-u11",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2"
-   ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [],
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng5-ham-u11",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 23,
+    "OX": 5,
+    "SUBJECTIVE": 5
+   },
+   "images": 10,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 0,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 5,
+    "C": 28
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 19,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 220411,
+   "packageSha256": "5cdc57adafec4e5383cea0c768fe28803cef62ddc7c63f16dbbe96a4c16fbfe7",
+   "effectiveSha256": "a9713a6b9df5dbc371ad7903ae212b3ad7557a5547ee37c55cdda7a4325ccdbc"
   },
   {
    "cartridgeId": "eng5-ham-u12",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2"
-   ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [],
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng5-ham-u12",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 23,
+    "OX": 5,
+    "SUBJECTIVE": 5
+   },
+   "images": 10,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 0,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 6,
+    "C": 27
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 19,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 216903,
+   "packageSha256": "745e4a22d18ce22a2861a86fa1444370e96d025a24c642b2d4904ecadd63745b",
+   "effectiveSha256": "813d3c5908114644f33962fcb89f4de15f0c55c3edfedaf1c56ac2189e35008f"
   },
   {
    "cartridgeId": "eng6-ybm-kim-u10",
@@ -138,6 +247,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g6u10",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -149,6 +259,7 @@
    "images": 4,
    "tags": 30,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 25,
@@ -156,6 +267,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -170,6 +282,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g6u11",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -181,6 +294,7 @@
    "images": 6,
    "tags": 29,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 23,
@@ -188,6 +302,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -202,6 +317,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "english/ybm-kim/grade5-6-u10-12/r1/review-approved-183.html",
+   "adapter": "renderer-v2",
    "unitId": "g6u12",
    "presentationSha256": "455fb57b9456ad8a62d8adab6290d8745ed6c2c40468d9bb97e9f769f479d0e3",
    "presentationShaVerified": false,
@@ -213,6 +329,7 @@
    "images": 4,
    "tags": 32,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 28,
@@ -220,6 +337,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "APPROVED_TABLES",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 0,
@@ -231,29 +349,119 @@
   {
    "cartridgeId": "eng6-ham-u10",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2"
-   ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [],
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng6-ham-u10",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 23,
+    "OX": 5,
+    "SUBJECTIVE": 5
+   },
+   "images": 6,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 5,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 5,
+    "C": 28
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 13,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 164642,
+   "packageSha256": "499653d06b017b58aa8bbba99e5e8d9c4a199445fe3db81cea4480749026e9fb",
+   "effectiveSha256": "cfadf777f5e79df61f06a8f2533757cd92cc1ffc1ceba1b23cec1f9026319907"
   },
   {
    "cartridgeId": "eng6-ham-u11",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2"
-   ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [],
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng6-ham-u11",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 22,
+    "OX": 6,
+    "SUBJECTIVE": 5
+   },
+   "images": 6,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 0,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 5,
+    "C": 28
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 16,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 157551,
+   "packageSha256": "2fcb0e8f7ef5fadf886c7faef60adcfbff47e43386b47c4e57243d91f520e9d1",
+   "effectiveSha256": "1a13eea859eb6349372fb807393000956d00b1478a0c6e450970444bf804df9a"
   },
   {
    "cartridgeId": "eng6-ham-u12",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "PRESENTATION_NOT_RENDERER_V2"
-   ],
-   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html"
+   "status": "READY",
+   "reasons": [],
+   "presentation": "english/cheonjae-ham/grade5-6-u10-12/HOJA_영어5_6학년_10_11_12단원_교사승인정본_20261121_r1.zip!presentation/HOJA_영어6개단원_공통퀴즈_정본_201문항.html",
+   "adapter": "presentation-v3",
+   "adapterNotes": [],
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "unitMetaSourceDetail": "APPROVED_PRESENTATION_V3_NAMES",
+   "unitId": "eng6-ham-u12",
+   "presentationSha256": "7abbfb28f8ec0e55bdbe518e82a76f8e8a17cdfa1035c8bacc0cf7112ec16430",
+   "presentationShaVerified": true,
+   "types": {
+    "MULTIPLE": 22,
+    "OX": 5,
+    "SUBJECTIVE": 6
+   },
+   "images": 6,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_V3_LAYOUT",
+   "mediaQuestions": 0,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 6,
+    "C": 27
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_PRESENTATION_V3_NAMES",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 15,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 166347,
+   "packageSha256": "b182c2a1fe292b652ef1bbe3f690487ca0e69e3b90d139f124ef91c84f10e63f",
+   "effectiveSha256": "eef14cd78547833be25b6a06bb030a95e78a14da74e159cab97b6f2c5504e449"
   },
   {
    "cartridgeId": "math5-s2-u4",
@@ -261,6 +469,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m5u4",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -272,6 +481,7 @@
    "images": 5,
    "tags": 31,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 0,
@@ -287,6 +497,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 7,
@@ -301,6 +512,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m5u5",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -312,6 +524,7 @@
    "images": 7,
    "tags": 33,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 3,
@@ -327,6 +540,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 16,
@@ -341,6 +555,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m5u6",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -352,6 +567,7 @@
    "images": 6,
    "tags": 30,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 6,
@@ -367,6 +583,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 11,
@@ -381,6 +598,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m6u4",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -392,6 +610,7 @@
    "images": 5,
    "tags": 32,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 2,
@@ -407,6 +626,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 7,
@@ -421,6 +641,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m6u5",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -432,6 +653,7 @@
    "images": 7,
    "tags": 31,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 0,
@@ -447,6 +669,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 11,
@@ -461,6 +684,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "math/grade5-6/semester2/HOJA_MATH_187_APPROVED_REVIEW_UI4_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "m6u6",
    "presentationSha256": "a85650c87ee93b6a2ed24c79f8dfa4df950c26d5ddfccbaf35f0c9ee02d669a5",
    "presentationShaVerified": true,
@@ -472,6 +696,7 @@
    "images": 6,
    "tags": 30,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-math-presentation-v1",
     "teacherC": 8,
@@ -492,6 +717,7 @@
     "hoja-math-teacher-final-wrap-v4"
    ],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 15,
@@ -503,11 +729,45 @@
   {
    "cartridgeId": "soc5-s2-u2-2-common",
    "questionCount": 33,
-   "status": "BLOCKED",
-   "reasons": [
-    "NO_APPROVED_RENDERER_PRESENTATION"
+   "status": "READY",
+   "reasons": [],
+   "presentation": null,
+   "adapter": "display-overlay-v1",
+   "adapterNotes": [
+    "NO_APPROVED_RENDERER_PRESENTATION__GENERATED_FROM_EFFECTIVE_PLUS_TEACHER_REVIEWED_DISPLAY_OVERLAY",
+    "IMAGES_FROM_DISPLAY_ASSETS:4"
    ],
-   "presentation": null
+   "mediaOverlay": null,
+   "renderTagsSourceDetail": "DERIVED_FROM_APPROVED_OVERLAY_LAYOUT_FAMILY",
+   "unitMetaSourceDetail": "APPROVED_INDEX_TITLE",
+   "unitId": "soc5-s2-u2-2-common",
+   "presentationSha256": null,
+   "presentationShaVerified": false,
+   "types": {
+    "MULTIPLE": 23,
+    "OX": 6,
+    "SUBJECTIVE": 4
+   },
+   "images": 6,
+   "tags": 33,
+   "renderTags": "DERIVED_FROM_APPROVED_OVERLAY_LAYOUT_FAMILY",
+   "mediaQuestions": 0,
+   "layoutPreferences": null,
+   "layoutCounts": {
+    "A": 22,
+    "C": 10,
+    "D": 1
+   },
+   "presentationScriptsNotInBridge": [],
+   "unitMetaSource": "APPROVED_INDEX_TITLE",
+   "visualParity": "NOT_VERIFIED",
+   "crossCheck": "EFFECTIVE_CONTENT",
+   "promptsShortenedForDisplay": 0,
+   "imageBytesCheckedAgainstEffective": 6,
+   "imageBytesDifferFromEffective": 0,
+   "packageBytes": 536229,
+   "packageSha256": "ef70481d731343ad2aad1fb16ac299c1eb9468005f497e6454ad35d451934371",
+   "effectiveSha256": "63dafa7eca706cdd339ca734aa678ca49844a5aa96ed3ff0034e5c9c5ae15dd2"
   },
   {
    "cartridgeId": "soc5-s2-u3-1-common",
@@ -515,6 +775,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "social/grade5/semester2/soc5-s2-u3-1-common/HOJA_SOC5_S2_U3_1_COMMON_APPROVED_20261121_r1.zip!presentation/HOJA_SOC5_U3_1_U3_2_APPROVED_64Q_20261121.html",
+   "adapter": "renderer-v2",
    "unitId": "u3-1",
    "presentationSha256": "dd8c66e873696493cb66caf826fda0f63d80934befffe6042a02d1300e55cfa0",
    "presentationShaVerified": false,
@@ -526,6 +787,7 @@
    "images": 2,
    "tags": 0,
    "renderTags": "NONE_IN_APPROVED_SOURCE",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 30,
@@ -533,6 +795,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_INDEX_TITLE",
+   "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 2,
@@ -547,6 +810,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "social/grade5/semester2/soc5-s2-u3-2-common/HOJA_SOC5_S2_U3_2_COMMON_APPROVED_20261121_r1.zip!presentation/HOJA_SOC5_U3_1_U3_2_APPROVED_64Q_20261121.html",
+   "adapter": "renderer-v2",
    "unitId": "u3-2",
    "presentationSha256": "dd8c66e873696493cb66caf826fda0f63d80934befffe6042a02d1300e55cfa0",
    "presentationShaVerified": false,
@@ -558,6 +822,7 @@
    "images": 2,
    "tags": 0,
    "renderTags": "NONE_IN_APPROVED_SOURCE",
+   "mediaQuestions": 0,
    "layoutPreferences": null,
    "layoutCounts": {
     "A": 30,
@@ -565,6 +830,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_INDEX_TITLE",
+   "visualParity": "NOT_VERIFIED",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 2,
@@ -579,6 +845,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "social/grade6/semester2/HOJA_SOC6_64_APPROVED_REVIEW_R1_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "s6u31",
    "presentationSha256": "437a90747b045ac55422350ebf51cf7c4653297453c8875fdcec753c7e799b08",
    "presentationShaVerified": true,
@@ -590,6 +857,7 @@
    "images": 6,
    "tags": 32,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-layout-preferences-v1",
     "teacherC": 0,
@@ -602,6 +870,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 8,
@@ -616,6 +885,7 @@
    "status": "READY",
    "reasons": [],
    "presentation": "social/grade6/semester2/HOJA_SOC6_64_APPROVED_REVIEW_R1_20261122.html",
+   "adapter": "renderer-v2",
    "unitId": "s6u32",
    "presentationSha256": "437a90747b045ac55422350ebf51cf7c4653297453c8875fdcec753c7e799b08",
    "presentationShaVerified": true,
@@ -627,6 +897,7 @@
    "images": 9,
    "tags": 32,
    "renderTags": "APPROVED",
+   "mediaQuestions": 0,
    "layoutPreferences": {
     "schema": "hoja-layout-preferences-v1",
     "teacherC": 0,
@@ -639,6 +910,7 @@
    },
    "presentationScriptsNotInBridge": [],
    "unitMetaSource": "APPROVED_PRESENTATION",
+   "visualParity": "SOURCE_RENDERER_DATA",
    "crossCheck": "EFFECTIVE_CONTENT",
    "promptsShortenedForDisplay": 0,
    "imageBytesCheckedAgainstEffective": 11,

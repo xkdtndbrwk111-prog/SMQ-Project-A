@@ -103,13 +103,13 @@ for (const [name, opts, re] of [
   const {index} = buildApprovedIndex(z, {sourceRepo: 'f', sourceCommit: COMMIT});
   assert.equal(buildContentPackages(z, index).report.entries[0].layoutPreferences.teacherC, 1);
 });
-test('F1 packager: unrepresentable or missing renderer data is BLOCKED with a reason, never converted', () => {
-  const {report} = build(bank([['social/a/zz5-s1-u1', 'zz5-s1-u1', {imgs: [2, 0, 0]}],
-    ['social/a/zz5-s1-u2', 'zz5-s1-u2', {pres: 'legacy'}], ['social/a/zz5-s1-u3', 'zz5-s1-u3', {pres: 'none'}]]));
+test('F1 packager: unknown presentation schema or no renderer source is BLOCKED with a reason, never guessed', () => {
+  const {report} = build(bank([['social/a/zz5-s1-u2', 'zz5-s1-u2', {pres: 'legacy'}], ['social/a/zz5-s1-u3', 'zz5-s1-u3', {pres: 'none'}]]));
   assert.deepEqual(report.entries.map(e => [e.cartridgeId, e.status, e.reasons[0].split(':')[0]]), [
-    ['zz5-s1-u1', 'BLOCKED', 'MULTI_IMAGE_QUESTIONS_NOT_REPRESENTABLE'],
-    ['zz5-s1-u2', 'BLOCKED', 'PRESENTATION_NOT_RENDERER_V2'],
+    ['zz5-s1-u2', 'BLOCKED', 'PRESENTATION_SCHEMA_UNKNOWN'],
     ['zz5-s1-u3', 'BLOCKED', 'NO_APPROVED_RENDERER_PRESENTATION']]);
+  // a renderer-v2 presentation showing ONE image where the approved effective question has TWO fails closed
+  assert.throws(() => build(bank([['social/a/zz5-s1-u1', 'zz5-s1-u1', {imgs: [2, 0, 0]}]])), /IMAGE_PRESENCE_DISAGREES/);
 });
 test('F1 packager: a NEW approved unit is packaged with no code change', () => {
   const one = build(bank([['social/a/zz5-s1-u1', 'zz5-s1-u1']]));
@@ -126,14 +126,22 @@ test('F1 extractConst reads JSON literals safely (strings with brackets, no eval
 
 /* ---------------- real approved source (committed, content-free report) ---------------- */
 const REPORT = DIR + '/approved-catalog/generated/approved-content-report.json';
-test('F1 REAL: 23 units -> 16 READY / 498 questions, 7 BLOCKED / 234 with explicit reasons', () => {
+test('F1/F1-B REAL: 23 units / 732 questions packaged by three version-identified adapters', () => {
   const r = JSON.parse(readFileSync(REPORT, 'utf8'));
   assert.equal(r.sourceCommit, '9573f91d2845a9667e2540df051f499d937dd94a');
-  assert.deepEqual([r.units, r.ready, r.readyQuestions, r.blocked, r.blockedQuestions], [23, 16, 498, 7, 234]);
-  const blocked = r.entries.filter(e => e.status === 'BLOCKED');
-  assert.ok(blocked.every(e => e.reasons.length > 0));
-  assert.equal(blocked.filter(e => e.reasons.some(x => x === 'PRESENTATION_NOT_RENDERER_V2')).length, 6);
-  assert.equal(blocked.filter(e => e.reasons.some(x => x === 'NO_APPROVED_RENDERER_PRESENTATION')).length, 1);
+  assert.deepEqual([r.units, r.ready, r.readyQuestions, r.blocked, r.blockedQuestions], [23, 23, 732, 0, 0]);
+  const by = a => r.entries.filter(e => e.adapter === a);
+  assert.deepEqual([by('renderer-v2').length, by('presentation-v3').length, by('display-overlay-v1').length], [16, 6, 1]);
+  assert.equal(by('presentation-v3').reduce((n, e) => n + e.questionCount, 0), 201);
+  const q21 = r.entries.find(e => e.mediaOverlay);
+  assert.match(q21.mediaOverlay.questionId, /:q21$/);
+  assert.deepEqual([q21.mediaOverlay.replaced, q21.mediaOverlay.labels], [2, 2]);
+  assert.equal(r.entries.reduce((n, e) => n + (e.mediaQuestions || 0), 0), 6, 'q21 pair + 5 frequency charts');
+  // derived layouts are never labelled as teacher-approved render tags; parity is not claimed
+  for (const e of [...by('presentation-v3'), ...by('display-overlay-v1')]) {
+    assert.match(e.renderTags, /^DERIVED_FROM_/); assert.equal(e.visualParity, 'NOT_VERIFIED');
+  }
+  assert.ok(by('display-overlay-v1')[0].adapterNotes.some(n => n.startsWith('NO_APPROVED_RENDERER_PRESENTATION')));
   const ready = r.entries.filter(e => e.status === 'READY');
   assert.ok(ready.every(e => e.imageBytesDifferFromEffective === 0));
   const math = ready.filter(e => e.layoutPreferences && e.layoutPreferences.schema === 'hoja-math-presentation-v1');
@@ -143,6 +151,7 @@ test('F1 REAL: 23 units -> 16 READY / 498 questions, 7 BLOCKED / 234 with explic
   assert.equal(math.reduce((n, e) => n + (e.layoutCounts.A || 0), 0), 120);
   assert.equal(ready.filter(e => e.layoutPreferences?.schema === 'hoja-layout-preferences-v1').reduce((n, e) => n + e.layoutPreferences.verifiedFixed, 0), 11);
   assert.ok(math.every(e => e.presentationScriptsNotInBridge.length === 2), 'math display scripts the bridge lacks are reported');
+  assert.ok(r.entries.filter(e => e.adapter === 'renderer-v2' && !e.layoutPreferences && e.renderTags === 'NONE_IN_APPROVED_SOURCE').every(e => e.visualParity === 'NOT_VERIFIED'));
   const txt = readFileSync(REPORT, 'utf8');
   assert.ok(!/data:image|"prompt"|"choices"/.test(txt), 'report carries no question content');
 });
@@ -196,4 +205,64 @@ test('F1 release build: RELEASE catalog with 0 entries, no content; QA build is 
     const dep = JSON.parse(readFileSync(DIR + '/approved-catalog/deployment/active-deployment.json', 'utf8'));
     assert.equal(dep.entries.length, 0, 'teacher deployment approvals stay 0');
   } finally { rmSync(out, {recursive: true, force: true}); }
+});
+
+/* ---------------- F1-B adapters (synthetic) ---------------- */
+import {blocksToV2} from './approved-catalog/approved_content_packager.mjs';
+test('F1-B blocksToV2: one image keeps the single-image contract; two images / charts add media[] in source order', () => {
+  const k = s => 'u/' + s;
+  const one = blocksToV2([{kind: 'text', text: 'Q'}, {kind: 'image', src: 'a.webp', alt: 'A'}], k);
+  assert.deepEqual([one.prompt, one.image, one.imageAlt, one.media], ['Q', 'u/a.webp', 'A', undefined]);
+  const two = blocksToV2([{kind: 'text', text: 'Q'}, {kind: 'text', text: 'passage'}, {kind: 'image', src: 'a.webp', alt: 'A'}, {kind: 'image', src: 'b.svg', alt: 'B'}], k);
+  assert.equal(two.prompt, 'Q\npassage');
+  assert.equal(two.image, 'u/a.webp');
+  assert.deepEqual(two.media.map(m => m.asset), ['u/a.webp', 'u/b.svg']);
+  const fr = blocksToV2([{kind: 'text', text: 'Q'}, {kind: 'frequency', period: 'w', labels: ['월', '화'], marks: [true, false]}], k);
+  assert.deepEqual(fr.media, [{kind: 'frequency', period: 'w', labels: ['월', '화'], marks: [true, false]}]);
+  assert.equal(blocksToV2([{kind: 'table'}], k).unsupported, 'table');
+  assert.equal(blocksToV2([{kind: 'dialogue', lines: []}, {kind: 'dialogue', lines: []}], k).unsupported, 'multiple-dialogue');
+});
+function overlayBank({reviewed = true, choiceIds = null, revision = 3} = {}) {
+  const fs = {}, id = 'zz5-s2-u2-2-common', dir = 'social/a/' + id;
+  const eff = {cartridgeId: id, revision: 3, title: '오버레이 단원', metadata: {grade: 5, semester: 2, unitNumber: 2},
+    questions: [effQ(id, 1, 'MCQ', 1), effQ(id, 2, 'OX', 0), {...effQ(id, 3, 'SHORT', 0), acceptedAnswers: ['정 답']}]};
+  const disp = {schema: 'hoja-presentation-overlay-v1', cartridgeId: id, sourceRevision: revision, entries: eff.questions.map(q => ({
+    questionId: q.questionId, reviewedByTeacher: reviewed, layoutFamily: q.type === 'MCQ' ? 'C' : 'A', preferredArrangement: 'auto',
+    displayContent: q.content.map(b => b.kind === 'text' ? {kind: 'text', text: 'D:' + b.text} : b),
+    displayChoices: (q.choices || []).map((c, i) => ({id: choiceIds ? choiceIds[i] : c.id, content: [{kind: 'text', text: 'd' + c.id}]}))}))};
+  const files = {'effective/cartridge.json': JSON.stringify(eff), 'effective/assets/a0.webp': IMG, 'display/presentation.json': JSON.stringify(disp),
+    'release/approval.json': JSON.stringify({status: 'TEACHER_APPROVED_SOURCE_CONTENT__GAME_DELIVERY_HOLD', cartridgeId: id})};
+  const t = {}; for (const [k2, v] of Object.entries(files)) t[k2] = sha256(Buffer.from(v));
+  files['release/FILES_SHA256.json'] = JSON.stringify(t);
+  const z = writeZip(files);
+  fs[`approved/${dir}/${id}.zip`] = z;
+  fs[`approved/${dir}/manifest.json`] = JSON.stringify({id, teacherApproval: 'APPROVED', questions: 3, archive: id + '.zip', sha256: sha256(z)});
+  fs['approved/catalog.json'] = JSON.stringify({schemaVersion: 'approved-catalog-v1', summary: {approvedUnits: 1, approvedQuestions: 3},
+    subjects: {social: {units: 1, questions: 3, paths: [dir + '/']}}});
+  return fs;
+}
+test('F1-B display overlay: deterministic from effective answers + teacher-reviewed display layer, flagged as such', () => {
+  const {report, packages} = build(overlayBank());
+  const e = report.entries[0];
+  assert.deepEqual([e.status, e.adapter, e.visualParity, e.renderTags], ['READY', 'display-overlay-v1', 'NOT_VERIFIED', 'DERIVED_FROM_APPROVED_OVERLAY_LAYOUT_FAMILY']);
+  const pkg = JSON.parse(packages[0].json);
+  assert.equal(pkg.questions[0].rendererQuestion.prompt, 'D:Q1', 'display text from the approved overlay');
+  assert.equal(pkg.questions[0].originalQuestion.prompt, 'Q1', 'original from approved effective content');
+  assert.equal(pkg.questions[0].answer, '2', 'answer key from effective');
+  assert.deepEqual(pkg.questions[2].rendererQuestion.accepted, ['정 답']);
+  assert.equal(pkg.tags[pkg.questions[0].rendererQuestion.id].needsHumanReview, true);
+  assert.throws(() => build(overlayBank({reviewed: false})), /NOT_TEACHER_REVIEWED/);
+  assert.throws(() => build(overlayBank({choiceIds: ['c1', 'c3', 'c2']})), /OVERLAY_CHOICE_IDS_DISAGREE/);
+  assert.throws(() => build(overlayBank({revision: 2})), /OVERLAY_REVISION_DISAGREES/);
+});
+test('F1-B composed renderer: bridge file SHA-pinned and untouched; only the media extension script is appended', async () => {
+  const {composeRenderer, BRIDGE_SHA256} = await import('../unified-quiz-renderer/compose_renderer.mjs');
+  const bridge = readFileSync('experimental/unified-quiz-renderer/HOJA_APPROVED_RENDERER_BRIDGE.html', 'utf8');
+  assert.equal(sha256(Buffer.from(bridge)), BRIDGE_SHA256);
+  const r = composeRenderer();
+  const at = bridge.lastIndexOf('</body>');
+  assert.ok(r.html.startsWith(bridge.slice(0, at)) && r.html.endsWith(bridge.slice(at)), 'bridge bytes preserved around the insertion');
+  assert.equal((r.html.match(/<script id="hoja-ext-media-v1">/g) || []).length, 1);
+  const ext = readFileSync('experimental/unified-quiz-renderer/HOJA_RENDERER_MEDIA_EXT.js', 'utf8');
+  assert.doesNotMatch(ext, /selectAnswer|setFeedback|HOJA_APPROVED_RENDERER_CAPTURE|score|rank/i, 'extension never touches answers/scoring');
 });
