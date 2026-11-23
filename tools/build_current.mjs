@@ -54,7 +54,8 @@ if(test){
  const course=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/gimmick-course.json'),'utf8'));
  const windCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/wind-course.json'),'utf8'));
  const steppingCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/stepping-course.json'),'utf8'));
- reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse);
+ const modesCourse=JSON.parse(fs.readFileSync(path.join(root,'verification/phase4d/stepping-modes-course.json'),'utf8'));
+ reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse,modesCourse);
  arcade=instrumentArcade(arcade);
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }

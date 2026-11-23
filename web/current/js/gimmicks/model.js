@@ -12,7 +12,16 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='pendulum'){c.length=number(raw.length,'줄 길이',16,512,96);c.amplitude=number(raw.amplitude,'진폭',0,85,45);c.speed=number(raw.speed,'진동 속도',0.1,12,2);c.radius=number(raw.radius,'반지름',4,128,16);c.phase=number(raw.phase,'시작 위상',0,6.283185307179586,0);}
   if(c.kind==='fan'){c.direction=one(raw.direction,'바람 방향',['left','right','up','down'],'right');c.power=number(raw.power,'바람 세기',0,2000,300);c.period=number(raw.period,'작동 주기',100,60000,4000);c.on=number(raw.on,'작동 시간',0,c.period,c.period);c.phase=number(raw.phase,'시작 위상',0,c.period,0);}
   if(c.kind==='flame'){c.wait=number(raw.wait,'대기 시간',0,60000,1800);c.warn=number(raw.warn,'예고 시간',1,60000,600);c.active=number(raw.active,'분출 시간',1,60000,1200);c.cool=number(raw.cool,'종료 시간',1,60000,400);c.phase=number(raw.phase,'시작 위상',0,c.wait+c.warn+c.active+c.cool,0);}
-  if(c.kind==='stepping_blocks'){c.direction=one(raw.direction,'이동 방향',['left','right'],'right');c.interval=number(raw.interval,'블록 이동 간격',200,5000,800);c.steps=number(raw.steps,'순찰 칸 수',1,60,15);if(!Number.isInteger(c.steps))throw Error('기믹 순찰 칸 수 오류');}
+  if(c.kind==='stepping_blocks'){
+   c.direction=one(raw.direction,'이동 방향',['left','right'],'right');c.activation=one(raw.activation,'출발 방식',['auto','on_step'],'auto');
+   c.count=number(raw.count,'벽돌 수',2,20,5);if(!Number.isInteger(c.count))throw Error('기믹 벽돌 수 오류');
+   c.interval=number(raw.interval,'블록 이동 간격',200,5000,800);
+   if(raw.path!==undefined){
+    if(!Array.isArray(raw.path)||raw.path.length<c.count+1||raw.path.length>c.count+60)throw Error('기믹 경로 길이 오류');
+    c.path=Object.freeze(raw.path.map((p,i)=>{if(!Array.isArray(p)||p.length!==2||!p.every(Number.isInteger)||p.some(v=>Math.abs(v)>128)||(i===0&&(p[0]!==0||p[1]!==0)))throw Error('기믹 경로 좌표 오류');if(i&&Math.abs(p[0]-raw.path[i-1][0])+Math.abs(p[1]-raw.path[i-1][1])!==1)throw Error('기믹 경로 연결 오류');if(c.x+p[0]*32<0||c.y+p[1]*32<0||c.x+p[0]*32>8192||c.y+p[1]*32>8192)throw Error('기믹 경로 범위 오류');return Object.freeze([...p]);}));
+    if(new Set(c.path.map(p=>p.join(','))).size!==c.path.length)throw Error('기믹 경로 중복 오류');c.steps=c.path.length-c.count;
+   }else{c.steps=number(raw.steps,'순찰 칸 수',1,60,15);if(!Number.isInteger(c.steps))throw Error('기믹 순찰 칸 수 오류');}
+  }
   return Object.freeze(c);
  }
  function state(c,elapsed){
@@ -23,8 +32,9 @@ window.HOJA_GIMMICK_MODEL=(()=>{
   if(c.kind==='stepping_blocks'){
    const tick=Math.floor(t/c.interval),cycle=2*c.steps,position=n=>{const p=n%cycle;return p<=c.steps?p:cycle-p;};
    const offset=position(tick),next=position(tick+1),progress=(t%c.interval)/c.interval,sign=c.direction==='right'?1:-1;
-   const at=(i,k)=>c.x+sign*(k+((i-k)%5+5)%5)*32;
-   return {kind:c.kind,offset,progress,x:c.x,y:c.y,blocks:Array.from({length:5},(_,i)=>{const from=at(i,offset),to=at(i,next);return {id:i,x:from+(to-from)*progress,y:c.y,moving:from!==to};})};
+   const index=(i,k)=>k+((i-k)%c.count+c.count)%c.count;
+   const point=n=>c.path?{x:c.x+c.path[n][0]*32,y:c.y+c.path[n][1]*32}:{x:c.x+sign*n*32,y:c.y};
+   return {kind:c.kind,offset,progress,x:c.x,y:c.y,blocks:Array.from({length:c.count},(_,i)=>{const from=index(i,offset),to=index(i,next),distance=Math.abs(to-from),walk=progress*distance,part=Math.min(Math.floor(walk),Math.max(0,distance-1)),fraction=distance?walk-part:0,dir=Math.sign(to-from),a=point(from+part*dir),b=point(from+(part+(distance?1:0))*dir);return {id:i,x:a.x+(b.x-a.x)*fraction,y:a.y+(b.y-a.y)*fraction,moving:distance>0};})};
   }
   const p=(t+c.phase)%(c.wait+c.warn+c.active+c.cool),phase=p<c.wait?'wait':p<c.wait+c.warn?'warn':p<c.wait+c.warn+c.active?'active':'cool';return {kind:c.kind,x:c.x,y:c.y,w:c.w,h:c.h,phase,active:phase==='active'};
  }

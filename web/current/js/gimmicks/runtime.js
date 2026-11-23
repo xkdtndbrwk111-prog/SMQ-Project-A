@@ -8,7 +8,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
   const all=[],add=name=>{const o=scene.add.sprite(0,0,key(scene,name),0).setDepth(10);all.push(o);return o;};
   let main,chain=[],particles=[],button=null,platform=null,collider=null,blocks=[],blockBodies=[],blockColliders=[];
   if(c.kind==='stepping_blocks'){
-   for(let i=0;i<5;i++){
+   for(let i=0;i<c.count;i++){
     // The original 22px canvas contains a complete 16px block with a 3px
     // transparent border. Preserve the image and use a separate 32px body.
     const art=scene.add.image(c.x+16,c.y+16,key(scene,'brick'),0).setScale(2).setDepth(7);
@@ -51,7 +51,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
   a.main.setAlpha(1);
   a.button.setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h).setVisible(s.phase==='warn'&&frame%2===0);
  }
- function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}if(c.kind==='stepping_blocks'){if(c.direction==='right')right+=c.steps*32;else left-=(c.steps+4)*32;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
+ function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}if(c.kind==='stepping_blocks'){if(c.path){left=Math.min(left,...c.path.map(p=>c.x+p[0]*32));right=Math.max(right,...c.path.map(p=>c.x+p[0]*32+32));top=Math.min(top,...c.path.map(p=>c.y+p[1]*32));bottom=Math.max(bottom,...c.path.map(p=>c.y+p[1]*32+32));}else if(c.direction==='right')right+=(c.steps+c.count)*32;else left-=(c.steps+c.count)*32;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
  function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&s.y<v.y+v.height);}
  // A short gap between neighbouring winds must remain a true no-wind area.
  function inWind(body,s){const x=(body.left+body.right)/2,y=(body.top+body.bottom)/2;return x>=s.x&&x<s.x+s.w&&y>=s.y&&y<s.y+s.h;}
@@ -65,11 +65,16 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
  }
  function create(scene,configs){
   if(!Array.isArray(configs))throw Error('기믹 목록 오류');
-  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null};});let elapsed=0;
+  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null,localElapsed:0,started:cfg.kind!=='stepping_blocks'||cfg.activation==='auto'};});let elapsed=0;
   for(const e of entries)paint(scene,e,model.state(e.cfg,0),0);
-  return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>({...model.state(e.cfg,elapsed)}));},
+  return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>e.cfg.kind==='stepping_blocks'?({...model.state(e.cfg,e.localElapsed),started:e.started}):({...model.state(e.cfg,elapsed)}));},
    update(delta){if(!Number.isFinite(delta)||delta<0)throw Error('기믹 시간 오류');if(scene.manualPaused||scene.quizActive||scene.dying||scene.timeUp||scene.clear||scene.transitioning)return;scene.hojaHorizontalWind=0;const before=elapsed;elapsed+=delta;const body=scene.playerBody?.body;if(!body||!body.enable)return;
-    for(const e of entries){const s=model.state(e.cfg,elapsed),visible=inView(scene,e.cfg),cycle=e.cfg.kind==='flame'?Math.floor((elapsed+e.cfg.phase)/(e.cfg.wait+e.cfg.warn+e.cfg.active+e.cfg.cool)):null,warned=e.cfg.kind==='flame'&&e.warnCycle===cycle;e.art.all.forEach(o=>o.setVisible(visible));
+    for(const e of entries){
+     if(e.cfg.kind==='stepping_blocks'){
+      if(!e.started){const grounded=!!(body.blocked?.down||body.touching?.down);const blocks=model.state(e.cfg,0).blocks;if(grounded&&blocks.some(p=>body.bottom>=p.y-4&&body.bottom<=p.y+4&&body.right>p.x+6&&body.left<p.x+26))e.started=true;}
+      if(e.started)e.localElapsed+=delta;
+     }
+     const s=model.state(e.cfg,e.cfg.kind==='stepping_blocks'?e.localElapsed:elapsed),visible=inView(scene,e.cfg),cycle=e.cfg.kind==='flame'?Math.floor((elapsed+e.cfg.phase)/(e.cfg.wait+e.cfg.warn+e.cfg.active+e.cfg.cool)):null,warned=e.cfg.kind==='flame'&&e.warnCycle===cycle;e.art.all.forEach(o=>o.setVisible(visible));
      if(e.cfg.kind==='flame')e.warnShown=warned;
      if(visible){if(e.cfg.kind==='flame'&&s.active&&!warned){paint(scene,e,{...s,phase:'warn',active:false},elapsed);e.warnShown=true;e.warnCycle=cycle;}else{paint(scene,e,s,elapsed);if(e.cfg.kind==='flame'&&s.phase==='warn'){e.warnShown=true;e.warnCycle=cycle;}}}
      if(e.cfg.kind==='stepping_blocks')continue;
