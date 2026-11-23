@@ -766,3 +766,63 @@
 - [ ] Claude U0 공개 API 경계 및 격리 복사본 설계: NOT RUN.
 - [ ] Claude U1 단일 GAS writer/daily/reader, U2 익명 통계 UI·보안, U3 동시성·GAS 실기, U4 GPT-6 독립 승인: NOT RUN.
 - [ ] 실제 운영 배포·원본 변경/삭제/트리거·교실매니저 실 제거: HOLD.
+
+### 40-6H. GPT-6 독립 감수 — Claude 40-6-U PR #6 / 실 GAS 동시성 FAIL (2026-11-23)
+**검수 대상:** [PR #6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6), 개발 브랜치 `work/usage-v4-40-6-u-20261123` HEAD `4fe3345c986ee2a745b4deb977d2cce51823112c` (기준 `d72964ff021dd3bf0f05d282b5e4d561cae16ecf`). 변경 파일 목록·patch, `gas/UsageV4Unified.gs`, `gas/UsageV4Public.gs`, 구현자 작업 로그 및 [비식별 실 GAS 증거](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/blob/work/usage-v4-40-6-u-20261123/experimental/usage-v4-unified/evidence/u3_real_gas_20261123.log) 검토. **이 판정은 Claude 자기 보고와 분리한 증거 기반 코드 리뷰**이며 운영 승인 아님.
+- [x] **U0 설계 문서: PASS (문서 범위).** Project A 단일 GAS·익명 공개 비식별 집계·기존 B/교실매니저 의존 제거, 시험 사본 격리·canary·운영 변경 금지 조건 명시. 정본 정책 준수.
+- [x] **U1 코드 구조·mock: PASS (제한적).** 시험용 `gas/Code.gs` 복제·V4 CORE·Public·Unified 한 GAS 번들로 구성, root 운영 파일 미변경. 로컬 Node U1 24/24 PASS는 구현자 제출 결과로 기록; **GitHub Actions 신규 CI NOT RUN** (워크플로 활성화 안 됨). 기존 인증 사본의 실제 SHA는 실 GAS R0 로그로 별도 증거 확인.
+- [x] **U2 익명 조회·화면: PASS (격리 시험 범위).** 실제 격리 GAS 익명 조회에서 전체 17,671=17,670+1, 오늘 1, 7일 1,299, 30일 4,291, 공개 응답 키 allowlist 및 원본 식별자 미노출 보고. Ops 2종 익명 거부, 실 익명 UI·기본 게임 라우트 시험 증거 존재. 팀전 팀 수 공개 제외는 후속 사용자 결정 반영. 단 공개 데이터 251개 카트리지 조합 중 112개(4,700회)가 이름 필터에 의해 '기타'로 병합됨: **통계 유용성 개선 검토 필요**, 개인정보 보호 완화는 별도 검증.
+- [x] **U3 R0/R1/R2/R3/R4/R5/R8/R9 격리 GAS 실기: 증거 확인·부분 PASS.** 61일 원본 SHA 61/61, 버킷 SHA 61/61, 집합 61/61, 17,672 raw / 17,670 unique / 2 replay / 4 zero / 3,969 bucket; 1회 append 및 동일 ID 중복/충돌, 익명 조회, 변조 fail-closed·복구 확인. 해당 기록은 실제 GAS 실행을 주장하는 비식별 로그이며 **감수자가 독립 재실행한 결과는 아님**. R7 자정 seal NOT RUN, GitHub Actions NOT RUN.
+- [ ] **U3 R6 동시 시작: FAIL — 운영 전환 STOP/HOLD.** 실제 익명 40건 동시 요청 중 **10/40 성공, 30/40 실패**. 실패 유형 `USAGE_APPEND_LOCK_TIMEOUT` 13건, `SHEETS_HTTP_429_RATE_LIMIT_EXCEEDED` 17건. 저장 성공 10건만 watermark/통계에 반영되고 실패한 30건은 현재 게임 클라이언트의 무재시도 경로에서 **사용량 누락**. 공개 통계가 부분 행을 정상 수치로 보이지 않은 점은 PASS이나, **기록 누락이 치명적인 FAIL**. [실행 증거](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/blob/work/usage-v4-40-6-u-20261123/experimental/usage-v4-unified/evidence/u3_real_gas_20261123.log).
+- [ ] **U3 동시성 원인 분리/수정 필수:** 기존 카탈로그 Sheets API 호출 429와 신규 V4 lock 내 manifest/TextFinder/flush/readback 부담을 각각 계측. (a) 공개 카탈로그 검증의 신뢰 가능한 단기 캐시·쿼터 완화, (b) 잠금 내 O(n) 검색/매번 manifest 읽기 축소 및 eventId 장기 멱등 색인, (c) 클라이언트의 **같은 eventId를 유지하는 제한된 재시도+지수 백오프**(실패시 조용히 무시 금지), (d) 40건 이상 실제 동시 재시험에서 **40/40 유효 기록 또는 명시적 재시도 성공** 및 0 중복, (e) 자정 R7 실기 시험. 단순 `waitLock` 증가만으로 429와 유실 문제 해결했다고 승인 금지.
+- [ ] **F-1 기존 `UsageRollupU3S.gs` 노출 가능성: HOLD/보안 확인 필요.** 공개 웹앱의 `_` 없는 유지보수 함수가 소유자 권한으로 호출될 위험을 Claude가 지적. 현재 실 시험 번들에서는 해당 파일 미포함·익명 함수 스텁 미노출 확인했으나, **실 운영 배포에 포함되어 있는지는 별도 확인 전 미확정**. 운영본 수정은 금지; 실제 노출 상태 파악 및 안전한 차단 패치 설계 제출 필요.
+- [ ] **U4 최종 승인: HOLD.** PR #6 Draft 유지, merge·운영 배포·원본 EVENT_LOG/랭킹·트리거·기존 교실매니저 제거 전부 금지. 다음 Claude 커밋에서 R6 해결 코드·실 GAS 재시험·GitHub Actions 증거를 검수한 뒤 판단. 기존 정본 및 이전 체크리스트 이력 보존.
+
+
+### 40-6I. GPT-6 추가 독립 감수 — R6 수정 요청 / 카트리지 표시 규칙 (2026-11-23)
+**대상:** Claude PR [#6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6) HEAD `4fe3345c986ee2a745b4deb977d2cce51823112c`, 실제 GAS 격리 로그 `experimental/usage-v4-unified/evidence/u3_real_gas_20261123.log`, `gas/UsageV4Public.gs`, `gas/UsageV4Unified.gs`, `gas/Code.gs`; [Claude 수정 요청 댓글](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089675598). **40-6H와 같은 HEAD를 추가 검토한 후속 의견으로 새 구현 PASS가 아니다.**
+- [x] **실제 원본 누락 재확인 — FAIL:** R6 로그 `sent:40`, `okReplies:10`, `rowsAdded:10`, `watermarkAdded:10`. 30건 실패는 정확히 lock 13 + Sheets 429 17. 오류 요청 30건은 원본 행으로 기록되지 않음. 게임 클라이언트 무재시도 상태에서 사용량 기록 누락이 발생하므로 배포 HOLD.
+- [x] **성능 병목 코드 위치 확인:** `gas/Code.gs`에서 시작 건마다 `hojaPublicSheets_()` 호출, `gas/UsageV4Unified.gs`의 가드가 락 안에서 manifest, watermark 복구, 최근 eventId TextFinder 검색, flush/readback 수행. 제한된 캐시/락 내 비용 절감만으로 끝내지 않고 동일 eventId 재시도·장기 멱등 색인 필요. 기존 U1 단독 동시성 대비 성능 측정 NOT RUN.
+- [x] **R4 시험 범위 제한 명시:** `NOT_EXPOSED_IN_CLIENT_STUB`는 현재 **격리 시험 GAS 번들에 없는 이름**이 익명 호출 스텁에 없음을 확인한 것. 루트 `UsageRollupU3S.gs`에는 `setupUsageRollupShadowU3S1`, `installUsageRollupDailyTriggerU3S1` 등 접미 `_` 없는 작업 함수가 실제로 존재한다. 운영 GAS 실제 배포 여부·익명 호출 가능성은 미확인으로 **SECURITY HOLD**. 새 번들에 이식하지 않도록 계속 검수하며 기존 운영 수정 금지.
+- [x] **카트리지명 공개 기준 분석:** `UsageV4Public.gs`의 엄격한 `CART_PART` 형식 검사가 총 251개 중 112개 조합, 4,700/17,670회(약 26.6%)를 '기타 공개 카트리지'로 병합. 통계 유용성이 낮아짐. **추천: 임의 EVENT_LOG 문자열 정규식 무제한 완화 금지, 승인된 공개 카탈로그의 ID→검증된 비식별 표시명 서버 매핑으로 대체 제안**. 먼저 이름 비공개 상태로 규칙 실패 유형·개선 후 남는 기타 비율을 검증하고 작은 집계 k≥5 보호 유지. 사용자 공개 정책 승인 없이 자동 완화/배포 금지.
+- [x] **R8 증거 한계:** 버킷 변조 후 캐시를 제거한 재계산 경로의 `UNAVAILABLE/INTEGRITY`는 확인됨. 캐시 적중 상태의 손상 인지 지연·stale 정책은 별도 시험 필요. R7 실제 자정 seal NOT RUN. 신규 40-6-U GitHub Actions workflow는 실험 디렉터리에만 있어 PR HEAD 실제 GitHub Actions 실행 기록 없음: CI NOT RUN.
+- [ ] **Claude 수정 요청 PR #6에 기록:** 카탈로그 429·lock 비용을 분리 계측, 유효한 캐시, 짧은 락, 안정적인 idempotency, 동일 eventId 클라이언트 재시도·지수 백오프, 40/40 실 GAS 재시험+중복 0, 공개 RPC 보안 확인, 이름 공개 안전성 개선 보고, CI 활성화, 자정 R7 근거 제출 대기.
+- [ ] 최종 U3/U4 **HOLD**, PR Draft 유지. 운영 GAS, `Code.gs` 운영본, `main`, `versions/2.0.0`, `EVENT_LOG`, 랭킹, 구 교실매니저 실제 제거, 삭제/보관 트리거 불변. 이번 작업은 GitHub 감수 댓글 및 체크리스트만 변경함.
+
+
+### 40-6J. 사용자 확정: 직접 제작한 공개 카트리지명 그대로 표시 (2026-11-23)
+- [x] 카트리지는 사용자 본인이 전부 제작·관리한다고 확인. **이미 승인된 PUBLIC 카트리지명은 통계에도 실제 이름으로 노출**하는 정책 확정. 카트리지 제목 형식 강제 정규식 `CART_PART`의 불필요한 과다 마스킹은 제거 대상으로 분류.
+- [x] 251개 카트리지 조합 중 112개(4,700회, 26.6%)가 '기타 공개 카트리지'로 묶이는 기존 실 GAS 감사 근거를 사용. 공개 카탈로그 및 과거 승인 카탈로그의 명칭 매핑을 우선, raw EVENT_LOG 임의 텍스트/개인정보 노출·XSS 방어는 유지. `k<5` 소수 셀 통합은 별도 검토 전 유지.
+- [x] Claude PR [#6에 사용자 정책 전달](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089690923) 및 최신 실행 정본에 정책 추가. 과거 40-6I의 '제안·사용자 확인 필요'는 **이번 사용자 확인으로 이름 표시 방향만 승인**, R6 동시성 FAIL과 운영 보류는 변경 없음.
+- [ ] Claude가 공개 카탈로그/과거 승인 제목을 검증한 뒤 통계 라벨 복원 코드+mock+실 GAS 확인 및 기타 비율 변화를 제출할 것: NOT RUN.
+- [ ] R6 동시 40건 시작 재시험(유실 0/중복 0), 자정 R7, 신규 CI 및 U4 최종 승인: HOLD/NOT RUN.
+
+
+### 40-6K. 원본 61일 버킷 전수 분석 및 카트리지명 출력 표준화 후보 (2026-11-23)
+- [x] 기존 61일 V4 **인증 복사본을 읽기 전용**으로 `HOJA_V4_DAILY_BUCKETS` 3,969개 버킷 중 `CARTRIDGE_COMBINATION` 1,634개 기록을 전수 취합. 77개 고유 카트리지 제목, **251개 순서에 민감한 조합**, 총 17,670회 확인. 원본/복사본 쓰기 0.
+- [x] **기존 `CART_PART` 이름 정규식 오분류 원인 재현 (112종/4,700회):** (1) 3단계 학년-교과-주제 표기 64종·3,429회, (2) `기타-` 비학년 카테고리 32종·974회, (3) `N학년-` 표기 11종·258회, (4) 교과 일반 어휘 `학교생활`에 포함된 `학교` 과잉 차단 5종·39회. 모두 이름 형식 문제이며 개별 이벤트 원본 자체 손상 근거 아님.
+- [x] **조합 순서 중복 발견:** 동일 카트리지 묶음을 A+B와 B+A 순서별로 별도 조합으로 세고 있어, 순서를 무시하면 **251 → 196개 조합**. 게임 시작 총 17,670회는 불변. 개별 과거 카트리지 77개와 실기 공개 카탈로그 76개는 서로 다른 시점 자료로, 정확한 신규/폐기 차이는 확인 전 추정 금지.
+- [x] 별도 독립 브랜치 `work/usage-v4-40-6-label-normalization-20261123` 및 구현 후보 [`52e84c4`](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/commit/52e84c4c1593e6d0ac553b98c50934232a7b24d9) 커밋: 공개 **출력 label**에만 `N학년 · 교과 · 단원` / 영어 출판사 분리 / `기타 · 분류 · 제목` 표준화, 선택 순서 정렬, 출력 단계 안전 필터. `EVENT_LOG`, 승인 문제은행/카탈로그, V4 원본 SHA/집계 버킷 및 운영본은 수정하지 않음.
+- [x] 실 버킷 이름에 대한 동일 변환 알고리즘 읽기 전용 시뮬레이션: 251개 원래 표현 **전부 허용(형식 탓 기타=0)**, 순서 정규화 뒤 196개 비순서 조합, `k<5` 익명성 보호에 따른 100종·158회는 계속 `기타(소수)`로 병합. 임의 학교 식별자/연락처/HTML 마스킹은 유지. 집계 시뮬레이션은 실제 브랜치의 GAS 코드 실행 증거로 혼동 금지.
+- [x] Claude의 기존 [PR #6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089900093)에 별도 브랜치·코드·테스트·수치·적용 지시 전달. 격리 구현 브랜치 변경이며 Claude PR #6에는 아직 미반영.
+- [ ] 신규 `UNIFIED_GAS_LABELS.test.mjs` Node 실행·GitHub Actions 및 실제 GAS 공개 통계 출력 재시험: **NOT RUN**. Claude R6 40건 중 30건 유실은 별개 **FAIL**, U3/U4 최종 승인·운영 배포 전부 HOLD. 변경된 표시명을 외부로 공개할 시 승인된 PUBLIC 범위 및 XSS/PII 회귀도 재검증할 것.
+
+
+### 40-6L. 사용자 정책 재확정 — GitHub 승인 정본만 사용, 소프트 코딩 분류 (2026-11-23)
+- [x] **최종 사용자 결정:** 앞으로 게임에 쓰는 카트리지는 `HOJA-QUESTION-BANK/approved/`의 교사 승인 정본만. 과거 77개 Sheets 카트리지명·251종 조합을 복원/통일하여 신규 콘텐츠로 사용할 계획은 **SUPERSEDED**. 기존 40-6J/K의 레거시 표준화 코드는 운영 PR에 병합 금지.
+- [x] 승인 색인 `approved/catalog.json` 및 영어 2개 그룹 manifest, 사회 5개 개별 manifest, 수학 집계 및 6개 개별 manifest 확인. **승인 23단원/732문항**(영어 12·사회 5·수학 6), 게임 운영 배포는 전체 `NOT_DEPLOYED`. 과목별 파일 구조 차이 확인.
+- [x] Claude PR [#6에 최신 정책 전달](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7089981753). **단원명/카트리지 ID 하드코딩 금지**, 정본 catalog→manifest→effective 내용에서 빌드 시 자동 생성 및 GAS 내장, 신규 승인 단원 확장, 교사 배포 승인·SHA pin 게이트를 요구.
+- [x] 별도 실험 브랜치 [`work/usage-v4-approved-catalog-index-20261123`](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/tree/work/usage-v4-approved-catalog-index-20261123)에 `approved_catalog_normalizer.mjs` 및 `approved_catalog_normalizer.test.mjs` 추가(커밋 `969cdec1c257bd1dc25a86c9353368baac638be8`). 구현자는 이름/ID 목록 대신 승인 manifest 메타데이터를 순회하여 학년·교과·학기·영어 출판사·저자를 분류. 코드 후보 및 설명을 [PR #6 추가 의견](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7090030322)에 전달.
+- [x] **순수 JS 실제 승인 메타데이터 분류 검증 PASS (한정):** 승인 `catalog.json`과 실 영어/사회 manifest 및 YBM 전체 승인 문항 JSON, 수학 aggregate의 단원별 메타데이터로 23개/732문항과 학년·교과·출판사 분류 일치 확인. 수학 6개 각 개별 manifest도 상위 id·문항 수·SHA-256 **표기 값**과 교차 확인 PASS. **ZIP 실바이트 SHA 재계산은 실시하지 않음**.
+- [x] **승인 vs 배포 분리:** 23개 전부 `gameDeployment=NOT_DEPLOYED`. 자동 분류 시 `approvedContentTitle:false`로 확인된 23개 정식 제목은 실제 승인 ZIP effective 데이터를 추출해 교체해야 한다. 임시 분류 라벨을 게임 승인 제목으로 오인하거나 자동 활성화하지 않도록 게이트 설정.
+- [ ] `approved_catalog_normalizer.test.mjs`를 Node 실제 프로세스에서 실행 및 GitHub Actions CI: **NOT RUN**. ZIP effective 승인 제목/오버레이·미디어 권리 검사, 빌드 결과 GAS 내장·게임/통계 연동, 실 GAS 확인: **NOT RUN**.
+- [ ] 기존 V4 61일 17,670회는 보존·회귀용; 새 정본 게임 통계에 혼합 금지. 신규 이벤트 스키마/카트리지 ID 구분의 실 구현·검증 필요.
+- [ ] 동시 시작 R6 40회 중 30회 유실 **FAIL 유지**. 운영 GAS·Code.gs·main/versions/2.0.0·원본 EVENT_LOG·랭킹·삭제/보관 트리거·기존 교실매니저 실제 폐기는 모두 **HOLD**.
+
+
+### 40-6M. Claude Code 후속 실행 지시서 발행 (2026-11-23)
+- [x] 사용자 최신 정책에 맞춰 별도 `docs/HOJA_USAGE_V4_40_6_CLAUDE_NEXT_STEPS_20261123.md` 작성: 정본 23단원/732문항의 **소프트 코딩 자동 분류**(이름/ID 하드코딩 금지), 승인 vs 실제 배포 게이트, 승인 effective 제목/오버레이/SHA 검증, 새로운 정본 통계와 구형 61일 기록 분리, 미래 카트리지 확장, Project A 단일 GAS/익명 비식별 집계.
+- [x] PR #6 HEAD `4fe3345c986ee2a745b4deb977d2cce51823112c`, 후보 브랜치 `work/usage-v4-approved-catalog-index-20261123` @ `969cdec1`, 승인 정본 메타데이터 정책 등 현행 기준 확인. 구형 Sheets 카트리지명 정규화 시안은 SUPERSEDED.
+- [x] R6 동시 40 중 30 실패(429 17/lock 13) **FAIL**을 최우선 운영 차단 조건으로 기록하고, 동일 eventId 재시도·캐시·락 최적화·실 GAS 40/40 증거 요구. R7 자정 실 GAS 및 신규 GitHub Actions CI NOT RUN을 별도 증거로 요구.
+- [ ] A 인덱스 생성 및 승인 effective 추출, B 배포 manifest와 게임/통계 연동, D 동시 기록 유실 해결, E 안전성 실기 검증: **Claude 구현 전/독립 감수 대기**. 지시서·중앙 체크리스트 갱신은 구현 PASS가 아니다.
+- [ ] 운영 프로젝트/Code.gs/main/versions/2.0.0/EVENT_LOG/랭킹/교실매니저 실제 삭제/트리거/배포는 **HOLD**.
