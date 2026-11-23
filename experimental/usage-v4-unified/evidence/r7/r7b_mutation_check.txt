@@ -1,0 +1,3 @@
+mutation: handler ignores the disabled flag -> AS-1 FAIL (caught)
+mutation: failures swallowed instead of re-thrown -> AS-4, AS-6, AS-7 FAIL (caught)
+source restored after each mutation

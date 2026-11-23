@@ -1192,3 +1192,16 @@
 | `R7-ISOLATED-GAS` / `R7-REAL-MIDNIGHT` / `R7-A 11-23 감사` | **NOT RUN** | 운영자 읽기 전용 감사 전 seal 금지 유지 | `r7_nov23_audit_STATUS.txt` |
 - [ ] 남은 미집계 조건: 2일 이상 대기, 저장소 불가 브라우저의 즉시 종료, 200 초과, 손상 저장소.
 - [ ] 다음: 40-6AI-2 자동 seal(비활성) 설계·mock 시험 → 별도 체크포인트.
+
+
+### 40-6AK. Claude 제출 — 40-6AI-2 일별 KST 자동 확정 비활성 설계·모의 검증 (2026-11-24)
+**경계:** Claude 자체 보고, 소스 + 모의 GAS만. **트리거 생성·설치, 실제 seal, GAS push/배포 없음.** GPT-6 감수 전.
+| ID | 상태 | 수치 / 근거 | 증거(`experimental/usage-v4-unified/evidence/r7/`) |
+|---|---|---|---|
+| `AUTO-SEAL-DESIGN` | **구현(비활성 기본)** | 운영자 전용 핸들러, 속성으로만 활성화, 기존 seal 경로 재사용, 상태 기록, 실패·HOLD 재던짐(메일 가시화), 트리거 생성 코드 0 | `r7b_autoseal_source_diff.patch` |
+| `AUTO-SEAL-MOCK` | **LOCAL PASS 8/8** | 비활성 무접촉 / 익명 거부 / 전날만 확정·재실행 무변화 / 동시 트리거 잠금 충돌 1회 확정 / 0건 날·장기 밀림(7일 단위) / 실패 후 재개 수렴 / 늦은 행 HOLD·연속 실패·staleRisk / 수동과 병존 | `r7b_autoseal_tests_8.txt` |
+| 변이 | 2/2 검출 | | `r7b_mutation_check.txt` |
+| 전체 Node / RC 감사 | **123/123** / PASS | | `r7b_node_suite_123.txt`, `r7b_rc_audit.txt` |
+| `AUTO-SEAL-TRIGGER-INSTALL` | **HOLD** | 교사 승인 + 11-23 실기록 읽기 전용 감사 후 격리 프로젝트에서만 | — |
+| `R7-A 11-23 감사` / `R7-ISOLATED-GAS` / `R7-REAL-MIDNIGHT` | **NOT RUN** | | `r7_nov23_audit_STATUS.txt` |
+- [ ] 다음(40-6AH 순서): F4 IndexedDB 캐시 C5(보호 목록·onblocked) — 별도 체크포인트에서 착수. 게시/push/배포는 계속 HOLD.

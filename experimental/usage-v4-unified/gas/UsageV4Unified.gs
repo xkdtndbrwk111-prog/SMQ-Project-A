@@ -278,7 +278,61 @@ function hojaV4OpsStatus(){
  const ctx=hojaV4uOpen_(props),state=hojaV4uManifestState_(ctx,false);
  return {enabled:true,sealedThrough:state.lastDate,sealedPrefixEndRow:state.prefix,
   preparingRows:state.preparing.length,committedWatermark:hojaV4uReadWatermark_(ctx),
-  sourceLastRow:ctx.event.getLastRow(),today:hojaV4uKstDay_(new Date())};
+  sourceLastRow:ctx.event.getLastRow(),today:hojaV4uKstDay_(new Date()),
+  autoSeal:{enabled:hojaV4uAutoSealEnabled_(props),last:hojaV4uAutoSealState_(props)}};
+}
+/* ------------------------- daily auto-seal (40-6AI-2) -------------------------
+ * DISABLED by default and NEVER installed by code (no trigger-creating API call in any file). Intended target of ONE
+ * installable time-driven trigger created by the owner in the isolated test project only, after the teacher's
+ * approval and the read-only audit of the copy: everyDays(1).atHour(0).nearMinute(20) (KST project time zone),
+ * optionally a second hourly trigger as retry. Each run seals ONLY finished days (< today KST) through the same
+ * hojaV4uSealPendingDays_ path as the manual operator call (idempotent, raced-safe, PREPARING resume, HOLD on late
+ * or partial rows). Its result is kept in HOJA_V4_AUTO_SEAL_STATE; a failure or HOLD is recorded and RE-THROWN so
+ * Apps Script's trigger-failure e-mail makes it visible. Unsealed past days >= 3 => staleRisk (the public reader
+ * fails closed with SEAL_STALE beyond 3). Manual sealing stays available and coexists. */
+const HOJA_V4U_AUTO_SEAL_PROP_='HOJA_V4_AUTO_SEAL';
+const HOJA_V4U_AUTO_SEAL_VALUE_='ENABLED_ISOLATED_COPY_ONLY';
+const HOJA_V4U_AUTO_SEAL_STATE_PROP_='HOJA_V4_AUTO_SEAL_STATE';
+function hojaV4uAutoSealEnabled_(props){
+ return String(props.getProperty(HOJA_V4U_AUTO_SEAL_PROP_)||'').trim()===HOJA_V4U_AUTO_SEAL_VALUE_;
+}
+function hojaV4uAutoSealState_(props){
+ try{return JSON.parse(props.getProperty(HOJA_V4U_AUTO_SEAL_STATE_PROP_)||'null')}catch(_e){return null}
+}
+function hojaV4OpsAutoSealDaily(){
+ hojaV4uRequireOperator_();
+ return hojaV4uAutoSeal_(new Date());
+}
+function hojaV4uPendingPastDays_(lastDate,today){
+ if(!lastDate)return null;
+ let n=0;for(let d=hojaV4uNextDay_(lastDate);d<today&&n<400;d=hojaV4uNextDay_(d))n++;
+ return n;
+}
+function hojaV4uAutoSeal_(now){
+ const props=PropertiesService.getScriptProperties();
+ if(!hojaV4uAutoSealEnabled_(props))return {ok:true,skipped:'AUTO_SEAL_DISABLED'};   // no read, no write
+ if(!hojaV4uEnabled_(props))return {ok:true,skipped:'V4_NOT_CONFIGURED'};
+ const today=hojaV4uKstDay_(now),prev=hojaV4uAutoSealState_(props);
+ let res,failure=null;
+ try{
+  const r=hojaV4uSealPendingDays_(HOJA_V4U_LIMITS_.sealDaysPerRun);
+  const st=hojaV4uManifestState_(hojaV4uOpen_(props),false);
+  const pending=hojaV4uPendingPastDays_(st.lastDate,today);
+  res={ok:true,today,sealed:r.sealed.filter(x=>!x.raced).map(x=>x.date),raced:r.sealed.some(x=>x.raced),
+   sealedThrough:st.lastDate,pendingPastDays:pending,staleRisk:pending>=3,consecutiveFailures:0};
+ }catch(e){
+  const msg=String(e&&e.message||e);
+  const code=(msg.match(/HOJA_V4U?_[A-Z0-9_]+|USAGE_[A-Z0-9_]+/)||['AUTO_SEAL_ERROR'])[0];
+  let pending=null;try{pending=hojaV4uPendingPastDays_(hojaV4uManifestState_(hojaV4uOpen_(props),false).lastDate,today)}catch(_e){}
+  res={ok:false,today,error:code,hold:/HOLD|MANUAL_REVIEW|LATE_EVENT|PARTIAL|UNSORTED|PARITY|MISMATCH/.test(code),
+   pendingPastDays:pending,staleRisk:pending===null||pending>=3,
+   consecutiveFailures:(prev&&prev.ok===false?Number(prev.consecutiveFailures)||0:0)+1};
+  failure=code;
+ }
+ res.at=now.toISOString();
+ props.setProperty(HOJA_V4U_AUTO_SEAL_STATE_PROP_,JSON.stringify(res));
+ if(failure)throw Error('HOJA_V4_AUTO_SEAL_FAILED '+failure+(res.hold?' (HOLD: manual review)':''));
+ return res;
 }
 function hojaV4uSealPendingDays_(maxDays){
  const props=PropertiesService.getScriptProperties();

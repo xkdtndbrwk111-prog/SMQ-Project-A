@@ -26,10 +26,12 @@ test('public RPC surface of the whole single GAS project equals the allowlist',(
  assert.deepEqual([...pub].sort(),['doGet','getPublicUsageStatisticsV4','hojaGetPublicQuestions',
   'hojaListPublicCartridges','hojaRankList','hojaRankSave','hojaV4OpsSealPendingDays',
   'hojaV4OpsStatus','recordUsageStartU1',
+  // 40-6AI-2: operator-gated, disabled-by-default auto-seal handler (trigger target; never installed by code)
+  'hojaV4OpsAutoSealDaily',
   // 40-6-U B: read-only approved-catalog RPCs (embedded active list only)
   'hojaListApprovedCartridges','hojaGetApprovedQuestions'].sort());
  const src=readFileSync(GAS_DIR+'/UsageV4Unified.gs','utf8');
- for(const ops of ['hojaV4OpsSealPendingDays','hojaV4OpsStatus'])
+ for(const ops of ['hojaV4OpsSealPendingDays','hojaV4OpsStatus','hojaV4OpsAutoSealDaily'])
   assert.match(src,new RegExp('function '+ops+'\\(\\)\\{\\n hojaV4uRequireOperator_\\(\\);'));
  assert.match(src,/function getPublicUsageStatisticsV4\(\)\{/,'public reader takes no parameters');
  for(const f of GAS_FILES){const s=readFileSync(GAS_DIR+'/'+f,'utf8');

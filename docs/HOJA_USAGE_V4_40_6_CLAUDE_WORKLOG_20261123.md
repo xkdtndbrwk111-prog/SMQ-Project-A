@@ -602,3 +602,24 @@ Node: **97/97 PASS**(신규: LIST 핀은 원격 카탈로그에만 / 캐시 블�
   - 200개 초과분은 오래된 것부터 버린다.
   - 손상 저장소는 전체 폐기한다.
 - R6 서버 단독 19/40 한계는 별도 **HOLD**(해결 주장 아님). 격리 GAS·실제 자정 NOT RUN.
+
+### 40-6AI-2 / 40-6AK — 일별 KST 자동 확정: 비활성 안전 구현·모의 검증 (2026-11-24)
+**범위:** 소스 + 모의 GAS(시계 주입)만. **실제 트리거 생성·설치, 실제 seal, GAS push/배포 없음.** 코드 어디에도 트리거 생성 API 호출이 없다(기존 정적 시험 유지, 번들에서도 0건 확인).
+- **`gas/UsageV4Unified.gs` 추가:** `hojaV4OpsAutoSealDaily()`. 운영자 전용(`hojaV4uRequireOperator_`) — 익명 웹앱 호출은 거부되고, 소유자의 설치형 시간 트리거라면 통과한다.
+  - **기본 비활성:** 속성 `HOJA_V4_AUTO_SEAL=ENABLED_ISOLATED_COPY_ONLY`가 없으면 아무것도 읽거나 쓰지 않는다.
+  - **확정 경로:** 기존 수동 확정과 같은 `hojaV4uSealPendingDays_`를 쓴다. 지난 날만 확정하고, 멱등이며, 경쟁(raced) 안전, PREPARING 재개, 늦은·미완성 행은 HOLD.
+  - **결과 기록:** `HOJA_V4_AUTO_SEAL_STATE`에 sealed / sealedThrough / pendingPastDays / staleRisk / 연속 실패 수를 남긴다.
+  - **실패·HOLD 가시화:** 기록한 뒤 **다시 던져서** Apps Script 트리거 실패 메일로 드러나게 한다.
+  - `hojaV4OpsStatus`에 `autoSeal{enabled,last}` 추가.
+- **예약 후보(설치 안 함):** 격리 시험 프로젝트에서 교사 승인과 실기록 읽기 전용 감사 후, 소유자가 `everyDays(1).atHour(0).nearMinute(20)`(KST) 트리거 1개를 만든다. 선택적으로 시간당 재시도 트리거를 둔다.
+- **모의 시험 `UNIFIED_GAS_AUTOSEAL.test.mjs` — LOCAL PASS 8/8:**
+  - AS-1 기본 비활성: 시트 접근 0, 상태 없음.
+  - AS-2 익명 거부.
+  - AS-3 00:20 실행은 전날만 확정(00:00:01 시작은 당일 유지), 재실행 무변화.
+  - AS-4 동시 트리거 2개: 잠금을 못 얻은 쪽이 `SEAL_LOCK_TIMEOUT`으로 보이게 실패, 확정은 1회.
+  - AS-5 5일 밀림 시 `SEAL_STALE` → 한 번에 5일(0건 날 포함) 확정 → 공개 OK. 10일 밀림은 7 + 3으로 나눠 처리하고 staleRisk를 표시.
+  - AS-6 버킷 쓰기 실패 → 기록·재던짐·PREPARING은 provisional 유지 → 다음 실행이 재개, 수치 수렴.
+  - AS-7 확정된 날의 늦은 행 → HOLD(확정·수정 없음), 연속 실패 1→2→3, staleRisk true, 원본·manifest 불변.
+  - AS-8 수동·자동 병존: 나중에 실행한 쪽은 할 일 없음.
+- **변이 시험:** 비활성 무시 → AS-1 실패, 실패 삼킴 → AS-4/6/7 실패(검출). 전체 Node **123/123**. RC 감사 PASS.
+- **R7 A(11-23 실기록 감사):** 여전히 **NOT RUN**. 감사 결과 전 실제 seal·트리거 설치 금지 유지. 격리 GAS 실측·실제 자정 NOT RUN.

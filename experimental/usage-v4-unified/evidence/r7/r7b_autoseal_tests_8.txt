@@ -1,0 +1,12 @@
+✔ AS-1 disabled by default: the handler returns AUTO_SEAL_DISABLED and touches nothing (9.79225ms)
+✔ AS-2 the handler is operator-only: an anonymous web-app caller is refused (1.01825ms)
+✔ AS-3 daily run at 00:20 KST seals exactly the finished day; a second run (duplicate trigger) is a no-op (2.828875ms)
+✔ AS-4 two triggers at the same moment: the one that cannot get the ScriptLock fails visibly; the seal happens exactly once (1.592542ms)
+✔ AS-5 zero days and a long backlog: SEAL_STALE before, sealed in bounded runs (7 days per run), public OK after (3.466ms)
+✔ AS-6 a failure mid-seal is recorded and re-thrown; the next run resumes the identical generation (2.336209ms)
+✔ AS-7 late / uncommitted rows: the run HOLDs (no seal, nothing repaired), failures accumulate, stale risk is flagged (1.365959ms)
+✔ AS-8 manual and automatic sealing coexist: whichever runs second finds nothing to do (1.2335ms)
+ℹ tests 8
+ℹ pass 8
+ℹ fail 0
+exit=0
