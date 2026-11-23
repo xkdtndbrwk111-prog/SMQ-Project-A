@@ -883,3 +883,14 @@
 
 **정책상 중단·미이행(미완료 기술 항목으로 되살리지 말 것):** 구형 Sheets 카트리지 77개/251조합 이름 정규화, Project B 별도 GAS, 관리자 통계 로그인 요구는 **SUPERSEDED**. 실제 운영 교실매니저 삭제는 별도 승인 전 **금지**. 
 **변경 불가:** `main`/루트 `Code.gs`·Game.html/`versions/2.0.0`/운영 Project A GAS/원본 EVENT_LOG·랭킹/원본 삭제·보관·트리거/운영 배포·PR merge 모두 사용자 별도 승인까지 **HOLD**. 
+
+
+### 40-6R. F1 제출 독립 감수 · 7개 BLOCKED를 F1-B/F2로 승계 (2026-11-23)
+**실측/제출 증거:** Claude Draft [PR #6](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6) HEAD `408ce4eeb4b6426401be70de4928649352f68ac6`; `approved-content-report.json`, `approved_content_packager.mjs`, `evidence/f1_real_content_20261123.log`, [Actions #45111578375](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45111578375), [독립 PR 리뷰 의견](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7091762808). **이번 독립 감수는 실제 GitHub 콘텐츠·코드·로그·CI 상태 대조**이며 Chromium/실 GAS 자체를 재실행하지 않았음.
+- [x] **F1 패키지/기존 renderer-v2 표시 범위의 제한적 PASS:** 사용자 승인 원본에서 23개·732문항 분류 후 **16단원/498문항 QA 콘텐츠 패키지 READY**, 나머지 **7단원/234문항 BLOCKED**. 준비 16단원 내부 이미지 107개, mock GAS 로드 498문항 그림 누락 0, 오프라인 Chromium **498개 × 3해상도**, blank 0/image missing 0/JS error 0 제출 로그 확인. 이는 게임 버튼 E2E·승인 HTML 픽셀 동일성·실 GAS/전자칠판 PASS가 아님.
+- [x] **GitHub Actions 상태 확인:** run `45111578375` HEAD `408ce4e` conclusion `success`; Node/mock/fixture/오프라인 스텁 검증 완료, **HOJA_QBANK_READ_TOKEN 누락으로 pinned upstream checkout & real rebuild drift SKIPPED**. 승인 콘텐츠 실파일(23/732) 직접 CI 재검증 PASS 주장 금지.
+- [x] **정확히 막힌 7개 단원:** 영어 천재(함순애) 6단원/201문항은 승인 최종 presentation v3가 현재 `DATA_ORIGINAL/DATA_CONCISE` renderer-v2 구조가 아니며, `eng5-ham-u10`에는 **2개 그림이 동시에 필요한 문항 1개**. 사회5 `soc5-s2-u2-2-common` 1단원/33문항은 renderer-v2 승인 presentation 없음. 승인 콘텐츠 자체가 무효라는 근거가 아니므로 **기존 정본 재작성 기본 방안 금지**; 승인 형식별 변환 어댑터와 공용 renderer 선택적 multi-image 지원 추진.
+- [x] **기존 READY 16개도 시각 HOLD:** 수학6개/187문항에 승인 HTML 미이식 스크립트 `hoja-math-priority-and-notation-v1`, `hoja-math-teacher-final-wrap-v4` 발견, 교사 C 지정 19개 및 4개 보기 줄바꿈은 데이터 반영했으나 렌더링 parity 미검증. 사회5 3-1·3-2(64문항)는 승인 렌더 태그 없음·임시 unitMeta 라벨, 승인 화면 v0.1.0-preview.2와 브리지 v0.2의 **시각 parity NOT RUN**. YBM 6 + 사회5 2개 presentationShaVerified=false에 대한 git-pin/digest trace 필요.
+- [x] **해결 방향 지시서 발행:** `docs/HOJA_USAGE_V4_40_6_F1B_APPROVED_RENDERER_COMPAT_20261123.md`와 기존 F단계 8절에 F1-B 승인 형식 무손실 어댑터/원본 q21 두 장·사회5 2-2 원본 콘텐츠 변환/수학 표기·wrap·사회5 파리티/4해상도·UI/CI 검증 및 출처 추적 추가. [PR #6 댓글](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/pull/6#issuecomment-7091762808)로 Claude 전달. 배포 manifest entries **0** 및 23/23 미디어 권리 HOLD 변경 없음.
+- [ ] **F1-B1 영어6/201·multi-image**, **F1-B2 사회5 2-2/33**, **F2 수학 187 분수·4 wrap 및 사회5 64 원본 화면 비교**: 구현·코드/시험 제출 대기 — **NOT RUN/HOLD**.
+- [ ] **F2/3 3모드 게임 버튼 E2E·승인 영문 ID A1 telemetry·신규 통계/실 GAS**, CI pinned checkout/drift 검증, **G R7 자정·80~120건·탭 종료/재시도·익명 권한·85인치**: 계속 **NOT RUN/HOLD**. 40-6Q 이월 상태 보존. 운영 코드/EVENT_LOG/랭킹/교실매니저 실제 삭제/원본 트리거/운영 배포·merge 금지.
