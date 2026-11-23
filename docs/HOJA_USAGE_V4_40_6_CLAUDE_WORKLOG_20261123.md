@@ -90,3 +90,18 @@
 | GitHub Actions CI | **NOT RUN** — workflow scope 문제(U1 참조). 제안 워크플로에 U2/U3/Chromium 단계 추가 |
 
 **운영**: 무변경.
+
+## U3 — 실제 GAS·동시성·성능 (2026-11-23 KST)
+**mock 시험** `UNIFIED_GAS_U3.test.mjs` (파일은 U2 커밋 `6e828b9`에 함께 포함됨) — 로컬 6/6 PASS. **실 GAS 엔진 결과가 아님.**
+- KST 자정 경계: 23:59:59.999 / 00:00:00.000 기록이 서로 다른 날짜, 통계 일별 분리.
+- 요청 폭주: 1분 내 익명 조회 2,000회 → 모두 OK, EVENT_LOG 꼬리 읽기 ≤1회(캐시).
+- 캐시 강제 미적중 공격 200회/분 → 재계산 정확히 20회, 나머지 180회 `stale:true`.
+- 규모: 61일×290건(17,690행) 확정 + 오늘 꼬리 20,000행 → 정확 합계, Node 계산 수백 ms. 꼬리 25,001행 → `READ_LIMIT` fail-closed(잘라서 표시하지 않음).
+- 안전 중단·복구: seal 중 manifest/버킷 쓰기 단계에서 실행시간 초과 모의 → 그 사이 통계 숫자 불변, 재실행 시 정확히 1회 확정.
+- 연속 기록 300회+재전송 30회: 행 +300, watermark 매회 +1 단조.
+- (U1 시험 포함) 읽는 중 commit/미commit append, 읽는 중 seal flip, 락 점유 중 seal/append 타임아웃.
+
+**실 Apps Script 엔진: BLOCKED / NOT RUN.**
+- 사유: 실 엔진 시험에는 사용자 Google 계정에 ① 인증 사본의 새 복제본 생성 ② 새 Apps Script 프로젝트 생성 ③ 익명 e2e용 `ANYONE_ANONYMOUS` 공개 URL 테스트 배포가 필요. 공개 URL 생성은 외부 노출 행위이므로 교사 승인 없이 진행하지 않음. 이 세션의 Drive 커넥터는 인증 사본 쓰기 권한 없음(적절).
+- 실행 절차와 기대값: `docs/HOJA_USAGE_V4_40_6_U3_REAL_GAS_RUNBOOK_20261123.md` (R1~R10: 익명 Ops 거부·`_` 함수 호출 불가 실측, 17,671 = 17,670+1, 재전송/충돌, 동시 40건, 자정 seal, 해시 손상, 실행 시간).
+- 실 엔진에서만 확인 가능한 잔여 위험: PropertiesService 쓰기-읽기 일관성(watermark), CacheService 실제 휘발, `Session.getActiveUser()` 익명 빈 값, ScriptLock 대기 시 `USAGE_APPEND_LOCK_TIMEOUT` 빈도, connector로 기록된 실 사본 manifest의 표시 형식(날짜가 `2026-09-23` 텍스트로 표시되는지, 숫자 천단위 구분 없음) — 형식이 다르면 Reader가 `INTEGRITY`/`MANIFEST_DATE_GAP`로 fail-closed(0 표시 아님).
