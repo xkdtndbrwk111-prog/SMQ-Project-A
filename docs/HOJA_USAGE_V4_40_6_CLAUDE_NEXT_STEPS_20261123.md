@@ -81,3 +81,11 @@
 - 신규 정본 문서: [HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md](HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md).
 - **중요**: 별도 승인 A/C/D 통합 렌더러를 게임 싱글/아케이드/팀전/오답 복습에 연결하는 F단계가 우선. 기존 R7 자정 실제 GAS 시험은 잔여 항목으로 유지하고 대기하지 않음.
 - 40-6O의 approved 영문 cartridgeId가 현재 telemetry client의 숫자 ID 필터에 걸려 무기록되는 문제를 F3에 포함. 운영 활성 0개·미디어 권리 HOLD는 그대로 유지. 
+
+
+## F 이후 반드시 이어야 하는 미완료 검증(G 단계, 2026-11-23)
+[현재 미완료 사항 40-6Q](HOJA_GAME_DEV_CHECKLIST_20261122.md) Q01–Q12와 [F 지시서 7절](HOJA_USAGE_V4_40_6_APPROVED_GAME_INTEGRATION_CLAUDE_DIRECTIVE_20261123.md)을 우선. F 단계에서 고친 항목도 실 GAS/실게임 증거가 없으면 다음 G로 이월한다.
+- **G1:** 재시도 없는 40 동시 19/40 한계 + 80~120 burst, 페이지 닫기·새로 열기·로컬 저장소 차단·재전송 유실·오류 알림 및 test harness assert.
+- **G2:** KST 자정 R7 실제 GAS seal/늦은 이벤트·in-flight 날짜·0회 날짜·SHA, R8 캐시 hit 상태 무결성/TTL 검증.
+- **G3:** 익명 통계 allowlist/관리 RPC deny, 승인 A1/구형 U3S1 시대 분리 실기, 23개 미디어 권리 확인과 배포 승인 0개 유지.
+- **G4:** 최신 GitHub CI pinned 정본 drift 복구, 실 버튼 E2E·싱글/팀전/아케이드·랭킹·오디오·85인치 전자칠판(불가시 NOT RUN). 운영 전환은 별도 사용자 승인.

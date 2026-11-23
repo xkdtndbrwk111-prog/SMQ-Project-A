@@ -859,3 +859,27 @@
 - [x] 승인 정본은 **교사승인과 게임 배포 구별**: `active-deployment.json` entries 0과 미디어 권리 23/23 HOLD 유지. 시험용 read-only QA build와 실사용 active catalog를 물리적으로 분리하고 운영 자동 활성화 금지.
 - [ ] Claude F1~F4 실제 코드·시험·CI·실 GAS 증거: **NOT RUN/개발 대기**. GPT-6 독립 감수 필요.
 - [ ] R7 자정 확정, 80~120건 동시 요청, 탭 종료/재개, 실제 전자칠판·전체 game E2E: **NOT RUN/HOLD**. 운영 코드, 원본 EVENT_LOG·랭킹, Project A 운영 GAS, 교실매니저 실제 폐기·삭제/트리거/배포 무단 변경 금지.
+
+
+### 40-6Q. 미완료·위험·다음 단계 승계표 — F 진행 전 기준선 (2026-11-23 13:14 KST)
+**사용자 요청:** 이전 섹션의 `NOT RUN`/`HOLD`를 소실하지 말고 **담당·선행조건·종료 증거를 가진 미완료 목록**으로 F 및 이후 최종 검증 단계에 이월한다. 이 표가 40-6G~P의 오래된 시점별 상태를 현재 기준으로 정리한다. **과거 기록/결과는 수정하지 않음.** 최신 증거: Claude PR #6 HEAD `1e2e21d75ada7c8e1393ce8eef7b2ac7d6a120ef` (R6 실 GAS 로그), 감사 `40-6N/O`, F 지시서 커밋 `7b45bf5155c57eb192a60353800171f7d3560850`. 개발 결과의 **독립 재실행은 아직 미수행**.
+
+| ID / 상태 | 현재까지 확인된 증거 | 다음 단계·담당·닫기 위한 증거 |
+| --- | --- | --- |
+| **Q01 승인 정본 빌더 — 코드·로컬 PASS(제출), 운영 HOLD** | Claude A `058b1a4`: 정본 pin `9573f91`, 승인 **23단원/732문항**, ZIP 17개 SHA 직접 재계산, q21 이미지 overlay, 로컬 Node 16/16. 정식 제목 23/23 추출했다고 보고. **미디어 공개 권리 23/23 HOLD** | **F1 Claude**: 정확한 effective 문항·그림·태그·제시 형식/미디어 및 회귀 데이터셋을 만들어 원본 rendererQuestion과 대조; 독립 diff/Chromium 검증. 승인만으로 배포 활성화 금지 |
+| **Q02 신규 카트리지 활성화 — HOLD(의도된 0개)** | `active-deployment.json` entries **0**; 교사 배포 승인·미디어 권리 미완료. `hojaGetApprovedQuestions`는 현재 `APPROVED_CONTENT_NOT_PACKAGED` | **F1→G Claude + 사용자 배포 승인**: 시험 전용 QA catalog/운영 manifest 물리 분리; 권리 확인, SHA pin, 게임 테스트 PASS와 별도 명시적 교사 배포 승인 전에는 실사용 0개 유지 |
+| **Q03 실제 게임 3모드 렌더링 — NOT RUN** | 기존 A/C/D 승인 renderer/iframe host/팀 바인딩/아케이드·복습 별도 실험 코드는 존재하나 PR #6의 승인 정본 실제 게임 버튼 연결 증거 없음 | **F2/F3 Claude**: 싱글 문제풀이 정오판정·단축키·싱글 주관식 제외; 아케이드 문제/종료/복습·랭킹; 팀전 3지선다 셔플/SHORT 교사 판정/우승 후 오답 복습. 원본 A/C/D 동일 렌더러, 실제 버튼 Chromium E2E 및 점수/음향 회귀 제출 |
+| **Q04 승인 영문 ID 사용량 무기록 — 미수정 확인 / 기능 FAIL 후보** | `UsageTelemetryClient.html` `track()`의 `/^[0-9]{1,11}$/`가 구형 숫자 ID만 허용. 승인 active 0으로 승인 A1 실제 시험 없음 | **F3 Claude**: 안정적인 approved ID 허용 + 동일 배포 allowlist/era 검증; 승인 A1 실제 게임 버튼 경로 기록→watermark→신규 공개 통계 시험, 차단 목록/중복/위조 입력 FAIL-closed. 운영 승인 0 유지 |
+| **Q05 R6 게임 기록 40건 — 범위 한정 PASS, 일반 보장 HOLD** | 격리 GAS: 실제 게임 페이지에서 `HOJA_USAGE.track()` 직접 40회 호출, **행 40/40·고유40·중복0·통계+40**, 재시도 16, **58.1초**; 동일 ID 3회→행 1. 실제 게임 시작 버튼 전 과정 E2E 아님 | **F4/G Claude**: 회귀 자동 단언(assert, 실패 exit), 실제 UI 버튼 E2E, 응답 유실·중복/등록 어긋남 재시험. GPT-6가 범위별 증거 검수; 기존 PASS를 전면 PASS로 확대 금지 |
+| **Q06 서버 독립 내구성 — FAIL(19/40), 부하 확장 NOT RUN** | 클라이언트 재전송 없이 40 동시 시작 시 **19 성공·21 ScriptLock timeout**, 429=0, lock hold p50 약1초. 40/40은 클라이언트 동일 eventId 재시도에 의존 | **G Claude**: 80~120건 동시/다학급·동시 public reader 부하/쿼터, 잠금 보유·대기 분포, 최종 행/중복/watermark 검사. 서버만으로 40/40 보장 못 한 점 유지하고 최종 회복 여부를 분리 보고 |
+| **Q07 브라우저 종료·네트워크 복구 — NOT RUN / 유실 위험** | `localStorage` 당일 대기열 200·최대 6회 재시도·60초 재플러시 10회; 즉시 종료/저장소 금지/다시 접속 안 함/오프라인/만료는 무기록 가능. UI 최종 실패 알림 없음 | **G Claude**: 브라우저 즉시 닫기/다음 재접속/저장소 거부/페이지 장기 미사용·복구 큐/사용자 또는 교사에게 실패 알림 정책, 재전송 및 무유실 보장 범위 명시 |
+| **Q08 KST 자정 확정 R7 + 재시도 날짜 — NOT RUN** | 실제 Apps Script 자정 전후 COMPLETE seal·watermark·미완성 행/늦은 이벤트 시험 없음. in-flight 재시도는 시작일과 기록 수신일 교차 위험 | **G R7 Claude(별도 격리 GAS)**: KST 자정 전후 실 엔진 + 0회 날짜/미완성 행/지연/오답·누락·중복/rollback·seal 복구를 검증. R7 전까지 F 개발은 진행 가능하나 운영 병합/배포 불가. 사용자 별도 격리 배포 필요 시 그때 요청 |
+| **Q09 승인 정본 통계 시대/개인정보 — mock 일부 PASS, 실 GAS NOT RUN** | 구형 61일 **17,670회는 보존**, A1 승인 정본 신규 집계와 분리 설계. 신규 active 0으로 A1 실익명 기록/화면 검증 없음. `era.legacy.all` 구형 실적의 신규 통계 화면 별도 노출 여부 미결 | **F3→G Claude**: 승인 시대 화면 기본 구형 숫자 숨김 *제안*과 원본 보존 분리, 실제 A1 test-only 격리 쓰기·새 공개 통계·서버 allowlist·작은 셀 보호·식별자/XSS/익명 권한 확인. UI 구형 별도 공개 여부 사용자 결정 전 임의 확정 금지 |
+| **Q10 익명 RPC 및 R8 캐시 오염 — SECURITY HOLD** | 격리 GAS 익명 브라우저 `NOT_EXPOSED_IN_CLIENT_STUB` 확인은 시험 번들 한정. `UsageRollupU3S.gs` 루트 작업 함수의 운영 배포 노출은 미확인. R8은 **캐시 초기화 후** 버킷 손상 인지 확인, 캐시 적중/지연 시나리오 미시험 | **G Claude / GPT-6 독립 검수**: 공개 read-only allowlist, 관리/삭제/재집계/시트 ID·비밀값 접근 deny, 캐시 hit 직후 손상 감지·TTL/stale 오류 표기, 게임 공개 제한적 쓰기 검증. 운영 원본에 직접 공격 시험 금지 |
+| **Q11 CI 드리프트 전수 검증 — 일부 PASS, SKIPPED 잔류** | [Actions #45107912487](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45107912487) `4bf80c2` mock·오프라인 성공. 승인 저장소 pinned checkout/drift는 `HOJA_QBANK_READ_TOKEN` 없어 **SKIPPED**. 이후 HEAD `1e2e21d` 재실행 증거 없음 | **F4/G Claude**: 읽기 전용 안전한 승인 소스 pin checkout 및 진짜 ZIP 재빌드 `--check`, 실패시 CI fail; 권한 불가면 SKIPPED를 명시하고 대체 근거. 최신 커밋 기준 CI URL 제출 |
+| **Q12 실제 기기·운영 안정화 — NOT RUN/HOLD** | 실제 85인치 전자칠판 터치/학교 네트워크/모바일·QR 전수 테스트, Game.html 전체 오디오·타이머·성적·랭킹 회귀와 운영 보안/성능 완전 검증 없음 | **F4→G Claude + 사용자 실기기**: 1920×1080/1280×720/1024×768/390×844 Chromium, 실제 전자칠판 가능하면 추가(불가시 NOT RUN), QR·싱글/팀전·복습 및 오디오 중복/랭킹 불변 증거, 미디어 권리 확인 전 배포 보류 |
+
+**단계 연결:** **F0–F4는 지금 진행**(Q01–04/09/11 구현·mock·브라우저), **G 사전출시 안전성 검증**(Q05–08/10–12, R7 포함)은 F 산출물 검수 후 수행. 각 항목은 **최신 코드 SHA + 수정 파일 + 테스트 종류 + 수치/URL + 담당 + 결론(PASS/FAIL/HOLD/NOT RUN)**을 제출받기 전에는 미완료로 유지한다. 클로드는 작업 로그에 제출하고 GPT-6만 중앙 독립 판정을 갱신. CI/실 GAS/Chromium/사용자 실기기는 동일 PASS로 혼동하지 않는다.
+
+**정책상 중단·미이행(미완료 기술 항목으로 되살리지 말 것):** 구형 Sheets 카트리지 77개/251조합 이름 정규화, Project B 별도 GAS, 관리자 통계 로그인 요구는 **SUPERSEDED**. 실제 운영 교실매니저 삭제는 별도 승인 전 **금지**. 
+**변경 불가:** `main`/루트 `Code.gs`·Game.html/`versions/2.0.0`/운영 Project A GAS/원본 EVENT_LOG·랭킹/원본 삭제·보관·트리거/운영 배포·PR merge 모두 사용자 별도 승인까지 **HOLD**. 
