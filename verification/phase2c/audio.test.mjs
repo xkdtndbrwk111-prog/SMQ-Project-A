@@ -37,7 +37,12 @@ test('parent mute, rate variation, sample gate and student volume',()=>{
   now+=60;
   audio.SFX.step('grass',false);
   assert.equal(played[1].volume,.08);
+  const count=played.length,randomBefore=randomCalls;
+  for(const name of ['gimmickSaw','gimmickPendulum','gimmickFan','gimmickFlame','gimmickBlocks']){now+=1000;audio.SFX[name]();}
+  assert.deepEqual(played.slice(count).map(x=>x.id),['sfx_owldash','sfx_shellkick','sfx_owlrise','sfx_strongstart','sfx_stone1']);
+  assert.equal(randomCalls,randomBefore,'gimmick audio never consumes gameplay randomness');
   audio.toggleSound();
+  const mutedCount=played.length;now+=1000;audio.SFX.gimmickFlame();assert.equal(played.length,mutedCount);
   assert.equal(button.textContent,'소리 끔');
   assert.equal(audio.muted,true);
   assert.equal(audio.loadedSamples(),0);

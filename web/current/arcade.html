@@ -3016,7 +3016,7 @@ class HojaScene extends Phaser.Scene{
     this.createStreetLamps();
     this.createEnemies();
     if(HOJA_MAKER_MODE)this.createMakerExtraObjects();
-    this.hojaGimmicks=STAGE.gimmicks?.length?window.HOJA_CREATE_GIMMICKS(HOJA_MAKER_IMAGES).create(this,STAGE.gimmicks):null;
+    this.hojaGimmicks=STAGE.gimmicks?.length?window.HOJA_CREATE_GIMMICKS(HOJA_MAKER_IMAGES,SFX).create(this,STAGE.gimmicks):null;
     if(this.hojaGimmicks){const gimmicks=this.hojaGimmicks,resetClock=()=>{this.hojaGimmickLastTime=null;};resetClock();this.events.on('pause',resetClock);this.events.on('resume',resetClock);this.events.once('shutdown',()=>{this.events.off('pause',resetClock);this.events.off('resume',resetClock);gimmicks.destroy();});}
     this.createInput();
     this.keys.chunkToggle=this.keys.chunkBench=this.keys.vision=this.keys.caveLight=HOJA_P1C_INPUT.DEAD; // 개발용 키 없음

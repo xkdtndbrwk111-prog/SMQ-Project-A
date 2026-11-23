@@ -291,6 +291,12 @@ window.HOJA_CREATE_AUDIO=function({activeScene,remainingMs}){
     robotStun(){playSampleVariant(['shell1','shell2'],.60,.04)},
     robotReboot(){playSampleSfx('shell2',.36,.78)},
     circuitAlert(){playSampleSfx('glitch',.42,1,250)},
+    // Reuse existing samples; these cues never consume gameplay randomness.
+    gimmickSaw(){playSampleSfx('owldash',.15,1.35,900)},
+    gimmickPendulum(){playSampleSfx('shellkick',.16,.80,900)},
+    gimmickFan(){playSampleSfx('owlrise',.12,.70,900)},
+    gimmickFlame(){playSampleSfx('strongstart',.28,.85,400)},
+    gimmickBlocks(){playSampleSfx('stone1',.18,1.35,250)},
     spring(){playSampleSfx('jumpy',.62,1.08,60)},
     collect(){playSampleSfx('collect',.55,1.1,40)},
     crumble(){playSampleSfx('stone1',.32,1.35,120)},

@@ -1,6 +1,6 @@
 'use strict';
 // Original Pixel Adventure images already bundled for Maker; no generated art.
-window.HOJA_CREATE_GIMMICKS=(images)=>{
+window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
  const model=window.HOJA_GIMMICK_MODEL;if(!model)throw Error('기믹 모델이 없습니다');
  const assets={saw:['Free/Traps/Saw/On (38x38).png',38,38],ball:['Free/Traps/Spiked Ball/Spiked Ball.png',28,28],chain:['Free/Traps/Spiked Ball/Chain.png',8,8],fanOn:['Free/Traps/Fan/On (24x8).png',24,8],fanOff:['Free/Traps/Fan/Off.png',24,8],dust:['Free/Other/Dust Particle.png',16,16],fireOn:['Free/Traps/Fire/On (16x32).png',16,32],fireOff:['Free/Traps/Fire/Off.png',16,32],brick:['Free/Traps/Blocks/Idle.png',22,22]};
  function key(scene,name){const [path,w,h]=assets[name],id='hojaGimmick_'+name;if(!scene.textures.exists(id)){const source=images?.get(path);if(!source)throw Error('Maker 기믹 이미지 누락: '+path);scene.textures.addSpriteSheet(id,source,{frameWidth:w,frameHeight:h});}return id;}
@@ -69,7 +69,7 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
  }
  function create(scene,configs){
   if(!Array.isArray(configs))throw Error('기믹 목록 오류');
-  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null,localElapsed:0,started:cfg.kind!=='stepping_blocks'||cfg.activation==='auto'};});let elapsed=0;
+  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null,localElapsed:0,nextSoundAt:0,lastSoundTick:-1,lastFlameSoundCycle:null,started:cfg.kind!=='stepping_blocks'||cfg.activation==='auto'};});let elapsed=0;
   for(const e of entries)paint(scene,e,model.state(e.cfg,0),0);
   return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>e.cfg.kind==='stepping_blocks'?({...model.state(e.cfg,e.localElapsed),started:e.started}):({...model.state(e.cfg,elapsed)}));},
    update(delta){if(!Number.isFinite(delta)||delta<0)throw Error('기믹 시간 오류');if(scene.manualPaused||scene.quizActive||scene.dying||scene.timeUp||scene.clear||scene.transitioning)return;scene.hojaHorizontalWind=0;const before=elapsed;elapsed+=delta;const body=scene.playerBody?.body;if(!body||!body.enable)return;
@@ -81,6 +81,20 @@ window.HOJA_CREATE_GIMMICKS=(images)=>{
      const s=model.state(e.cfg,e.cfg.kind==='stepping_blocks'?e.localElapsed:elapsed),visible=inView(scene,e.cfg),cycle=e.cfg.kind==='flame'?Math.floor((elapsed+e.cfg.phase)/(e.cfg.wait+e.cfg.warn+e.cfg.active+e.cfg.cool)):null,warned=e.cfg.kind==='flame'&&e.warnCycle===cycle;e.art.all.forEach(o=>o.setVisible(visible));
      if(e.cfg.kind==='flame')e.warnShown=warned;
      if(visible){if(e.cfg.kind==='flame'&&s.active&&!warned){paint(scene,e,{...s,phase:'warn',active:false},elapsed);e.warnShown=true;e.warnCycle=cycle;}else{paint(scene,e,s,elapsed);if(e.cfg.kind==='flame'&&s.phase==='warn'){e.warnShown=true;e.warnCycle=cycle;}}}
+     // Short nearby cues only; no wall-clock timers or RNG affect the game.
+     const px=(body.left+body.right)/2,py=(body.top+body.bottom)/2;
+     const pos=e.cfg.kind==='stepping_blocks'?s.blocks[0]:s;
+     const near=visible&&Math.hypot(px-(pos.x+(pos.w||0)/2),py-(pos.y+(pos.h||0)/2))<520;
+     if(e.cfg.kind==='flame'){
+      if(near&&s.active&&warned&&e.lastFlameSoundCycle!==cycle){sfx?.gimmickFlame?.();e.lastFlameSoundCycle=cycle;}
+     }else if(e.cfg.kind==='stepping_blocks'){
+      const tick=Math.floor(e.localElapsed/e.cfg.interval);
+      if(near&&e.started&&tick!==e.lastSoundTick)sfx?.gimmickBlocks?.();
+      e.lastSoundTick=tick;
+     }else if(near&&elapsed>=e.nextSoundAt&&(e.cfg.kind!=='fan'||s.active)){
+      ({saw:sfx?.gimmickSaw,pendulum:sfx?.gimmickPendulum,fan:sfx?.gimmickFan}[e.cfg.kind])?.();
+      e.nextSoundAt=elapsed+1800;
+     }
      if(e.cfg.kind==='stepping_blocks')continue;
      if(e.cfg.kind==='fan'){if(s.active&&inWind(body,s)){const grounded=!!(body.blocked?.down||body.touching?.down),amount=s.power*Math.min(delta,100)/1000;const opposingCap=grounded?Math.max(12,252-s.power*.3):Math.max(90,252-s.power*.2);if(s.direction==='left'){if(s.power>0)scene.hojaHorizontalWind=-1;body.setVelocityX(Math.min(body.velocity.x-amount*(grounded?1:.6),opposingCap));}if(s.direction==='right'){if(s.power>0)scene.hojaHorizontalWind=1;body.setVelocityX(Math.max(body.velocity.x+amount*(grounded?1:.6),-opposingCap));}if(s.direction==='up')body.setVelocityY(Math.min(body.velocity.y-amount,-Math.min(150,s.power*.15)));if(s.direction==='down')body.setVelocityY(Math.min(180,Math.max(body.velocity.y+amount,Math.min(150,s.power*.15))));}}
      else if(e.cfg.kind==='flame'?s.active&&warned&&intersectsViewport(scene,s)&&model.rectHit(body,{x:s.x+s.w*.2,y:s.y-(s.length-1)*s.h*6/32*s.rise,w:s.w*.6,h:s.h*.55+(s.length-1)*s.h*6/32*s.rise}):crossed(body,e.cfg,before,elapsed)){scene.hojaGimmickHit=e.cfg.kind;try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
