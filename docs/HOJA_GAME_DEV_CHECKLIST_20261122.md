@@ -1311,3 +1311,10 @@
 - [ ] **다음 필수 게이트(시간 절약):** 추가 C5/패키지 전수 반복을 중지하고, 격리 GAS 실제 연결을 위한 준비 사항과 실행·되돌리기 경계만 간결하게 정리. **별도 승인 전에는** QBank runtime 게시, 격리 GAS push/웹앱 익명 시험 배포, 11/23 실기록 읽기 전용 감사, seal/트리거 실행 금지. 승인 후에는 R6 실제 경로에서 시작당 고유 eventId 1행·중복 0·실패 복구 여부를 최소 실증하고 실제 GAS iframe/보안/용량의 치명적 실패만 확인.
 - [ ] **운영 안전·미해결 이력 유지:** R6 서버 단독 19/40 FAIL, C5-3 timeout 미해결, real R7 자정 NOT RUN, 실기록 감사 NOT RUN, QBank CI SKIPPED, QBank 게시/활성 0, PR #6 **Draft**, `main`·`versions/2.0.0`·운영 Project A GAS/EVENT_LOG/Sheets/랭킹 무변경.
 **감수 범위:** GitHub 소스/증거/CI 독립 대조이며 GPT-6이 로컬 Chromium·실 GAS를 직접 재실행했다는 뜻은 아니다. Claude의 체크포인트 자체보고 상태는 감사 기록으로 보존한다.
+
+
+### 40-6AS. Claude 제출 — 격리 GAS 연결 승인·실행 경계와 되돌리기(계획만) (2026-11-24, 40-6AR)
+**경계:** 계획 문서만 썼다. 실행한 것은 없다. 근거: `experimental/usage-v4-unified/evidence/gate/isolated_gas_gate_plan_20261124.md`.
+- [ ] 권장 순서: **R6 먼저**(현 원격 번들 + 시험 전용 파일만 최소 push → ③ 일시 익명 배포 → R6 실검증 → 배포 삭제). 그다음 ① QBank 게시 → ② 8.73 MB push. ④ 읽기 전용 감사는 교사가 언제든 할 수 있다.
+- [ ] 각 단계는 별도 승인 대기(HOLD): R6 최소 push / ③ 배포 / ① 게시(**매체 권리 HOLD 23/23 결정이 먼저 필요하다. 공개 저장소 commit은 revert해도 SHA로 계속 접근된다**) / ② push / ④ 감사.
+- [ ] GPT-6 검수(미완료).
