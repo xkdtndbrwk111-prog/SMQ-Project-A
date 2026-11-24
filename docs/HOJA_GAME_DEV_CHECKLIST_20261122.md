@@ -1235,3 +1235,15 @@
 - [ ] **실환경 이월 게이트:** 11-23 읽기 전용 기록 감사, R6 19/40, 격리 GAS/실 자정/자동 트리거, QBank CI 2개 SKIPPED, 런타임 패키지 게시·활성화는 별도 승인·증거 전까지 HOLD.
 **갱신 방식:** 각 후속 개발 보고가 제출될 때 검수 가능한 범위에서 이 중앙 파일을 업데이트하고 PR #6에 검수 결과를 남긴다. 채팅 종료 후 자동 감시가 동작한다는 의미는 아니다. 병렬 작업자 커밋이 있으면 최신 HEAD를 먼저 재확인하고 이전 변경을 덮어쓰지 않는다.
 
+
+
+### 40-6AM. Claude 제출 — C5-1 캐시 보호 수명(동시 GET) 재현·수정 (2026-11-24)
+**경계:** Claude 자체 보고, 로컬 실제 Chromium + Node. GPT-6 감수 C5-1은 미완료로 둔다. 실 GAS·게시·배포 없음.
+| 항목 | 상태 | 근거(`experimental/usage-v4-unified/evidence/c5/`) |
+|---|---|---|
+| 수정 전 재현 | 1차 시도 **재현 안 됨**(최근성이 가림) → 정밀 시나리오에서 **FAIL 재현**(사용 중 X 축출) | `c5_1_REPRO_prefix_block_FAIL.txt`, `c5_1_notes.txt` |
+| 수정(lease 참조 수, finally 해제) | **LOCAL PASS** P1·P2·P3 | `c5_1_fixed_block_PASS.txt`, `c5_1_lease_diff.patch` |
+| 회귀 | Node **123/123**, RC 감사 PASS, 캐시 E2E **14/14** | `c5_1_node_suite.txt`, `c5_1_rc_audit.txt`, `c5_1_cache_e2e_14.txt` |
+| 탭 간 보호 | **범위 밖(기록)** — 탭별 lease | — |
+- [ ] 다음: C5-2 IndexedDB blocked/stall 복구 → 40-6AN.
+- [ ] 유지: 38/46 최초 FAIL 원인 불명, QBank CI 2 SKIPPED, R6 19/40, 실 GAS·자정·트리거·게시·배포 HOLD.

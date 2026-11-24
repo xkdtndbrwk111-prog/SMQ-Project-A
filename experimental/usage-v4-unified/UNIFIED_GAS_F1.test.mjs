@@ -501,4 +501,7 @@ test('F4 cache client: one injected block, wraps only LIST/GET, IndexedDB only, 
   assert.doesNotMatch(code, /recordUsageStartU1|hojaRank/, 'never touches usage records or ranking');
   assert.match(code, /if\(method==='LIST'\)/); assert.match(code, /if\(method==='GET'&&handles\(payload\)\)/);
   assert.match(code, /redirect:'error'/); assert.match(code, /credentials:'omit'/);
+  // C5-1 (40-6AL): no global protection reset; per-unit leases released in finally
+  assert.doesNotMatch(code, /protect\.clear\(\)/);
+  assert.match(code, /const release=lease\(entries\.map\(e=>e\.id\)\);\n try\{return await getLeased\(names,entries\)\}finally\{release\(\)\}/);
 });
