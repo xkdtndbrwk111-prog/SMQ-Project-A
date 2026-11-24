@@ -2464,7 +2464,7 @@ function attachHojaEyeOverlay(scene,moodProvider){
     if(disposed)return;
     try{
       const h=scene.hoja;
-      if(!h?.active||!h.visible){if(overlay.visible)overlay.setVisible(false);return;}
+      if(!h?.active||!h.visible||scene.transitioning){if(overlay.visible)overlay.setVisible(false);return;}
       const match=/^hoja_(IDLE|WALK|RUN|JUMP|SIT|break)_(\d+)$/.exec(h.texture?.key||'');
       if(!match){if(overlay.visible)overlay.setVisible(false);return;}
       const eye=hojaEyeNameAt(performance.now(),moodProvider?.());
@@ -4932,6 +4932,7 @@ class HojaScene extends Phaser.Scene{
     // The pipe rim (depth 5) must always cover Hoja (normally depth 12).
     // Only lower the hero AFTER a valid entry; other gameplay is unchanged.
     this.hoja.setDepth(4).setAlpha(1);
+    if(this.hojaSwimGhost)this.hojaSwimGhost.setVisible(false);
     const cave=STAGE.theme!=='cave';
     const target=near.target;
     const spawn=HOJA_MAKER_MODE?'makerPortal':(cave?`fromSurface:${STAGE_INDEX}`:'surfacePipe');
@@ -5166,10 +5167,21 @@ class HojaScene extends Phaser.Scene{
       if(side)this.facing=arrival.orientation==='left'?-1:1;
       const startY=arrival.orientation==='up'?arrival.top+45:arrival.orientation==='down'?arrival.bottom-18:arrival.foot;
       this.hoja.setPosition(arrival.x,startY).setDepth(4).setAlpha(1).setFlipX(this.facing>0);
+      // Reveal a horizontal arrival only beyond the mouth; the body and
+      // background behind the pipe must never show a trailing sprite.
+      let arrivalMaskShape=null;
+      if(side){
+        const mouth=arrival.x+(arrival.orientation==='left'?-32:32);
+        arrivalMaskShape=this.add.graphics().setVisible(false).fillStyle(0xffffff);
+        if(arrival.orientation==='left')arrivalMaskShape.fillRect(-128,-128,Math.max(0,mouth+128),WORLD_H+256);
+        else arrivalMaskShape.fillRect(mouth,-128,Math.max(0,WORLD_W-mouth+128),WORLD_H+256);
+        this.hoja.setMask(arrivalMaskShape.createGeometryMask());
+      }
       this.hoja.play(side?'hoja-walk':'hoja-idle',true);
       if(side)this.hoja.anims.timeScale=.65;
       this.tweens.add({targets:this.hoja,x:arrival.sx,y:arrival.foot,duration:800,delay:100,ease:'Sine.InOut',onComplete:()=>{
         this.hoja.setDepth(12);this.hoja.anims.timeScale=1;
+        if(arrivalMaskShape){this.hoja.clearMask(true);arrivalMaskShape.destroy();}
         body.body.reset(arrival.sx,arrival.foot-21);body.body.enable=true;
         this.pipeArrivalCooldownUntil=this.time.now+500;
         this.transitioning=false;this.makerPipeArrival=null;
@@ -6506,6 +6518,10 @@ class HojaScene extends Phaser.Scene{
     if(cam.zoom<stageFitZoom)cam.setZoom(stageFitZoom);
     const w=cam.width/Math.max(.01,cam.zoom);
     const h=cam.height/Math.max(.01,cam.zoom);
+    const swimCameraTarget=this.hojaSwimActive?.05:1;
+    const cameraStep=Math.min(1,(this.game.loop.delta||16.67)/400);
+    this._hojaSwimCameraSmooth=(this._hojaSwimCameraSmooth??1)+(swimCameraTarget-(this._hojaSwimCameraSmooth??1))*cameraStep;
+    if(Math.abs(this._hojaSwimCameraSmooth-swimCameraTarget)<.002)this._hojaSwimCameraSmooth=swimCameraTarget;
     const safe=hojaCameraSafeView({
       viewW:w,viewH:h,worldW:WORLD_W,
       worldBottom:this.camBottom||SURFACE_VIEW_BOTTOM,
@@ -6513,7 +6529,7 @@ class HojaScene extends Phaser.Scene{
       initialLift:!HOJA_MAKER_MODE&&STAGE_INDEX===0&&STAGE.theme!=='cave'?20:0,
       sleeping:this.visualState==='hoja-sleep',
       prevLeft:this._hojaSafePrevLeft,prevTop:this._c1ViewTop,
-      manual:HOJA_C1_MANUAL_CAMERA,smoothManual:!!this.hojaSwimActive,smoothing:this.hojaSwimActive?.05:.10
+      manual:HOJA_C1_MANUAL_CAMERA,smoothManual:this._hojaSwimCameraSmooth<.999,smoothing:this._hojaSwimCameraSmooth
     });
     this._c1ViewTop=safe.top;
     this._hojaSafePrevLeft=safe.left;
