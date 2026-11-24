@@ -111,19 +111,13 @@ function qrCanvas(text){
 }
 function hhmm(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
 function showCode(r){
- const digits=String(r.code);const left=h('div',{class:'h15Meta'});
- const tick=()=>{const m=Math.max(0,Math.round((r.expiresAt-Date.now())/60000));left.textContent=m>0?hhmm(r.expiresAt)+'까지 사용 가능 (약 '+(m>=60?Math.floor(m/60)+'시간 ':'')+(m%60)+'분 남음)':'코드가 만료되었어요. 재발급을 눌러 주세요.';};
- tick();state.timer=setInterval(tick,20000);
+ const digits=String(r.code);   // teacher (40-6CH): label + number only; no unit / time / link text
  const copy=h('button',{type:'button',id:'hoja15JoinCopy',onclick:async()=>{const t=r.url||digits;try{await navigator.clipboard.writeText(t);copy.textContent='복사됨 ✓';}catch(e){copy.textContent='복사 실패';}setTimeout(()=>copy.textContent=r.url?'링크 복사':'코드 복사',1600);}},r.url?'링크 복사':'코드 복사');
  open('code',h('div',{class:'h15Board'},
   r.url?h('div',{class:'h15Qr'},qrCanvas(r.url)):null,
   h('div',{class:'h15Info'},
    h('div',{class:'h15Label',text:'학생 참여 코드'}),
    h('div',{class:'h15Digits',id:'hoja15JoinDigits',text:digits.slice(0,3)+' '+digits.slice(3)}),
-   h('div',{class:'h15Meta',text:MODE_NAME[r.mode]+' · '+unitText(r.names)}),left,
-   r.url?h('div',{class:'h15Note',text:'카메라로 QR을 찍거나, 이 주소에서 [참여 코드 입력]에 숫자 6자리를 넣으세요.'})
-        :h('div',{class:'h15Note',text:'학생은 게임 주소에서 [참여 코드 입력]을 누르고 숫자 6자리를 넣으세요.'}),
-   r.url?h('div',{class:'h15Link',id:'hoja15JoinUrl',text:r.url}):null,
    h('div',{class:'h15Actions'},copy,
     h('button',{type:'button',id:'hoja15JoinReissue',onclick:()=>{if(state.timer){clearInterval(state.timer);state.timer=0;}issue(true);}},'재발급'),
     h('button',{type:'button',class:'h15Go',id:'hoja15JoinTeacherStart',onclick:()=>{if(state.timer){clearInterval(state.timer);state.timer=0;}const go=state.pending;close();if(typeof go==='function')go();}},'선생님도 바로 시작'),

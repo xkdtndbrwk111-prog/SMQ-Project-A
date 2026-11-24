@@ -6,7 +6,7 @@
  * The student URL used for the QR comes from the optional bundle-only constant HOJA15_JOIN_STUDENT_URL_
  * (written by assemble_hoja15_production.py, never committed); getUrl() is only a fallback when it ends in /exec. */
 const HOJA15_JOIN_PREFIX_='HOJA15_JOIN_';
-const HOJA15_JOIN_TTL_MS_=6*60*60*1000;
+const HOJA15_JOIN_TTL_MS_=8*60*60*1000;   // teacher (40-6CH): 8 hours
 const HOJA15_JOIN_MAX_ACTIVE_=400;
 const HOJA15_JOIN_MODES_=['arcade','quiz'];
 const HOJA15_JOIN_SEASONS_=['spring','summer','autumn','winter'];

@@ -25,7 +25,7 @@ test('create -> resolve returns only mode/names/season; stores no question data 
   const stored = JSON.parse(p.props.get('HOJA15_JOIN_' + r.code));
   assert.deepEqual(Object.keys(stored).sort(), ['expires', 'issued', 'mode', 'names', 'season', 'tokenHash', 'v']);
   assert.ok(!JSON.stringify(stored).includes(r.token), 'raw token never stored');
-  assert.equal(stored.expires - stored.issued, 6 * 3600 * 1000);
+  assert.equal(stored.expires - stored.issued, 8 * 3600 * 1000);
 });
 
 test('invalid selections and unknown cartridges are refused', () => {
@@ -48,7 +48,7 @@ test('typo / expired / revoked codes give clear errors; expired entries are swep
   assert.equal(p.call(`hojaJoinRevoke('${a.code}',${JSON.stringify(a.token)})`), true);
   assert.match(err(p, `hojaJoinResolve('${a.code}')`), /HOJA15_JOIN_NOT_FOUND/);
   const b = p.call(`hojaJoinCreate({mode:'quiz',names:${JSON.stringify(names)}})`);
-  p.clock.ms += 6 * 3600 * 1000 + 1;
+  p.clock.ms += 8 * 3600 * 1000 + 1;
   assert.match(err(p, `hojaJoinResolve('${b.code}')`), /HOJA15_JOIN_EXPIRED/);
   const c = p.call(`hojaJoinCreate({mode:'arcade',names:${JSON.stringify(names)}})`);
   assert.deepEqual(joinKeys(p), ['HOJA15_JOIN_' + c.code], 'old codes swept on create');

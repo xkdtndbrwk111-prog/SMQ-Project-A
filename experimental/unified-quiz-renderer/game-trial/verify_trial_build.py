@@ -13,7 +13,7 @@ ORIGINAL=ROOT/'versions/2.0.0/Game.html.parts'
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
 # 40-6BF: arcade ranking patch applied before the approved patch (was de83f2e30c03b082b7acbdf47a2c42bb2bc98eeb)
-EXPECTED_14='883f38c87d82cbe014243a3c9caa794b43eddd54'   # 40-6BG: raw arcade for practice (was 47faed97…, de83f2e3…)
+EXPECTED_14='28848912bc1a8aec9e43785a76b707ddaab814ef'   # 40-6CH: quiz label without 'Project B' (was 883f38c8…, 47faed97…, de83f2e3…)
 def gitblob(data):
     return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():

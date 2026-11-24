@@ -78,12 +78,13 @@ async def main():
         info = await t.evaluate("""(lib)=>{eval(lib);const c=document.querySelector('#hoja15JoinLayer .h15Qr canvas');
           const x=c.getContext('2d').getImageData(0,0,c.width,c.height);const r=jsQR(x.data,c.width,c.height);
           const d=document.getElementById('hoja15JoinDigits').getBoundingClientRect(),q=c.getBoundingClientRect();
-          return {decoded:r&&r.data,link:document.getElementById('hoja15JoinUrl')?.textContent||'',digitsPx:parseFloat(getComputedStyle(document.getElementById('hoja15JoinDigits')).fontSize),
+          return {decoded:r&&r.data,link:c.dataset.text||'',textUnder:[...document.querySelectorAll('#hoja15JoinLayer .h15Info > div')].map(e=>e.className),digitsPx:parseFloat(getComputedStyle(document.getElementById('hoja15JoinDigits')).fontSize),
             qrPx:Math.round(q.width),fits:q.right<=innerWidth&&q.bottom<=innerHeight&&d.right<=innerWidth&&d.bottom<=innerHeight}}""", jsqr)
         out['teacherCode'] = {'digits': len(code1), **{k: v for k, v in info.items() if k not in ('decoded', 'link')},
                               'qrDecodesToLink': info['decoded'] == info['link'], 'linkEndsWithJoin': info['link'].endswith('?join=' + code1)}
         ok(len(code1) == 6 and info['decoded'] == info['link'] and info['link'].endswith('/exec?join=' + code1), 'QR_OR_CODE')
         ok(info['digitsPx'] >= 120 and info['qrPx'] >= 600 and info['fits'], 'BOARD_SIZE ' + json.dumps(info))
+        ok(info['textUnder'] == ['h15Label', 'h15Digits', 'h15Actions'], 'ONLY_LABEL_AND_NUMBER ' + json.dumps(info['textUnder']))   # 40-6CH
         await shot(t, 'join_code_1920.png')
         for vw, vh, nm in ((1280, 720, '1280'), (390, 844, '390')):
             await t.set_viewport_size({'width': vw, 'height': vh}); await t.wait_for_timeout(300)

@@ -34,7 +34,7 @@ function doGet(e) {
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
   return HtmlService.createHtmlOutputFromFile('Game')
-    .setTitle('HOJA QUIZ 2.0')
+    .setTitle('HOJA QUIZ 1.5')   // teacher (40-6CH): browser tab / app name
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
