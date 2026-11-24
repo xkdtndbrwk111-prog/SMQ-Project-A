@@ -21,6 +21,12 @@ for(const [before,after] of RANKING){const first=ranked.indexOf(before);
 assert(!game.includes('for(const [before,after] of rankingPatch)'),'launch() must not re-apply the ranking patch on the approved-patched arcade');
 const patched=patchApprovedArcadeInnerHTML(ranked);
 assert(patched.includes('hojaArcadeApprovedChildTrial'));
+// 40-6CB: 6 question spots per map (30) while the run still ends at 25
+assert(patched.includes("pick('question',6)")&&patched.includes('model.questionPoints.length!==6')&&patched.includes("if(questionCount!==6)"),'cave must place 6 question balloons');
+assert(patched.includes('function hoja15AddSixthBalloon(st){')&&patched.includes('hoja15AddSixthBalloon(st);\n  if(stageQuestionCount(st)!==6)'),'surface maps must add a 6th balloon');
+assert(patched.includes('const TOTAL_QUESTIONS=25;')&&!patched.includes('const TOTAL_QUESTIONS=5*STAGES.length;'),'the run must still end at 25 questions');
+assert(patched.includes("m.found===25&&m.answered===25&&m.usedFamilies===25"),'approved ranking still requires 25/25/25');
+console.log('ARCADE_30_SPOTS_25_QUESTIONS_STATIC_PASS');
 assert(patched.includes('hojaTrialControlsHelpScript'),'H help panel must be injected');
 assert(patched.includes('jump:this.input.keyboard.addKey(K.PERIOD)'),'Period must be jump');
 assert(patched.includes('run:this.input.keyboard.addKey(K.COMMA)'),'Comma must be run');

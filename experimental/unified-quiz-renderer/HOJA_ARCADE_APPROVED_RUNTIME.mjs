@@ -87,11 +87,69 @@ export function patchApprovedArcadeInnerHTML(html){
   const anchor=head+'/^[가-힣A-Z0-9]{2,6}$/.test(hojaRankNormalize_(r.name))&&';
   s=substituteOnce(s,anchor,anchor+'!HOJA_RANK_FORBIDDEN_.has(hojaRankNormalize_(r.name))&&');
  }
+ s=patchArcadeQuestionSpots(s);
  s=patchArcadeControls(s);
  // HOJA 1.5: the approved parent renderer shows the question below the HUD. The original in-game quiz overlay
  // stays active (pause/input) but transparent, so the HUD (score, questions, time) is never covered.
  s=substituteOnce(s,'</head>','<style id="hoja15ArcadeQuizUnderlay">#quizOverlay.active{background:transparent!important}#quizOverlay.active #quizCard{visibility:hidden!important}</style>\n</head>');
  return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
+}
+
+/* 40-6CB (teacher): 6 question balloons per map (5 maps = 30 spots) while the run still ends at 25 questions.
+ * Surface maps: after the random assembly, ONE extra balloon is placed on the floor spot FARTHEST from every existing
+ * question point (balloons, hidden-quiz stones, secrets), away from start/goal/water/caves/springs/walkers, and only
+ * accepted if the stage's own reachability audit (checkStage) reports nothing new. Cave: the generator picks 6 question
+ * rooms (distinct rooms, >= 8 tiles apart) and the fixed fallback cave gets a 6th balloon (moved by its own safe-spot pass).
+ * TOTAL_QUESTIONS, the 25-question deck guard and the approved 25/25/25 ranking condition stay 25. */
+const SIXTH_BALLOON_FN=`function hoja15AddSixthBalloon(st){
+  const pts=[...st.enemies.filter(e=>e.type==='BALLOONEY').map(e=>({x:e.x,y:e.y-25})),
+    ...st.bricks.filter(b=>b.hiddenQuiz).map(b=>({x:b.x+16,y:b.y+16})),
+    ...(st.secrets||[]).map(b=>({x:b.x+16,y:b.y+16}))];
+  const grounds=st.solids.filter(s=>s.kind==='ground');
+  const top=x=>{let b=null;for(const s of grounds)if(x>=s.x&&x<s.x+s.w)b=b===null?s.y:Math.min(b,s.y);return b;};
+  const near=(ranges,x,m)=>(ranges||[]).some(([a,b])=>x>T(a)-m&&x<T(b)+m);
+  const boxes=[...st.solids,...(st.crumbles||[]),...(st.rafts||[]).map(r=>({x:r.x,y:r.y,w:r.w,h:TILE})),
+    ...st.bricks.map(b=>({x:b.x,y:b.y,w:32,h:32})),...(st.secrets||[]).map(b=>({x:b.x,y:b.y,w:32,h:32}))];
+  const before=checkStage(st).length;
+  // strict pass first; later passes only shrink the safety margins (never the reachability audit)
+  // far enough from every existing ? first (>= 12 tiles); only if no such safe spot exists, take the farthest safe one
+  for(const [sg,wc,en,far] of [[10,3,3,12],[6,2,1,12],[4,1,-1,12],[6,2,1,0],[4,1,-1,0]]){
+    const cands=[];
+    for(const s of grounds)for(let x=s.x+TILE;x<=s.x+s.w-TILE;x+=TILE){
+      if(top(x)!==s.y)continue;
+      const y=s.y-2*TILE;
+      if(Math.abs(x-T(st.start))<sg*TILE||Math.abs(x-T(st.goal))<sg*TILE)continue;
+      if(near(st.water,x,wc*TILE)||near(st.caves,x,wc*TILE))continue;
+      if((st.springs||[]).some(p=>Math.abs(p.x+16-x)<2*TILE))continue;
+      if((st.moving||[]).some(m=>{const l=m.axis==='x'?m.min:m.x,r=m.axis==='x'?m.max+m.w:m.x+m.w;return x+2*TILE>l&&x-2*TILE<r;}))continue;
+      if(en>=0&&st.enemies.some(e=>e.type!=='BALLOONEY'&&x+en*TILE>e.min&&x-en*TILE<e.max&&Math.abs(e.y-s.y)<5*TILE))continue;
+      if(boxes.some(o=>o!==s&&x+24>o.x&&x-24<o.x+o.w&&o.y<s.y&&o.y+(o.h||TILE)>y-96))continue;
+      cands.push({x,y,d:Math.min(...pts.map(p=>Math.hypot(p.x-x,p.y-(y-25))))});
+    }
+    cands.sort((a,b)=>b.d-a.d);
+    for(const c of cands){
+      if(c.d<far*TILE)break;
+      st.enemies.push({type:'BALLOONEY',x:c.x,y:c.y,min:c.x-2*TILE,max:c.x+2*TILE,hoja15Sixth:true});
+      if(checkStage(st).length<=before){st.hoja15SixthBalloon={x:Math.round(c.x/TILE),nearestTiles:Math.round(c.d/TILE),pass:sg*100+far};return st;}
+      st.enemies.pop();
+    }
+  }
+  throw new Error('HOJA15_SIXTH_BALLOON_NO_SAFE_SPOT_'+st.id);
+}
+`;
+export function patchArcadeQuestionSpots(html){
+ let s=html;
+ s=substituteOnce(s,"pick('question',5)","pick('question',6)");
+ s=substituteOnce(s,"if(map.questions.length!==5)errors.push('QUESTION_COUNT');","if(map.questions.length!==6)errors.push('QUESTION_COUNT');");
+ s=substituteOnce(s,"model.questionPoints.length!==5","model.questionPoints.length!==6");
+ s=substituteOnce(s,"if(questionCount!==5)throw new Error('CAVE_QUESTION_COUNT_MISMATCH');","if(questionCount!==6)throw new Error('CAVE_QUESTION_COUNT_MISMATCH');");
+ s=substituteOnce(s,"    caveBalloon(101,110),    // deep end chamber\n","    caveBalloon(101,110),    // deep end chamber\n    caveBalloon(44,74),      // HOJA 1.5: 6th question (moved by the safe-spot pass if blocked)\n");
+ s=substituteOnce(s,"function capSurfaceQuestions(st){",SIXTH_BALLOON_FN+"function capSurfaceQuestions(st){\n  st.enemies=st.enemies.filter(e=>!e.hoja15Sixth);   // a reused template never keeps an old 6th");
+ // keep the original 5 (same trimming as before), then add the far-away 6th
+ s=substituteOnce(s,"  if(count!==5)throw new Error(`Surface level ${st.id} has ${count} ? pickups, expected 5`);",
+  "  if(count!==5)throw new Error(`Surface level ${st.id} has ${count} ? pickups, expected 5`);\n  hoja15AddSixthBalloon(st);\n  if(stageQuestionCount(st)!==6)throw new Error(`Surface level ${st.id} expected 6 ? pickups`);");
+ s=substituteOnce(s,"const TOTAL_QUESTIONS=5*STAGES.length;","const TOTAL_QUESTIONS=25;");
+ return s;
 }
 
 /* 40-6BG: the HOJA control contract (A/D move, W door, S down/pipe, ',' run, '.' jump, Enter confirm, H help) as ONE
