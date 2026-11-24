@@ -1,0 +1,74 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "invalid_height",
+  "name": "평지와 톱날",
+  "description": "Phase 4D 시험 코스에서 추출한 시험 조각",
+  "difficulty": "medium",
+  "dependencies": [
+    "Phase 4D 기믹"
+  ],
+  "source": {
+    "path": "verification/phase4d/gimmick-course.json",
+    "mapId": "phase4d-gimmick-course",
+    "x": 0,
+    "width": 32
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 21
+    }
+  },
+  "map": {
+    "id": "segment_1",
+    "theme": "grassland",
+    "width": 32,
+    "height": 24,
+    "spawn": {
+      "x": 4,
+      "y": 22
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 32,
+        "h": 2
+      }
+    ],
+    "objects": [
+      {
+        "id": "start",
+        "type": "maker_start",
+        "x": 2,
+        "y": 18,
+        "w": 4,
+        "h": 4
+      },
+      {
+        "id": "ground-saw",
+        "type": "gimmick",
+        "x": 20,
+        "y": 20,
+        "w": 4,
+        "h": 4,
+        "gimmick": {
+          "kind": "saw",
+          "axis": "x",
+          "distance": 128,
+          "speed": 45,
+          "radius": 28,
+          "embedded": true
+        }
+      }
+    ],
+    "events": []
+  }
+}

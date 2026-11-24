@@ -1,0 +1,73 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "practice_3",
+  "name": "송풍기와 골인",
+  "description": "Phase 4D 시험 코스에서 추출한 시험 조각",
+  "difficulty": "medium",
+  "dependencies": [
+    "Phase 4D 기믹"
+  ],
+  "source": {
+    "path": "verification/phase4d/gimmick-course.json",
+    "mapId": "phase4d-gimmick-course",
+    "x": 64,
+    "width": 32
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 22
+    }
+  },
+  "map": {
+    "id": "segment_3",
+    "theme": "grassland",
+    "width": 32,
+    "height": 24,
+    "spawn": {
+      "x": 4,
+      "y": 22
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 32,
+        "h": 2
+      }
+    ],
+    "objects": [
+      {
+        "id": "steady-wind",
+        "type": "gimmick",
+        "x": 7,
+        "y": 17,
+        "w": 12,
+        "h": 5,
+        "gimmick": {
+          "kind": "fan",
+          "direction": "left",
+          "power": 780,
+          "period": 5000,
+          "on": 5000
+        }
+      },
+      {
+        "id": "goal",
+        "type": "maker_goal",
+        "x": 26,
+        "y": 18,
+        "w": 4,
+        "h": 4
+      }
+    ],
+    "events": []
+  }
+}

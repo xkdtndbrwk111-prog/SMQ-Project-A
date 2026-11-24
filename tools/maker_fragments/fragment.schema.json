@@ -1,0 +1,15 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://hoja.example/schema/maker-fragment-1.json",
+  "title":"HOJA Maker Fragment v1",
+  "type":"object",
+  "required":["format","schemaVersion","id","name","map","connectors"],
+  "properties":{
+    "format":{"const":"HOJA_MAKER_FRAGMENT"},"schemaVersion":{"const":1},
+    "id":{"type":"string","pattern":"^[A-Za-z0-9_-]{1,48}$"},"name":{"type":"string","minLength":1},"description":{"type":"string"},
+    "difficulty":{"enum":["easy","medium","hard"]},"dependencies":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "connectors":{"type":"object","required":["entry","exit"],"properties":{"entry":{"$ref":"#/$defs/connector"},"exit":{"$ref":"#/$defs/connector"}}},
+    "map":{"type":"object","required":["id","theme","width","height","terrain","objects","events"],"properties":{"id":{"type":"string","pattern":"^[A-Za-z0-9_-]{1,48}$"},"theme":{"enum":["grassland","autumn","tropics","winter","cave"]},"width":{"type":"integer","minimum":4,"maximum":512},"height":{"type":"integer","minimum":24,"maximum":256},"spawn":{"type":"object"},"terrain":{"type":"array","items":{"$ref":"#/$defs/item"}},"objects":{"type":"array","items":{"$ref":"#/$defs/item"}},"events":{"type":"array","items":{"type":"object","required":["id"]}}}}
+  },
+  "$defs":{"connector":{"type":"object","required":["kind","y"],"properties":{"kind":{"const":"ground"},"y":{"type":"integer","minimum":0}}},"item":{"type":"object","required":["id","x","y","w","h"],"properties":{"id":{"type":"string","pattern":"^[A-Za-z0-9_-]{1,48}$"},"x":{"type":"integer","minimum":0},"y":{"type":"integer","minimum":0},"w":{"type":"integer","minimum":1},"h":{"type":"integer","minimum":1}}}}
+}

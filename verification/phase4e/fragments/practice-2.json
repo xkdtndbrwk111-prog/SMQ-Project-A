@@ -1,0 +1,80 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "practice_2",
+  "name": "공중 톱날과 진자",
+  "description": "Phase 4D 시험 코스에서 추출한 시험 조각",
+  "difficulty": "medium",
+  "dependencies": [
+    "Phase 4D 기믹"
+  ],
+  "source": {
+    "path": "verification/phase4d/gimmick-course.json",
+    "mapId": "phase4d-gimmick-course",
+    "x": 32,
+    "width": 32
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 22
+    }
+  },
+  "map": {
+    "id": "segment_2",
+    "theme": "grassland",
+    "width": 32,
+    "height": 24,
+    "spawn": {
+      "x": 4,
+      "y": 22
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 32,
+        "h": 2
+      }
+    ],
+    "objects": [
+      {
+        "id": "air-saw",
+        "type": "gimmick",
+        "x": 2,
+        "y": 15,
+        "w": 4,
+        "h": 4,
+        "gimmick": {
+          "kind": "saw",
+          "axis": "x",
+          "distance": 96,
+          "speed": 45,
+          "radius": 28
+        }
+      },
+      {
+        "id": "swinging-ball",
+        "type": "gimmick",
+        "x": 17,
+        "y": 13,
+        "w": 4,
+        "h": 2,
+        "gimmick": {
+          "kind": "pendulum",
+          "length": 84,
+          "amplitude": 35,
+          "speed": 1.5,
+          "radius": 28
+        }
+      }
+    ],
+    "events": []
+  }
+}
