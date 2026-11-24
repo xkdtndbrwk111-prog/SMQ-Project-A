@@ -1,0 +1,14 @@
+# 40-6CA arcade slow motion after the first question — investigation (2026-11-24). No production push in this step.
+engine fact: HojaScene movement/enemies use dt=Math.min(delta,35)/1000 -> any frame over 35 ms runs the game slower than real time (slow motion), shared by HOJA 1.5 and the separate HOJA 2.0 arcade (teacher sees it in both)
+measured (headless Chromium, software WebGL ~30 fps baseline):
+PERF_AFTER_CLOSE 1 {'frames': 125, 'slowOver35ms': 10, 'p50': 30, 'p95': 64, 'max': 130, 'fit': 0, 'sel': 0}
+SHADER_COMPILES_SO_FAR 1 count 12 ms 900 largest [0, 7, 82, 99, 712]
+PERF_AFTER_CLOSE 2 {'frames': 135, 'slowOver35ms': 1, 'p50': 29, 'p95': 32, 'max': 129, 'fit': 0, 'sel': 0}
+SHADER_COMPILES_SO_FAR 2 count 12 ms 900 largest [0, 7, 82, 99, 712]
+PERF_AFTER_CLOSE 3 {'frames': 127, 'slowOver35ms': 13, 'p50': 30, 'p95': 46, 'max': 117, 'fit': 0, 'sel': 0}
+SHADER_COMPILES_SO_FAR 3 count 12 ms 900 largest [0, 7, 82, 99, 712]
+CPU profile of the first question close: 904 ms in WebGL getProgramParameter (Phaser 4 compiling shader variants on first use); question window (about:srcdoc) 12 ms
+first-use effects tried one by one: sparkle particles 3 programs; rectangle/score text/celebrate 0 after that
+pre-warming the sparkle at start: not conclusive in this environment (compile timing varies) -> reverted
+kept: the question window is now prepared when the arcade starts (teacher request), not at the first question
+next (needs the teacher's Mac/Chrome): chrome://gpu hardware acceleration, Energy Saver, other heavy tabs

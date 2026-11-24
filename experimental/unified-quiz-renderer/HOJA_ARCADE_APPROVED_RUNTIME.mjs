@@ -340,7 +340,12 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
  window.addEventListener('message',onMessage);
  window.addEventListener('keydown',shortcut,true);
  return Object.freeze({
-  configure(sources){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
+  configure(sources){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);
+   // HOJA 1.5: prepare the question renderer while the arcade is still starting, not at the first question.
+   // Its one-time load (renderer document, unit payload, images) otherwise ran into the first resume and the
+   // arcade (dt clamped at 35 ms) played in slow motion for a few seconds.
+   setTimeout(()=>{if(catalog)ensureHost().catch(()=>{})},0);
+   return catalog.count},
   patchHTML(html){if(!catalog)throw Error('ARCADE_APPROVED_NOT_CONFIGURED');return patchApprovedArcadeInnerHTML(html)},
   patchControls(html){return patchArcadeControls(html)},
   reset(){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},

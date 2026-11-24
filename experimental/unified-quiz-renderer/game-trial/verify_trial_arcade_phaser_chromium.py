@@ -23,6 +23,9 @@ async def run():
  p.add_argument('--movement-smoke',action='store_true')
  p.add_argument('--screens-dir',help='optional: save HOJA 1.5 verdict/results/review screenshots here')
  p.add_argument('--viewport',help='WxH, default 1280x800')
+ p.add_argument('--perf-probe',action='store_true')
+ p.add_argument('--cpu-profile')
+ p.add_argument('--shader-probe',action='store_true')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -92,6 +95,28 @@ async def run():
   print('ARCADE_REAL_PHASER_BOOT_PASS version',
    await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.Phaser.VERSION"),
    'phaserScriptsServed',loaded[0],flush=True)
+  if args.shader_probe or args.perf_probe:
+   await page.evaluate("""()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;
+     for(const pr of [w.WebGLRenderingContext?.prototype,w.WebGL2RenderingContext?.prototype]){if(!pr||pr.__qaw)continue;pr.__qaw=1;const g=pr.getProgramParameter;
+       pr.getProgramParameter=function(a,b){const t=w.performance.now();const r=g.call(this,a,b);const d=w.performance.now()-t;(w.__QA_GLC__=w.__QA_GLC__||[]).push(d);if(d>40)(w.__QA_GLS__=w.__QA_GLS__||[]).push({ms:Math.round(d),at:Math.round(t),stack:String(new Error().stack).split('\\n').filter(l=>!l.includes('phaser.min.js')).slice(0,8).join(' | ')});return r;};}}""")
+  if args.shader_probe:
+   # which first-time effect compiles a WebGL shader (slow-motion investigation)
+   await page.evaluate("""()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;
+     for(const pr of [w.WebGLRenderingContext?.prototype,w.WebGL2RenderingContext?.prototype]){if(!pr||pr.__qaw)continue;pr.__qaw=1;const g=pr.getProgramParameter;
+       pr.getProgramParameter=function(a,b){const t=w.performance.now();const r=g.call(this,a,b);const d=w.performance.now()-t;(w.__QA_GLC__=w.__QA_GLC__||[]).push(d);if(d>40)(w.__QA_GLS__=w.__QA_GLS__||[]).push({ms:Math.round(d),at:Math.round(t),stack:String(new Error().stack).split('\\n').filter(l=>!l.includes('phaser.min.js')).slice(0,8).join(' | ')});return r;};}}""")
+   await page.wait_for_timeout(1500)
+   async def step(label,js):
+    before=await page.evaluate("(document.getElementById('hqArcadeFrame').contentWindow.__QA_GLC__||[]).length")
+    await page.evaluate(js); await page.wait_for_timeout(700)
+    glc=await page.evaluate("(document.getElementById('hqArcadeFrame').contentWindow.__QA_GLC__||[])")
+    new=glc[before:]; print('SHADER_PROBE',label,'programs',len(new),'ms',round(sum(new)),flush=True)
+   S_="document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()"
+   await step('idle',"0")
+   await step('rectangle',"(()=>{const s="+S_+";const r=s.add.rectangle(0,0,40,40,0xffe58a,.7).setScrollFactor(0).setDepth(205);s.placeScreenSpaceObject(r,60,60,1);})()")
+   await step('scoreText',"(()=>{const s="+S_+";s.spawnScoreFly(10,s.playerBody.x,s.playerBody.body.top-6,'');})()")
+   await step('sparkle',"(()=>{const s="+S_+";s.emitClearSparkle(s.playerBody.x,s.playerBody.body.top,16);})()")
+   await step('celebrateCorrect',"(()=>{const s="+S_+";s.celebrateCorrect();})()")
+   await step('balloonConsumeTween',"0")
   if args.control_smoke:
    # Test H first in the freshly started arcade. Death retries are a separate
    # phase, because repeated respawns can steal focus from a nested srcdoc.
@@ -548,6 +573,7 @@ async def run():
     s.showQuiz(e);
     if(!e.consumed || e.alive)throw Error('ORIGINAL_BALLOON_NOT_CONSUMED');
    }''',{'i':i,'collisionFirst':args.collision_first})
+   if args.perf_probe and i<2: await page.evaluate("(()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;(w.__QA_EVT__=w.__QA_EVT__||[]).push(['balloon-hit',Math.round(w.performance.now())]);})()")
    if i==0 and args.collision_first:
     proof=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_REAL_BALLOON_COLLISION__")
     assert proof and proof['found']==1,proof
@@ -572,6 +598,7 @@ async def run():
        f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=2 &&
        document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
    }""",arg=canonical['id'],timeout=30000)
+   if args.perf_probe and i<2: await page.evaluate("(()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;(w.__QA_EVT__=w.__QA_EVT__||[]).push(['question-visible',Math.round(w.performance.now())]);})()")
    if i==0 and args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_question_open.png'))
    answer=canonical['answer']
    correct_id=str(answer['value']).lower() if row['type']=='OX' else answer['choiceId']
@@ -580,6 +607,9 @@ async def run():
    }""")
    assert correct_id in choices,(family,choices,correct_id)
    choose_id=correct_id if i%2==0 else next(v for v in choices if v!=correct_id)
+   if args.perf_probe and i<2: await page.evaluate("(()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;(w.__QA_EVT__=w.__QA_EVT__||[]).push(['before-answer-click',Math.round(w.performance.now())]);})()")
+   if i==0 and args.cpu_profile:
+    cdp=await page.context.new_cdp_session(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.setSamplingInterval',{'interval':500});await cdp.send('Profiler.start')
    if i==0:
     await page.evaluate("""()=>{const f=document.getElementById('hojaArcadeApprovedParentFrame');window.__QA_REVEALS__=window.__QA_REVEALS__||[];
       if(f&&!window.__QA_REVEAL_OBS__){window.__QA_REVEAL_OBS__=new MutationObserver(()=>{if(f.style.visibility!=='visible')return;
@@ -611,6 +641,22 @@ async def run():
     return w.__QA_ACTIVE_SCENE__()?.scene.isPaused()===false;
    }""",timeout=10000)
    print('ARCADE_ORIGINAL_SHOWQUIZ_FINISH_PASS',i+1,'expectedCorrect',i%2==0,state,flush=True)
+   if args.perf_probe and i<3:
+    # measure the arcade frame cadence right after the question closes (slow-motion investigation)
+    await page.evaluate("""()=>{const f=document.getElementById('hojaArcadeApprovedParentFrame');const w=f?.contentWindow;
+      window.__QA_FIT__=0;window.__QA_SEL__=0;try{if(w&&!w.__qaWrapped){w.__qaWrapped=1;const mf=w.measureAndFit,sc=w.selectComposition;
+        if(typeof mf==='function')w.measureAndFit=function(){window.__QA_FIT__++;return mf.apply(this,arguments)};
+        if(typeof sc==='function')w.selectComposition=function(){window.__QA_SEL__++;return sc.apply(this,arguments)};}}catch(e){}}""")
+    stats=await page.evaluate("""()=>new Promise(res=>{const aw=document.getElementById('hqArcadeFrame').contentWindow;const d=[];let last=aw.performance.now();const t0=last;
+      const step=()=>{const n=aw.performance.now();d.push(n-last);last=n;if(n-t0<4000)aw.requestAnimationFrame(step);else{
+        const slow=d.filter(x=>x>35).length;d.sort((a,b)=>a-b);res({frames:d.length,slowOver35ms:slow,p50:Math.round(d[Math.floor(d.length/2)]),p95:Math.round(d[Math.floor(d.length*.95)]),max:Math.round(d[d.length-1]),fit:window.__QA_FIT__,sel:window.__QA_SEL__});}};aw.requestAnimationFrame(step);})""")
+    print('PERF_AFTER_CLOSE',i+1,stats,flush=True)
+    if i<2: print('EVENTS',i+1,await page.evaluate("JSON.stringify(document.getElementById('hqArcadeFrame').contentWindow.__QA_EVT__||[])"),flush=True)
+    glc=await page.evaluate("(document.getElementById('hqArcadeFrame').contentWindow.__QA_GLC__||[]).map(x=>Math.round(x))")
+    print('SHADER_COMPILES_SO_FAR',i+1,'count',len(glc),'ms',sum(glc),'largest',sorted(glc)[-5:],flush=True)
+    if i==0: print('SLOW_COMPILE_STACKS',await page.evaluate("JSON.stringify(document.getElementById('hqArcadeFrame').contentWindow.__QA_GLS__||[])"),flush=True)
+    if i==0 and args.cpu_profile:
+     prof=await cdp.send('Profiler.stop');Path(args.cpu_profile).write_text(json.dumps(prof['profile']))
   if args.rounds==25:
    totals=await page.evaluate("""()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow;
