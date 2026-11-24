@@ -21,6 +21,7 @@ async def run():
  p.add_argument('--keyboard-smoke',action='store_true')
  p.add_argument('--control-smoke',action='store_true')
  p.add_argument('--movement-smoke',action='store_true')
+ p.add_argument('--screens-dir',help='optional: save HOJA 1.5 verdict/results/review screenshots here')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -576,7 +577,16 @@ async def run():
    }""")
    assert correct_id in choices,(family,choices,correct_id)
    choose_id=correct_id if i%2==0 else next(v for v in choices if v!=correct_id)
+   if i==0:
+    await page.evaluate("""()=>{window.__QA_VERDICTS__=[];new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes){
+      if(n.id==='hojaArcadeApprovedJudgment'){const c=n.firstElementChild;window.__QA_VERDICTS__.push({text:c?.textContent||n.textContent,bg:c?getComputedStyle(c).backgroundColor:'none'});}}})
+      .observe(document.getElementById('hojaArcadeApprovedParentOverlay'),{childList:true});}""")
    await page.frame_locator('#hojaArcadeApprovedParentFrame').locator('button.hqChoice[data-choice="'+choose_id+'"]').click(timeout=15000)
+   if i<2:
+    # HOJA 1.5: the verdict is a coloured card (green = correct, red = wrong), not plain white text.
+    await page.wait_for_function("(window.__QA_VERDICTS__||[]).length>="+str(i+1),timeout=8000)
+    verdict=(await page.evaluate("window.__QA_VERDICTS__"))[i]
+    assert verdict['bg'] in ('rgb(23, 108, 75)','rgb(163, 38, 58)') and (('정답' in verdict['text'])==(verdict['bg']=='rgb(23, 108, 75)')),verdict
    await page.wait_for_function('''(v)=>document.getElementById('hqArcadeFrame').contentWindow.__QA_ACTIVE_SCENE__()?.quizAnswered===v''',arg=i+1,timeout=10000)
    state=await page.evaluate('''()=>{
     const w=document.getElementById('hqArcadeFrame').contentWindow,s=w.__QA_ACTIVE_SCENE__(),r=w.__QA_RUN__();
@@ -634,6 +644,18 @@ async def run():
       const door=s.doors.find(d=>d.kind==='finish');
       s.enterDoor(door);
     }""")
+    # HOJA 1.5: the results screen stays up; review starts only when the player presses '오답 풀기'.
+    await page.wait_for_function("""()=>{
+      const w=document.getElementById('hqArcadeFrame').contentWindow;
+      return w.document.getElementById('step09RunResult')?.style.display==='block' && !!document.getElementById('hojaArcadeReviewStart');
+    }""",timeout=25000)
+    await page.wait_for_timeout(3000)
+    held=await page.evaluate("""()=>({bar:document.getElementById('hojaArcadeReviewBar')?.style.display||'',
+      result:document.getElementById('hqArcadeFrame').contentWindow.document.getElementById('step09RunResult')?.style.display,
+      button:document.getElementById('hojaArcadeReviewStart')?.textContent})""")
+    assert held['bar']!='flex' and held['result']=='block' and '오답 풀기 (12문항)' in held['button'],held
+    if args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_results_held.png'))
+    await page.locator('#hojaArcadeReviewStart').click(timeout=10000)
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return w.document.getElementById('step09RunResult')?.style.display==='block' &&
@@ -659,6 +681,10 @@ async def run():
           (()=>{try{return f.contentWindow.current().id===x.qid}catch(e){return false}})() &&
           (f?.contentDocument?.getElementById('hqQuestion')?.textContent?.trim()||'').length>0;
       }""",arg={'index':n,'qid':expected},timeout=20000)
+      if n==0:
+        size=await page.evaluate("(()=>{const r=document.getElementById('hojaArcadeApprovedParentFrame').getBoundingClientRect();return [Math.round(r.width),Math.round(r.height)]})()")
+        assert size[1]>=300,('REVIEW_FRAME_TOO_SMALL',size)
+        if args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_review_first.png'))
       label=await page.locator('#hojaArcadeReviewLabel').inner_text()
       assert ('오답 복습 '+str(n+1)+'/12') in label and '정답:' in label,label
       await page.locator('#hojaArcadeReviewNext').click(timeout=15000)

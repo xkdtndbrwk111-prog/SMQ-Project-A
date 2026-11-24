@@ -40,9 +40,11 @@ async def click_card(page, text):
     await btn.click()
 
 async def to_catalog(page):
+    # HOJA 1.5: the intro goes straight to the built-in catalog (no public/private choice); older builds still show it.
     for _ in range(6):
-        if await page.evaluate("!document.getElementById('hojaRepoChoice').hidden"): break
+        if await page.evaluate("!document.getElementById('hojaRepoChoice').hidden||!document.getElementById('hojaCatalog').hidden"): break
         await page.locator('#frame').click(position={'x': 200, 'y': 200}); await page.wait_for_timeout(700)
+    if await page.evaluate("!document.getElementById('hojaCatalog').hidden"): return
     assert await page.evaluate("!document.getElementById('hojaRepoChoice').hidden"), 'REPOSITORY_SCREEN_NOT_REACHED'
     await page.locator('#hrPublic').click()
     await page.wait_for_function("!document.getElementById('hojaCatalog').hidden", timeout=30000)

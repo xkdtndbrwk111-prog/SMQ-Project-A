@@ -29,8 +29,8 @@ if game.count(mark) == 1:
 # 40-6AI: the telemetry client policy changed (R7 queue rollover), so the patched game hash moved from 876933... (40-6AF).
 # Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
 # UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
-# 40-6BG: re-pinned after the practice-mode control update + rank-list forbidden-name filter (was 1cb387c7… after 40-6BF, 617f2228… before)
-ok(rc.get('rcGameSha256') == '22aa9041d0135564f8fa7ea346ed98009d0a70219f6901908d3c51280825eeff', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# 40-6BV: re-pinned after HOJA 1.5 UX fixes (was 22aa9041… 40-6BG, 1cb387c7… 40-6BF, 617f2228… before)
+ok(rc.get('rcGameSha256') == 'c62a8faf49cd62ff3c5bf32cb85b009d9e3175b160b9c4575e2db033502f2641', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}

@@ -311,6 +311,39 @@ window.HOJA_USAGE=Object.freeze({
 });
 </script>
 
+<style id="hoja15IntroSign">
+/* HOJA 1.5: blue intro sign, matching lettering, small version badge. */
+.logoBox{background:#5db3ff!important;border-color:#17305a!important;box-shadow:inset 0 0 0 5px #a6dbff,9px 10px 0 #26354a,0 0 0 4px #2d7cd0!important}
+.logoBox .main{color:#ffffff!important;text-shadow:3px 3px #2b6cb8,5px 6px #12305c!important}
+.logoBox .logoSub{color:#e9f6ff!important}
+.logoBox .hoja15Ver{position:absolute;right:14px;bottom:9px;padding:3px 9px;border-radius:999px;background:#17305a;color:#fff;font:900 clamp(11px,1.3vw,16px)/1 system-ui,sans-serif;letter-spacing:.04em}
+/* HOJA 1.5: built-in cartridges only (no public/private choice). Shown only as a retry screen if the list fails. */
+#hrPrivate,#hrPrivatePanel,.hrDemo{display:none!important}
+</style>
+<script id="hoja15BuiltInCatalog">
+(function(){
+ 'use strict';
+ const box=document.querySelector('#hojaLogo .logoBox');
+ if(box&&!box.querySelector('.hoja15Ver')){const v=document.createElement('span');v.className='hoja15Ver';v.textContent='1.5';box.append(v);}
+ const pub=document.getElementById('hrPublic');
+ if(pub){const t=pub.querySelector('strong'),d=pub.querySelector('small');if(t)t.textContent='내장 카트리지';if(d)d.textContent='문제 목록 다시 불러오기';}
+ const R=window.HOJA_REPOSITORY;
+ if(!R||typeof R.show!=='function'||typeof R.back!=='function')return;
+ // '이전' from the catalog's first step used to return to the public/private choice; now it returns to the intro.
+ let backAt=0;
+ document.addEventListener('click',e=>{if(e.target?.closest?.('#hojaSharedBack'))backAt=Date.now();},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')backAt=Date.now();},true);
+ const show=R.show;
+ R.show=function(){
+  show.apply(this,arguments);
+  if(Date.now()-backAt<800){R.back();return;}
+  // never start loading the catalog over a running game (e.g. the intro timer ending in the background)
+  const game=document.getElementById('hojaGamePlay');
+  if(game&&!game.hidden){R.hide?.();return;}
+  document.getElementById('hrPublic')?.click();   // straight to the built-in catalog
+ };
+})();
+</script>
 <script id="hojaTeacherToolsArcadeSourceV1">window.HOJA_TT_ARCADE_BRIDGE_SOURCE="  /* TT TOUCH V7: actual Phaser keys; acknowledge action from inner game. */\n  (function hojaTTArcadeTouchReceiver(){\n    const names=Object.freeze({ArrowLeft:'a',ArrowRight:'d',ArrowUp:'w',ArrowDown:'s',Space:'jump',ShiftLeft:'run',KeyF:'fps'});\n    const held=new Set();\n    function getKey(code){return ACTIVE_SCENE?.keys?.[names[code]]||null}\n    function releaseKey(code){\n      held.delete(code);const key=getKey(code);if(!key)return false;\n      key.isDown=false;key.isUp=true;key._justDown=false;key._justUp=true;key.timeUp=performance.now();return true;\n    }\n    function releaseAll(){for(const code of [...held])releaseKey(code)}\n    window.addEventListener('message',function(e){\n      if(e.source!==window.parent||!e.data||e.data.kind!=='HOJA_TT_ARCADE_INPUT')return;\n      const m=e.data;\n      if(m.action==='releaseAll'){releaseAll();return;}\n      if(!Object.prototype.hasOwnProperty.call(names,m.code)||!['down','up'].includes(m.action))return;\n      let applied=false;\n      if(m.action==='up'){applied=releaseKey(m.code)}\n      else {\n        const key=getKey(m.code);\n        if(key){\n          applied=true;\n          if(!held.has(m.code)){\n            held.add(m.code);key.isDown=true;key.isUp=false;\n            key._justDown=true;key._justUp=false;\n            key.timeDown=performance.now();key.repeats=0;\n          }\n          if(ACTIVE_SCENE?.quizActive){\n            const keyNames={ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight',ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',Space:' ',ShiftLeft:'Shift',KeyF:'f'};\n            window.dispatchEvent(new KeyboardEvent('keydown',{code:m.code,key:keyNames[m.code],bubbles:true}));\n          }\n        }\n      }\n      try{window.parent.postMessage({kind:'HOJA_TT_ARCADE_APPLIED',seq:m.seq,code:m.code,action:m.action,applied},'*')}catch{}\n    });\n    window.addEventListener('pagehide',releaseAll);\n    window.HOJA_TT_ARCADE_TOUCH_TEST={releaseAll,get held(){return [...held]}};\n  })();\n";</script>
 
 <script id="hojaTeacherToolsPracticeSourceV8">window.HOJA_TT_PRACTICE_SOURCE="/* Runs in the decoded tutorial document, with its existing state and keys. */\n(function(){\n 'use strict';\n const codes=new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','ShiftLeft','KeyF']);\n const held=new Set();\n const names={Space:' ',ShiftLeft:'Shift',KeyF:'f'};\n function ack(m,applied,stage){window.parent.postMessage({kind:'HOJA_TT_ARCADE_APPLIED',seq:m.seq,code:m.code,action:m.action,applied,stage},'*');}\n const toNew={ArrowLeft:'KeyA',ArrowRight:'KeyD',ArrowUp:'KeyW',ArrowDown:'KeyS',ShiftLeft:'Comma',Space:'Enter'};\n function dispatch(type,code){code=toNew[code]||code;window.dispatchEvent(new KeyboardEvent(type,{code,key:names[code]||code,bubbles:true,cancelable:true}));}\n function releaseAll(){for(const code of held){dispatch('keyup',code);keys.delete(toNew[code]||code)}held.clear();document.getElementById('hojaStage0Native')?.contentWindow?.postMessage({kind:'HOJA_TT_ARCADE_INPUT',action:'releaseAll'},'*');}\n window.addEventListener('message',e=>{\n  const native=document.getElementById('hojaStage0Native');\n  if(e.source===native?.contentWindow&&e.data?.kind==='HOJA_TT_ARCADE_APPLIED'){window.parent.postMessage(e.data,'*');return;}\n  if(e.source!==window.parent||e.data?.kind!=='HOJA_TT_PRACTICE_INPUT')return;\n  const m=e.data;\n  if(m.action==='releaseAll'){releaseAll();ack(m,true,'release');return;}\n  if(!codes.has(m.code)||!['down','up'].includes(m.action))return;\n  if(state.zone==='native'&&native&&(m.action==='up'||!state.dialogueOpen)){\n    if(m.action==='up'){held.delete(m.code);dispatch('keyup',m.code);keys.delete(toNew[m.code]||m.code)}\n    native.contentWindow.postMessage({...m,kind:'HOJA_TT_ARCADE_INPUT'},'*');return;\n  }\n  if(m.action==='down'){\n    window.focus();\n    if(!held.has(m.code)){held.add(m.code);dispatch('keydown',m.code)}\n  }else{held.delete(m.code);dispatch('keyup',m.code);keys.delete(toNew[m.code]||m.code)}\n  ack(m,true,state.dialogueOpen?'dialogue':'museum');\n });\n window.addEventListener('pagehide',releaseAll);\n})();\n";</script>

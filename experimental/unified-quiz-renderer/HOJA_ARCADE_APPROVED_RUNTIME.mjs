@@ -209,6 +209,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    await h.show({questionId:mapping.binding.questionId,mode:'solo',omitChoiceId:mapping.binding.omitChoiceId});
    if(local!==epoch||active?.id!==msg.id)return;
    overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();frame.style.visibility='visible';
+   // HOJA 1.5: keyboard focus was inside the Phaser frame; move it to the question so 1-3 / O·X work at once.
+   try{frame.focus();frame.contentWindow?.focus();}catch(_e){}
   }catch(e){if(local===epoch)error(e)}
  }
  function verdict(msg){
@@ -216,8 +218,12 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   if(msg.correct===false)wrong.set(active.familyKey+'\u0000'+active.kind,active.mapping);
   const mark=document.createElement('div');mark.id='hojaArcadeApprovedJudgment';
   mark.setAttribute('role','status');mark.setAttribute('aria-live','assertive');
-  mark.style.cssText='position:absolute;inset:0;z-index:10;display:grid;place-items:center;pointer-events:none;background:#07142190;color:#fff;font:bold clamp(28px,5vw,54px) system-ui';
-  mark.textContent=msg.correct?'✓ 정답! +10점':'✕ 오답 · 0점';
+  mark.style.cssText='position:absolute;inset:0;z-index:10;display:grid;place-items:center;pointer-events:none;background:rgba(5,12,21,.48)';
+  // HOJA 1.5: same clear verdict card as the solo quiz mode (green = correct, red = wrong).
+  const card=document.createElement('div');
+  card.style.cssText='border-radius:20px;box-shadow:0 12px 55px #000a;padding:22px 45px;max-width:90%;font:900 clamp(28px,4.5vw,54px)/1.2 system-ui,sans-serif;text-align:center;color:#fff;border:4px solid rgba(255,255,255,.75);background:'+(msg.correct?'#176c4b':'#a3263a');
+  card.textContent=msg.correct?'✓ 정답! +10점':'✕ 오답 · 0점';
+  mark.append(card);
   overlay?.querySelector('#hojaArcadeApprovedJudgment')?.remove();overlay?.append(mark);
  }
  function close(msg){
@@ -229,6 +235,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   if(frame){frame.style.visibility='hidden';frame.style.top='0';frame.style.height='100%';}
   if(reviewBar)reviewBar.style.display='none';
   if(overlay)overlay.style.display='none';
+  // HOJA 1.5: give the keyboard back to the game so the player can move without clicking.
+  try{if(frame&&document.activeElement===frame)frame.blur();const g=getArcadeFrame();g?.focus();g?.contentWindow?.focus();}catch(_e){}
  }
 
  function finishReview(){
@@ -251,7 +259,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   reviewNext.textContent=current.index===current.items.length-1?'복습 마치기':'다음 오답';
   reviewBar.style.display='flex';
   const barHeight=Math.ceil(reviewBar.getBoundingClientRect().height);
-  frame.style.top=barHeight+'px';frame.style.bottom='0';frame.style.height='auto';
+  // HOJA 1.5: an iframe does not stretch between top/bottom (height:auto = 150px -> the tiny review); size it explicitly.
+  frame.style.top=barHeight+'px';frame.style.bottom='';frame.style.height='calc(100% - '+barHeight+'px)';
   try{
    const h=await ensureHost();
    if(token!==epoch||review!==current)return;
@@ -277,8 +286,15 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    });
    if(!items.length)throw Error('ARCADE_REVIEW_EMPTY_REQUEST');
   }catch(e){error(e);return}
-  review={id:msg.id,items,index:0,loading:false};
-  showReviewItem();
+  review={id:msg.id,items,index:0,loading:false,waiting:true};
+  // HOJA 1.5: leave the results screen up; the player starts the review with a button (no auto jump).
+  const root=getContainer();
+  root?.querySelector('#hojaArcadeReviewStart')?.remove();
+  const go=document.createElement('button');go.id='hojaArcadeReviewStart';go.type='button';
+  go.textContent='오답 풀기 ('+items.length+'문항) ▶';
+  go.style.cssText='position:absolute;left:50%;bottom:6%;transform:translateX(-50%);z-index:5001;padding:14px 30px;border-radius:14px;border:3px solid #ffdb67;background:#a3263a;color:#fff;font:900 clamp(18px,2.4vw,28px) system-ui,sans-serif;box-shadow:0 8px 28px #000a;cursor:pointer';
+  go.onclick=()=>{go.remove();if(review===null||!review.waiting)return;review.waiting=false;showReviewItem();};
+  root?.append(go);
  }
  function shortcut(ev){
   if(review)return;
@@ -313,10 +329,10 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
  window.addEventListener('message',onMessage);
  window.addEventListener('keydown',shortcut,true);
  return Object.freeze({
-  configure(sources){review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
+  configure(sources){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
   patchHTML(html){if(!catalog)throw Error('ARCADE_APPROVED_NOT_CONFIGURED');return patchApprovedArcadeInnerHTML(html)},
   patchControls(html){return patchArcadeControls(html)},
-  reset(){review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
+  reset(){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
   get state(){return {configured:!!catalog,count:catalog?.count||0,activeId:active?.id||null,reviewIndex:review?.index??null,reviewCount:review?.items.length??0}}
  });
 }

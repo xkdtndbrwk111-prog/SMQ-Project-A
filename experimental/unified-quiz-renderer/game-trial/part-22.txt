@@ -253,6 +253,8 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  }
  function inputWindow(){return frame?.contentWindow||null}
  function error(reason){
+   // HOJA 1.5: closing the question frame on purpose ('이전', mode change) is not an error -> no alert.
+   if(/HOJA_FRAME_CLOSED/.test(String(reason?.message||reason)))return;
    const m='승인 공통 렌더러 연결 실패: '+String(reason?.message||reason);
    console.error('[HOJA unified team trial]',reason);
    window.alert(m+'\n점수와 팀 턴은 진행하지 않습니다.');
@@ -294,7 +296,8 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  function reveal(){
    const pane=overlay();pane.hidden=false;pane.dataset.hojaUnified='yes';
    const card=document.getElementById('hqCard');if(card)card.style.display='none';
-   if(frame)frame.hidden=false;
+   // HOJA 1.5: keep the frame invisible until the NEW question is drawn (no flash of the previous question).
+   if(frame){frame.style.visibility='hidden';frame.hidden=false;}
  }
  async function show(q,mode,onAnswer,caption=''){
    const token=++serial;answerHandler=null;clearJudgment();reveal();
@@ -306,6 +309,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      if(!q?.approvedBinding)throw Error('APPROVED_BINDING_REQUIRED');
      await h.show({questionId:q.approvedBinding.questionId,mode,omitChoiceId:q.approvedBinding.omitChoiceId});
      if(token!==serial)return;
+     if(frame)frame.style.visibility='visible';
      answerHandler=onAnswer;
    }catch(e){error(e);}
  }
@@ -318,6 +322,8 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  }
  function hide(){
    serial++;answerHandler=null;clearJudgment();
+   // HOJA 1.5: a mouse answer leaves keyboard focus inside the (now hidden) frame; give it back to the game.
+   if(frame&&document.activeElement===frame){try{frame.blur();window.focus();}catch(_e){}}
    if(host)host.suspend();
    if(frame)frame.hidden=true;
    if(header)header.style.display='none';
