@@ -1286,3 +1286,16 @@
 - [ ] GPT-6 독립 검수 40-6AP(미완료).
 - [ ] 실 격리 GAS R6 재실행(템플릿 반영 push 포함)과 group commit 채택 여부: **승인 대기 HOLD**.
 - [ ] 다음: 23단원 패키지 SHA/INDEX/overlay 확인, 격리 GAS 사전 조건 정리.
+
+
+### 40-6AQ. Claude 제출 — 23단원 런타임 패키지 감사 + 격리 GAS 사전 조건 (2026-11-24, 40-6AO 5번)
+**경계:** 오프라인 감사와 문서만 했다. GAS·QBank·배포는 일절 실행하지 않았다. GPT-6 감수는 미완료로 둔다.
+| 항목 | 상태 | 근거(`experimental/usage-v4-unified/evidence/aq/`) |
+|---|---|---|
+| 패키지 SHA/바이트/ID/문항 수 vs INDEX·승인 색인 | **LOCAL PASS** 23/23, 732문항 | `runtime_package_audit_23.*` |
+| 고정 원본 재빌드 동일성 | **LOCAL PASS** INDEX 23/23 동일 | `runtime_package_rebuild.txt` |
+| overlay·매체 권리·배포 | overlay 1단원, 매체 권리 **HOLD 23/23**, active entries **0** | 동상 |
+| QBank 게시, 실 content commit | **NOT RUN(승인 필요)** | `isolated_gas_prerequisites_20261124.md` |
+| 격리 GAS(push 크기 8.73 MB, 익명 배포, R6 재실행) | **NOT RUN / F4-SIZE-GATE OPEN** | 동상 |
+- [ ] GPT-6 독립 검수 40-6AQ(미완료).
+- [ ] 승인 대기: QBank 게시 / 격리 GAS push / 익명 시험 배포 / 실기록 감사·Seal·트리거(각각 별도).

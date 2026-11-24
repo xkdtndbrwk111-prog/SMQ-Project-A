@@ -684,3 +684,18 @@ Node: **97/97 PASS**(신규: LIST 핀은 원격 카탈로그에만 / 캐시 블�
   - `verify_real_gas_r6.py`: 요청별 결과 분류(acceptedStored, acceptedButMissing, failedNotStored, failedButStored, storedNotSent), 실패분만 같은 eventId로 1회 재전송, R6a~R6c와 최종 재검증 fail-fast assert.
 - **판정:** R6 서버 단독 **19/40 FAIL 유지**. 40 시작 → 40 고유 기록 / 중복 0의 저장 정확성은 클라이언트 재시도 없이는 **미입증이며 PASS가 아니다.** 실 격리 GAS 재실행은 승인 대기(HOLD).
 - 회귀: Node 123/123. mock 프로파일 도구는 `r6_lock_profile.mjs`.
+
+### 40-6AQ — 23단원 런타임 패키지 SHA/INDEX/overlay 확인 + 격리 GAS 사전 조건 (2026-11-24, 40-6AO 5번)
+- **오프라인 감사 `audit_runtime_packages.py`: LOCAL PASS.**
+  - 23단원 / 732문항. 모든 패키지의 바이트 수와 SHA-256이 INDEX와 일치하고, ID·문항 수가 승인 색인과 일치한다. 목록 밖 파일은 없다.
+  - sourceCommit `9573f91`이 세 파일(INDEX, 승인 색인, active-deployment)에서 일치한다.
+  - 깨끗한 고정 checkout에서 다시 빌드한 INDEX가 동일하다(23/23).
+  - media overlay는 1단원에 있다. 매체 권리는 **23/23 HOLD**, active entries는 **0**.
+- **미게시:** 패키지는 QBank 저장소에 올리지 않았다. pin은 여전히 시험용 placeholder commit이다. 게시에는 승인이 필요하다.
+- **격리 GAS 사전 조건(미실행):**
+  - 번들 8.73 MB(Game.html 8.63 MB). F4-SIZE-GATE OPEN이고, 실제 저장은 한 번도 시도하지 않았다.
+  - 저장소는 격리 사본만 쓴다.
+  - R6 재실행 준비는 끝났다.
+  - auto-seal은 비활성이고, 트리거 코드는 없다.
+  - R7 실기록 감사와 자정 시험은 NOT RUN이다.
+- **필요 승인(각각 별도):** ① QBank 게시 ② 격리 GAS push(크기 시도 포함) ③ 익명 시험 배포 ④ 실기록 감사와 Seal/트리거. 상세: `evidence/aq/isolated_gas_prerequisites_20261124.md`.

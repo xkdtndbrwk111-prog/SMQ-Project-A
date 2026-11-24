@@ -1,0 +1,3 @@
+# Rebuild from pinned HOJA-QUESTION-BANK 9573f91 (clean checkout, 0 local changes) -> INDEX compared with the audited packages
+{"sourceCommit":"9573f91d2845a9667e2540df051f499d937dd94a","units":23,"ready":23,"readyQuestions":732,"blocked":0,"blockedQuestions":0,"packageBytes":5367321,"ms":141,"qa":{"qaEntries":23,"qaQuestions":732,"out":"<SCRATCH>","contentSource":"GITHUB_RAW_PINNED_V1"},"packagesOut":{"out":"<SCRATCH>","files":23,"bytes":5799408},"mode":"WRITTEN"}
+INDEX (cartridgeId sha256 bytes) x23: REBUILD_IDENTICAL
