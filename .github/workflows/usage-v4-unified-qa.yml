@@ -1,0 +1,74 @@
+name: HOJA usage V4 40-6-U single Project A GAS (mock, no Google access)
+on:
+  push:
+    branches:
+      - work/usage-v4-40-6-u-20261123
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  QBANK_TOKEN: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
+jobs:
+  unified:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check single-GAS bundle
+        run: |
+          for f in experimental/usage-v4-unified/gas/*.gs; do
+            cp "$f" "$RUNNER_TEMP/$(basename "$f").js"; node --check "$RUNNER_TEMP/$(basename "$f").js"
+          done
+      - name: Existing V4 suites (regression, unchanged sources)
+        run: |
+          node --test experimental/usage-retention/HOJA_USAGE_V4_CORE.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_TRIAL_GAS.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_SHA256_AUDIT_ONLY.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TAIL.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_LIVE_TRIAL_GAS.test.mjs
+          node --test experimental/usage-retention/HOJA_USAGE_V4_APPEND_GUARD_TRIAL.test.mjs
+      - name: 40-6-U1 single GAS writer / seal / public reader (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs
+      - name: 40-6-U2 anonymous RPC surface + game bytes unchanged (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs
+      - name: 40-6-U3 boundaries / storms / scale (mock GAS, not the real engine)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
+      - name: 40-6-U A approved-source index (fixture shapes, auto-discovery, fail-closed, committed real index)
+        run: node --test experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+      - name: 40-6-U B embedded active catalog equals index + teacher deployment manifest (drift)
+        run: node experimental/usage-v4-unified/approved-catalog/build_active_catalog.mjs --check
+      - name: 40-6-U B/C/D active gate, legacy/approved era, R6 loss fix incl. client retry (mock GAS)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_D.test.mjs
+      - name: 40-6 F1 approved content packager, GAS lazy loader, QA/release build split (fixture + committed report)
+        run: node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs
+      - name: Pinned HOJA-QUESTION-BANK checkout (only if a read token secret is configured)
+        id: qbank
+        if: ${{ env.QBANK_TOKEN != '' }}
+        env:
+          QBANK_TOKEN: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
+        uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 9573f91d2845a9667e2540df051f499d937dd94a
+          token: ${{ secrets.HOJA_QBANK_READ_TOKEN }}
+          path: qbank
+      - name: 40-6-U A rebuild index from the pinned source and fail on drift
+        if: ${{ steps.qbank.outcome == 'success' }}
+        run: |
+          node experimental/usage-v4-unified/approved-catalog/build_approved_index.mjs --qbank qbank --check
+          node experimental/usage-v4-unified/approved-catalog/build_content_packages.mjs --qbank qbank --check
+          node experimental/unified-quiz-renderer/extract_math_display.mjs --qbank qbank --check
+      - name: Install Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: 40-6-U2 offline anonymous Stats.html browser test (no network, stubbed RPC)
+        run: |
+          node experimental/usage-v4-unified/make_stats_payloads.mjs "$RUNNER_TEMP/payloads.json"
+          python3 experimental/usage-v4-unified/verify_stats_chromium.py "$RUNNER_TEMP/payloads.json"

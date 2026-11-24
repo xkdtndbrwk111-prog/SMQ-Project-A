@@ -1,0 +1,7 @@
+{
+ "schemaVersion": "hoja-approved-deployment-v1",
+ "deploymentId": "none-approved-yet",
+ "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+ "note": "Teacher APPROVAL of content is not DEPLOYMENT. Add an entry only with an explicit teacher deployment approval (teacherDeploymentApproval APPROVED + approvedOn), the exact effectiveSha256 from generated/approved-source-index.json, rendererGate PASS, questionValidationGate PASS, and media rights CLEARED or mediaRightsAcknowledged true.",
+ "entries": []
+}

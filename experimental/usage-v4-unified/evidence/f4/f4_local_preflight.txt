@@ -1,0 +1,13 @@
+# F4 local preflight of the exact F4 bundle (mock GAS, offline Chromium)
+NEGATIVE: real-isolated-id QA catalog loaded in a different (mock) project -> hojaListPublicCartridges {"ok":false,"e":"APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED"}
+server code identical to repo: Code.gs UsageV4Core.gs UsageV4Public.gs UsageV4Unified.gs (cmp)
+POSITIVE twin (only allowedScriptIds differs = mock id):
+{"unit": "math5-s2-u4", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+F3_UI_E2E_PASS {"cases": 4}
+e2e exit=0
+{"unit": "eng5-ham-u10", "turnsAnswered": 24, "byType": {"SHORT": 4, "MCQ": 14, "OX": 6}, "shortTeacherJudged": 4, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 200점", "최종 0점"], "usageRows": 1, "rankRpc": 0}
+F3_TEAM_FULL_PASS
+team exit=0

@@ -1,0 +1,128 @@
+# F3-2 local evidence (2026-11-23). HOJA-QUESTION-BANK pin 9573f91. Offline Chromium; RPCs served by the real single-GAS sources in the mock engine (qa_mock_gas_server.mjs) over a QA bundle; Phaser 4.2.1 npm-packed (sha256 prefix 66348b1b). Counts/codes only, no content.
+## QA bundle game: trial game + composed renderer + patched telemetry
+telemetryBlockOldSha256 18bc5697b7e8 (replaced) patchedGameSha256 2a5b31f0a17c
+## UI E2E (intro -> 공개 카트리지 -> LIST -> grade/subject/publisher/unit cards -> GET -> mode buttons -> approved question -> answer/verdict; usage row checked in backend)
+{"unit": "eng5-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u11", "flow": "SOLO", "choicesShown": 2, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u11", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u12", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 3, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u12", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u10", "flow": "TEAM", "choicesShown": 3, "imagesShown": 3, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 3, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u12", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u12", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u10", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u11", "flow": "TEAM", "choicesShown": 3, "imagesShown": 3, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u12", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u5", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u5", "flow": "TEAM", "choicesShown": 3, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u6", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u6", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u4", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u4", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u5", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u5", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u6", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u6", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-1-common", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-1-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-2-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-2-common", "flow": "TEAM", "choicesShown": 2, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+F3_UI_E2E_PASS {"cases": 46}
+e2e exit=0
+## fail-closed 23-unit gate (run_f3_all_units.py)
+eng5-ham-u10 | solo PASS | team PASS | arcade PASS
+eng5-ham-u11 | solo PASS | team PASS | arcade PASS
+eng5-ham-u12 | solo PASS | team PASS | arcade PASS
+eng5-ybm-kim-u10 | solo PASS | team PASS | arcade PASS
+eng5-ybm-kim-u11 | solo PASS | team PASS | arcade PASS
+eng5-ybm-kim-u12 | solo PASS | team PASS | arcade PASS
+eng6-ham-u10 | solo PASS | team PASS | arcade PASS
+eng6-ham-u11 | solo PASS | team PASS | arcade PASS
+eng6-ham-u12 | solo PASS | team PASS | arcade PASS
+eng6-ybm-kim-u10 | solo PASS | team PASS | arcade PASS
+eng6-ybm-kim-u11 | solo PASS | team PASS | arcade PASS
+eng6-ybm-kim-u12 | solo PASS | team PASS | arcade PASS
+math5-s2-u4 | solo PASS | team PASS | arcade PASS
+math5-s2-u5 | solo PASS | team PASS | arcade PASS
+math5-s2-u6 | solo PASS | team PASS | arcade PASS
+math6-s2-u4 | solo PASS | team PASS | arcade PASS
+math6-s2-u5 | solo PASS | team PASS | arcade PASS
+math6-s2-u6 | solo PASS | team PASS | arcade PASS
+soc5-s2-u2-2-common | solo PASS | team PASS | arcade PASS
+soc5-s2-u3-1-common | solo PASS | team PASS | arcade PASS
+soc5-s2-u3-2-common | solo PASS | team PASS | arcade PASS
+soc6-s2-u3-1-common | solo PASS | team PASS | arcade PASS
+soc6-s2-u3-2-common | solo PASS | team PASS | arcade PASS
+F3_ALL_UNITS_PASS {"units": 23, "expected": 23, "failed": [], "pass": true}
+gate exit=0
+## real Phaser arcade, 25 balloons + wrong-answer review + FINISH + read-only rank + Korean IME + TIME UP, approved sources
+### math5-s2-u4
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### eng5-ham-u10
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### eng6-ybm-kim-u10
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### eng6-ham-u10
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### soc5-s2-u2-2-common
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### soc5-s2-u3-1-common
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}
+### soc6-s2-u3-1-common
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 130} blocked26th {'consumed': False, 'alive': True, 'found': 25, 'history': 25, 'warning': '25개 문제를 모두 사용했습니다. 추가 중복 출제는 차단됩니다.'}
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 730
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answered': 25, 'correct': 13, 'wrong': 12, 'quizPoints': 130, 'score': 730, 'flowers': 0, 'flowerBonus': 0, 'timeBonus': 600, 'otherPoints': 0, 'remainingSeconds': 600}, 'rank': {'open': True, 'score': 730, 'serverSaved': False}, 'title': 'STEP
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'serverSaved': False}, 'title': 'STEP 09-3 · 시간 종료 · 문항·점수 정산 확인', 'type': 'TIME UP', 'message': '시간 종료 · 랭킹 등록은 FINISH로만 가능합니다.'}

@@ -1,0 +1,4 @@
+{"viewport": "1920x1080", "mathQuestions": 187, "domEqual": 0, "differ": 187, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [{"id": "m5u4:q01", "fields": ["c"]}, {"id": "m5u4:q02", "fields": ["c"]}, {"id": "m5u4:q03", "fields": ["c"]}, {"id": "m5u4:q04", "fields": ["c"]}, {"id": "m5u4:q05", "fields": ["c"]}, {"id": "m5u4:q06", "fields": ["c"]}], "jsErrorsApproved": [], "jsErrorsComposed": []}
+{"viewport": "1280x720", "mathQuestions": 187, "domEqual": 0, "differ": 187, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [{"id": "m5u4:q01", "fields": ["c"]}, {"id": "m5u4:q02", "fields": ["c"]}, {"id": "m5u4:q03", "fields": ["c"]}, {"id": "m5u4:q04", "fields": ["c"]}, {"id": "m5u4:q05", "fields": ["c"]}, {"id": "m5u4:q06", "fields": ["c"]}], "jsErrorsApproved": [], "jsErrorsComposed": []}
+F2_MATH_PARITY_FAIL
+exit=1

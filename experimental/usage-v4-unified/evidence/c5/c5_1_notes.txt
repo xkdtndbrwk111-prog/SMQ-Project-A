@@ -1,0 +1,4 @@
+# C5-1 reproduction notes
+First attempt (pre-fix, X cache hit touched to newest): P1 did NOT reproduce — LRU recency hid the defect (log not kept separately; scenario then sharpened).
+Sharpened scenario: X in use by GET#1 but made the OLDEST record (lost touch / clock step / another tab) before GET#2 stores -> pre-fix: X EVICTED while in use (FAIL); fixed: kept (PASS).
+P2/P3 pre-fix FAIL only because the old block exposes no protection state (protectedUnits added for dev diagnostics).

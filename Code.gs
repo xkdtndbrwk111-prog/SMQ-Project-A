@@ -350,11 +350,21 @@ function recordUsageStartU1(payload){
   if(!lock.tryLock(10000))throw new Error('USAGE_APPEND_LOCK_TIMEOUT');
   try{
     const now=new Date(),date=Utilities.formatDate(now,'Asia/Seoul','yyyy-MM-dd');
-    sh.appendRow([
+    const usageRow=[
       eventId,now,date,mode,'PUBLIC',extra.grade,extra.subject,extra.publisher,
       hojaUsageText_(names.join(' | '),500),names.length,teams,ids.join('|'),
       'PUBLIC:'+hojaProdPublicId_(),'U3S1',JSON.stringify(names)
-    ]);
+    ];
+    // Opt-in isolated-copy guard only; unconfigured production keeps U1 logic.
+    // Project A's ScriptLock covers this guard and the existing append.
+    const flag=String(PropertiesService.getScriptProperties()
+      .getProperty('HOJA_USAGE_V4_TRIAL_APPEND_GATE')||'').trim();
+    if(flag){
+      if(flag!=='COPIED_SHEET_ONLY')throw Error('HOJA_V4_APPEND_TRIAL_MODE_DENIED');
+      const replay=hojaV4UsageTrialGuardU4_(sh,usageRow,statsId);
+      if(replay)return replay;
+    }
+    sh.appendRow(usageRow);
     SpreadsheetApp.flush();
     return {ok:true,repositoryKind:'PUBLIC',cartridgeCount:names.length,usageSchemaVersion:'U3S1'};
   }finally{lock.releaseLock()}

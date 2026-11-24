@@ -1,0 +1,23 @@
+# 40-6AV R6 minimal push to the ISOLATED test project (approval 40-6AU, comment 7121015087), 2026-11-24 KST. IDs/tokens omitted.
+target: clasp project name prefix 'HOJA V4 40-6U ISOLA' (isolated test project, not production); same scriptId in 3 local dirs (fingerprint only kept locally)
+pre-push remote backup (clasp pull, 9 files):
+  ApprovedActiveCatalog.js 522 9ad9d58f
+  Code.js 25617 35ff13aa
+  Game.html 7213184 f9647ad6
+  Stats.html 14636 b3da909d
+  TestOnlyU3.js 7198 81b65e59
+  UsageV4Core.js 10306 d4ec5268
+  UsageV4Public.js 12964 a45a6fab
+  UsageV4Unified.js 24301 ba832744
+  appsscript.json 347 68158339
+backup == 11-23 R6 push folder byte-identical for all code/html files (Game.html f9647ad6 = R6 bundle); appsscript.json differs by trailing newline only (pushed unchanged from the backup)
+push copy vs backup: ONLY TestOnlyU3.js differs:
+  105c105,106
+  <   duplicateRows:rows.length-ids.size,invalidRows:invalid,schema,watermark:hojaV4uReadWatermark_(ctx)};
+  ---
+  >   duplicateRows:rows.length-ids.size,invalidRows:invalid,schema,watermark:hojaV4uReadWatermark_(ctx),
+  >   eventIds:rows.length<=500?rows.map(r=>r[0]):null};   // 40-6AP: random test UUIDs only (per-request outcome check)
+clasp push --force: exit 0
+post-push clasp pull: remote == push copy (diff -rq empty); remote vs backup: only TestOnlyU3.js differs
+rollback: push $S/r6b_backup back (kept locally)
+deployment: clasp create-deployment was BLOCKED by the local agent permission classifier (not executed, not retried); teacher UI deployment requested

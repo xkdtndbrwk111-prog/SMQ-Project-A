@@ -1,0 +1,5 @@
+# 40-6AY single read-only public stats check on the temporary isolated deployment @6, 2026-11-24 13:40 KST, signed-out Chromium (?view=stats)
+getPublicUsageStatisticsV4: {"rpcOk": true, "status": "OK", "code": null, "totals": {"days30": 4439, "all": 17819, "today": 78, "days7": 1217}, "provisionalDays": ["2026-11-23", "2026-11-24"]}
+page renders: title + anonymous notice + legacy-era notice + provisional notice + today 78 / 7d 1,217 / 30d 4,439 / all 17,819
+Verdict: trial smoke NORMAL. The R6b +40 public delta remains NOT MEASURED (the earlier pre-R6b non-OK status/code was not captured;
+it is not known whether it was a data fault; the 40-6AW phrase 'not a data fault' is withdrawn as unsupported).

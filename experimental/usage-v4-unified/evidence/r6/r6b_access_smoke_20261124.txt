@@ -1,0 +1,12 @@
+# 40-6AW anonymous access smoke on the TEMPORARY isolated R6 deployment (version @6), 2026-11-24 KST, fresh signed-out Chromium
+hojaV4OpsStatus: DENIED
+hojaV4TestEvidenceU3 token=wrong: DENIED
+hojaV4TestEvidenceU3 token=empty: DENIED
+hojaV4TestTailU3 token=wrong: DENIED
+hojaV4TestTailU3 token=empty: DENIED
+hojaV4TestColdU3 token=wrong: DENIED
+hojaV4TestColdU3 token=empty: DENIED
+hojaV4TestClearCacheU3 token=wrong: DENIED
+hojaV4TestClearCacheU3 token=empty: DENIED
+ACCESS_SMOKE_PASS 9/9 denied
+exit=0

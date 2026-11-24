@@ -1,0 +1,13 @@
+# F1-B local evidence (2026-11-23). HOJA-QUESTION-BANK pin 9573f91. Counts/hashes only; no question text or images.
+## composed renderer
+{"bridgeSha256":"12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157","extSha256":"6e8a77f1c5463a662f6e64c10d5d2d1c2878554d54bc38d64e31d598165e9715","composedSha256":"fcceadae54ac6edcf9c92f79d23d4b40a60cec4acaa42ec9ddb99cd150283b00"}
+## content report
+{"units":23,"ready":23,"readyQuestions":732,"blocked":0,"adapters":{"renderer-v2":16,"presentation-v3":6,"display-overlay-v1":1},"mediaQuestions":6,"imageBytesDiffer":0,"imageBytesChecked":199}
+## mock GAS lazy loader (QA bundle, 23 units)
+{"units": 23, "questions": 732, "missingImages": 0, "loadMsMax": 5}
+## unchanged bridge vs composed renderer, offline Chromium, every question
+{"viewport": "1920x1080", "questions": 732, "noMediaIdenticalDom": 726, "noMediaDomDiffers": 0, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1280x720", "questions": 732, "noMediaIdenticalDom": 726, "noMediaDomDiffers": 0, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1024x768", "questions": 732, "noMediaIdenticalDom": 726, "noMediaDomDiffers": 0, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "390x844", "questions": 732, "noMediaIdenticalDom": 726, "noMediaDomDiffers": 0, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+F1B_RENDER_PASS

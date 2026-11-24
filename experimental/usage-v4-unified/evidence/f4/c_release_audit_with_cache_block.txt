@@ -1,0 +1,3 @@
+{"bundle": "c2lite_rel", "synthetic": true, "activeEntries": 23, "contentFiles": 0, "contentSource": "GITHUB_RAW_PINNED_V1", "bundleBytes": 8742075, "rcGameSha256": "617f2228285ab5dd8fd0af6cb2de47354142c9f9d46b29db0a1ea73dbae60456", "patchedGameSha256": "105dad4bbfbe468f8a9b71c7de2ad7a264bd36b374b4d8656cca5737443d3879", "composedRendererSha256": "d9e5547d8b41213ff6737d62dcb4119f36031e2794337330e51bfdc8e8bf2715", "part14Sha256": "cc872d05e87a91480ee0f41100e27f77bf1836e6ad605dcedc90bc7fdba48488", "part22Sha256": "f8b623b597d11cb2e3952e1626fcbc18f98cae5ebd715f1bbd129644cf9fedc7", "fails": []}
+RELEASE_CANDIDATE_AUDIT_PASS
+RELEASE_CANDIDATE_AUDIT_PASS

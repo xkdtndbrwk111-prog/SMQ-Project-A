@@ -1,0 +1,6 @@
+# RC audit after the telemetry client change
+new build (current client):
+RELEASE_CANDIDATE_AUDIT_PASS
+40-6AF build (old client) — must now FAIL:
+['TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT']
+RELEASE_CANDIDATE_AUDIT_FAIL

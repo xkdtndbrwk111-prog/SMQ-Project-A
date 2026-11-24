@@ -1,0 +1,14 @@
+✔ F4 GAS: remote catalog — only the selected unit is fetched from the pinned commit, verified, then served from a re-verified cache (2.2465ms)
+✔ F4 GAS: fail-closed — network error, non-200, tampered bytes, partial multi-unit failure, inactive id (8.758666ms)
+✔ F4 GAS: source pinning — branch names, other repos, path traversal are refused for list AND load (13.238375ms)
+✔ F4 GAS: a digest-valid package with bad media or tags is still refused (6.36675ms)
+✔ F4 builder: remote QA catalog ships NO content files and refuses mixing; a branch commit is refused (101.906041ms)
+ℹ tests 95
+ℹ suites 0
+ℹ pass 95
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 496.902
+exit=0

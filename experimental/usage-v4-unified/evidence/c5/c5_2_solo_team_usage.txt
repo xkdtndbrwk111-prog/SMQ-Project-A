@@ -1,0 +1,17 @@
+# SOLO+TEAM UI E2E (3 units x 2 flows) on the C5-2 lite build: exactly 1 new usage row per start
+{"unit": "math5-s2-u4", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+F3_UI_E2E_PASS {"cases": 6}
+GITHUB_STANDIN_REQUESTS 6 distinct 3 notFound 0
+exit=0
+
+# TEAM full play (2 units): usageRows 1 each, rankRpc 0
+{"unit": "math5-s2-u4", "turnsAnswered": 24, "byType": {"MCQ": 17, "OX": 5, "SHORT": 2}, "shortTeacherJudged": 2, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 180점", "최종 0점"], "usageRows": 1, "rankRpc": 0}
+{"unit": "eng5-ham-u10", "turnsAnswered": 24, "byType": {"SHORT": 2, "OX": 4, "MCQ": 18}, "shortTeacherJudged": 2, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 210점", "최종 0점"], "usageRows": 1, "rankRpc": 0}
+F3_TEAM_FULL_PASS
+GITHUB_STANDIN_REQUESTS 2 distinct 2 notFound 0
+exit=0

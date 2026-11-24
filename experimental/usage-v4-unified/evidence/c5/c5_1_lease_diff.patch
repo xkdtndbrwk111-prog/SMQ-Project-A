@@ -1,0 +1,59 @@
+--- a/ApprovedPackageCacheClient.html (40-6AF)	2026-11-24 09:42:49
++++ experimental/usage-v4-unified/gas/ApprovedPackageCacheClient.html	2026-11-24 09:44:20
+@@ -26,7 +26,13 @@
+ const baseRpc=live.rpc;
+ let catalog=new Map();            // game name -> verified pkg descriptor (from the current LIST only)
+ const inflight=new Map();         // sha256 -> Promise<text>  (one download per package per page)
+-const protect=new Set();          // unit ids in use / downloading / verifying
++// C5-1 (40-6AL): per-unit leases (reference counts) instead of one global set that each GET used to clear.
++// A unit stays protected from eviction/purge while ANY GET in this page is reading, downloading, verifying or
++// storing it; leases are released in finally (success, failure or exception).
++const leases=new Map();          // unit id -> number of GETs currently using it
++const isProtected=id=>(leases.get(id)||0)>0;
++const lease=ids=>{for(const id of ids)leases.set(id,(leases.get(id)||0)+1);
++ return ()=>{for(const id of ids){const n=(leases.get(id)||0)-1;if(n>0)leases.set(id,n);else leases.delete(id)}}};
+ const stats={hits:0,misses:0,downloads:0,downloadAttempts:0,relayed:0,stored:0,notStored:0,evicted:0,purged:0,discarded:0,idbErrors:0};
+ const enc=new TextEncoder();
+ const utf8Bytes=s=>enc.encode(s).length;
+@@ -87,9 +93,9 @@
+    const all=s.getAll();
+    all.onsuccess=()=>{
+     let live=all.result.filter(r=>r&&r.cartridgeId!==entry.id);
+-    for(const r of live.slice())if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!protect.has(r.cartridgeId)){s.delete(r.cartridgeId);stats.purged++;live=live.filter(x=>x!==r)}
++    for(const r of live.slice())if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!isProtected(r.cartridgeId)){s.delete(r.cartridgeId);stats.purged++;live=live.filter(x=>x!==r)}
+     let total=live.reduce((n,r)=>n+recSize(r),0);
+-    const lru=live.filter(r=>!protect.has(r.cartridgeId)).sort((a,b)=>(a.lastUsedAt||0)-(b.lastUsedAt||0));
++    const lru=live.filter(r=>!isProtected(r.cartridgeId)).sort((a,b)=>(a.lastUsedAt||0)-(b.lastUsedAt||0));
+     while(total+size>LIMIT_BYTES&&lru.length){const v=lru.shift();s.delete(v.cartridgeId);total-=recSize(v);stats.evicted++}
+     if(total+size>LIMIT_BYTES){stats.notStored++;return}   // protected units alone fill the limit
+     s.put(rec);stored=true;
+@@ -107,7 +113,7 @@
+   t.oncomplete=resolve;t.onerror=()=>reject(t.error);
+   const c=s.openCursor();
+   c.onsuccess=()=>{const cur=c.result;if(!cur)return;const r=cur.value;
+-   if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!protect.has(r.cartridgeId)){cur.delete();stats.purged++}cur.continue()};
++   if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!isProtected(r.cartridgeId)){cur.delete();stats.purged++}cur.continue()};
+  })}catch(_e){stats.idbErrors++}
+ }
+ /* ---------- validation (mirrors the GAS loader) ---------- */
+@@ -177,7 +183,10 @@
+ }
+ async function get(names){
+  const entries=names.map(n=>catalog.get(n));
+- protect.clear();entries.forEach(e=>protect.add(e.id));
++ const release=lease(entries.map(e=>e.id));
++ try{return await getLeased(names,entries)}finally{release()}
++}
++async function getLeased(names,entries){
+  const loaded=await Promise.all(entries.map(loadUnit));
+  const relayIdx=loaded.map((r,i)=>r.needsRelay?i:-1).filter(i=>i>=0);
+  if(relayIdx.length){
+@@ -217,7 +226,7 @@
+ async function diagnose(){   // developer diagnostics only (not shown to students)
+  const d=await db();let units=[];
+  if(d)try{units=(await tx(d,'readonly',s=>s.getAll())||[]).map(r=>({id:r.cartridgeId,sha8:String(r.packageSha256).slice(0,8),bytes:r.bytes,lastUsedAt:r.lastUsedAt}))}catch(_e){}
+- return {idb:d?'OK':'UNAVAILABLE',limitBytes:LIMIT_BYTES,usedBytes:units.reduce((n,u)=>n+u.bytes+META_BYTES,0),units,stats:Object.assign({},stats),catalogUnits:catalog.size};
++ return {idb:d?'OK':'UNAVAILABLE',protectedUnits:[...leases.keys()].sort(),limitBytes:LIMIT_BYTES,usedBytes:units.reduce((n,u)=>n+u.bytes+META_BYTES,0),units,stats:Object.assign({},stats),catalogUnits:catalog.size};
+ }
+ window.HOJA_APPROVED_PACKAGE_CACHE=Object.freeze({version:1,diagnose,get stats(){return Object.assign({},stats)}});
+ })();

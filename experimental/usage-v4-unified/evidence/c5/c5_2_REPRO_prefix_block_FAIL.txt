@@ -1,0 +1,19 @@
+# REPRO — pre-fix block (b58dd52 cache block), full B set, --deadline-ms 15000, real Chromium
+START B1
+B1_open_stalls_blocked_fallback_bounded FAIL {"result": null, "error": "HUNG>15000ms", "ms": 15002, "downloads": null, "idb": "DIAGNOSE_HUNG>15000ms"}
+START B2
+B2_versionchange_from_newer_tab_no_hang PASS {"newerTabOpen": {"opened": true, "blocked": false}, "result": ["soc6-s2-u3-1-common"], "error": null, "ms": 10, "downloads": 1}
+START B3
+B3_transaction_stall_bounded_fallback FAIL {"first": [null, "HUNG>15000ms", 15001], "second": [null, "HUNG>15000ms", 15002], "downloads": null}
+START B4_openError
+B4_openError_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 15, "storedUnits": 0, "idb": "UNAVAILABLE"}
+START B4_txAbort
+B4_txAbort_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 6, "storedUnits": 0, "idb": "OK"}
+START B5
+B5_real_pending_delete_stall_bounded_and_late_conn_closed FAIL {"otherTab": {"held": true, "deleteBlocked": true, "deleteDone": false}, "listErr": null, "result": null, "error": "HUNG>15000ms", "ms": 15001, "downloads": 1, "idb": "DIAGNOSE_HUNG>15000ms", "idbState": null, "stats": {"idbBlocked": null, "idbTimeouts": null, "stored": null}, "deleteAfterRelease": {"blocked": true, "done": true}, "v2OpenAfter": {"opened": true, "blocked": false}}
+START B6a
+B6a_stall_tampered_bytes_fail_closed FAIL {"result": null, "error": "HUNG>15000ms", "ms": 15001, "relayCalls": 0, "storedUnits": null}
+START B6b
+B6b_stall_github_down_relay_one_shot FAIL {"result": null, "error": "HUNG>15000ms", "ms": 15001, "relayCalls": 0, "relayed": null, "idb": "DIAGNOSE_HUNG>15000ms"}
+F4_CACHE_C5_FAIL ["B1_open_stalls_blocked_fallback_bounded", "B3_transaction_stall_bounded_fallback", "B5_real_pending_delete_stall_bounded_and_late_conn_closed", "B6a_stall_tampered_bytes_fail_closed", "B6b_stall_github_down_relay_one_shot"]
+exit=1

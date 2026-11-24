@@ -1,0 +1,49 @@
+{"unit": "eng5-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u12", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ham-u12", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u10", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng5-ybm-kim-u12", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u10", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ham-u12", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u10", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u10", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u11", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u11", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u12", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "eng6-ybm-kim-u12", "flow": "TEAM", "choicesShown": 3, "imagesShown": 3, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u4", "flow": "TEAM", "choicesShown": 1, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u5", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u5", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math5-s2-u6", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math5-s2-u6", "flow": "TEAM", "choicesShown": 3, "imagesShown": 1, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u4", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u4", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u5", "flow": "SOLO", "choicesShown": 3, "imagesShown": 1, "verdict": "✓ 정답! +10점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u5", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "math6-s2-u6", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "math6-s2-u6", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u2-2-common", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-1-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-1-common", "flow": "TEAM", "choicesShown": 3, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-2-common", "flow": "SOLO", "choicesShown": 2, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc5-s2-u3-2-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-1-common", "flow": "TEAM", "choicesShown": 1, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-2-common", "flow": "SOLO", "choicesShown": 3, "imagesShown": 0, "verdict": "✕ 오답 · 0점", "usageRow": "A1:SOLO", "telemetryRpcOk": true}
+{"unit": "soc6-s2-u3-2-common", "flow": "TEAM", "choicesShown": 2, "imagesShown": 0, "verdict": "team question shown", "usageRow": "A1:TEAM", "telemetryRpcOk": true}
+F3_UI_E2E_PASS {"cases": 46}
+GITHUB_STANDIN_REQUESTS 46 distinct 23 notFound 0
+exit=0

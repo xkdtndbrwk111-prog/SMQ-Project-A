@@ -1,0 +1,41 @@
+# F3 local evidence (2026-11-23). HOJA-QUESTION-BANK pin 9573f91. Trial 7MB game (experimental/unified-quiz-renderer/game-trial, NOT production) built with the composed renderer; sources = exact hojaGetApprovedQuestions output from the mock GAS loader over the QA bundle. Counts/codes only.
+## trial build
+TRIAL_ONLY 8604937 79a32bcb817a895faf4a22ce399d53d4bedd02c3475c9d89d97f24811fd553ab 
+## per unit: solo (MC/OX click+keyboard verdicts) | team first approved balloon | arcade iframe transport (MC+OX)
+eng5-ham-u10 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng5-ham-u11 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng5-ham-u12 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng5-ybm-kim-u10 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng5-ybm-kim-u11 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng5-ybm-kim-u12 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ham-u10 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ham-u11 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ham-u12 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ybm-kim-u10 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ybm-kim-u11 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+eng6-ybm-kim-u12 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math5-s2-u4 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math5-s2-u5 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math5-s2-u6 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math6-s2-u4 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math6-s2-u5 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+math6-s2-u6 | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+soc5-s2-u2-2-common | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+soc6-s2-u3-1-common | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+soc6-s2-u3-2-common | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+soc5-s2-u3-1-common | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+soc5-s2-u3-2-common | solo: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio pla | team: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS | arcadeTransportPass: 2
+## renderer regression (bridge vs composed) after F3 package changes
+{"viewport": "1920x1080", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1280x720", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "1024x768", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+{"viewport": "390x844", "questions": 732, "noMediaIdenticalDom": 539, "noMediaDomDiffers": 0, "profileQuestions": 187, "mediaQuestionsOk": 6, "mediaQuestionsBad": 0, "blank": 0, "jsErrors": [], "bad": []}
+F1B_RENDER_PASS
+## math parity
+{"viewport": "1920x1080", "mathQuestions": 187, "domEqual": 187, "differ": 0, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+{"viewport": "1280x720", "mathQuestions": 187, "domEqual": 187, "differ": 0, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+F2_MATH_PARITY_PASS
+## soc5 3-1/3-2 parity (with derived default-layout tags)
+{"viewport": "1920x1080", "questions": 64, "equal": 64, "differ": 0, "differingFields": {}, "examples": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+{"viewport": "1280x720", "questions": 64, "equal": 64, "differ": 0, "differingFields": {}, "examples": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+F2_SOC5_PARITY_PASS

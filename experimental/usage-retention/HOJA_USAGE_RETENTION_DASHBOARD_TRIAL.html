@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOJA 플레이 통계 — 시험용 요약 대시보드</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;color:#1f2937;background:#f4f6fb}
+*{box-sizing:border-box}body{margin:0}header{background:#17365b;color:white;padding:24px max(20px,calc((100% - 1080px)/2))}
+header h1{margin:0;font-size:25px}header p{margin:6px 0 0;color:#cddff5;font-size:14px}
+main{max-width:1080px;margin:auto;padding:24px 16px 48px}
+.notice{background:white;border:1px solid #c5d2e3;border-radius:14px;padding:15px 18px;font-size:14px}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:16px 0}
+button{border:0;border-radius:10px;padding:11px 17px;background:#235a92;color:white;font-weight:750;cursor:pointer}
+button:focus-visible{outline:3px solid #f9ad47}button.secondary{background:#e1eaf5;color:#20405e}
+input[type=file]{max-width:100%;font:inherit}
+.panels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.panel{background:#fff;border-radius:16px;padding:18px;border:1px solid #e0e5f0}
+.panel strong{display:block;font-size:28px;font-variant-numeric:tabular-nums}.panel small{color:#61738a;font-weight:650}
+.section-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+section{background:#fff;border:1px solid #e0e5f0;border-radius:16px;padding:20px;margin:0 0 16px}
+h2{font-size:17px;margin:0 0 12px}
+.bars{display:flex;gap:8px;min-height:175px;align-items:end;overflow-x:auto;padding-bottom:5px}
+.day{flex:1;min-width:38px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.meter{width:100%;min-height:5px;background:#4a84c1;border-radius:6px 6px 3px 3px}
+.day label{font-size:11px;color:#637083;white-space:nowrap}
+.rowstat{display:grid;grid-template-columns:105px minmax(90px,1fr) 52px;gap:10px;align-items:center;margin:11px 0;font-size:13px}
+.bar{background:#e7edf6;height:11px;border-radius:20px;overflow:hidden}.bar i{display:block;background:#4f9d92;height:100%;border-radius:20px}
+.rowstat .value{text-align:right;font-variant-numeric:tabular-nums;font-weight:750}
+.table-scroll{max-height:330px;overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:9px;border-bottom:1px solid #e8edf3}
+th{color:#52667d}td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.badges{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.badge{font-size:12px;border-radius:30px;padding:4px 9px;background:#ddecfb;color:#164f80;font-weight:750}
+.muted{color:#667789;font-size:13px}.error{color:#b22424;font-weight:700}footer{font-size:12px;color:#637083;margin-top:18px}
+@media(max-width:720px){.panels{grid-template-columns:repeat(2,1fr)}.section-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>HOJA 플레이 통계</h1><p>관리자 시험용 · 학생 개인 기록 없음 · 브라우저 안에서만 집계 결과 표시</p></header>
+<main>
+<div class="notice">
+ <div class="badges"><span class="badge">시험판</span><strong>Google Sheets 요약 결과 뷰어</strong></div>
+ <p>별도 <code>hojaUsageRetentionPreviewTrialU1()</code>가 반환한 집계 JSON을 파일로 저장해 열어보세요.
+ 이 페이지는 서버에 접속하거나 자료를 업로드하지 않으며, 기존 시트의 행을 수정하거나 삭제할 수 없습니다.</p>
+ <div class="controls"><input id="file" type="file" accept=".json,application/json" aria-label="집계 JSON 파일 선택">
+ <button id="example" class="secondary" type="button">예시 데이터 보기</button></div>
+ <div id="status" class="muted" role="status">아직 파일을 선택하지 않았습니다.</div>
+</div>
+<div class="panels">
+ <div class="panel"><small>총 플레이 시작</small><strong id="starts">—</strong></div>
+ <div class="panel"><small>완료 (확인된 건)</small><strong id="done">—</strong></div>
+ <div class="panel"><small>시간 종료</small><strong id="timedout">—</strong></div>
+ <div class="panel"><small>종료 미확인</small><strong id="unknown">—</strong></div>
+</div>
+<div class="section-grid">
+ <section><h2>날짜별 플레이 시작</h2><div id="days" class="bars"></div></section>
+ <section><h2>모드별 이용</h2><div id="modes"></div></section>
+</div>
+<section><h2>선택한 단원 TOP 10</h2><p class="muted">다중 단원 게임은 단원마다 1회씩 집계하므로 단원 선택 수를 더해 총 플레이 횟수로 사용하면 안 됩니다.</p>
+ <div class="table-scroll"><table><thead><tr><th>단원 ID</th><th>게임</th><th>선택 횟수</th></tr></thead><tbody id="units"></tbody></table></div>
+</section>
+<footer>로컬 검토용 화면입니다. 승인된 운영 대시보드나 Google Sheets/GAS 배포본이 아닙니다. 기존 U3S1 기록에는 종료 결과가 없어 UNKNOWN으로 분류합니다.</footer>
+</main>
+<script>
+(()=>{'use strict';
+ const $=id=>document.getElementById(id);
+ const format=v=>Number(v||0).toLocaleString('ko-KR');
+ const demo={
+  schema:'HOJA_USAGE_RETENTION_V1',source:'SAMPLE_ONLY',uniqueStarts:14,
+  totals:[
+   {date:'2026-11-20',gameId:'HOJA_ARCADE',mode:'SOLO',starts:4,completed:2,timeUp:1,unknownEnded:1},
+   {date:'2026-11-21',gameId:'HOJA_ARCADE',mode:'SOLO',starts:5,completed:3,timeUp:0,unknownEnded:2},
+   {date:'2026-11-21',gameId:'HOJA_ARCADE',mode:'TEAM',starts:2,completed:1,timeUp:0,unknownEnded:1},
+   {date:'2026-11-22',gameId:'HOJA_ARCADE',mode:'SOLO',starts:3,completed:1,timeUp:1,unknownEnded:1}
+  ],
+  dimensions:[
+   {cartridgeId:'사회6-1',gameId:'HOJA_ARCADE',starts:8},
+   {cartridgeId:'사회6-2',gameId:'HOJA_ARCADE',starts:5},
+   {cartridgeId:'수학6-1',gameId:'HOJA_ARCADE',starts:4}
+  ]
+ };
+ function parse(obj){
+  if(!obj||obj.schema!=='HOJA_USAGE_RETENTION_V1'||!Array.isArray(obj.totals)||
+    !Array.isArray(obj.dimensions))throw Error('HOJA 요약 데이터 구조가 아닙니다.');
+  const clean=(r,key)=>Number.isSafeInteger(r[key])&&r[key]>=0?r[key]:0;
+  const totals=obj.totals.map(r=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(r.date)))throw Error('날짜 구조 오류');
+    return {date:r.date,gameId:String(r.gameId||'기타').slice(0,64),
+      mode:String(r.mode||'기타').slice(0,64),starts:clean(r,'starts'),
+      completed:clean(r,'completed'),timeUp:clean(r,'timeUp'),
+      unknownEnded:clean(r,'unknownEnded')};
+  });
+  const dimensions=obj.dimensions.map(r=>({
+    cartridgeId:String(r.cartridgeId||'미지정').slice(0,90),
+    gameId:String(r.gameId||'기타').slice(0,64),starts:clean(r,'starts')
+  }));
+  return {totals,dimensions,source:obj.source};
+ }
+ function rowStat(label,count,max){
+  const wrap=document.createElement('div');wrap.className='rowstat';
+  const title=document.createElement('span');title.textContent=label;
+  const bar=document.createElement('div');bar.className='bar';
+  const filled=document.createElement('i');filled.style.width=(max?100*count/max:0)+'%';bar.append(filled);
+  const val=document.createElement('span');val.className='value';val.textContent=format(count);
+  wrap.append(title,bar,val);return wrap;
+ }
+ function render(data,sample){
+  const {totals,dimensions}=parse(data);
+  const sum=k=>totals.reduce((n,r)=>n+r[k],0);
+  $('starts').textContent=format(sum('starts'));
+  $('done').textContent=format(sum('completed'));
+  $('timedout').textContent=format(sum('timeUp'));
+  $('unknown').textContent=format(sum('unknownEnded'));
+  const byDay=new Map(),byMode=new Map(),byUnit=new Map();
+  for(const r of totals){
+   byDay.set(r.date,(byDay.get(r.date)||0)+r.starts);
+   byMode.set(r.mode,(byMode.get(r.mode)||0)+r.starts);
+  }
+  for(const r of dimensions){
+   const k=JSON.stringify([r.gameId,r.cartridgeId]);
+   const prev=byUnit.get(k)||{game:r.gameId,id:r.cartridgeId,count:0};
+   prev.count+=r.starts;byUnit.set(k,prev);
+  }
+  const days=[...byDay].sort((a,b)=>a[0].localeCompare(b[0])).slice(-14);
+  const top=Math.max(1,...days.map(r=>r[1]));
+  $('days').replaceChildren();
+  for(const [date,count] of days){
+   const cell=document.createElement('div');cell.className='day';cell.title=date+' '+format(count)+'회';
+   const bar=document.createElement('div');bar.className='meter';bar.style.height=(Math.max(4,count/top*150))+'px';
+   const label=document.createElement('label');label.textContent=date.slice(5);
+   const number=document.createElement('span');number.className='muted';number.textContent=format(count);
+   cell.append(number,bar,label);$('days').append(cell);
+  }
+  const modes=[...byMode].sort((a,b)=>b[1]-a[1]);$('modes').replaceChildren();
+  for(const [key,count] of modes)$('modes').append(rowStat(key,count,Math.max(1,...modes.map(x=>x[1]))));
+  $('units').replaceChildren();
+  for(const unit of [...byUnit.values()].sort((a,b)=>b.count-a.count).slice(0,10)){
+   const row=document.createElement('tr');
+   for(const value of [unit.id,unit.game,format(unit.count)]){
+    const cell=document.createElement('td');cell.textContent=value;row.append(cell);
+   }
+   $('units').append(row);
+  }
+  $('status').className='muted';
+  $('status').textContent=(sample?'예시용 가상 데이터입니다. ':'로컬 JSON 로딩 완료. ')+format(sum('starts'))+'회 · '+days.length+'개 날짜 · '+byUnit.size+'개 단원';
+ }
+ $('example').addEventListener('click',()=>render(demo,true));
+ $('file').addEventListener('change',async ev=>{
+  const file=ev.target.files?.[0];if(!file)return;
+  try{if(file.size>2_000_000)throw Error('2MB 미만의 요약 JSON만 지원합니다.');
+   render(JSON.parse(await file.text()),false);
+  }catch(err){$('status').className='error';$('status').textContent='불러오기 실패: '+String(err.message||err);}
+ });
+})();
+</script>
+</body>
+</html>

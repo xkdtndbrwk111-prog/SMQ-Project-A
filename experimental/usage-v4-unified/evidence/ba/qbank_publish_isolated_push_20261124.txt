@@ -1,0 +1,16 @@
+# 40-6BA QBank publish + isolated release push (teacher approval 40-6AZ), 2026-11-24 KST. IDs/tokens/URLs omitted.
+QBank: xkdtndbrwk111-prog/HOJA-QUESTION-BANK (public), main 9573f91 -> 440cc1fe60c6545004e9039bfa75142ff8fe8e7a
+  added only game-runtime/README.md + game-runtime/approved-packages/v1/ (23 packages + INDEX), = clean rebuild; audit PASS; no emails/links/tokens
+  QBank's own CI check-handoff was already failing on main before this commit (9573f91, 4cb87a8, 347ac6d: 'missing/duplicate workstreams')
+real raw.githubusercontent.com pinned to 440cc1f:
+  {"commit": "440cc1fe60c6545004e9039bfa75142ff8fe8e7a", "packages": 23, "shaAndBytesMatch": 23, "corsHeader": "*"}
+  RAW_GITHUB_PINNED_CHECK_PASS
+isolated release: QA variant, catalog contentSource GITHUB_RAW_PINNED_V1 @440cc1f, allowedScriptIds = isolated project only; 8 files 8,749,983 B + TestOnlyU3.js
+  mock twin (same commit, mock script id; Game.html byte-identical): UI E2E 3 units x SOLO/TEAM:
+    F3_UI_E2E_PASS {"cases": 6}
+    GITHUB_STANDIN_REQUESTS 6 distinct 3 notFound 0
+  backup before push: remote = 40-6AV state (kept locally)
+  clasp push --force: exit 0 (total 8,768,517 B) -> F4-SIZE-GATE CLOSED (earlier 14,766,720 B refused 'too large')
+  re-pull: 9/9 files byte-identical to the push folder
+  deployment @6 (teacher trial) is a fixed version -> unaffected
+deployment of the new version: clasp create-deployment BLOCKED by the local agent permission check (not bypassed) -> teacher UI needed

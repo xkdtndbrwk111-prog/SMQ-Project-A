@@ -1,0 +1,26 @@
+eng5-ham-u10 {"questions": 31, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng5-ham-u11 {"questions": 59, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng5-ham-u12 {"questions": 87, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng5-ybm-kim-u10 {"questions": 87, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng5-ybm-kim-u11 {"questions": 87, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng5-ybm-kim-u12 {"questions": 87, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng6-ham-u10 {"questions": 115, "leaks": 0, "mappingFail": 0, "verdictFail": 0}
+eng6-ham-u11 {"questions": 143, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+eng6-ham-u12 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+eng6-ybm-kim-u10 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+eng6-ybm-kim-u11 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+eng6-ybm-kim-u12 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math5-s2-u4 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math5-s2-u5 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math5-s2-u6 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math6-s2-u4 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math6-s2-u5 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+math6-s2-u6 {"questions": 170, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+soc5-s2-u2-2-common {"questions": 196, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+soc5-s2-u3-1-common {"questions": 196, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+soc5-s2-u3-2-common {"questions": 196, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+soc6-s2-u3-1-common {"questions": 196, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+soc6-s2-u3-2-common {"questions": 196, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+{"units": 23, "questions": 196, "mcq": 158, "ox": 38, "pictureChoice": 12, "cueChecked": 1, "leaks": 0, "mappingFail": 0, "verdictFail": 1}
+F3_HINT_MAPPING_FAIL [{"q": "eng6-ham-u11:q14", "verdict": "✕ 오답 · 0점", "before": {"page": "quiz", "season": "spring", "answered": 0, "correct": 0, "activeQuiz": false, "jumping": false}, "after": {"page": "quiz", "season": "spring", "answered": 1, "correct": 0, "activeQuiz": true, "jumping": false}}]
+hint exit=1

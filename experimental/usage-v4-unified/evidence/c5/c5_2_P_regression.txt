@@ -1,0 +1,6 @@
+# C5-1 P scenarios re-run on the C5-2 block
+P1_parallel_get_keeps_in_use_unit PASS {"xStoredWhileGet1Running": true, "storeAfterGet2": ["math5-s2-u4", "soc6-s2-u3-1-common"], "storeAfterBoth": ["eng5-ham-u10", "math5-s2-u4", "soc6-s2-u3-1-common"], "get1": ["math5-s2-u4", "eng5-ham-u10"]}
+P2_failed_get_releases_protection PASS {"getFailed": true, "protectedAfter": []}
+P3_shared_unit_held_until_all_gets_finish PASS {"protectedDuring": ["soc5-s2-u3-1-common"], "protectedAfter": []}
+F4_CACHE_C5_PASS []
+exit=0

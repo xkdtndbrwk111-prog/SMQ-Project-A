@@ -1,0 +1,2 @@
+{"bundle": "rcE_rel", "synthetic": false, "activeEntries": 0, "contentFiles": 0, "rcGameSha256": "617f2228285ab5dd8fd0af6cb2de47354142c9f9d46b29db0a1ea73dbae60456", "patchedGameSha256": "876933786d9cc3bb2dd412afe1823c78625d79747a8ffe4a03f1a25007c0fee7", "composedRendererSha256": "d9e5547d8b41213ff6737d62dcb4119f36031e2794337330e51bfdc8e8bf2715", "part14Sha256": "cc872d05e87a91480ee0f41100e27f77bf1836e6ad605dcedc90bc7fdba48488", "part22Sha256": "f8b623b597d11cb2e3952e1626fcbc18f98cae5ebd715f1bbd129644cf9fedc7", "fails": []}
+RELEASE_CANDIDATE_AUDIT_PASS

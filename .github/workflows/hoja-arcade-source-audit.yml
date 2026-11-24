@@ -1,0 +1,31 @@
+name: HOJA arcade packed-source input audit (trial only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect original compressed arcade keymap and death screen
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {gunzipSync} from 'node:zlib';
+          const root='experimental/unified-quiz-renderer/game-trial/';
+          const src=Array.from({length:25},(_,i)=>readFileSync(root+'part-'+String(i+1).padStart(2,'0')+'.txt','utf8')).join('');
+          const payload=src.match(/const HOJA_V051_ARCADE_GZIP='([^']+)'/);
+          if(!payload)throw new Error('Packed arcade missing');
+          const html=gunzipSync(Buffer.from(payload[1],'base64')).toString('utf8');
+          const needles=['  createInput(){','  update(time,delta){','this.keys.left','this.keys.right','this.keys.run','this.keys.x','this.keys.jump','this.keys.z','this.keys.up','this.keys.down','this.keys.hurryTest','this.hojaDoubleTap','this._hojaDeathKey=(ev)=>','showHojaDeathDialog','continueHojaAfterDeath','const upArrowPressed','const spacePressed','runHeld','runDown','leftHeld','rightHeld','moveSpeed','this.keys.enter'];
+          for(const needle of needles){
+            let from=0,count=0,clips=[];
+            while((from=html.indexOf(needle,from))>=0 && count<4){
+              clips.push(html.slice(Math.max(0,from-650),Math.min(html.length,from+1800)).replace(/\r/g,'').replace(/\n/g,'\\n'));
+              from+=needle.length;count++;
+            }
+            console.log('AUDIT_FOCUS',JSON.stringify(needle),'SAMPLES',JSON.stringify(clips));
+          }
+          JS

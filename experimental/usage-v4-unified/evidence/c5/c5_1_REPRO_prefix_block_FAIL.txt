@@ -1,0 +1,5 @@
+P1_parallel_get_keeps_in_use_unit FAIL {"xStoredWhileGet1Running": false, "storeAfterGet2": ["soc6-s2-u3-1-common", "zz-fill"], "storeAfterBoth": ["eng5-ham-u10", "soc6-s2-u3-1-common"], "get1": ["math5-s2-u4", "eng5-ham-u10"]}
+P2_failed_get_releases_protection FAIL {"getFailed": true, "protectedAfter": null}
+P3_shared_unit_held_until_all_gets_finish FAIL {"protectedDuring": null, "protectedAfter": null}
+F4_CACHE_C5_FAIL ["P1_parallel_get_keeps_in_use_unit", "P2_failed_get_releases_protection", "P3_shared_unit_held_until_all_gets_finish"]
+exit=1

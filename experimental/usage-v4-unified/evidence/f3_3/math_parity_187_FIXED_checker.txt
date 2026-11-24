@@ -1,0 +1,4 @@
+{"viewport": "1920x1080", "mathQuestions": 187, "domEqual": 187, "differ": 0, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+{"viewport": "1280x720", "mathQuestions": 187, "domEqual": 187, "differ": 0, "fractionsRendered": 43, "inlineMathRendered": 34, "diffs": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+F2_MATH_PARITY_PASS
+exit=0

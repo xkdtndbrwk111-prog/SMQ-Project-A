@@ -1,0 +1,510 @@
+{
+ "totals": {
+  "probes": 42,
+  "registered": 30,
+  "hazard": 0,
+  "dropped": 12,
+  "registeredCorrectlyForGameQuestion": 30
+ },
+ "byDelayMs": {
+  "0": {
+   "taps": 6,
+   "registered": 0,
+   "hazard": 0
+  },
+  "16": {
+   "taps": 6,
+   "registered": 0,
+   "hazard": 0
+  },
+  "33": {
+   "taps": 6,
+   "registered": 6,
+   "hazard": 0
+  },
+  "50": {
+   "taps": 6,
+   "registered": 6,
+   "hazard": 0
+  },
+  "100": {
+   "taps": 6,
+   "registered": 6,
+   "hazard": 0
+  },
+  "200": {
+   "taps": 6,
+   "registered": 6,
+   "hazard": 0
+  },
+  "300": {
+   "taps": 6,
+   "registered": 6,
+   "hazard": 0
+  }
+ },
+ "cases": [
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 0,
+   "delayMs": 0,
+   "visibleQAtTap": "soc6-s2-u3-1-common:q01",
+   "gameQ": "eng5-ham-u10:q38",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 1,
+   "delayMs": 16,
+   "visibleQAtTap": "eng5-ham-u10:q06",
+   "gameQ": "eng5-ham-u10:q06",
+   "tappedChoice": "true",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 2,
+   "delayMs": 33,
+   "visibleQAtTap": "eng5-ham-u10:q24",
+   "gameQ": "eng5-ham-u10:q24",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 3,
+   "delayMs": 50,
+   "visibleQAtTap": "eng5-ham-u10:q30",
+   "gameQ": "eng5-ham-u10:q30",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 4,
+   "delayMs": 100,
+   "visibleQAtTap": "eng5-ham-u10:q04",
+   "gameQ": "eng5-ham-u10:q04",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 5,
+   "delayMs": 200,
+   "visibleQAtTap": "eng5-ham-u10:q10",
+   "gameQ": "eng5-ham-u10:q10",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 6,
+   "delayMs": 300,
+   "visibleQAtTap": "eng5-ham-u10:q22",
+   "gameQ": "eng5-ham-u10:q22",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 7,
+   "delayMs": 0,
+   "visibleQAtTap": "eng5-ham-u10:q36",
+   "gameQ": "eng5-ham-u10:q36",
+   "tappedChoice": "true",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 8,
+   "delayMs": 16,
+   "visibleQAtTap": "eng5-ham-u10:q12",
+   "gameQ": "eng5-ham-u10:q12",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 9,
+   "delayMs": 33,
+   "visibleQAtTap": "eng5-ham-u10:q27",
+   "gameQ": "eng5-ham-u10:q27",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 10,
+   "delayMs": 50,
+   "visibleQAtTap": "eng5-ham-u10:q01",
+   "gameQ": "eng5-ham-u10:q01",
+   "tappedChoice": "c2",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 11,
+   "delayMs": 100,
+   "visibleQAtTap": "eng5-ham-u10:q09",
+   "gameQ": "eng5-ham-u10:q09",
+   "tappedChoice": "c2",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 12,
+   "delayMs": 200,
+   "visibleQAtTap": "eng5-ham-u10:q39",
+   "gameQ": "eng5-ham-u10:q39",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 13,
+   "delayMs": 300,
+   "visibleQAtTap": "eng5-ham-u10:q18",
+   "gameQ": "eng5-ham-u10:q18",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 14,
+   "delayMs": 0,
+   "visibleQAtTap": "eng5-ham-u10:q28",
+   "gameQ": "eng5-ham-u10:q28",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 15,
+   "delayMs": 16,
+   "visibleQAtTap": "eng5-ham-u10:q21",
+   "gameQ": "eng5-ham-u10:q21",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 16,
+   "delayMs": 33,
+   "visibleQAtTap": "eng5-ham-u10:q14",
+   "gameQ": "eng5-ham-u10:q14",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 17,
+   "delayMs": 50,
+   "visibleQAtTap": "eng5-ham-u10:q17",
+   "gameQ": "eng5-ham-u10:q17",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 18,
+   "delayMs": 100,
+   "visibleQAtTap": "eng5-ham-u10:q25",
+   "gameQ": "eng5-ham-u10:q25",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 19,
+   "delayMs": 200,
+   "visibleQAtTap": "eng5-ham-u10:q20",
+   "gameQ": "eng5-ham-u10:q20",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "eng5-ham-u10",
+   "probe": 20,
+   "delayMs": 300,
+   "visibleQAtTap": "eng5-ham-u10:q26",
+   "gameQ": "eng5-ham-u10:q26",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 0,
+   "delayMs": 0,
+   "visibleQAtTap": "math5-s2-u4:q03",
+   "gameQ": "math5-s2-u4:q03",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 1,
+   "delayMs": 16,
+   "visibleQAtTap": "math5-s2-u4:q20",
+   "gameQ": "math5-s2-u4:q20",
+   "tappedChoice": "c2",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 2,
+   "delayMs": 33,
+   "visibleQAtTap": "math5-s2-u4:q12",
+   "gameQ": "math5-s2-u4:q12",
+   "tappedChoice": "c2",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 3,
+   "delayMs": 50,
+   "visibleQAtTap": "math5-s2-u4:q25",
+   "gameQ": "math5-s2-u4:q25",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 4,
+   "delayMs": 100,
+   "visibleQAtTap": "math5-s2-u4:q22",
+   "gameQ": "math5-s2-u4:q22",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 5,
+   "delayMs": 200,
+   "visibleQAtTap": "math5-s2-u4:q26",
+   "gameQ": "math5-s2-u4:q26",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 6,
+   "delayMs": 300,
+   "visibleQAtTap": "math5-s2-u4:q11",
+   "gameQ": "math5-s2-u4:q11",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 7,
+   "delayMs": 0,
+   "visibleQAtTap": "math5-s2-u4:q15",
+   "gameQ": "math5-s2-u4:q15",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 8,
+   "delayMs": 16,
+   "visibleQAtTap": "math5-s2-u4:q21",
+   "gameQ": "math5-s2-u4:q21",
+   "tappedChoice": "c1",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 9,
+   "delayMs": 33,
+   "visibleQAtTap": "math5-s2-u4:q04",
+   "gameQ": "math5-s2-u4:q04",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 10,
+   "delayMs": 50,
+   "visibleQAtTap": "math5-s2-u4:q05",
+   "gameQ": "math5-s2-u4:q05",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 11,
+   "delayMs": 100,
+   "visibleQAtTap": "math5-s2-u4:q27",
+   "gameQ": "math5-s2-u4:q27",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 12,
+   "delayMs": 200,
+   "visibleQAtTap": "math5-s2-u4:q02",
+   "gameQ": "math5-s2-u4:q02",
+   "tappedChoice": "c2",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 13,
+   "delayMs": 300,
+   "visibleQAtTap": "math5-s2-u4:q10",
+   "gameQ": "math5-s2-u4:q10",
+   "tappedChoice": "c2",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 14,
+   "delayMs": 0,
+   "visibleQAtTap": "math5-s2-u4:q13",
+   "gameQ": "math5-s2-u4:q13",
+   "tappedChoice": "c2",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 15,
+   "delayMs": 16,
+   "visibleQAtTap": "math5-s2-u4:q24",
+   "gameQ": "math5-s2-u4:q24",
+   "tappedChoice": "true",
+   "registered": false,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 16,
+   "delayMs": 33,
+   "visibleQAtTap": "math5-s2-u4:q16",
+   "gameQ": "math5-s2-u4:q16",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 17,
+   "delayMs": 50,
+   "visibleQAtTap": "math5-s2-u4:q01",
+   "gameQ": "math5-s2-u4:q01",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 1
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 18,
+   "delayMs": 100,
+   "visibleQAtTap": "math5-s2-u4:q07",
+   "gameQ": "math5-s2-u4:q07",
+   "tappedChoice": "c1",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 19,
+   "delayMs": 200,
+   "visibleQAtTap": "math5-s2-u4:q23",
+   "gameQ": "math5-s2-u4:q23",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  },
+  {
+   "unit": "math5-s2-u4",
+   "probe": 20,
+   "delayMs": 300,
+   "visibleQAtTap": "math5-s2-u4:q14",
+   "gameQ": "math5-s2-u4:q14",
+   "tappedChoice": "true",
+   "registered": true,
+   "hazard": false,
+   "correctDelta": 0
+  }
+ ]
+}

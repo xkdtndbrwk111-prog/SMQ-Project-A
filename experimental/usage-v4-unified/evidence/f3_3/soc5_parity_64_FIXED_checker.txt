@@ -1,0 +1,4 @@
+{"viewport": "1920x1080", "questions": 64, "equal": 64, "differ": 0, "differingFields": {}, "examples": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+{"viewport": "1280x720", "questions": 64, "equal": 64, "differ": 0, "differingFields": {}, "examples": [], "jsErrorsApproved": [], "jsErrorsComposed": []}
+F2_SOC5_PARITY_PASS
+exit=0

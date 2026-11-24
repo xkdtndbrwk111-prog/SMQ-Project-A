@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOJA QUIZ 공개 이용 통계</title>
+<style>
+.viz-root{color-scheme:light;--surface-0:#f4f4f2;--surface-1:#fcfcfb;--border:#e2e1dc;
+ --text-primary:#0b0b0b;--text-secondary:#52514e;--text-muted:#6f6e69;--series-1:#2a78d6;
+ --grid:#e8e7e3;--warn-bg:#fff4dc;--warn-ink:#6b4a00;--err-bg:#fde8e8;--err-ink:#8a1c1c}
+@media (prefers-color-scheme:dark){.viz-root{color-scheme:dark;--surface-0:#121211;--surface-1:#1a1a19;
+ --border:#2e2e2c;--text-primary:#f0efec;--text-secondary:#c3c2b7;--text-muted:#9a998f;--series-1:#3987e5;
+ --grid:#2a2a28;--warn-bg:#3a2f12;--warn-ink:#f5d999;--err-bg:#3d1a1a;--err-ink:#f3b6b6}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+.viz-root{background:var(--surface-0);color:var(--text-primary);min-height:100vh;padding:16px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:22px;margin:4px 0 4px}
+h2{font-size:16px;margin:0 0 10px}
+.sub{color:var(--text-secondary);font-size:13px;margin:0 0 12px}
+.bar-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);
+ background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+button:disabled{opacity:.5;cursor:default}
+.note{font-size:12px;color:var(--text-secondary)}
+.banner{border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.banner.warn{background:var(--warn-bg);color:var(--warn-ink)}
+.banner.err{background:var(--err-bg);color:var(--err-ink)}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tile .k{font-size:12px;color:var(--text-secondary)}
+.tile .v{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .h{font-size:11px;color:var(--text-muted);margin-top:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hbar{display:grid;grid-template-columns:minmax(70px,140px) 1fr auto;gap:8px;align-items:center;
+ font-size:13px;margin:6px 0}
+.hbar .lab{color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .track{height:12px;position:relative}
+.hbar .fill{height:12px;background:var(--series-1);border-radius:0 4px 4px 0;min-width:2px}
+.hbar .num{color:var(--text-secondary);font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{color:var(--text-muted);font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--grid)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+#chart{width:100%;height:220px;display:block}
+#tip{position:fixed;pointer-events:none;background:var(--surface-1);color:var(--text-primary);
+ border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;display:none;
+ box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:5}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text-secondary);margin-top:6px;flex-wrap:wrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px;background:var(--series-1)}
+.sw.prov{background:repeating-linear-gradient(45deg,var(--series-1) 0 2px,transparent 2px 4px);border:1px solid var(--series-1)}
+details summary{cursor:pointer;font-size:13px;color:var(--text-secondary)}
+.hidden{display:none}
+@media (max-width:720px){.tiles{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}
+ .tile .v{font-size:22px}#chart{height:180px}}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="wrap">
+ <h1>HOJA QUIZ 공개 이용 통계</h1>
+ <p class="sub">누구나 로그인 없이 볼 수 있는 익명 집계입니다. 게임 시작 횟수만 세며, 학생·학교·기기 정보는 수집하거나 공개하지 않습니다.</p>
+ <div class="bar-top">
+  <button id="refresh" type="button">새로고침</button>
+  <span class="note" id="meta" aria-live="polite">불러오는 중…</span>
+ </div>
+ <p class="note" id="era" aria-live="polite"></p>
+ <div id="banner" class="banner warn hidden" role="status"></div>
+ <div id="error" class="banner err hidden" role="alert"></div>
+ <section id="content" class="hidden" aria-label="통계">
+  <div class="tiles">
+   <div class="tile"><div class="k">오늘 <span class="h">(잠정)</span></div><div class="v" id="t-today"></div></div>
+   <div class="tile"><div class="k">최근 7일</div><div class="v" id="t-7"></div></div>
+   <div class="tile"><div class="k">최근 30일</div><div class="v" id="t-30"></div></div>
+   <div class="tile"><div class="k">전체</div><div class="v" id="t-all"></div><div class="h" id="t-since"></div></div>
+  </div>
+  <div class="card">
+   <h2>일별 게임 시작 수</h2>
+   <svg id="chart" role="img" aria-label="일별 게임 시작 수 막대 그래프"></svg>
+   <div class="legend"><span><span class="sw"></span>확정</span><span><span class="sw prov"></span>잠정(집계 확정 전)</span></div>
+   <details><summary>표로 보기</summary><table><thead><tr><th>날짜</th><th class="n">횟수</th><th>상태</th></tr></thead><tbody id="daily-table"></tbody></table></details>
+  </div>
+  <div class="grid2">
+   <div class="card"><h2>개인전 / 팀전</h2><div id="l-mode"></div></div>
+   <div class="card"><h2>학년</h2><div id="l-grade"></div></div>
+   <div class="card"><h2>교과</h2><div id="l-subject"></div></div>
+   <div class="card"><h2>출판사 <span class="note">(출판사 정보가 있는 게임만)</span></h2><div id="l-publisher"></div></div>
+  </div>
+  <div class="card"><h2>많이 선택된 카트리지 TOP 20</h2>
+   <p class="note">여러 단원을 함께 고른 경우 그 조합을 한 번으로 셉니다. 5회 미만 조합은 ‘기타(소수)’로 묶고, 형식이 다른 이름은 ‘기타 공개 카트리지’로 표시합니다.</p>
+   <table><thead><tr><th>#</th><th>카트리지</th><th class="n">횟수</th><th class="n">비율</th></tr></thead><tbody id="top"></tbody></table>
+  </div>
+ </section>
+</div>
+<div id="tip"></div>
+</div>
+<script>
+(function(){
+ 'use strict';
+ var MODE={SOLO:'개인전',TEAM:'팀전'};
+ var ERR={NOT_CONFIGURED:'통계 저장소가 아직 준비되지 않았습니다.',RATE_LIMITED:'요청이 많아 잠시 후 다시 시도해 주세요.',
+  SEAL_STALE:'지난 날짜 집계 확정이 밀려 있어 정확한 숫자를 보여 드릴 수 없습니다.',
+  LATE_OR_UNSORTED_EVENT:'기록 순서 이상이 감지되어 표시를 멈췄습니다.',PARTIAL_ROW:'불완전한 기록이 감지되어 표시를 멈췄습니다.',
+  BUSY_RETRY:'집계가 갱신되는 중입니다. 잠시 후 다시 시도해 주세요.',READ_LIMIT:'데이터가 조회 한도를 넘었습니다.',
+  INTEGRITY:'집계 검증에 실패하여 숫자를 표시하지 않습니다.',INTERNAL:'통계를 불러오지 못했습니다.',NETWORK:'서버에 연결하지 못했습니다.'};
+ var $=function(id){return document.getElementById(id);};
+ var fmt=function(n){return Number(n).toLocaleString('ko-KR');};
+ var busy=false,lastClick=0;
+ function el(tag,text,cls){var e=document.createElement(tag);if(text!=null)e.textContent=String(text);if(cls)e.className=cls;return e;}
+ function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+ function bars(id,list,mapLabel){
+  var box=$(id);clear(box);
+  if(!list||!list.length){box.appendChild(el('div','아직 기록이 없습니다.','empty'));return;}
+  var max=Math.max.apply(null,list.map(function(x){return x.count;}))||1;
+  list.forEach(function(x){
+   var row=el('div',null,'hbar'),lab=el('div',mapLabel?mapLabel(x.label):x.label,'lab');
+   lab.title=lab.textContent;
+   var track=el('div',null,'track'),fill=el('div',null,'fill');
+   fill.style.width=(x.count/max*100)+'%';track.appendChild(fill);
+   row.appendChild(lab);row.appendChild(track);
+   row.appendChild(el('div',fmt(x.count)+' ('+x.share+'%)','num'));box.appendChild(row);
+  });
+ }
+ function chart(daily,prov){
+  var svg=$('chart'),NS='http://www.w3.org/2000/svg';clear(svg);
+  var W=svg.clientWidth||600,H=svg.clientHeight||220,L=40,B=22,T=8,R=6;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var max=Math.max(1,Math.max.apply(null,daily.map(function(d){return d.count;})));
+  var step=Math.pow(10,Math.floor(Math.log10(max)));var top=Math.ceil(max/step)*step;
+  var ih=H-T-B,iw=W-L-R,bw=iw/daily.length,gap=bw>6?2:0;
+  var css=getComputedStyle(document.querySelector('.viz-root'));
+  for(var g=0;g<=2;g++){
+   var v=top*g/2,y=T+ih-ih*g/2;
+   var ln=document.createElementNS(NS,'line');ln.setAttribute('x1',L);ln.setAttribute('x2',W-R);
+   ln.setAttribute('y1',y);ln.setAttribute('y2',y);ln.setAttribute('stroke',css.getPropertyValue('--grid'));svg.appendChild(ln);
+   var tx=document.createElementNS(NS,'text');tx.setAttribute('x',L-6);tx.setAttribute('y',y+4);
+   tx.setAttribute('text-anchor','end');tx.setAttribute('font-size','11');tx.setAttribute('fill',css.getPropertyValue('--text-muted'));
+   tx.textContent=fmt(v);svg.appendChild(tx);
+  }
+  var defs=document.createElementNS(NS,'defs');
+  defs.innerHTML='<pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="4" fill="'+css.getPropertyValue('--series-1').trim()+'"></rect></pattern>';
+  svg.appendChild(defs);
+  var tip=$('tip');
+  daily.forEach(function(d,i){
+   var h=d.count/top*ih,x=L+i*bw,isProv=prov.indexOf(d.date)>=0;
+   var r=document.createElementNS(NS,'rect');r.setAttribute('x',x+gap/2);r.setAttribute('width',Math.max(1,bw-gap));
+   r.setAttribute('y',T+ih-h);r.setAttribute('height',Math.max(0,h));r.setAttribute('rx',bw>8?2:0);
+   r.setAttribute('fill',isProv?'url(#hatch)':css.getPropertyValue('--series-1'));
+   if(isProv){r.setAttribute('stroke',css.getPropertyValue('--series-1'));r.setAttribute('stroke-width','1');}
+   svg.appendChild(r);
+   var hit=document.createElementNS(NS,'rect');hit.setAttribute('x',x);hit.setAttribute('width',bw);
+   hit.setAttribute('y',T);hit.setAttribute('height',ih);hit.setAttribute('fill','transparent');
+   hit.addEventListener('mousemove',function(ev){tip.textContent=d.date+' · '+fmt(d.count)+'회'+(isProv?' (잠정)':'');
+    tip.style.display='block';tip.style.left=Math.max(4,Math.min(ev.clientX+12,window.innerWidth-tip.offsetWidth-8))+'px';tip.style.top=(ev.clientY-30)+'px';});
+   hit.addEventListener('mouseleave',function(){tip.style.display='none';});
+   svg.appendChild(hit);
+  });
+  var first=daily[0],last=daily[daily.length-1];
+  [[first,L,'start'],[last,W-R,'end']].forEach(function(a){if(!a[0])return;
+   var t=document.createElementNS(NS,'text');t.setAttribute('x',a[1]);t.setAttribute('y',H-6);
+   t.setAttribute('text-anchor',a[2]);t.setAttribute('font-size','11');t.setAttribute('fill',css.getPropertyValue('--text-muted'));
+   t.textContent=a[0].date;svg.appendChild(t);});
+ }
+ function showError(code){
+  $('content').classList.add('hidden');$('banner').classList.add('hidden');
+  var e=$('error');e.textContent=(ERR[code]||ERR.INTERNAL)+' (코드: '+code+') 숫자는 표시하지 않습니다.';
+  e.classList.remove('hidden');$('meta').textContent='';
+ }
+ function render(s){
+  if(!s||s.schema!=='HOJA_PUBLIC_USAGE_V4'||s.status!=='OK'||!s.totals){showError(s&&s.code||'INTERNAL');return;}
+  $('error').classList.add('hidden');
+  $('t-today').textContent=fmt(s.totals.today);$('t-7').textContent=fmt(s.totals.days7);
+  $('t-30').textContent=fmt(s.totals.days30);$('t-all').textContent=fmt(s.totals.all);
+  $('t-since').textContent=s.historyStart+'부터';
+  var prov=s.provisionalDays||[];
+  // 40-6-U C: say which source the numbers come from; the other era is never added in.
+  var era=s.era||{},ln=$('era');
+  ln.textContent=era.current==='APPROVED'?
+   '교사 승인 정본 카트리지 이용 통계입니다 ('+era.approvedSince+'부터).'+
+   (era.legacy?' 이전 게임 기록 '+fmt(era.legacy.all)+'회('+era.legacy.from+'~'+era.legacy.through+')는 합산하지 않습니다.':''):
+   '이전 게임(구글 시트 카트리지) 기록입니다. 승인 정본 카트리지 통계는 운영 전환 후 따로 집계됩니다.';
+  var b=$('banner');
+  b.textContent='오늘'+(prov.length>1?'과 아직 확정되지 않은 '+(prov.length-1)+'일':'')+'의 숫자는 잠정값이며 새로고침하면 바뀔 수 있습니다.'+
+   (s.cache&&s.cache.stale?' 요청이 많아 '+s.cache.ageSeconds+'초 전 집계를 보여 드리고 있습니다.':'');
+  b.classList.remove('hidden');
+  $('meta').textContent='기준일 '+s.asOf+' · '+(s.cache?s.cache.ageSeconds:0)+'초 전 집계';
+  $('content').classList.remove('hidden');
+  chart(s.daily,prov);
+  var tb=$('daily-table');clear(tb);
+  s.daily.slice().reverse().forEach(function(d){var tr=el('tr');tr.appendChild(el('td',d.date));
+   tr.appendChild(el('td',fmt(d.count),'n'));tr.appendChild(el('td',prov.indexOf(d.date)>=0?'잠정':'확정'));tb.appendChild(tr);});
+  bars('l-mode',s.mode,function(l){return MODE[l]||l;});
+  bars('l-grade',s.grade);bars('l-subject',s.subject);bars('l-publisher',s.publisher);
+  var top=$('top');clear(top);
+  if(!s.topCartridges.length){var tr0=el('tr');var td0=el('td','아직 기록이 없습니다.','empty');td0.colSpan=4;tr0.appendChild(td0);top.appendChild(tr0);}
+  s.topCartridges.forEach(function(x,i){var tr=el('tr');tr.appendChild(el('td',i+1));tr.appendChild(el('td',x.label));
+   tr.appendChild(el('td',fmt(x.count),'n'));tr.appendChild(el('td',x.share+'%','n'));top.appendChild(tr);});
+ }
+ function load(){
+  if(busy)return;busy=true;$('refresh').disabled=true;$('meta').textContent='불러오는 중…';
+  var done=function(){busy=false;setTimeout(function(){$('refresh').disabled=false;},10000);};
+  try{
+   google.script.run.withSuccessHandler(function(s){done();render(s);})
+    .withFailureHandler(function(){done();showError('NETWORK');})
+    .getPublicUsageStatisticsV4();
+  }catch(_e){done();showError('NETWORK');}
+ }
+ $('refresh').addEventListener('click',function(){var n=Date.now();if(n-lastClick<10000)return;lastClick=n;load();});
+ window.addEventListener('resize',function(){if(window.__lastStats)chart(window.__lastStats.daily,window.__lastStats.provisionalDays||[]);});
+ var orig=render;render=function(s){if(s&&s.status==='OK')window.__lastStats=s;orig(s);};
+ load();
+})();
+</script>
+</body>
+</html>

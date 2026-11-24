@@ -1,0 +1,6 @@
+{"unit": "math5-s2-u4", "turnsAnswered": 24, "byType": {"SHORT": 3, "OX": 4, "MCQ": 17}, "shortTeacherJudged": 3, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 260점", "최종 90점"], "usageRows": 1, "rankRpc": 0}
+{"unit": "eng5-ham-u10", "turnsAnswered": 24, "byType": {"SHORT": 4, "MCQ": 15, "OX": 5}, "shortTeacherJudged": 4, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 280점", "최종 0점"], "usageRows": 1, "rankRpc": 0}
+{"unit": "soc6-s2-u3-1-common", "turnsAnswered": 24, "byType": {"MCQ": 18, "OX": 5, "SHORT": 1}, "shortTeacherJudged": 1, "wrongGiven": 12, "reviewAsked": 12, "finalScores": ["최종 160점", "최종 40점"], "usageRows": 1, "rankRpc": 0}
+F3_TEAM_FULL_PASS
+GITHUB_STANDIN_REQUESTS 3 distinct 3 notFound 0
+exit=0
