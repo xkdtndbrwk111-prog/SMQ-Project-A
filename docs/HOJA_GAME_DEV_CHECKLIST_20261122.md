@@ -1272,3 +1272,17 @@
 - [ ] GPT-6 독립 검수 C5-2(미완료).
 - [ ] 다음: R6 19/40 원인 분석(새 번호), 그다음 23단원 패키지 SHA/INDEX·격리 GAS 사전 정리.
 - [ ] 유지: QBank CI 2 SKIPPED, R6 19/40, 실 R7 감사·자정·트리거·Seal·게시·배포 HOLD/NOT RUN, PR Draft.
+
+
+### 40-6AP. Claude 제출 — R6 19/40 원인 분석 + 다음 실 실행 준비 (2026-11-24, 40-6AO 4번)
+**경계:** Claude 자체 보고. 기존 실 로그와 코드, mock 분석만 했다. **새 실 GAS 실행 없음.** GPT-6 감수는 미완료로 둔다.
+| 항목 | 상태 | 근거(`experimental/usage-v4-unified/evidence/r6/`) |
+|---|---|---|
+| 카운터 구분 | 입력 40 / 수락·저장 19 / 중복 무시 0 / 실패 21(lock timeout, 429 0) / 실패 후 저장 0(개수상) / 클라이언트 재전송 R6b 40/40(재시도 16) | `r6_19of40_analysis_20261124.md` |
+| 원인 | ScriptLock 직렬화 × 잠금 안 시트 왕복 4회(hold p50 ≈ 1 s) → 20 s 대기 창 용량 ≈ 19~20. tryLock 실패는 쓰기 전이라 재전송 안전 | 동 문서, `r6_mock_lock_profile.txt` |
+| 개선안 | A 현행 유지 + 클라이언트 같은-eventId 재전송(권장) / B group commit(미구현) / C timeout 연장(거부) | 동 문서 |
+| 다음 실행 준비 | 요청별 결과 분류, 실패분 재전송, fail-fast assert — **정적 검사만, 미실행** | `verify_real_gas_r6.py`, `test-only/TestOnlyU3.template.gs` |
+| 판정 | **R6 서버 단독 19/40 FAIL 유지.** 저장 정확성(클라이언트 재시도 없이 40 → 40/중복 0) **미입증 → PASS 아님** | — |
+- [ ] GPT-6 독립 검수 40-6AP(미완료).
+- [ ] 실 격리 GAS R6 재실행(템플릿 반영 push 포함)과 group commit 채택 여부: **승인 대기 HOLD**.
+- [ ] 다음: 23단원 패키지 SHA/INDEX/overlay 확인, 격리 GAS 사전 조건 정리.

@@ -662,3 +662,25 @@ Node: **97/97 PASS**(신규: LIST 핀은 원격 카탈로그에만 / 캐시 블�
   - TEAM 전체 2단원은 usageRows 1, 랭킹 RPC 0.
 - **NOT REPRODUCED / 범위 밖:** Safari·iOS·Android WebView, 실 GAS iframe, 브라우저 저장소 압박 축출, 3 s보다 느리지만 정상인 IndexedDB(그 페이지만 일회성 모드가 되어 다운로드가 늘어남). 추가 추적은 40-6AO에 따라 생략했다.
 - **C5-3: 보류(미해결 관측).** 최초 UI E2E 38/46의 180 s `Page.goto` timeout은 원인 불명으로 유지하고, 재시험 46/46 PASS도 보존한다. 40-6AO에 따라 반복 실행과 프로파일링은 하지 않았다. FIXED가 아니다.
+
+## R6 실집계 (40-6AO 4번)
+### R6 / 40-6AP — 19/40 원인 분석(기존 증거) + 다음 실행 준비 (2026-11-24)
+- **새 실 GAS 실행 없음(NOT RUN).** 근거는 기존 실 로그 `r6_real_gas_rerun_20261123.log`, 코드, mock 잠금 프로파일이다. 상세: `evidence/r6/r6_19of40_analysis_20261124.md`.
+- **카운터(R6a, 서버 단독):**
+  - 입력 40, 수락 19, 저장 19(고유 19, 중복 0, 무효 0, watermark 일치), 중복 무시 0.
+  - 실패 21은 전부 `USAGE_APPEND_LOCK_TIMEOUT`이고 429는 0이다.
+  - 실패했는데 저장된 건은 **개수상 0**이다. 개별 eventId 증명은 없다(배포된 tail 도우미가 개수만 돌려준다).
+  - 클라이언트 같은-eventId 재전송: R6b 40/40(재시도 16).
+- **원인:** 모든 시작이 ScriptLock 하나로 직렬화되고, `tryLock(20000)`이 기다리는 한계다.
+  - 잠금 안 작업은 dedupe TextFinder, appendRow, flush, 읽기 확인 = 시트 왕복 4회와 속성 쓰기 1회다.
+  - 실제 hold p50은 1006 ms다. 20 s 창의 용량이 약 19~20건이라 관측값 19와 맞고, 성공 건의 최대 대기는 19 861 ms였다.
+  - tryLock 실패는 쓰기 **전에** 일어나므로 같은 eventId 재전송이 안전하다.
+- **개선안(미구현):**
+  - A. 현행 유지(서버는 깨끗이 거절하고 클라이언트가 같은 eventId로 재전송): **권장**.
+  - B. group commit: 서버 단독 용량 확대. 새 쓰기 경로라 별도 시험과 실 GAS가 필요하다.
+  - C. tryLock 연장: **거부**.
+- **다음 실행 준비(정적 검사만, 미실행):**
+  - `TestOnlyU3.template.gs`: tail이 시험용 무작위 eventId를 반환한다.
+  - `verify_real_gas_r6.py`: 요청별 결과 분류(acceptedStored, acceptedButMissing, failedNotStored, failedButStored, storedNotSent), 실패분만 같은 eventId로 1회 재전송, R6a~R6c와 최종 재검증 fail-fast assert.
+- **판정:** R6 서버 단독 **19/40 FAIL 유지**. 40 시작 → 40 고유 기록 / 중복 0의 저장 정확성은 클라이언트 재시도 없이는 **미입증이며 PASS가 아니다.** 실 격리 GAS 재실행은 승인 대기(HOLD).
+- 회귀: Node 123/123. mock 프로파일 도구는 `r6_lock_profile.mjs`.

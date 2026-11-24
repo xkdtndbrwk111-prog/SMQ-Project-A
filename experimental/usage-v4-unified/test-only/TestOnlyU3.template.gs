@@ -102,7 +102,8 @@ function hojaV4TestTailU3(token,fromRow){
  for(const r of rows){ids.set(r[0],(ids.get(r[0])||0)+1);schema[r[13]]=(schema[r[13]]||0)+1;
   if(!HOJA_USAGE_V4_PUBLIC.validTailRow(r))invalid++;}
  return {lastRow:last,rowsAdded:rows.length,uniqueEventIds:ids.size,
-  duplicateRows:rows.length-ids.size,invalidRows:invalid,schema,watermark:hojaV4uReadWatermark_(ctx)};
+  duplicateRows:rows.length-ids.size,invalidRows:invalid,schema,watermark:hojaV4uReadWatermark_(ctx),
+  eventIds:rows.length<=500?rows.map(r=>r[0]):null};   // 40-6AP: random test UUIDs only (per-request outcome check)
 }
 /* Cold-start burst: drop the writer caches (catalog / sealed state / canary) and public caches. */
 function hojaV4TestColdU3(token){

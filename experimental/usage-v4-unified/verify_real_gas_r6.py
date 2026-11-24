@@ -76,10 +76,12 @@ async def main():
         a1, pa, fa = await anon(browser); a2, pb, fb = await anon(browser)
         def batch(n): return [[{'eventId': str(uuid.uuid4()), 'mode': 'SOLO', 'repositoryKind': 'PUBLIC', 'cartridgeIds': [cid],
                                 'cartridgeCount': 1, 'teamCount': 1}] for _ in range(n)]
+        ba, bb = batch(20), batch(20); batch_ids = ba + bb
         t = time.time()
-        ra, rb = await asyncio.gather(fa.evaluate(CALL_MANY, ['recordUsageStartU1', batch(20)]),
-                                      fb.evaluate(CALL_MANY, ['recordUsageStartU1', batch(20)]))
+        ra, rb = await asyncio.gather(fa.evaluate(CALL_MANY, ['recordUsageStartU1', ba]),
+                                      fb.evaluate(CALL_MANY, ['recordUsageStartU1', bb]))
         res = ra + rb
+        sent_ids = [b[0]['eventId'] for b in batch_ids]
         perf = [x['v'].get('perf', {}) for x in res if x['ok']]
         fails = {}
         for x in res:
@@ -94,6 +96,28 @@ async def main():
             'lockHoldMs': {'p50': pct([p['lockHoldMs'] for p in perf], .5), 'p95': pct([p['lockHoldMs'] for p in perf], .95), 'max': pct([p['lockHoldMs'] for p in perf], 1)},
             'serverTotalMs': {'p50': pct([p['totalMs'] for p in perf], .5), 'max': pct([p['totalMs'] for p in perf], 1)},
             'rpcMs': {'p50': pct([x['ms'] for x in res], .5), 'max': pct([x['ms'] for x in res], 1)}, 'seconds': round(time.time() - t, 1)})
+        # 40-6AP per-request outcome: input / accepted+stored / duplicateIgnored / failed-not-stored / failed-but-stored(!)
+        stored = tail.get('eventIds')
+        if stored is not None:
+            okd = [i for i, x in zip(sent_ids, res) if x['ok'] and not x['v'].get('duplicateIgnored')]
+            dup = [i for i, x in zip(sent_ids, res) if x['ok'] and x['v'].get('duplicateIgnored')]
+            bad = [i for i, x in zip(sent_ids, res) if not x['ok']]
+            cls = {'input': len(sent_ids), 'acceptedStored': sum(1 for i in okd if stored.count(i) == 1),
+                   'acceptedButMissing': sum(1 for i in okd if i not in stored), 'duplicateIgnored': len(dup),
+                   'failedNotStored': sum(1 for i in bad if i not in stored), 'failedButStored': sum(1 for i in bad if i in stored),
+                   'storedNotSent': sum(1 for i in stored if i not in sent_ids)}
+            # one server-side re-send of ONLY the failed requests, SAME eventId (what the client queue does)
+            rr = await fa.evaluate(CALL_MANY, ['recordUsageStartU1', [b for b, x in zip(batch_ids, res) if not x['ok']]]) if bad else []
+            tail2 = (await call(f0, 'hojaV4TestTailU3', TOKEN, start))['v']
+            cls.update({'resent': len(rr), 'resendOk': sum(1 for x in rr if x['ok']), 'resendFailures': sum(1 for x in rr if not x['ok']),
+                        'rowsAfterResend': tail2['rowsAdded'], 'uniqueAfterResend': tail2['uniqueEventIds'], 'duplicateRowsAfterResend': tail2['duplicateRows']})
+            log('R6A_PER_REQUEST_OUTCOME', cls)
+            assert cls['acceptedButMissing'] == 0 and cls['failedButStored'] == 0 and cls['storedNotSent'] == 0, cls   # fail fast: accounting
+            assert tail2['duplicateRows'] == 0 and tail2['invalidRows'] == 0, tail2
+            tail = tail2
+        else:
+            log('R6A_PER_REQUEST_OUTCOME', 'NOT_AVAILABLE (deployed test helper predates 40-6AP)')
+        assert tail['duplicateRows'] == 0 and tail['invalidRows'] == 0 and tail['watermark'] == tail['lastRow'], tail
         await a1.close(); await a2.close()
         # ---------------- R6b: real game page + patched client retry ----------------
         start_b = tail['lastRow']
@@ -138,6 +162,12 @@ async def main():
             'pollTotalsSeen': polls, 'monotone': nums == sorted(nums), 'seconds': secs,
             'lastErrors': sorted({s['lastError'].split(':')[-1].strip()[:50] for s in statuses if s['lastError']})})
         for ctx, _, _ in games: await ctx.close()
+        # 40-6AP fail-fast: storage accuracy for 40 real client starts (no PASS without 40 unique rows, 0 duplicates)
+        assert sum(tracked) == 40 and agg['delivered'] == 40 and agg['permanent'] == 0 and agg['queued'] == 0, agg
+        assert tail_b['rowsAdded'] == 40 and tail_b['uniqueEventIds'] == 40 and tail_b['duplicateRows'] == 0 and tail_b['invalidRows'] == 0, tail_b
+        assert tail_b['watermark'] == tail_b['lastRow'] and nums == sorted(nums), (tail_b, polls)
+        assert s_after.get('status') == 'OK' and s_before.get('status') == 'OK' and \
+            s_after['totals']['all'] - s_before['totals']['all'] == 40, (s_before.get('totals'), s_after.get('totals'))
         # ---------------- R6c: lost reply / concurrent identical re-sends ----------------
         start_c = tail_b['lastRow']
         same = {'eventId': str(uuid.uuid4()), 'mode': 'SOLO', 'repositoryKind': 'PUBLIC', 'cartridgeIds': [cid], 'cartridgeCount': 1, 'teamCount': 1}
@@ -145,9 +175,13 @@ async def main():
         tail_c = (await call(f0, 'hojaV4TestTailU3', TOKEN, start_c))['v']
         log('R6C_SAME_EVENT_X3', {'ok': sum(1 for x in rc if x['ok']), 'duplicateIgnored': sum(1 for x in rc if x['ok'] and x['v'].get('duplicateIgnored')),
             'failures': [x['e'].split(':')[-1].strip()[:50] for x in rc if not x['ok']], 'rowsAdded': tail_c['rowsAdded']})
+        assert sum(1 for x in rc if x['ok']) == 3 and tail_c['rowsAdded'] == 1 and \
+            sum(1 for x in rc if x['ok'] and x['v'].get('duplicateIgnored')) == 2, (rc, tail_c)
         fin = await call(f0, 'hojaV4TestEvidenceU3', TOKEN)
+        assert fin['v']['bad'] == [] and fin['v']['watermark'] == fin['v']['sourceLastRow'], 'final copy reverify'
         log('R6_FINAL_COPY_REVERIFY', {k: fin['v'][k] for k in ('manifestComplete', 'srcShaOk', 'bucketShaOk', 'bucketSetOk', 'bad',
             'watermark', 'sourceLastRow', 'publicCompute', 'publicComputeError')})
+        log('R6_FAIL_FAST_ASSERTS', 'ALL_PASSED')   # 40-6AP: any violated gate above exits non-zero first
         await c0.close(); await browser.close()
 
 asyncio.run(main())
