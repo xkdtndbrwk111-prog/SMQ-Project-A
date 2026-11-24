@@ -15,7 +15,7 @@ import argparse, asyncio, json, re, sys
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-HOOK = 'return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandArcade,get state()'
+HOOK = 'return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade,get state()'
 SETTLE_MS = 700
 SNAP = """(labels)=>{
   const f=document.querySelector('iframe[id^="hojaTeamApproved"]');const d=f.contentDocument;
@@ -33,7 +33,7 @@ async def main():
     global SETTLE_MS; SETTLE_MS = a.settle_ms
     html = Path(a.html).read_text(encoding='utf-8')
     assert html.count(HOOK) == 1, 'SOLO_ENGINE_ANCHOR_CHANGED'
-    html = html.replace(HOOK, '''return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandArcade,
+    html = html.replace(HOOK, '''return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade,
       __qa:{forceId:(qid)=>{const ix=deck.findIndex(i=>questions[i].approvedBinding?.questionId===qid);if(ix<0)return false;
         deck.push(...deck.splice(ix,1));return true;}},get state()''', 1)
     report = json.loads(Path(a.report).read_text(encoding='utf-8'))

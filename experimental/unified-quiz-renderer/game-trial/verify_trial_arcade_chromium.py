@@ -50,7 +50,7 @@ async def run():
           const f=document.getElementById('hqArcadeFrame');f.hidden=false;
           window.__QA_ARCADE_FINISH=[];
         }''',sources)
-        content=await page.evaluate('window.HOJA_GAMEPLAY.getCanonicalArcade()')
+        content=await page.evaluate('window.HOJA_GAMEPLAY.getLaunchArcade()')
         assert 'hojaArcadeApprovedChildTrial' in content
         await page.evaluate('''(content)=>{document.getElementById('hqArcadeFrame').srcdoc=content}''',content)
         await page.wait_for_function('''()=>typeof document.getElementById('hqArcadeFrame')?.contentWindow?.HOJA_ARCADE_APPROVED_BRIDGE?.open==='function' ''',timeout=30000)

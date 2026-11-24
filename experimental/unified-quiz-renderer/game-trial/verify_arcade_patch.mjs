@@ -57,6 +57,7 @@ assert(patched.includes('HOJA_RANK_COMPOSING_')&&patched.includes('compositionst
 assert(!patched.includes("dataset.rankComposing"),'no second (approved) composition handler');
 assert(patched.includes('/^[가-힣A-Z0-9]{2,6}$/'),'2-6 Hangul/Latin/digit name policy');
 assert(patched.includes("failures.push('승인 25문항 미완료')"),'approved 25-question FINISH requirement added to the production failures list');
+assert.equal(patched.split('!HOJA_RANK_FORBIDDEN_.has(hojaRankNormalize_(r.name))&&').length-1,2,'forbidden names filtered in both rank lists');
 const approvedBackend=readFileSync('versions/2.0.0/Code.gs','utf8');
 assert(approvedBackend.includes('/^[가-힣A-Z0-9]{2,6}$/.test(v)'),'Name policy must remain identical to the source GAS');
 assert(approvedBackend.includes("HOJA_RANK_FORBIDDEN_ = ['SEX','XES','EXS','SXE']"),'Forbidden-name rule must remain original');

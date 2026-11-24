@@ -8,7 +8,7 @@ from playwright.async_api import async_playwright
 
 HERE=Path(__file__).resolve().parent
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
-HOOK='return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandArcade,get state()'
+HOOK='return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade,get state()'
 
 def const_json(s,name):
     mark='const '+name+'='
@@ -30,7 +30,7 @@ def social6_sources(s):
 
 def instrument(s):
     assert s.count(HOOK)==1,'Solo engine changed unexpectedly'
-    return s.replace(HOOK,'''return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandArcade,
+    return s.replace(HOOK,'''return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade,
      __qa:{forceNextType:(type)=>{const ix=deck.findIndex(i=>questions[i].type===type);if(ix<0)throw Error('NO_TYPE');
        deck.push(...deck.splice(ix,1));return questions[deck.at(-1)].approvedBinding.questionId;},
        peek:()=>questions[deck.at(-1)]},get state()''',1)

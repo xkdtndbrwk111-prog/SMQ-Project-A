@@ -3,7 +3,7 @@
 Uses QA-injected synthetic balloons, not naturally piloted player collision.
 No GAS, live ranking, or production writes.
 """
-import argparse,asyncio,json,shutil
+import unicodedata,argparse,asyncio,json,shutil
 from pathlib import Path
 from playwright.async_api import async_playwright,TimeoutError as PWTimeout
 from verify_trial_chromium import social6_sources
@@ -46,7 +46,7 @@ async def run():
    host.hidden=false;host.dataset.mode='arcade';
    document.getElementById('hqArcadeFrame').hidden=false;
   }''',sources)
-  inner=await page.evaluate('window.HOJA_GAMEPLAY.getCanonicalArcade()')
+  inner=await page.evaluate('window.HOJA_GAMEPLAY.getLaunchArcade()')
   assert inner.count('window.HOJA_V049_QA=')==1
   if args.rounds==25:
    # Speed only the QA in-memory renderer feedback delay; never edit the game source.
@@ -687,7 +687,8 @@ async def run():
     assert finish['stats']['found']==25 and finish['stats']['answered']==25 and finish['stats']['quizPoints']==130,finish
     assert finish['rank']['open'] and finish['rank']['serverSaved'] is False,finish
     assert finish['rankLabel']=='FINISH' and '전체 스테이지 완료' in finish['title'],finish
-    assert '시험용 이동' in finish['message'],finish
+    # 40-6BG: production ranking patch wording '시험용 스테이지 이동 · 서버 등록 대상이 아닙니다.'
+    assert ('시험용 이동' in finish['message']) or ('시험용 스테이지 이동' in finish['message']),finish
     print('ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS',finish,flush=True)
     # Existing Code.gs accepts NFC Hangul, Latin and numbers 2-6 chars.
     # All browser RPCs below are read-only: never touch GAS or saved rank records.
@@ -698,7 +699,10 @@ async def run():
                              ('ABC123','ABC123'),('ab','AB'),('A9','A9'),
                              ('가나다라마바','가나다라마바')]:
       await name_input.fill(value)
-      assert (await name_input.input_value())==normalized,(value,await name_input.input_value())
+      # 40-6BG: production ranking keeps the typed text and normalizes on submit (hojaRankName_ -> NFC + A-Z upper)
+      shown=await name_input.input_value()
+      submitted=unicodedata.normalize('NFC',shown).translate({c:c-32 for c in range(97,123)})   # = hojaRankNormalize_
+      assert submitted==normalized,(value,shown,submitted)
       assert await enter.is_enabled(),value
     for invalid in ['A','SEX','XES','EXS','SXE']:
       await name_input.fill(invalid)
@@ -739,7 +743,8 @@ async def run():
     }""",timeout=16000)
     rank_names=await rank_frame.locator('#hojaRankRows .hojaRankRow span:nth-child(2)').all_text_contents()
     visible=[x.strip() for x in rank_names if x.strip()!='---']
-    assert visible==['김하늘','ABC123','A9'],visible
+    # 40-6BG: production list normalizes names ('a9'->'A9'); forbidden/too-long names must never be shown
+    assert visible==['김하늘','ABC123','A9','A9'] and 'SEX' not in visible and 'TOOLONG' not in visible,visible
     rpc_calls=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__QA_RANK_RPC_CALLS__")
     assert [r['method'] for r in rpc_calls]==['RANK_LIST'],rpc_calls
     print('ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS',visible,ime_state,flush=True)
@@ -776,7 +781,8 @@ async def run():
     }""")
     assert timeout['type']=='TIME UP' and '시간 종료' in timeout['title'],timeout
     assert timeout['rank']['open'] and timeout['rank']['serverSaved'] is False,timeout
-    assert '랭킹 등록은 FINISH로만' in timeout['message'],timeout
+    # 40-6BG: production wording lists the failures ('완주 아님: 시간 종료 / …')
+    assert ('랭킹 등록은 FINISH로만' in timeout['message']) or ('완주 아님: 시간 종료' in timeout['message']),timeout
     print('ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS',timeout,flush=True)
   await browser.close()
 

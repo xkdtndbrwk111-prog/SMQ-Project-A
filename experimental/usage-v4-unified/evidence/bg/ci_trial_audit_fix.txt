@@ -1,0 +1,34 @@
+# CI 45347721318 (unified-trial-qa on main b4cbb01) FAILED: verify_trial_chromium 'Solo engine changed unexpectedly' (hook string = old part-14 export line).
+# Fixes (verifiers only follow the 40-6BG API/production wording; game behaviour unchanged):
+#  - hook strings -> getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade (verify_trial_chromium, verify_f3_hint_mapping)
+#  - arcade verifiers use getLaunchArcade() (launch copy = production ranking patch + approved patch)
+#  - phaser verifier accepts production ranking wording / submit-time name normalization
+# Game change found by the phaser verifier: forbidden names are again filtered from both rank lists (display-side safety).
+## local reruns on the rebuilt trial:
+verify_trial_chromium: CHROMIUM_SOLO_MCQ_OX_SHORTCUT_VERDICT_AUDIO_GATE_PASS (audio gate mocked; actual audio playback not tested)
+verify_trial_arcade_chromium: ARCADE_TRANSPORT_ONLY_PHASER_BLOCKED 3
+verify_trial_team_chromium: CHROMIUM_TEAM_APPROVED_FIRST_BALLOON_PASS {'text': '전쟁이나 박해 등으로 생명과 안전을 위협받아 자기 나라를 떠나 �
+verify_trial_arcade_phaser_chromium --rounds 25 --collision-first --finish-check --control-smoke: PASS
+  ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+  ARCADE_REAL_H_HELP_OPEN_CLOSE_PASS
+  ARCADE_REAL_DEATH_KEY_PASS w
+  ARCADE_REAL_DEATH_KEY_PASS a
+  ARCADE_REAL_DEATH_KEY_PASS s
+  ARCADE_REAL_DEATH_KEY_PASS d
+  ARCADE_REAL_DEATH_KEY_PASS ,
+  ARCADE_REAL_DEATH_KEY_PASS .
+  ARCADE_REAL_DEATH_KEY_PASS Enter
+  ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS {'run': 188, 'comma': 188, 'jump': 190, 'period': 190}
+  ARCADE_WORLD_BALLOON_COLLISION_HANDLER_PASS {'memKey': 'e12', 'found': 1}
+  ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 25, 'history': 25, 'correctHistory': 13, 'points': 
+  ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 722
+  ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}, 'stats': {'found': 25, 'usedFamilies': 25, 'answ
+  ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9', 'A9'] {'inProgress': 'ㅎ', 'final': '하'}
+  ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'eligible': False, 'reason': '완주 아님: 시간 종료 / 시험용 스테�
+## PRE-EXISTING (not caused by today's changes): --rounds 2 --movement-smoke times out at line 225 on BOTH the current build and main 9b6c279 (before 40-6BF):
+current:
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 16000ms exceeded.
+9b6c279:
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 16000ms exceeded.

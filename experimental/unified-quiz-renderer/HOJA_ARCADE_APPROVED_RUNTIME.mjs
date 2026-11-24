@@ -82,6 +82,11 @@ export function patchApprovedArcadeInnerHTML(html){
  '  hojaStep09_3RenderProgress_();\n  hojaRankShow_(scene,reason);\n}',
  '  hojaStep09_3RenderProgress_();\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],()=>hojaRankShow_(scene,reason)))\n    hojaRankShow_(scene,reason);\n}');
  // 40-6BF: ranking name/input substitutions removed (owned by the production rankingPatch applied before this).
+ // 40-6BG: keep the trial's display-side safety on top of the production list filters: never show a forbidden name.
+ for(const head of ['HOJA_RANK_ROWS_=reply.rows.filter(r=>r&&','HOJA_RANK_ROWS_=rows.filter(r=>r&&']){
+  const anchor=head+'/^[가-힣A-Z0-9]{2,6}$/.test(hojaRankNormalize_(r.name))&&';
+  s=substituteOnce(s,anchor,anchor+'!HOJA_RANK_FORBIDDEN_.has(hojaRankNormalize_(r.name))&&');
+ }
  s=patchArcadeControls(s);
  return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
 }
