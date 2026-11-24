@@ -12,6 +12,12 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
         if(im&&!scene.anims.exists(anim))scene.anims.create({key:anim,frames:scene.anims.generateFrameNumbers(key,{start:0,end:7}),frameRate:9,repeat:-1});
       }
     }
+    if(HOJA_MAKER_MODE&&MOVING_PLATFORMS.some(p=>p.makerSink)){
+      const image=HOJA_MAKER_IMAGES.get('Free/Traps/Falling Platforms/On (32x10).png');
+      if(!image)throw new Error('내려가는 발판 원본 에셋을 불러오지 못했습니다.');
+      if(!scene.textures.exists('hojaSinkPlatform'))scene.textures.addSpriteSheet('hojaSinkPlatform',image,{frameWidth:32,frameHeight:10});
+      if(!scene.anims.exists('hojaSinkPlatformOn'))scene.anims.create({key:'hojaSinkPlatformOn',frames:scene.anims.generateFrameNumbers('hojaSinkPlatform',{start:0,end:3}),frameRate:8,repeat:-1});
+    }
     scene.movingPlatforms=[];
     scene.movingPlatformGroup=scene.physics.add.group({allowGravity:false,immovable:true});
 
@@ -22,11 +28,22 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
       bodyObj.body.setAllowGravity(false);
       bodyObj.body.setImmovable(true);
       bodyObj.body.pushable=false;
-      bodyObj.__makerMoving=Boolean(HOJA_MAKER_MODE&&cfg.makerSkin);
+      bodyObj.__makerMoving=Boolean(HOJA_MAKER_MODE&&(cfg.makerSkin||cfg.makerSink));
       bodyObj.__makerStandable=cfg.makerStandable!==false;
       if(bodyObj.body.friction){
         bodyObj.body.friction.x=1;
         bodyObj.body.friction.y=1;
+      }
+
+      if(cfg.makerSink){
+        const art=[];
+        for(let ox=0;ox<cfg.w;ox+=32){
+          const segment=Math.min(32,cfg.w-ox),sp=scene.add.sprite(cfg.x+ox,cfg.y,'hojaSinkPlatform',0).setOrigin(0,0).setDepth(4);
+          if(segment<32)sp.setCrop(0,0,segment,10);
+          art.push({image:sp,makerArt:true,offsetX:ox,offsetY:0});
+        }
+        const platform={cfg,bodyObj,tiles:art,touchAt:-1e9,occupied:false};
+        bodyObj.__sinkPlatform=platform;scene.movingPlatforms.push(platform);return;
       }
 
       // One 32×8 original frame per segment. The final partial segment is
@@ -80,7 +97,23 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
   function updateMovingPlatforms(scene){
     for(const p of scene.movingPlatforms){
       const b=p.bodyObj.body,c=p.cfg;
-      if(c.waypoints?.length>=2){
+      if(c.makerSink){
+        const pb=scene.playerBody?.body,top=b.top,now=scene.time.now,grounded=!!(pb&&(pb.blocked.down||pb.touching.down));
+        const over=!!pb&&pb.right>b.left+2&&pb.left<b.right-2;
+        const occupied=!!pb&&over&&pb.velocity.y>-40&&((now-p.touchAt<120)||(grounded&&Math.abs(pb.bottom-top)<=5)||(p.occupied&&pb.bottom>=top-12&&pb.bottom<=top+8));
+        const dt=Math.min(50,Math.max(0,scene.game.loop.delta||16.67))/1000;
+        let vy=occupied?c.sinkSpeed:(top>c.y? -c.returnSpeed:0);
+        let maxY=Math.min(c.y+c.sinkDepth,(scene.physics.world.bounds?.bottom??(c.y+c.sinkDepth+8))-b.height);
+        // Do not visually or physically sink through a solid surface below.
+        for(const group of [scene.solidGroup,scene.oneWayGroup,scene.brickGroup,scene.pipeGroup,scene.crumbleGroup])for(const object of group?.getChildren?.()||[]){const floor=object.body;if(floor&&floor.enable!==false&&floor.right>b.left&&floor.left<b.right&&floor.top>=c.y+b.height-1)maxY=Math.min(maxY,floor.top-b.height);}
+        maxY=Math.max(c.y,maxY);
+        if(occupied&&top+vy*dt>=maxY){b.reset(p.bodyObj.x,maxY+b.height/2);vy=0;}
+        if(!occupied&&top+vy*dt<=c.y){b.reset(p.bodyObj.x,c.y+b.height/2);vy=0;}
+        b.setVelocity(0,vy);
+        if(occupied&&vy>0&&pb.velocity.y<vy)pb.setVelocityY(vy);
+        if(occupied!==p.occupied){for(const tile of p.tiles){if(occupied)tile.image.play('hojaSinkPlatformOn',true);else{tile.image.stop();tile.image.setFrame(0);}}}
+        p.occupied=occupied;
+      }else if(c.waypoints?.length>=2){
         if(p.pathIndex===undefined){p.pathIndex=1;p.pathDir=1;}
         const dst=c.waypoints[p.pathIndex],targetX=dst.x+c.w/2,targetY=dst.y+c.h/2;
         const dx=targetX-p.bodyObj.x,dy=targetY-p.bodyObj.y,dist=Math.hypot(dx,dy);
