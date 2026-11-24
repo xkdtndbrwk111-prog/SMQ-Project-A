@@ -1,0 +1,11 @@
+# 40-6BG practice-mode controls update — local checks (mock GAS, same Game.html as the isolated push), 2026-11-24
+substitution precheck against the real decoded tutorial + assembled stage 0:
+  연습모드 entries 25
+  연습 스테이지 entries 2
+  ALL_MATCH
+practice stage 0 assembly: before fix -> 'R17S 원본 아케이드 줄 수 변경 · 자동 병합 차단' / 'ARCADE_APPROVED_NOT_CONFIGURED'; after -> OK (12793 lines)
+museum: ArrowRight moved 0 px, D moved 62.3 px; run with ',', door with W; outdoor stage opened (Phaser 4.2.1, H help, legend updated)
+outdoor: Space -> no jump, '.' -> jump (screenshots); Nahansang line '마침표(.) 키를 눌러 점프해 봐.'
+touch (teacher tools) ArrowLeft into the arcade: before fix acked but hero did not move (fell asleep); after fix hero moves left
+regression: Node 123/123; RC audit PASS (re-pinned a25e96a4…); arcade static PASS; trial build verify PASS; SOLO/TEAM UI 6/6
+isolated push: remote == push 9/9; vs previous remote only Game changed (appsscript.json trailing newline only)

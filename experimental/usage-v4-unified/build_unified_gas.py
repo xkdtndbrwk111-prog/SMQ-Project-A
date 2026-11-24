@@ -70,7 +70,7 @@ def approved_rc_game(original_sha):
     trial = [(trial_dir / f'part-{i:02d}.txt').read_bytes() for i in range(1, 26)]
     if hashlib.sha256(b''.join(orig)).hexdigest() != original_sha: raise SystemExit('ORIGINAL_SNAPSHOT_CHANGED')
     changed = [i + 1 for i, (x, y) in enumerate(zip(orig, trial)) if x != y]
-    if changed != [14, 22]: raise SystemExit('UNEXPECTED_TRIAL_PART_CHANGES ' + str(changed))
+    if changed != [14, 22, 23, 24]: raise SystemExit('UNEXPECTED_TRIAL_PART_CHANGES ' + str(changed))   # 40-6BG: 23/24 practice controls
     with tempfile.TemporaryDirectory() as td:
         comp = Path(td) / 'composed.html'
         info = json.loads(subprocess.check_output(['node', str(rdir / 'compose_renderer.mjs'), str(comp)]).decode())

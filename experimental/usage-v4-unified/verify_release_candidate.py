@@ -12,7 +12,7 @@ fails = []; ok = lambda c, m: c or fails.append(m)
 rc = info.get('releaseCandidate') or {}
 ok(info.get('variant') == 'release' and info.get('game') == 'approved-rc', 'NOT_A_RELEASE_RC_BUILD')
 ok(rc.get('originalSha256') == '4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6', 'ORIGINAL_SNAPSHOT_SHA')
-ok(rc.get('changedParts') == [14, 22], 'CHANGED_PARTS')
+ok(rc.get('changedParts') == [14, 22, 23, 24], 'CHANGED_PARTS')   # 40-6BG: practice-mode control update in 23/24
 ok(rc.get('bridgeSha256') == '12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157', 'BRIDGE_SHA')
 game = (d / 'Game.html').read_bytes()
 ok(hashlib.sha256(game).hexdigest() == info['patchedGameSha256'], 'GAME_SHA_MISMATCH_WITH_BUILD_REPORT')
@@ -29,8 +29,8 @@ if game.count(mark) == 1:
 # 40-6AI: the telemetry client policy changed (R7 queue rollover), so the patched game hash moved from 876933... (40-6AF).
 # Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
 # UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
-# 40-6BF: re-pinned after the arcade ranking-patch order fix (was 617f2228285ab5dd8fd0af6cb2de47354142c9f9d46b29db0a1ea73dbae60456)
-ok(rc.get('rcGameSha256') == '1cb387c74663dd38d2418600fd89bb6fbe84c60c92189ce6b16673408d2d8241', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# 40-6BG: re-pinned after the practice-mode control update (was 1cb387c7… after 40-6BF, 617f2228… before)
+ok(rc.get('rcGameSha256') == 'a25e96a4c7a23e9db3fad1655ceb478d216b661441b8f84dc9039eab89b1f5de', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}

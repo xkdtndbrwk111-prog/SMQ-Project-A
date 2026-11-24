@@ -195,8 +195,17 @@ window.HOJA_GAMEPLAY=(()=>{
     }
     return html;
   }
+  // 40-6BG: the RAW restored arcade (what production 2.0.0 exposes) is kept apart from the launch copy.
+  // Practice mode (R17S stage 0) rebuilds from the RAW arcade with an exact line-count check; giving it the
+  // approved+ranking-patched copy blocked the practice outdoor stage ('R17S 원본 아케이드 줄 수 변경').
+  let rawArcade='';
   async function expandArcade(){
    if(original)return original;
+   original=window.HOJA_ARCADE_APPROVED_TRIAL.patchHTML(hojaApplyRankingPatch_(await expandRawArcade()));
+   return original;
+  }
+  async function expandRawArcade(){
+   if(rawArcade)return rawArcade;
    if(!('DecompressionStream' in window))throw new Error('이 브라우저는 아케이드 압축 해제를 지원하지 않습니다. 최신 Chrome을 사용하세요.');
    const raw=atob(HOJA_V051_ARCADE_GZIP), bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
    const decoded=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
@@ -222,8 +231,8 @@ window.HOJA_GAMEPLAY=(()=>{
    });
    if(ptrUsed!==20 || domUsed!==44 || restored.includes('__HOJA_R17D_'))
      throw new Error('R17D 아케이드 에셋 복원 검증 실패');
-   original=window.HOJA_ARCADE_APPROVED_TRIAL.patchHTML(hojaApplyRankingPatch_(restored));
-   return original;
+   rawArcade=restored;
+   return rawArcade;
   }
  async function launch(which,requested){
   if(!window.HOJA_B_LIVE?.sources||!questions.length){window.alert('Project B 문제를 먼저 선택하고 불러와야 합니다.');return;}
@@ -396,7 +405,7 @@ window.HOJA_GAMEPLAY=(()=>{
  },true);
  window.addEventListener('message',e=>{if(e.source===frame().contentWindow&&e.data?.type==='HOJA_V051_ARCADE_EXIT'&&page==='arcade')back();});
  window.addEventListener('resize',()=>{if(page==='quiz'&&!host().hidden){placeBalloon();drawBackground();}},{passive:true});
- return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandArcade,get state(){return {page,season,answered,correct,activeQuiz,jumping}}};
+ return {launch,back,stop,setServerQuestions,clearServerQuestions,getCanonicalArcade:expandRawArcade,getLaunchArcade:expandArcade,get state(){return {page,season,answered,correct,activeQuiz,jumping}}};
 })();
 
 </script><audio id="hqSfx_correct" src="data:audio/mpeg;base64,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" preload="none" aria-hidden="true"></audio>

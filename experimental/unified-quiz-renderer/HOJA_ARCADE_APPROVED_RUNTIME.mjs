@@ -82,6 +82,15 @@ export function patchApprovedArcadeInnerHTML(html){
  '  hojaStep09_3RenderProgress_();\n  hojaRankShow_(scene,reason);\n}',
  '  hojaStep09_3RenderProgress_();\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],()=>hojaRankShow_(scene,reason)))\n    hojaRankShow_(scene,reason);\n}');
  // 40-6BF: ranking name/input substitutions removed (owned by the production rankingPatch applied before this).
+ s=patchArcadeControls(s);
+ return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
+}
+
+/* 40-6BG: the HOJA control contract (A/D move, W door, S down/pipe, ',' run, '.' jump, Enter confirm, H help) as ONE
+ * patch shared by the arcade and the practice outdoor stage (R17S stage 0), so practice teaches the real keys. */
+export function patchArcadeControls(html){
+ if(typeof html!=='string'||html.includes('hojaTrialControlsHelpScript'))throw Error('ARCADE_CONTROLS_ALREADY_PATCHED');
+ let s=html;
  // Trial-only Phaser 2.0 input contract and death continue; original archive stays immutable.
  s=substituteOnce(s,"↑ 한 번 더: 끝내기","W 한 번 더: 끝내기");
  s=substituteOnce(s,"Enter / Space ▶ 스테이지 ","Enter ▶ 스테이지 ");
@@ -106,8 +115,12 @@ export function patchApprovedArcadeInnerHTML(html){
 
  s=substituteOnce(s,"<button id=\"hojaDeathContinue\" type=\"button\">계속하기 ▶</button>","<button id=\"hojaDeathContinue\" type=\"button\">조작키 아무거나 눌러 계속 ▶</button>");
  s=substituteOnce(s,'</head>',HELP_SCRIPT+'\n</head>');
- return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
+ // 40-6BG: in-game control legend follows the same contract.
+ s=substituteOnce(s,'이동 <kbd>←→</kbd> / <kbd>A D</kbd> · 달리기 <kbd>Shift</kbd> 또는 방향 두 번 누르고 유지 · 점프 <kbd>↑</kbd>/<kbd>W</kbd>/<kbd>Space</kbd> · 강 STOMP <kbd>↓</kbd>/<kbd>S</kbd>',
+  '이동 <kbd>A</kbd> <kbd>D</kbd> · 달리기 <kbd>,</kbd> · 점프 <kbd>.</kbd> · 문 <kbd>W</kbd> · 공중 STOMP·토관 <kbd>S</kbd> · 도움말 <kbd>H</kbd>');
+ return s;
 }
+
 
 export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame,getContainer}){
  if(!core?.createApprovedFrameHost||!core?.teamApprovedPayload)throw Error('ARCADE_APPROVED_CORE_REQUIRED');
@@ -297,6 +310,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
  return Object.freeze({
   configure(sources){review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);return catalog.count},
   patchHTML(html){if(!catalog)throw Error('ARCADE_APPROVED_NOT_CONFIGURED');return patchApprovedArcadeInnerHTML(html)},
+  patchControls(html){return patchArcadeControls(html)},
   reset(){review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
   get state(){return {configured:!!catalog,count:catalog?.count||0,activeId:active?.id||null,reviewIndex:review?.index??null,reviewCount:review?.items.length??0}}
  });

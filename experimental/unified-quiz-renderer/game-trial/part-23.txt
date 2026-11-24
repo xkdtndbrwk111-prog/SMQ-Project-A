@@ -235,7 +235,7 @@ a.addEventListener('mousedown',e=>e.stopPropagation());
   const o=document.getElementById('hojaTutOverlay'),f=document.getElementById('hojaTutApp');
   if(!nativeDialogueOpen||!o||o.hidden||!f?.contentWindow)return;
   const k=e.code||(e.key===' '?'Space':e.key);
-  if(k!=='Space'&&k!=='Enter')return;
+  if(k!=='Enter')return;   // 40-6BG: dialogue = click / Enter (Space removed, as in the arcade)
   e.preventDefault();e.stopImmediatePropagation();
   if(e.repeat)return;
   f.contentWindow.postMessage({kind:'HOJA_TUT_REMOTE_DIALOG_NEXT'},'*');

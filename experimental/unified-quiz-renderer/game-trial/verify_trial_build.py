@@ -13,7 +13,7 @@ ORIGINAL=ROOT/'versions/2.0.0/Game.html.parts'
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
 # 40-6BF: arcade ranking patch applied before the approved patch (was de83f2e30c03b082b7acbdf47a2c42bb2bc98eeb)
-EXPECTED_14='47faed9728dcfb6e0e17710df747d782a78b2194'
+EXPECTED_14='883f38c87d82cbe014243a3c9caa794b43eddd54'   # 40-6BG: raw arcade for practice (was 47faed97…, de83f2e3…)
 def gitblob(data):
     return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():
@@ -22,7 +22,8 @@ def audit():
     trial=[(HERE/f'part-{i:02}.txt').read_bytes() for i in range(1,26)]
     assert gitblob(trial[13])==EXPECTED_14,'Chromium QA part-14 bytes changed'
     changed=[i+1 for i,(a,b) in enumerate(zip(originals,trial)) if a!=b]
-    assert changed==[14,22],f'Unexpected changes in trial parts: {changed}'
+    # 40-6BG: parts 23/24 carry the practice-mode control update (tutorial texts/keys, stage 0 controls, TT key map)
+    assert changed==[14,22,23,24],f'Unexpected changes in trial parts: {changed}'
     assert APPROVED.exists() and APPROVED.stat().st_size>1_000_000
     with tempfile.TemporaryDirectory() as folder:
         dest=Path(folder)/'Game.TEST.html'
