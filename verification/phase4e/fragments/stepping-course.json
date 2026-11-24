@@ -1,0 +1,442 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "stepping_course",
+  "name": "낙하 구간과 이어지는 발판",
+  "description": "검증된 Phase 4D 코스의 전체 구간",
+  "difficulty": "medium",
+  "dependencies": [
+    "stepping_blocks",
+    "가시"
+  ],
+  "source": {
+    "path": "verification/phase4d/stepping-course.json",
+    "mapId": "phase4d-stepping-course",
+    "x": 0,
+    "width": 90
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 22
+    }
+  },
+  "map": {
+    "id": "segment_stepping",
+    "name": "이어지는 벽돌 발판",
+    "width": 90,
+    "height": 34,
+    "theme": "grassland",
+    "spawn": {
+      "x": 6,
+      "y": 18
+    },
+    "terrain": [
+      {
+        "id": "start",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 15,
+        "h": 3
+      },
+      {
+        "id": "hazard-floor",
+        "kind": "ground",
+        "x": 15,
+        "y": 30,
+        "w": 36,
+        "h": 4
+      },
+      {
+        "id": "exit",
+        "kind": "ground",
+        "x": 51,
+        "y": 22,
+        "w": 39,
+        "h": 3
+      }
+    ],
+    "objects": [
+      {
+        "id": "spike-15",
+        "type": "asset",
+        "x": 15,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-16",
+        "type": "asset",
+        "x": 16,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-17",
+        "type": "asset",
+        "x": 17,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-18",
+        "type": "asset",
+        "x": 18,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-19",
+        "type": "asset",
+        "x": 19,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-20",
+        "type": "asset",
+        "x": 20,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-21",
+        "type": "asset",
+        "x": 21,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-22",
+        "type": "asset",
+        "x": 22,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-23",
+        "type": "asset",
+        "x": 23,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-24",
+        "type": "asset",
+        "x": 24,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-25",
+        "type": "asset",
+        "x": 25,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-26",
+        "type": "asset",
+        "x": 26,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-27",
+        "type": "asset",
+        "x": 27,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-28",
+        "type": "asset",
+        "x": 28,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-29",
+        "type": "asset",
+        "x": 29,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-30",
+        "type": "asset",
+        "x": 30,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-31",
+        "type": "asset",
+        "x": 31,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-32",
+        "type": "asset",
+        "x": 32,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-33",
+        "type": "asset",
+        "x": 33,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-34",
+        "type": "asset",
+        "x": 34,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-35",
+        "type": "asset",
+        "x": 35,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-36",
+        "type": "asset",
+        "x": 36,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-37",
+        "type": "asset",
+        "x": 37,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-38",
+        "type": "asset",
+        "x": 38,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-39",
+        "type": "asset",
+        "x": 39,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-40",
+        "type": "asset",
+        "x": 40,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-41",
+        "type": "asset",
+        "x": 41,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-42",
+        "type": "asset",
+        "x": 42,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-43",
+        "type": "asset",
+        "x": 43,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-44",
+        "type": "asset",
+        "x": 44,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-45",
+        "type": "asset",
+        "x": 45,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-46",
+        "type": "asset",
+        "x": 46,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-47",
+        "type": "asset",
+        "x": 47,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-48",
+        "type": "asset",
+        "x": 48,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-49",
+        "type": "asset",
+        "x": 49,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "spike-50",
+        "type": "asset",
+        "x": 50,
+        "y": 29,
+        "w": 1,
+        "h": 1,
+        "assetPath": "Free/Traps/Spikes/Idle.png",
+        "collision": "hazard"
+      },
+      {
+        "id": "stepping-bridge",
+        "type": "gimmick",
+        "x": 13,
+        "y": 22,
+        "w": 10,
+        "h": 2,
+        "gimmick": {
+          "kind": "stepping_blocks",
+          "direction": "right",
+          "interval": 1000,
+          "steps": 15
+        }
+      }
+    ],
+    "events": []
+  }
+}

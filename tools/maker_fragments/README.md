@@ -8,6 +8,8 @@
 - `connectors.entry`와 `exit`는 `{ "kind":"ground", "y":22 }` 형태로 왼쪽·오른쪽 경계의 지면 상단 높이(타일)를 뜻한다. 실제 ground와 일치해야 하며 이웃 접점의 높이가 다르면 오류다. 조각을 강제로 옮기거나 지형을 수정하지 않는다. 서로 다른 테마는 한 맵에 섞지 않는다.
 - `terrain`, `objects`, `events`의 ID는 조각 내부에서 고유해야 한다. `targetMapId`/`targetPortalId`는 조각의 `map.id`와 오브젝트 ID를 참조한다. 동일 조각의 링크는 동일 인스턴스 내에서 연결한다. 다른 조각에 대한 참조는 해당 `map.id`가 조합에서 유일해야 한다. `eventId`, `triggerId`, `objectId`는 동일 조각 내 ID다. 모르는 참조 필드는 자동 추측하지 않으며 원본에 보존한다.
 - `pipeMode:solid`에 목표가 남아 있으면 오류로 알려주며 자동 변경하지 않는다. 구형 `type:saw`와 `type:gimmick, kind:saw`는 각각 그대로 보존한다. 기믹은 공유 `HOJA_GIMMICK_MODEL.normalize`로 검사한다.
+- 톱날·진자·화염·이어지는 발판의 움직임/효과가 조각 경계를 벗어나면 `fragmentSources.warnings`에 경고한다. 위험 여부는 배치 검수로 판단하며 자동으로 축소하지 않는다.
+- 단일 짧은 조각은 기존 게임의 맵 최소 너비 32칸을 충족하도록 오른쪽 빈 공간만 확보한다. 지형과 조각 원본은 늘리지 않는다.
 - 동일한 순서와 seed는 동일한 결과를 만들며 난수 호출을 하지 않는다. 버전 1은 수동 순서 조합만 지원한다. 반전·자동 배치·높이 자동 보정 및 임의 필드의 좌표 변환은 지원하지 않는다.
 
 ```sh
@@ -15,4 +17,6 @@ node tools/maker_fragments/cli.mjs validate verification/phase4e/fragments/pract
 node tools/maker_fragments/cli.mjs compile verification/phase4e/fragments/practice-{1,2,3}.json > /tmp/hoja-fragment-project.json
 ```
 
-`verification/phase4e/fragments/practice-{1,2,3}.json`은 기존 Phase 4D 코스에서 잘라낸 지형·기믹에 시작 문과 집을 추가한 시험용 데이터다. 잘못된 예는 `invalid-height.json`: 접합점에 실제 지면이 없어 검증 실패해야 한다. 시범 코스의 완주 가능성이나 교사 수동 검수는 별도로 평가한다.
+`verification/phase4e/fragments/practice-{0,4,3}.json`은 쉬운 검수 코스이며, `practice-{1,2,3}.json`은 기존 기믹을 더 많이 포함한 별도 예제다. 모두 기존 Phase 4D 코스에서 잘라낸 지형·기믹에 시작 문과 집을 추가한 시험용 데이터다. 잘못된 예는 `invalid-height.json`: 접합점에 실제 지면이 없어 검증 실패해야 한다. 시범 코스의 완주 가능성이나 교사 수동 검수는 별도로 평가한다.
+
+Maker 시험판에서 `조각 JSON 열기`는 파일명 순서로 조합하고, `맵을 조각으로 저장`은 현재 맵 전체를 저장한다. 단계별 결과와 실제 플레이 범위는 `verification/phase4e/FRAGMENTS.md`를 참조한다.

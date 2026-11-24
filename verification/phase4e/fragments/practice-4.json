@@ -1,0 +1,65 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "practice_4",
+  "name": "공중 톱날",
+  "description": "기존 Phase 4D 시험 코스에서 추출",
+  "difficulty": "easy",
+  "dependencies": [
+    "Phase 4D 기믹"
+  ],
+  "source": {
+    "path": "verification/phase4d/gimmick-course.json",
+    "mapId": "phase4d-gimmick-course",
+    "x": 32,
+    "width": 16
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 22
+    }
+  },
+  "map": {
+    "id": "segment_practice_4",
+    "theme": "grassland",
+    "width": 16,
+    "height": 24,
+    "spawn": {
+      "x": 4,
+      "y": 22
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 16,
+        "h": 2
+      }
+    ],
+    "objects": [
+      {
+        "id": "air-saw",
+        "type": "gimmick",
+        "x": 2,
+        "y": 15,
+        "w": 4,
+        "h": 4,
+        "gimmick": {
+          "kind": "saw",
+          "axis": "x",
+          "distance": 96,
+          "speed": 45,
+          "radius": 28
+        }
+      }
+    ],
+    "events": []
+  }
+}

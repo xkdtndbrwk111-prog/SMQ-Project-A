@@ -1,0 +1,69 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "pipe_pair",
+  "name": "pipe_pair",
+  "description": "검증용 신규 데이터: 두 토관을 명시적으로 연결",
+  "difficulty": "easy",
+  "dependencies": [],
+  "source": {
+    "description": "검증용 신규 데이터: 두 토관을 명시적으로 연결"
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 22
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 22
+    }
+  },
+  "map": {
+    "id": "pipe_pair",
+    "theme": "grassland",
+    "width": 32,
+    "height": 24,
+    "spawn": {
+      "x": 4,
+      "y": 22
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 22,
+        "w": 32,
+        "h": 2
+      }
+    ],
+    "objects": [
+      {
+        "id": "a",
+        "type": "pipe",
+        "x": 8,
+        "y": 18,
+        "w": 4,
+        "h": 4,
+        "orientation": "up",
+        "pipeMode": "linked",
+        "targetMapId": "pipe_pair",
+        "targetPortalId": "b"
+      },
+      {
+        "id": "b",
+        "type": "pipe",
+        "x": 20,
+        "y": 18,
+        "w": 4,
+        "h": 4,
+        "orientation": "up",
+        "pipeMode": "linked",
+        "targetMapId": "pipe_pair",
+        "targetPortalId": "a"
+      }
+    ],
+    "events": []
+  }
+}

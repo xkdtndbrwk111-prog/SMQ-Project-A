@@ -1,0 +1,100 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "demo_moving",
+  "name": "움직이는 발판",
+  "description": "기존 Maker 예제의 구간",
+  "difficulty": "easy",
+  "dependencies": [],
+  "source": {
+    "path": "tools/maker_compat/maker.html",
+    "mapId": "meadow",
+    "x": 80,
+    "width": 32
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 27
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 27
+    }
+  },
+  "map": {
+    "id": "demo_moving",
+    "theme": "grassland",
+    "width": 32,
+    "height": 32,
+    "spawn": {
+      "x": 2,
+      "y": 27
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 27,
+        "w": 32,
+        "h": 5
+      }
+    ],
+    "objects": [
+      {
+        "id": "ob_8vj21nazv",
+        "type": "moving",
+        "x": 5,
+        "y": 19,
+        "w": 4,
+        "h": 1,
+        "orientation": "up",
+        "targetMapId": "",
+        "targetPortalId": "",
+        "pipeMode": "solid",
+        "enemyType": "JUMPY",
+        "speed": 80,
+        "aiMode": "native",
+        "active": true,
+        "collision": "pass",
+        "opacity": 1,
+        "animationFps": 12,
+        "patrol": {
+          "mode": "loop",
+          "waypoints": [
+            {
+              "x": 5,
+              "y": 19
+            },
+            {
+              "x": 17,
+              "y": 19
+            },
+            {
+              "x": 17,
+              "y": 13
+            },
+            {
+              "x": 5,
+              "y": 13
+            }
+          ],
+          "speed": 65
+        },
+        "dialogue": [
+          {
+            "speaker": "호자",
+            "text": "저 앞에는 뭔가 있는 것 같아!"
+          },
+          {
+            "speaker": "부엉이",
+            "text": "조심해! 함정이 있어."
+          }
+        ],
+        "assetPath": ""
+      }
+    ],
+    "events": []
+  }
+}

@@ -1,0 +1,296 @@
+{
+  "format": "HOJA_MAKER_PROJECT",
+  "schemaVersion": 6101,
+  "title": "조각 연결 시험",
+  "maps": [
+    {
+      "id": "fragment-stage",
+      "name": "조각 연결 맵",
+      "theme": "grassland",
+      "width": 64,
+      "height": 24,
+      "spawn": {
+        "x": 4,
+        "y": 22
+      },
+      "terrain": [
+        {
+          "id": "f1_floor",
+          "kind": "ground",
+          "x": 0,
+          "y": 22,
+          "w": 16,
+          "h": 2
+        },
+        {
+          "id": "f2_floor",
+          "kind": "ground",
+          "x": 16,
+          "y": 22,
+          "w": 16,
+          "h": 2
+        },
+        {
+          "id": "f3_floor",
+          "kind": "ground",
+          "x": 32,
+          "y": 22,
+          "w": 32,
+          "h": 2
+        }
+      ],
+      "objects": [
+        {
+          "id": "f1_start",
+          "type": "maker_start",
+          "x": 2,
+          "y": 18,
+          "w": 4,
+          "h": 4
+        },
+        {
+          "id": "f2_air-saw",
+          "type": "gimmick",
+          "x": 18,
+          "y": 15,
+          "w": 4,
+          "h": 4,
+          "gimmick": {
+            "kind": "saw",
+            "axis": "x",
+            "distance": 96,
+            "speed": 45,
+            "radius": 28
+          }
+        },
+        {
+          "id": "f3_steady-wind",
+          "type": "gimmick",
+          "x": 39,
+          "y": 17,
+          "w": 12,
+          "h": 5,
+          "gimmick": {
+            "kind": "fan",
+            "direction": "left",
+            "power": 780,
+            "period": 5000,
+            "on": 5000
+          }
+        },
+        {
+          "id": "f3_goal",
+          "type": "maker_goal",
+          "x": 58,
+          "y": 18,
+          "w": 4,
+          "h": 4
+        }
+      ],
+      "events": []
+    }
+  ],
+  "fragmentSources": {
+    "schemaVersion": 1,
+    "seed": 0,
+    "warnings": [],
+    "fragments": [
+      {
+        "format": "HOJA_MAKER_FRAGMENT",
+        "schemaVersion": 1,
+        "id": "practice_0",
+        "name": "안전 시작",
+        "description": "기존 Phase 4D 시험 코스에서 추출",
+        "difficulty": "easy",
+        "dependencies": [
+          "Phase 4D 기믹"
+        ],
+        "source": {
+          "path": "verification/phase4d/gimmick-course.json",
+          "mapId": "phase4d-gimmick-course",
+          "x": 0,
+          "width": 16
+        },
+        "connectors": {
+          "entry": {
+            "kind": "ground",
+            "y": 22
+          },
+          "exit": {
+            "kind": "ground",
+            "y": 22
+          }
+        },
+        "map": {
+          "id": "segment_practice_0",
+          "theme": "grassland",
+          "width": 16,
+          "height": 24,
+          "spawn": {
+            "x": 4,
+            "y": 22
+          },
+          "terrain": [
+            {
+              "id": "floor",
+              "kind": "ground",
+              "x": 0,
+              "y": 22,
+              "w": 16,
+              "h": 2
+            }
+          ],
+          "objects": [
+            {
+              "id": "start",
+              "type": "maker_start",
+              "x": 2,
+              "y": 18,
+              "w": 4,
+              "h": 4
+            }
+          ],
+          "events": []
+        }
+      },
+      {
+        "format": "HOJA_MAKER_FRAGMENT",
+        "schemaVersion": 1,
+        "id": "practice_4",
+        "name": "공중 톱날",
+        "description": "기존 Phase 4D 시험 코스에서 추출",
+        "difficulty": "easy",
+        "dependencies": [
+          "Phase 4D 기믹"
+        ],
+        "source": {
+          "path": "verification/phase4d/gimmick-course.json",
+          "mapId": "phase4d-gimmick-course",
+          "x": 32,
+          "width": 16
+        },
+        "connectors": {
+          "entry": {
+            "kind": "ground",
+            "y": 22
+          },
+          "exit": {
+            "kind": "ground",
+            "y": 22
+          }
+        },
+        "map": {
+          "id": "segment_practice_4",
+          "theme": "grassland",
+          "width": 16,
+          "height": 24,
+          "spawn": {
+            "x": 4,
+            "y": 22
+          },
+          "terrain": [
+            {
+              "id": "floor",
+              "kind": "ground",
+              "x": 0,
+              "y": 22,
+              "w": 16,
+              "h": 2
+            }
+          ],
+          "objects": [
+            {
+              "id": "air-saw",
+              "type": "gimmick",
+              "x": 2,
+              "y": 15,
+              "w": 4,
+              "h": 4,
+              "gimmick": {
+                "kind": "saw",
+                "axis": "x",
+                "distance": 96,
+                "speed": 45,
+                "radius": 28
+              }
+            }
+          ],
+          "events": []
+        }
+      },
+      {
+        "format": "HOJA_MAKER_FRAGMENT",
+        "schemaVersion": 1,
+        "id": "practice_3",
+        "name": "송풍기와 골인",
+        "description": "Phase 4D 시험 코스에서 추출한 시험 조각",
+        "difficulty": "medium",
+        "dependencies": [
+          "Phase 4D 기믹"
+        ],
+        "source": {
+          "path": "verification/phase4d/gimmick-course.json",
+          "mapId": "phase4d-gimmick-course",
+          "x": 64,
+          "width": 32
+        },
+        "connectors": {
+          "entry": {
+            "kind": "ground",
+            "y": 22
+          },
+          "exit": {
+            "kind": "ground",
+            "y": 22
+          }
+        },
+        "map": {
+          "id": "segment_3",
+          "theme": "grassland",
+          "width": 32,
+          "height": 24,
+          "spawn": {
+            "x": 4,
+            "y": 22
+          },
+          "terrain": [
+            {
+              "id": "floor",
+              "kind": "ground",
+              "x": 0,
+              "y": 22,
+              "w": 32,
+              "h": 2
+            }
+          ],
+          "objects": [
+            {
+              "id": "steady-wind",
+              "type": "gimmick",
+              "x": 7,
+              "y": 17,
+              "w": 12,
+              "h": 5,
+              "gimmick": {
+                "kind": "fan",
+                "direction": "left",
+                "power": 780,
+                "period": 5000,
+                "on": 5000
+              }
+            },
+            {
+              "id": "goal",
+              "type": "maker_goal",
+              "x": 26,
+              "y": 18,
+              "w": 4,
+              "h": 4
+            }
+          ],
+          "events": []
+        }
+      }
+    ]
+  }
+}

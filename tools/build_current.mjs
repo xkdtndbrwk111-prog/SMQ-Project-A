@@ -49,7 +49,7 @@ if(test){
  reviewFiles['teacher-review.js']=fs.readFileSync(path.join(reviewPath,'client.js'),'utf8');
  reviewFiles['maker-compat.html']=fs.readFileSync(path.join(root,'tools/maker_compat/maker.html'),'utf8');
  reviewFiles['maker-fragment-system.js']=fs.readFileSync(path.join(root,'tools/maker_fragments/fragment-system.js'),'utf8');
- reviewFiles['fragment-practice.json']=JSON.stringify([1,2,3].map(n=>JSON.parse(fs.readFileSync(path.join(root,`verification/phase4e/fragments/practice-${n}.json`),'utf8'))));
+ reviewFiles['fragment-practice.json']=JSON.stringify([0,4,3].map(n=>JSON.parse(fs.readFileSync(path.join(root,`verification/phase4e/fragments/practice-${n}.json`),'utf8'))));
  reviewFiles['maker-compat-boot.js']=fs.readFileSync(path.join(root,'tools/maker_compat/boot.js'),'utf8');
  const gp=fs.readFileSync(path.join(source,'js/parent-gameplay.js'),'utf8');
  const needle="f.src='arcade.html?season='";

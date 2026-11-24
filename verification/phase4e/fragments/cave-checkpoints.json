@@ -1,0 +1,69 @@
+{
+  "format": "HOJA_MAKER_FRAGMENT",
+  "schemaVersion": 1,
+  "id": "cave_checkpoints",
+  "name": "cave_checkpoints",
+  "description": "verification/phase4e/maker-features.test.mjs의 cave x=16~48",
+  "difficulty": "easy",
+  "dependencies": [],
+  "source": {
+    "description": "verification/phase4e/maker-features.test.mjs의 cave x=16~48"
+  },
+  "connectors": {
+    "entry": {
+      "kind": "ground",
+      "y": 27
+    },
+    "exit": {
+      "kind": "ground",
+      "y": 27
+    }
+  },
+  "map": {
+    "id": "cave_checkpoints",
+    "theme": "cave",
+    "width": 32,
+    "height": 32,
+    "spawn": {
+      "x": 4,
+      "y": 27
+    },
+    "terrain": [
+      {
+        "id": "floor",
+        "kind": "ground",
+        "x": 0,
+        "y": 27,
+        "w": 32,
+        "h": 5
+      }
+    ],
+    "objects": [
+      {
+        "id": "start-extra",
+        "type": "maker_start",
+        "x": 4,
+        "y": 23,
+        "w": 4,
+        "h": 4
+      },
+      {
+        "id": "checkpoint-b",
+        "type": "maker_checkpoint",
+        "x": 9,
+        "y": 23,
+        "w": 4,
+        "h": 4
+      },
+      {
+        "id": "start-third",
+        "type": "maker_start",
+        "x": 14,
+        "y": 23,
+        "w": 4,
+        "h": 4
+      }
+    ],
+    "events": []
+  }
+}
