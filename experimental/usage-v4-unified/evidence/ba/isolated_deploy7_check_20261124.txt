@@ -1,0 +1,18 @@
+# 40-6BC new isolated version deployment @7 (created by the teacher), 2026-11-24 KST. URL/IDs omitted.
+## anonymous access smoke
+hojaV4OpsStatus: DENIED
+hojaV4TestEvidenceU3 token=wrong: DENIED
+hojaV4TestEvidenceU3 token=empty: DENIED
+hojaV4TestTailU3 token=wrong: DENIED
+hojaV4TestTailU3 token=empty: DENIED
+hojaV4TestColdU3 token=wrong: DENIED
+hojaV4TestColdU3 token=empty: DENIED
+hojaV4TestClearCacheU3 token=wrong: DENIED
+hojaV4TestClearCacheU3 token=empty: DENIED
+ACCESS_SMOKE_PASS 9/9 denied
+exit=0
+## real browser functional check (signed out, one run)
+{"listRows": 23, "approvedWithPkg": 23, "commits": ["440cc1f"]}
+{"get": {"id": "math5-s2-u4", "q": 31}, "githubRequests": 1, "cache": {"idb": "OK", "downloads": 1, "relayed": 0, "stored": 1}}
+{"usageStart": {"ok": false, "schema": null, "error": "USAGE_APPROVED_ERA_NOT_STARTED"}}
+-> approved-unit starts are refused until the script property HOJA_USAGE_APPROVED_ERA_START (yyyy-MM-dd) is set in the isolated project (teacher, editor).

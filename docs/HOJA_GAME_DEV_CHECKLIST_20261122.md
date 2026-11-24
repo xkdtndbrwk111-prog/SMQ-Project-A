@@ -1413,3 +1413,9 @@
 ### 40-6BB. main 병합 완료 (2026-11-24, 교사 승인 "치명적이지 않으면 진행")
 - [x] PR #6 → **main 병합**(merge commit `9b6c279`). 병합 직전 CI success(45333946740). 운영 GAS 자동 배포는 없다. 루트 Code.gs 변경은 속성 미설정 시 동작이 같은 opt-in 가드다.
 - [ ] 운영 GAS 전환, 실 Seal/트리거: 보류(40-6BA 사유). 새 격리 버전 배포는 교사 UI가 필요하다.
+
+
+### 40-6BC. 새 격리 버전 배포 @7 확인 (2026-11-24)
+- [x] 교사가 배포 @7을 생성했다. 익명 보안 스모크 **9/9 DENIED**.
+- [x] 실제 브라우저: LIST 23단원, 모두 pin `440cc1f`. 수학 5-2 4단원 GET은 실제 GitHub 다운로드 1회, SHA 검증 후 IndexedDB 저장, relay 0. 31문항.
+- [ ] **승인 단원 사용량 기록 미작동:** `USAGE_APPROVED_ERA_NOT_STARTED`. 격리 프로젝트 스크립트 속성 `HOJA_USAGE_APPROVED_ERA_START` 설정이 필요하다(교사, 편집기). 근거: `evidence/ba/isolated_deploy7_check_20261124.txt`.
