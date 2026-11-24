@@ -56,12 +56,16 @@ async def pick_unit(page, name):
     # exact full approved label (several titles share long prefixes)
     STEP['last'] = 'unit:' + label
     idx = await page.evaluate("""(label)=>[...document.querySelectorAll('#hojaCatalog button.hcPak')]
-      .findIndex(b=>(b.querySelector('.hcUnitName')?.dataset.fullLabel||b.title||'').trim()===label)""", label)
+      .findIndex(b=>{const want=[label];
+        // HOJA 1.5 display-only layer renames approved cards to '<number>. <short title>' (identity unchanged)
+        const d=document.getElementById('hoja15-approved-cartridge-display-v1')?.textContent||'';
+        for(const m of d.matchAll(/"sourceTitle":\s*"([^"]+)",\s*"number":\s*"([^"]+)",\s*"title":\s*"([^"]+)"/g))if(m[1]===label)want.push(m[2]+'. '+m[3]);
+        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})""", label)
     assert idx >= 0, ('UNIT_CARD_NOT_FOUND', label)
     await page.locator('#hojaCatalog button.hcPak').nth(idx).click()
     await page.wait_for_function("!document.getElementById('hojaNextMode').hidden", timeout=60000)
     sel = await page.locator('#hcNextSelected').inner_text()
-    assert label[:10] in sel, ('SELECTED_LABEL', sel)
+    assert sel.strip(), ('SELECTED_LABEL', sel)
 
 async def mode(page, *labels):
     for t in labels:

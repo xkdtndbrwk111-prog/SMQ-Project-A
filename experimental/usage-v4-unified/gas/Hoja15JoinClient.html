@@ -1,0 +1,204 @@
+<script id="hoja15-join-v1">
+/* HOJA 1.5 single-mode student join code + QR (40-6CF; spec docs/HOJA15_SINGLE_QR_INVITE_SPEC_20261124.md).
+ * Teacher: 혼자 놀기 -> 아케이드 / 문제 풀이 -> [학생 참여 코드] [바로 시작하기].
+ * Student: /exec?join=<6 digits> (QR) or the "참여 코드" entry opens the teacher's approved units in that mode.
+ * Routing only: units are fetched through the SAME window.HOJA_B_LIVE.rpc('LIST'/'GET') path (so the F4 package
+ * cache wrapper is used), the game's own launch()/tutorial gate/ranking run unchanged. No game line is edited.
+ * QR encoder: qrcode-generator 1.4.4 (c) 2009 Kazuhiko Arase, MIT license, inlined below unchanged. */
+(()=>{'use strict';
+/*HOJA15_QRCODE_LIB*/
+const G=window.HOJA_GAMEPLAY,GATE=window.HOJA_TUTORIAL_GATE,LIVE=()=>window.HOJA_B_LIVE;
+if(!G||typeof G.launch!=='function'||!GATE||typeof GATE.startArcade!=='function')return;
+const origLaunch=G.launch.bind(G),origStartArcade=GATE.startArcade.bind(GATE);
+const MODE_NAME={arcade:'싱글 아케이드',quiz:'싱글 문제풀이'};
+const ERR={HOJA15_JOIN_NOT_FOUND:'코드를 찾을 수 없어요. 숫자 6자리를 다시 확인해 주세요.',
+ HOJA15_JOIN_EXPIRED:'만료된 코드예요. 선생님께 새 코드를 받아 주세요.',
+ HOJA15_JOIN_CODE_INVALID:'참여 코드는 숫자 6자리예요.',
+ HOJA15_JOIN_BUSY:'요청이 많아요. 잠시 후 다시 시도해 주세요.',
+ HOJA15_JOIN_NOT_APPROVED:'승인된 내장 카트리지만 참여 코드를 만들 수 있어요.'};
+const msgOf=e=>{const s=String(e&&e.message||e||'');const k=Object.keys(ERR).find(k=>s.indexOf(k)>=0);return k?ERR[k]:'연결에 실패했어요. 잠시 후 다시 시도해 주세요.';};
+function gas(fn,...args){return new Promise((res,rej)=>{const r=window.google&&google.script&&google.script.run;
+ if(!r)return rej(new Error('Apps Script 웹앱 연결이 없습니다.'));
+ r.withSuccessHandler(res).withFailureHandler(e=>rej(new Error(String(e&&e.message||e))))[fn](...args);});}
+const css=document.createElement('style');css.id='hoja15JoinStyle';
+css.textContent=`
+#hoja15JoinLayer{position:fixed;inset:0;z-index:2147483000;display:none;font-family:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:#fff}
+#hoja15JoinLayer.open{display:flex;align-items:center;justify-content:center;background:rgba(6,18,34,.86)}
+#hoja15JoinLayer .h15Card{background:#13304e;border:4px solid #ffd85e;border-radius:22px;padding:clamp(18px,3vw,40px);max-width:min(94vw,980px);box-shadow:0 18px 60px #0009;text-align:center}
+#hoja15JoinLayer h2{margin:0 0 8px;font-size:clamp(26px,3.4vw,46px)}
+#hoja15JoinLayer .h15Units{opacity:.85;font-size:clamp(14px,1.6vw,20px);margin-bottom:clamp(14px,2.4vw,30px);word-break:keep-all}
+#hoja15JoinLayer .h15Row{display:flex;gap:clamp(12px,2vw,26px);justify-content:center;flex-wrap:wrap}
+#hoja15JoinLayer button{font:inherit;cursor:pointer;border-radius:16px;border:3px solid #0000;touch-action:manipulation}
+#hoja15JoinLayer .h15Big{min-width:min(78vw,330px);min-height:clamp(96px,14vh,150px);font-size:clamp(24px,2.9vw,40px);font-weight:900;background:#ffd85e;color:#10253c;box-shadow:0 6px 0 #b48d1c}
+#hoja15JoinLayer .h15Big.h15Alt{background:#3fc3ff;box-shadow:0 6px 0 #1c7da6}
+#hoja15JoinLayer .h15Big small{display:block;font-size:.48em;font-weight:700;margin-top:6px;opacity:.85}
+#hoja15JoinLayer .h15Small{margin-top:clamp(14px,2vw,24px);padding:10px 26px;font-size:clamp(16px,1.6vw,21px);font-weight:800;background:#ffffff1f;color:#fff;border-color:#ffffff55}
+#hoja15JoinLayer .h15Small+.h15Small{margin-left:10px}
+#hoja15JoinLayer.h15Code{background:#0b1e33}
+#hoja15JoinLayer .h15Board{display:flex;align-items:center;justify-content:center;gap:clamp(18px,4vw,70px);width:100vw;height:100vh;padding:2vh 3vw;box-sizing:border-box}
+#hoja15JoinLayer .h15Qr{background:#fff;border-radius:18px;padding:clamp(10px,1.4vw,22px);line-height:0;flex:none}
+#hoja15JoinLayer .h15Qr canvas{width:min(74vh,44vw);height:min(74vh,44vw);image-rendering:pixelated}
+#hoja15JoinLayer .h15Info{display:flex;flex-direction:column;align-items:center;max-width:min(48vw,760px)}
+#hoja15JoinLayer .h15Label{font-size:clamp(20px,2.4vw,38px);font-weight:800;color:#ffd85e}
+#hoja15JoinLayer .h15Digits{font-size:clamp(68px,9vw,144px);font-weight:900;letter-spacing:.12em;line-height:1.05;margin:.06em 0 .1em;font-variant-numeric:tabular-nums}
+#hoja15JoinLayer .h15Meta{font-size:clamp(15px,1.6vw,24px);opacity:.9;text-align:center;word-break:keep-all}
+#hoja15JoinLayer .h15Link{font-size:clamp(11px,.95vw,15px);opacity:.75;word-break:break-all;margin-top:10px;max-width:100%}
+#hoja15JoinLayer .h15Note{font-size:clamp(14px,1.4vw,20px);color:#ffe9a8;margin-top:8px}
+#hoja15JoinLayer .h15Actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:clamp(12px,2.2vh,26px)}
+#hoja15JoinLayer .h15Actions button{padding:12px 20px;font-size:clamp(15px,1.5vw,22px);font-weight:800;background:#ffffff1f;color:#fff;border-color:#ffffff55}
+#hoja15JoinLayer .h15Actions .h15Go{background:#ffd85e;color:#10253c;border-color:#ffd85e}
+#hoja15JoinLayer input{font:900 clamp(38px,7vw,64px)/1.1 system-ui;letter-spacing:.18em;width:min(80vw,6.6em);text-align:center;border-radius:14px;border:3px solid #ffd85e;padding:8px 6px;color:#10253c}
+#hoja15JoinLayer .h15Err{min-height:1.5em;color:#ffb3b3;font-weight:800;margin-top:10px;font-size:clamp(15px,1.6vw,20px)}
+#hoja15JoinEntry{position:fixed;right:clamp(10px,1.6vw,22px);bottom:clamp(10px,1.6vw,22px);z-index:2147482000;display:none;font:900 clamp(16px,1.7vw,22px) system-ui;padding:12px 20px;border-radius:999px;border:3px solid #fff;background:#ffd85e;color:#10253c;box-shadow:0 5px 18px #0007;cursor:pointer}
+#hoja15JoinEntry.show{display:block}
+@media (max-width:820px),(max-aspect-ratio:1/1){
+ #hoja15JoinLayer .h15Board{flex-direction:column;gap:2vh;overflow:auto}
+ #hoja15JoinLayer .h15Qr canvas{width:min(46vh,82vw);height:min(46vh,82vw)}
+ #hoja15JoinLayer .h15Info{max-width:94vw}
+}`;
+document.head.appendChild(css);
+const layer=document.createElement('div');layer.id='hoja15JoinLayer';layer.setAttribute('role','dialog');layer.setAttribute('aria-modal','true');
+const entryBtn=document.createElement('button');entryBtn.id='hoja15JoinEntry';entryBtn.type='button';entryBtn.textContent='참여 코드 입력';
+document.body.append(layer,entryBtn);
+// keys typed in this layer never reach the game / intro shortcuts underneath
+for(const t of ['keydown','keyup','keypress'])layer.addEventListener(t,e=>{if(layer.classList.contains('open'))e.stopPropagation();});
+window.addEventListener('keydown',e=>{if(!layer.classList.contains('open'))return;
+ if(e.key==='Escape'&&state.view!=='joining'){e.preventDefault();e.stopImmediatePropagation();close();return;}
+ if(!layer.contains(e.target)){e.stopImmediatePropagation();}},true);
+for(const t of ['pointerdown','mousedown','click','touchstart'])entryBtn.addEventListener(t,e=>e.stopPropagation());
+const state={view:'',pending:null,mode:'',season:'',issued:null,timer:0};
+function h(tag,attrs,...kids){const el=document.createElement(tag);for(const [k,v] of Object.entries(attrs||{})){if(k==='class')el.className=v;else if(k==='text')el.textContent=v;else if(k.startsWith('on'))el.addEventListener(k.slice(2),v);else el.setAttribute(k,v);}for(const c of kids)if(c!=null)el.append(c);return el;}
+function open(view,...nodes){state.view=view;layer.className='open'+(view==='code'?' h15Code':'');layer.replaceChildren(...nodes);syncEntry();
+ const f=layer.querySelector('[data-focus]')||layer.querySelector('button');setTimeout(()=>f&&f.focus(),30);}
+function close(){if(state.timer){clearInterval(state.timer);state.timer=0;}state.view='';layer.className='';layer.replaceChildren();syncEntry();}
+function selectedNames(){const s=LIVE()&&LIVE().sources;return Array.isArray(s)?s.map(x=>x.sheetName):[];}
+function unitText(names){const t=document.getElementById('hcNextSelected');const shown=t&&t.textContent.trim();return shown||names.join(' · ');}
+// ---------------------------------------------------------------- teacher: two-option menu
+function menu(mode,season,start){
+ state.mode=mode;state.season=season||(window.HOJA_SEASON_SESSION&&window.HOJA_SEASON_SESSION.current&&window.HOJA_SEASON_SESSION.current())||'';
+ state.pending=start;const names=selectedNames();
+ open('menu',h('div',{class:'h15Card'},
+  h('h2',{text:MODE_NAME[mode]}),
+  h('div',{class:'h15Units',text:unitText(names)}),
+  h('div',{class:'h15Row'},
+   h('button',{type:'button',class:'h15Big h15Alt',id:'hoja15JoinIssue',onclick:()=>issue()},'학생 참여 코드',h('small',{text:'QR로 학생 기기에서 바로 시작'})),
+   h('button',{type:'button',class:'h15Big',id:'hoja15JoinDirect','data-focus':'1',onclick:()=>direct()},'바로 시작하기',h('small',{text:'이 화면에서 지금 시작'}))),
+  h('button',{type:'button',class:'h15Small',id:'hoja15JoinBack',onclick:()=>close()},'뒤로')));
+}
+function direct(){const go=state.pending;revokeIssued();close();if(typeof go==='function')go();}
+function revokeIssued(){const it=state.issued;state.issued=null;if(it&&it.token)gas('hojaJoinRevoke',it.code,it.token).catch(()=>{});}
+async function issue(reissue){
+ const names=selectedNames();
+ if(!names.length){open('menu-error',h('div',{class:'h15Card'},h('h2',{text:'선택한 단원이 없어요'}),h('button',{type:'button',class:'h15Small',onclick:close},'닫기')));return;}
+ if(reissue)revokeIssued();
+ open('issuing',h('div',{class:'h15Card'},h('h2',{text:'참여 코드 만드는 중…'}),h('div',{class:'h15Units',text:unitText(names)})));
+ try{
+  const r=await gas('hojaJoinCreate',{mode:state.mode,names,season:state.season});
+  // count down on THIS device's clock (server and classroom devices may disagree)
+  if(Number.isFinite(r.expiresInMs))r.expiresAt=Date.now()+r.expiresInMs;
+  state.issued=r;showCode(r);
+ }catch(e){
+  open('issue-error',h('div',{class:'h15Card'},h('h2',{text:'코드를 만들지 못했어요'}),h('div',{class:'h15Err',text:msgOf(e)}),
+   h('div',{class:'h15Row'},h('button',{type:'button',class:'h15Small',onclick:()=>issue()},'다시 시도'),h('button',{type:'button',class:'h15Small',onclick:()=>menu(state.mode,state.season,state.pending)},'뒤로'))));
+ }
+}
+function qrCanvas(text){
+ const q=qrcode(0,'M');q.addData(text);q.make();
+ const n=q.getModuleCount(),quiet=2,scale=12,c=document.createElement('canvas');c.width=c.height=(n+quiet*2)*scale;
+ const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';
+ for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect((k+quiet)*scale,(r+quiet)*scale,scale,scale);
+ c.setAttribute('role','img');c.setAttribute('aria-label','학생 참여 QR 코드');c.dataset.text=text;return c;
+}
+function hhmm(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function showCode(r){
+ const digits=String(r.code);const left=h('div',{class:'h15Meta'});
+ const tick=()=>{const m=Math.max(0,Math.round((r.expiresAt-Date.now())/60000));left.textContent=m>0?hhmm(r.expiresAt)+'까지 사용 가능 (약 '+(m>=60?Math.floor(m/60)+'시간 ':'')+(m%60)+'분 남음)':'코드가 만료되었어요. 재발급을 눌러 주세요.';};
+ tick();state.timer=setInterval(tick,20000);
+ const copy=h('button',{type:'button',id:'hoja15JoinCopy',onclick:async()=>{const t=r.url||digits;try{await navigator.clipboard.writeText(t);copy.textContent='복사됨 ✓';}catch(e){copy.textContent='복사 실패';}setTimeout(()=>copy.textContent=r.url?'링크 복사':'코드 복사',1600);}},r.url?'링크 복사':'코드 복사');
+ open('code',h('div',{class:'h15Board'},
+  r.url?h('div',{class:'h15Qr'},qrCanvas(r.url)):null,
+  h('div',{class:'h15Info'},
+   h('div',{class:'h15Label',text:'학생 참여 코드'}),
+   h('div',{class:'h15Digits',id:'hoja15JoinDigits',text:digits.slice(0,3)+' '+digits.slice(3)}),
+   h('div',{class:'h15Meta',text:MODE_NAME[r.mode]+' · '+unitText(r.names)}),left,
+   r.url?h('div',{class:'h15Note',text:'카메라로 QR을 찍거나, 이 주소에서 [참여 코드 입력]에 숫자 6자리를 넣으세요.'})
+        :h('div',{class:'h15Note',text:'학생은 게임 주소에서 [참여 코드 입력]을 누르고 숫자 6자리를 넣으세요.'}),
+   r.url?h('div',{class:'h15Link',id:'hoja15JoinUrl',text:r.url}):null,
+   h('div',{class:'h15Actions'},copy,
+    h('button',{type:'button',id:'hoja15JoinReissue',onclick:()=>{if(state.timer){clearInterval(state.timer);state.timer=0;}issue(true);}},'재발급'),
+    h('button',{type:'button',class:'h15Go',id:'hoja15JoinTeacherStart',onclick:()=>{if(state.timer){clearInterval(state.timer);state.timer=0;}const go=state.pending;close();if(typeof go==='function')go();}},'선생님도 바로 시작'),
+    h('button',{type:'button',id:'hoja15JoinCodeBack',onclick:()=>{if(state.timer){clearInterval(state.timer);state.timer=0;}menu(state.mode,state.season,state.pending);}},'뒤로')))));
+}
+// wrap ONLY the two single-mode entries of the solo menu; practice / team / quiz retry stay untouched
+GATE.startArcade=function(launch){
+ const solo=!document.getElementById('hojaNextMode')?.hidden;
+ if(!solo||state.view==='joining')return origStartArcade(launch);
+ menu('arcade','',()=>origStartArcade(launch));
+};
+G.launch=function(which,requested){
+ const solo=!document.getElementById('hojaNextMode')?.hidden;
+ if(which==='quiz'&&solo&&state.view!=='joining'){menu('quiz',requested,()=>origLaunch(which,requested));return;}
+ return origLaunch(which,requested);
+};
+// ---------------------------------------------------------------- student: QR / manual code
+function screenIsEntry(){
+ const vis=id=>{const el=document.getElementById(id);return !!el&&!el.hidden;};
+ if(vis('hojaGamePlay')||vis('hojaNextMode')||vis('loadingOverlay'))return false;
+ const tut=document.getElementById('hojaTutorialOverlay')||document.getElementById('hojaTutLayer');if(tut&&!tut.hidden&&tut.offsetParent)return false;
+ return true;
+}
+function syncEntry(){entryBtn.classList.toggle('show',!state.view&&screenIsEntry());}
+setInterval(syncEntry,700);
+entryBtn.addEventListener('click',()=>askCode());
+function askCode(err){
+ const input=h('input',{type:'text',inputmode:'numeric',autocomplete:'off',maxlength:'7',placeholder:'000000','aria-label':'참여 코드 6자리','data-focus':'1',id:'hoja15JoinInput'});
+ const msg=h('div',{class:'h15Err',id:'hoja15JoinErr',text:err||''});
+ const go=()=>{const v=input.value.replace(/\D/g,'');if(v.length!==6){msg.textContent=ERR.HOJA15_JOIN_CODE_INVALID;return;}join(v);};
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});
+ input.addEventListener('input',()=>{input.value=input.value.replace(/\D/g,'').slice(0,6);});
+ open('ask',h('div',{class:'h15Card'},h('h2',{text:'참여 코드 입력'}),h('div',{class:'h15Units',text:'선생님 화면의 숫자 6자리를 입력하세요.'}),input,msg,
+  h('div',{class:'h15Row'},h('button',{type:'button',class:'h15Small',id:'hoja15JoinGo',onclick:go},'참여하기'),h('button',{type:'button',class:'h15Small',onclick:close},'닫기'))));
+}
+let joinBusy=false;
+async function join(code){
+ if(joinBusy)return;joinBusy=true;
+ open('joining',h('div',{class:'h15Card'},h('h2',{text:'수업에 참여하는 중…'}),h('div',{class:'h15Units',id:'hoja15JoinStatus',text:'참여 코드 '+code})));
+ const status=t=>{const el=document.getElementById('hoja15JoinStatus');if(el)el.textContent=t;};
+ try{
+  const s=await gas('hojaJoinResolve',code);
+  status(MODE_NAME[s.mode]+' · 문제 불러오는 중');
+  const live=LIVE();if(!live||typeof live.rpc!=='function')throw new Error('GAME_NOT_READY');
+  const rows=await live.rpc('LIST');           // same path as the catalog: lets the F4 cache learn the trusted pins
+  const listed=new Set((rows||[]).map(r=>r&&r.name));
+  if(s.names.some(n=>!listed.has(n)))throw new Error('HOJA15_JOIN_NOT_APPROVED');
+  const results=await live.rpc('GET',s.names.slice());
+  if(!Array.isArray(results)||results.length!==s.names.length||results.some((v,i)=>!v||v.sheetName!==s.names[i]))throw new Error('GET_MISMATCH');
+  live.setSources(results);
+  const a=window.HOJA_ATTRACT_SCENE;if(a)a.pausedByUser=true;
+  window.HOJA_REPOSITORY&&window.HOJA_REPOSITORY.hide&&window.HOJA_REPOSITORY.hide();
+  window.HOJA_CATALOG&&window.HOJA_CATALOG.hide&&window.HOJA_CATALOG.hide();
+  window.HOJA_LOADING&&window.HOJA_LOADING.hide&&window.HOJA_LOADING.hide();
+  const ctx=document.getElementById('hcNextContext'),sel=document.getElementById('hcNextSelected');
+  if(ctx)ctx.textContent='학생 참여 코드 · '+s.names.length+'개 내장 카트리지';
+  if(sel)sel.textContent=s.names.join(' · ');
+  const season=s.season||'';
+  joinBusy=false;close();
+  window.HOJA_AUDIO_CONTROL&&window.HOJA_AUDIO_CONTROL.unlockFromGesture&&window.HOJA_AUDIO_CONTROL.unlockFromGesture();
+  window.HOJA15_JOIN_LAST={code,mode:s.mode,units:s.names.length,at:Date.now()};
+  if(s.mode==='arcade')origStartArcade(()=>origLaunch('arcade',season));else origLaunch('quiz',season);
+ }catch(e){
+  joinBusy=false;askCode(String(e&&e.message||'').indexOf('HOJA15_JOIN_')>=0?msgOf(e):'문제를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+ }
+}
+// iPad Safari: sound needs one touch; the game keeps running without it
+window.addEventListener('pointerdown',()=>{window.HOJA_AUDIO_CONTROL&&window.HOJA_AUDIO_CONTROL.unlockFromGesture&&window.HOJA_AUDIO_CONTROL.unlockFromGesture();},{once:true,capture:true});
+function fromUrl(){
+ try{if(window.google&&google.script&&google.script.url)google.script.url.getLocation(loc=>{
+  const c=String(loc&&loc.parameter&&loc.parameter.join||'').replace(/\D/g,'');
+  if(c.length===6)join(c);else if(loc&&loc.parameter&&loc.parameter.join)askCode(ERR.HOJA15_JOIN_CODE_INVALID);
+ });}catch(e){}
+}
+if(document.readyState==='complete')setTimeout(fromUrl,400);else window.addEventListener('load',()=>setTimeout(fromUrl,400),{once:true});
+window.HOJA15_JOIN={menu,issue,join,askCode,close,get view(){return state.view;}};
+})();
+</script>

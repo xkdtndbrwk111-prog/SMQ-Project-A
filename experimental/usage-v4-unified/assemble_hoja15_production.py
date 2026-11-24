@@ -16,6 +16,7 @@ ROOT = HERE.parents[1]
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--catalog', required=True); ap.add_argument('--packages', required=True); ap.add_argument('--out', required=True)
+    ap.add_argument('--student-url', help='40-6CF: the EXISTING student /exec URL for the join QR (written only into the bundle, never the repo)')
     a = ap.parse_args()
     out = Path(a.out).resolve()
     if out == ROOT or ROOT in out.parents: raise SystemExit('OUTPUT_MUST_BE_OUTSIDE_REPO')
@@ -47,6 +48,10 @@ def main():
         ok(p is not None and p['sha256'] == e.get('packageSha256') and p['path'] == e.get('contentPath'), 'PIN_MISMATCH_' + e['cartridgeId'])
     (out / 'ApprovedActiveCatalog.gs').write_text(cat, encoding='utf-8')
     for f in ('UsageRollupU3S.gs', 'appsscript.json'): shutil.copyfile(ROOT / f, out / f)
+    if a.student_url:
+        ok(re.fullmatch(r'https://script\.google\.com/(?:a/[A-Za-z0-9.-]+/)?macros/s/[A-Za-z0-9_-]{20,}/exec', a.student_url) is not None, 'STUDENT_URL_NOT_EXEC')
+        (out / 'Hoja15JoinConfig.gs').write_text("/* bundle-only (40-6CF): student /exec URL for the join QR. Not in the repository. */\n"
+                                                 "const HOJA15_JOIN_STUDENT_URL_=" + json.dumps(a.student_url) + ";\n", encoding='utf-8')
     ok(not [f for f in out.iterdir() if f.name.startswith('HOJA_QB_CONTENT_')], 'EMBEDDED_CONTENT_PRESENT')
     names = {}
     for f in sorted(out.glob('*.gs')):
@@ -56,7 +61,7 @@ def main():
     ok(not dups, 'DUPLICATE_GLOBALS ' + json.dumps(dups))
     files = {f.name: {'bytes': f.stat().st_size, 'sha8': hashlib.sha256(f.read_bytes()).hexdigest()[:8]} for f in sorted(out.iterdir())}
     summary = {'out': str(out.name), 'files': files, 'bundleBytes': sum(v['bytes'] for v in files.values()), 'activeEntries': len(ents),
-               'contentSource': src, 'deploymentId': c.get('deploymentId'), 'rcAudit': 'PASS' if 'RC_AUDIT_FAIL' not in fails else 'FAIL', 'fails': fails}
+               'contentSource': src, 'deploymentId': c.get('deploymentId'), 'joinStudentUrlConfigured': bool(a.student_url), 'rcAudit': 'PASS' if 'RC_AUDIT_FAIL' not in fails else 'FAIL', 'fails': fails}
     print(json.dumps(summary, ensure_ascii=False, indent=1))
     print('HOJA15_PRODUCTION_BUNDLE_' + ('PASS' if not fails else 'FAIL')); sys.exit(1 if fails else 0)
 

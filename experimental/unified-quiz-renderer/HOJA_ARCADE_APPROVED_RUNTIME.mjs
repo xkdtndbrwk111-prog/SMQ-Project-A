@@ -36,7 +36,7 @@ const CHILD_SCRIPT=[
  "  const d=ev.data;",
  "  if(d?.type==='HOJA_ARCADE_APPROVED_REVIEW_DONE'){",
  "   if(!review||review.id!==d.id)return;",
- "   const done=review.onDone;review=null;done();return;",
+ "   const done=review.onDone;review=null;done(d.allCorrect===true);return;",
  '  }',
  "  if(d?.type!=='HOJA_ARCADE_APPROVED_SELECT')return;",
  '  if(!active||active.id!==d.id||active.responded||!Number.isInteger(d.index))return;',
@@ -77,10 +77,10 @@ export function patchApprovedArcadeInnerHTML(html){
  // ranking UI/name policy; this patcher only adds the approved 25-question FINISH requirement to its failures list.
  s=substituteOnce(s,
  "  const eligible=failures.length===0;",
- "  if(!(m.found===25&&m.answered===25&&m.usedFamilies===25))failures.push('승인 25문항 미완료');\n  const eligible=failures.length===0;");
+ "  if(!(m.found===25&&m.answered===25&&m.usedFamilies===25))failures.push('승인 25문항 미완료');\n  if(window.HOJA15_REVIEW_ALL_CORRECT_!==true)failures.push('오답 복습 미완료');\n  const eligible=failures.length===0;");
  s=substituteOnce(s,
  '  hojaStep09_3RenderProgress_();\n  hojaRankShow_(scene,reason);\n}',
- '  hojaStep09_3RenderProgress_();\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],()=>hojaRankShow_(scene,reason)))\n    hojaRankShow_(scene,reason);\n}');
+ '  hojaStep09_3RenderProgress_();\n  window.HOJA15_REVIEW_ALL_CORRECT_=null;\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],allCorrect=>{\n    window.HOJA15_REVIEW_ALL_CORRECT_=allCorrect===true;\n    if(allCorrect===true)hojaRankShow_(scene,reason);\n    else hojaStep09_3SetStatus_(\'오답 복습에서 모두 맞히지 못해 이번 기록은 랭킹에 등록할 수 없습니다.\');}))\n  {window.HOJA15_REVIEW_ALL_CORRECT_=true;hojaRankShow_(scene,reason);}\n}');
  // 40-6BF: ranking name/input substitutions removed (owned by the production rankingPatch applied before this).
  // 40-6BG: keep the trial's display-side safety on top of the production list filters: never show a forbidden name.
  for(const head of ['HOJA_RANK_ROWS_=reply.rows.filter(r=>r&&','HOJA_RANK_ROWS_=rows.filter(r=>r&&']){
@@ -208,14 +208,38 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   reviewNext=document.createElement('button');reviewNext.id='hojaArcadeReviewNext';reviewNext.type='button';
   reviewNext.style.cssText='flex:none;min-width:120px;padding:7px 12px;border:2px solid #83c9be;border-radius:8px;background:#23555a;color:#fff;font-weight:bold;cursor:pointer';
   reviewNext.onclick=()=>{
-    if(!review||review.loading)return;
+    if(!review||review.loading||!review.answered)return;   // 40-6CF: each wrong question must be answered again first
     ++review.index;
     if(review.index>=review.items.length)finishReview();
     else showReviewItem();
   };
   reviewBar.append(reviewLabel,reviewNext);overlay.append(reviewBar);root.append(overlay);
  }
+ // 40-6CF (teacher): the review is a real re-try. One answer per question; the ranking opens only if ALL are right.
+ function reviewAnswer(d){
+  const current=review;
+  if(!current||current.waiting||current.loading||current.answered)return;
+  const item=current.items[current.index],q=item.mapping.binding.rendererQuestion;
+  if(d.questionId!==item.mapping.binding.questionId)return;
+  const correctId=q.type==='OX'?String(!!q.answer.value):q.answer?.choiceId;
+  const ok=typeof d.choiceId==='string'&&d.choiceId===correctId;
+  current.answered=true;current.results[current.index]=ok;
+  const answerText=q.type==='OX'?(q.answer.value?'O':'X'):(q.choices?.find(x=>x.id===q.answer?.choiceId)?.text||'');
+  const mark=document.createElement('div');mark.id='hojaArcadeApprovedJudgment';
+  mark.setAttribute('role','status');mark.setAttribute('aria-live','assertive');
+  mark.style.cssText='position:absolute;inset:0;z-index:10;display:grid;place-items:center;pointer-events:none;background:rgba(5,12,21,.48)';
+  const card=document.createElement('div');
+  card.style.cssText='border-radius:20px;box-shadow:0 12px 55px #000a;padding:22px 45px;max-width:90%;font:900 clamp(28px,4.5vw,54px)/1.2 system-ui,sans-serif;text-align:center;color:#fff;border:4px solid rgba(255,255,255,.75);background:'+(ok?'#176c4b':'#a3263a');
+  card.textContent=ok?'✓ 정답!':'✕ 오답'+(answerText?' · 정답: '+answerText:'');
+  mark.append(card);overlay?.querySelector('#hojaArcadeApprovedJudgment')?.remove();overlay?.append(mark);
+  const last=current.index===current.items.length-1;
+  reviewLabel.textContent='오답 복습 '+(current.index+1)+'/'+current.items.length+' · '+(ok?'정답':'오답')+
+    (last?(current.results.every(Boolean)&&current.results.length===current.items.length?' · 모두 맞혔어요! 랭킹 등록이 열립니다.':' · 모두 맞히지 못해 이번 기록은 랭킹에 등록되지 않아요.'):'');
+  reviewNext.textContent=last?'복습 마치기':'다음 오답';reviewNext.style.display='';
+  try{reviewNext.focus();}catch(_e){}
+ }
  function answer(d){
+  if(review&&!active){reviewAnswer(d);return;}
   const a=active;if(!a||a.responded||d.questionId!==a.mapping.binding.questionId)return;
   const ix=a.mapping.choiceIdToArcadeIndex[d.choiceId];
   if(!Number.isInteger(ix))return;
@@ -311,7 +335,21 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   if(!current)return;
   review=null;
   close();
-  getArcadeFrame()?.contentWindow?.postMessage({type:'HOJA_ARCADE_APPROVED_REVIEW_DONE',id:current.id},'*');
+  const allCorrect=current.results.length===current.items.length&&current.results.every(x=>x===true);
+  if(!allCorrect)reviewNotice(current.results.filter(x=>x===true).length,current.items.length);
+  getArcadeFrame()?.contentWindow?.postMessage({type:'HOJA_ARCADE_APPROVED_REVIEW_DONE',id:current.id,allCorrect},'*');
+ }
+ function reviewNotice(right,total){
+  const root=getContainer();if(!root)return;
+  root.querySelector('#hojaArcadeReviewNotice')?.remove();
+  const box=document.createElement('div');box.id='hojaArcadeReviewNotice';box.setAttribute('role','alert');
+  box.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5002;max-width:min(88%,640px);padding:26px 30px;border-radius:18px;border:4px solid #ffdb67;background:#20304a;color:#fff;text-align:center;font:800 clamp(18px,2.2vw,26px)/1.5 system-ui,sans-serif;box-shadow:0 12px 50px #000b';
+  const t=document.createElement('div');t.textContent='오답 복습 '+right+'/'+total+' 정답';t.style.cssText='font-size:1.35em;color:#ffdb67;margin-bottom:8px';
+  const m=document.createElement('div');m.textContent='오답을 모두 맞혀야 랭킹에 등록할 수 있어요. 다시 도전해 보세요!';
+  const b=document.createElement('button');b.type='button';b.id='hojaArcadeReviewNoticeOk';b.textContent='확인';
+  b.style.cssText='margin-top:16px;padding:10px 34px;border-radius:12px;border:3px solid #ffdb67;background:#a3263a;color:#fff;font:900 1em system-ui;cursor:pointer';
+  b.onclick=()=>{box.remove();try{const g=getArcadeFrame();g?.focus();g?.contentWindow?.focus();}catch(_e){}};
+  box.append(t,m,b);root.append(box);setTimeout(()=>{try{b.focus();}catch(_e){}},50);
  }
  async function showReviewItem(){
   const current=review;
@@ -322,8 +360,10 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   const binding=item.mapping.binding,q=binding.rendererQuestion;
   const answerText=q.type==='OX'?(q.answer.value?'O':'X'):
     (q.choices?.find(x=>x.id===q.answer?.choiceId)?.text||'정답 정보를 확인하세요');
-  reviewLabel.textContent='오답 복습 '+(current.index+1)+'/'+current.items.length+' · 정답: '+answerText;
-  reviewNext.textContent=current.index===current.items.length-1?'복습 마치기':'다음 오답';
+  void answerText;   // 40-6CF: the answer is NOT shown before the re-try
+  current.answered=false;overlay.querySelector('#hojaArcadeApprovedJudgment')?.remove();
+  reviewLabel.textContent='오답 복습 '+(current.index+1)+'/'+current.items.length+' · 다시 풀어 보세요 (모두 맞히면 랭킹 등록)';
+  reviewNext.textContent=current.index===current.items.length-1?'복습 마치기':'다음 오답';reviewNext.style.display='none';
   reviewBar.style.display='flex';
   const barHeight=Math.ceil(reviewBar.getBoundingClientRect().height);
   // HOJA 1.5: an iframe does not stretch between top/bottom (height:auto = 150px -> the tiny review); size it explicitly.
@@ -355,7 +395,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    });
    if(!items.length)throw Error('ARCADE_REVIEW_EMPTY_REQUEST');
   }catch(e){error(e);return}
-  review={id:msg.id,items,index:0,loading:false,waiting:true};
+  review={id:msg.id,items,index:0,loading:false,waiting:true,answered:false,results:[]};
   // HOJA 1.5: leave the results screen up; the player starts the review with a button (no auto jump).
   const root=getContainer();
   root?.querySelector('#hojaArcadeReviewStart')?.remove();
@@ -366,16 +406,16 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   root?.append(go);
  }
  function shortcut(ev){
-  if(review)return;
   if(frame?.style.visibility!=='visible')return;
-  if(!active||active.responded||ev.repeat||ev.isComposing||ev.ctrlKey||ev.altKey||ev.metaKey)return;
+  const cur=review?(review.waiting||review.loading||review.answered?null:{mapping:review.items[review.index].mapping,responded:false}):active;
+  if(!cur||cur.responded||ev.repeat||ev.isComposing||ev.ctrlKey||ev.altKey||ev.metaKey)return;
   if(['INPUT','TEXTAREA','SELECT'].includes(ev.target?.tagName)||ev.target?.isContentEditable)return;
   const buttons=[...(frame?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice')||[])];
   if(!buttons.length)return;
   const code=ev.code,arrows=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];
   let index=-1;
   if(/^Digit[123]$/.test(code)||/^Numpad[123]$/.test(code))index=Number(code.at(-1))-1;
-  else if(active.mapping.binding.rendererQuestion.type==='OX'&&(code==='KeyO'||code==='KeyX'))
+  else if(cur.mapping.binding.rendererQuestion.type==='OX'&&(code==='KeyO'||code==='KeyX'))
    index=buttons.findIndex(b=>b.dataset.choice===(code==='KeyO'?'true':'false'));
   else if(!arrows.includes(code)&&code!=='Enter'&&code!=='NumpadEnter'&&code!=='Space')return;
   ev.preventDefault();ev.stopImmediatePropagation();
@@ -398,7 +438,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
  window.addEventListener('message',onMessage);
  window.addEventListener('keydown',shortcut,true);
  return Object.freeze({
-  configure(sources){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);
+  configure(sources){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();getContainer()?.querySelector('#hojaArcadeReviewNotice')?.remove();review=null;wrong.clear();close();catalog=createApprovedArcadeCatalog(sources,core);
    // HOJA 1.5: prepare the question renderer while the arcade is still starting, not at the first question.
    // Its one-time load (renderer document, unit payload, images) otherwise ran into the first resume and the
    // arcade (dt clamped at 35 ms) played in slow motion for a few seconds.
@@ -406,7 +446,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    return catalog.count},
   patchHTML(html){if(!catalog)throw Error('ARCADE_APPROVED_NOT_CONFIGURED');return patchApprovedArcadeInnerHTML(html)},
   patchControls(html){return patchArcadeControls(html)},
-  reset(){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
+  reset(){getContainer()?.querySelector('#hojaArcadeReviewStart')?.remove();getContainer()?.querySelector('#hojaArcadeReviewNotice')?.remove();review=null;wrong.clear();close();catalog=null;host?.close();frame?.remove();overlay?.remove();host=null;frame=null;overlay=null;reviewBar=null;reviewLabel=null;reviewNext=null;loading=null},
   get state(){return {configured:!!catalog,count:catalog?.count||0,activeId:active?.id||null,reviewIndex:review?.index??null,reviewCount:review?.items.length??0}}
  });
 }

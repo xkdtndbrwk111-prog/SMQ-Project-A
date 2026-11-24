@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 GAS = Path(__file__).resolve().parent / 'gas'
 VER = ROOT / 'versions' / '2.0.0'
-FILES = ['appsscript.json', 'Code.gs', 'ApprovedActiveCatalog.gs', 'UsageV4Core.gs', 'UsageV4Public.gs', 'UsageV4Unified.gs', 'Stats.html']
+FILES = ['appsscript.json', 'Code.gs', 'ApprovedActiveCatalog.gs', 'UsageV4Core.gs', 'UsageV4Public.gs', 'UsageV4Unified.gs', 'Hoja15Join.gs', 'Stats.html']
 TELEMETRY_OPEN = b'<script id="hojaProdUsageTelemetry">'
 
 def game_bytes():
@@ -70,6 +70,26 @@ def inject_hoja15_display(content):
     i = content.rfind(b'</body>')
     if i < 0 or CACHE_MARK not in content[:i]:
         raise SystemExit('DISPLAY_REQUIRES_APPROVED_PACKAGE_CACHE')
+    return content[:i] + block + b'\n' + content[i:], hashlib.sha256(block).hexdigest()
+
+JOIN_MARK = b'<script id="hoja15-join-v1">'
+QR_LIB = GAS / 'vendor' / 'qrcode-generator-1.4.4.js'
+QR_LIB_SHA256 = '18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780'
+def inject_hoja15_join(content):
+    """40-6CF single-mode join code + QR. Routing only (LIST/GET through the same HOJA_B_LIVE.rpc, F4 cache kept)."""
+    lib = QR_LIB.read_bytes()
+    if hashlib.sha256(lib).hexdigest() != QR_LIB_SHA256 or b'</script' in lib.lower():
+        raise SystemExit('QR_LIB_INVALID')
+    block = (GAS / 'Hoja15JoinClient.html').read_bytes().strip()
+    if not block.startswith(JOIN_MARK) or not block.endswith(b'</script>') or block.count(b'<script') != 1 \
+            or block.count(b'/*HOJA15_QRCODE_LIB*/') != 1:
+        raise SystemExit('JOIN_BLOCK_INVALID')
+    block = block.replace(b'/*HOJA15_QRCODE_LIB*/', lib.strip())
+    if JOIN_MARK in content:
+        raise SystemExit('JOIN_BLOCK_ALREADY_PRESENT')
+    i = content.rfind(b'</body>')
+    if i < 0 or DISPLAY_MARK not in content[:i]:
+        raise SystemExit('JOIN_REQUIRES_DISPLAY_LAYER')
     return content[:i] + block + b'\n' + content[i:], hashlib.sha256(block).hexdigest()
 
 def approved_rc_game(original_sha):
@@ -185,6 +205,8 @@ def main():
         rc['packageCacheBlockSha256'] = cache_sha
         patched, display_sha = inject_hoja15_display(patched)
         rc['approvedDisplayBlockSha256'] = display_sha
+        patched, join_sha = inject_hoja15_join(patched)
+        rc['joinBlockSha256'] = join_sha
     (out / 'Game.html').write_bytes(patched)
     if b'getPublicUsageStatisticsV4' in patched:
         raise SystemExit('GAME_MUST_NOT_CALL_STATS')

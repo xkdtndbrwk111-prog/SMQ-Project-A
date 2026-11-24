@@ -26,6 +26,7 @@ async def run():
  p.add_argument('--perf-probe',action='store_true')
  p.add_argument('--cpu-profile')
  p.add_argument('--shader-probe',action='store_true')
+ p.add_argument('--review-fail',action='store_true',help='40-6CF: answer the FIRST review question wrong -> no ranking entry, notice shown')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -728,7 +729,9 @@ async def run():
     assert len(before_review['wrong'])==12,before_review
     for n,key in enumerate(before_review['wrong']):
       family=key.split(chr(0))[-1]
-      expected=next(r['rendererQuestion']['id'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
+      rq=next(r['rendererQuestion'] for e in sources for r in e['data']['questions'] if r['familyId']==family)
+      expected=rq['id']
+      right=str(bool(rq['answer']['value'])).lower() if rq.get('type')=='OX' else rq['answer']['choiceId']
       await page.wait_for_function("""(x)=>{
         const f=document.getElementById('hojaArcadeApprovedParentFrame'),s=window.HOJA_ARCADE_APPROVED_TRIAL?.state;
         const bar=document.getElementById('hojaArcadeReviewBar');
@@ -743,14 +746,41 @@ async def run():
         assert size[1]>=300,('REVIEW_FRAME_TOO_SMALL',size)
         if args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_review_first.png'))
       label=await page.locator('#hojaArcadeReviewLabel').inner_text()
-      assert ('오답 복습 '+str(n+1)+'/12') in label and '정답:' in label,label
+      # 40-6CF: a real re-try — the answer is not shown first and '다음' appears only after answering
+      assert ('오답 복습 '+str(n+1)+'/12') in label and '정답:' not in label,label
+      assert not await page.locator('#hojaArcadeReviewNext').is_visible(),'NEXT_BEFORE_ANSWER'
+      choices=await page.frame_locator('#hojaArcadeApprovedParentFrame').locator('button.hqChoice').evaluate_all("bs=>bs.map(b=>b.dataset.choice)")
+      pick=right if not (args.review_fail and n==0) else next(c for c in choices if c!=right)
+      await page.frame_locator('#hojaArcadeApprovedParentFrame').locator(f'button.hqChoice[data-choice="{pick}"]').click(timeout=15000)
+      await page.locator('#hojaArcadeReviewNext').wait_for(state='visible',timeout=10000)
+      verdict=await page.locator('#hojaArcadeApprovedJudgment').inner_text()
+      assert (('정답' in verdict and '오답' not in verdict)==(pick==right)),(verdict,pick,right)
       await page.locator('#hojaArcadeReviewNext').click(timeout=15000)
+    if args.review_fail:
+      await page.wait_for_function("""()=>window.HOJA_ARCADE_APPROVED_TRIAL?.state?.reviewCount===0&&!!document.getElementById('hojaArcadeReviewNotice')""",timeout=20000)
+      await page.wait_for_timeout(1500)
+      st=await page.evaluate("""()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;
+        return {rankOpen:w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open'),notice:document.getElementById('hojaArcadeReviewNotice')?.textContent||'',
+          flag:w.HOJA15_REVIEW_ALL_CORRECT_}}""")
+      assert st['rankOpen'] is False and '11/12' in st['notice'] and st['flag'] is False,st
+      if args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_review_failed_notice.png'))
+      await page.locator('#hojaArcadeReviewNoticeOk').click()
+      print('ARCADE_REVIEW_NOT_ALL_CORRECT_NO_RANK_ENTRY_PASS',st['notice'],flush=True)
+      await browser.close();return
     await page.wait_for_function("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return window.HOJA_ARCADE_APPROVED_TRIAL?.state?.reviewCount===0 &&
         document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='none' &&
         w.document.getElementById('hojaRankOverlay')?.classList.contains('is-open');
     }""",timeout=20000)
+    # 40-6CF: after an all-correct review the name field has the keyboard (real key presses, no click)
+    await page.wait_for_timeout(400)
+    await page.keyboard.type('hoja12',delay=40)
+    typed=await page.frame_locator('#hqArcadeFrame').locator('#hojaRankName').input_value()
+    assert typed.upper()=='HOJA12',('RANK_NAME_KEYBOARD',typed)
+    flag=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.HOJA15_REVIEW_ALL_CORRECT_")
+    assert flag is True,flag
+    print('ARCADE_REVIEW_ALL_CORRECT_RANK_ENTRY_KEYBOARD_PASS',typed,flush=True)
     after_review=await page.evaluate("""()=>{
       const w=document.getElementById('hqArcadeFrame').contentWindow;
       return w.HOJA_STEP09_3_TEST.metrics();

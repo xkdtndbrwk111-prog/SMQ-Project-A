@@ -271,10 +271,10 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    frame.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:#071421;z-index:30';
    pane.appendChild(frame);
    header=document.createElement('div');header.id='hojaTeamReviewHeader';
-   header.style.cssText='position:absolute;left:0;right:0;top:0;min-height:41px;background:#12293e;color:#fff3cc;z-index:32;padding:8px 15px;font-weight:900;font-size:16px;display:none';
+   header.style.cssText='position:absolute;left:0;right:0;top:0;min-height:41px;background:#12293e;color:#fff3cc;z-index:32;padding:8px 15px;font-weight:900;font-size:clamp(16px,1.6vw,24px);display:none';
    const label=document.createElement('span');label.id='hojaTeamReviewLabel';header.append(label);
    nextButton=document.createElement('button');nextButton.id='hojaTeamReviewNext';nextButton.type='button';
-   nextButton.style.cssText='float:right;background:#23555a;color:white;border:1px solid #83c9be;border-radius:7px;padding:3px 12px;display:none';
+   nextButton.style.cssText='float:right;background:#23555a;color:white;border:2px solid #83c9be;border-radius:9px;padding:6px 18px;font:900 clamp(15px,1.4vw,22px) system-ui;cursor:pointer;display:none';
    header.append(nextButton);pane.append(header);
    loading=new Promise((resolve,reject)=>{
      frame.addEventListener('load',async()=>{
@@ -305,7 +305,10 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  }
  async function show(q,mode,onAnswer,caption=''){
    const token=++serial;answerHandler=null;clearJudgment();reveal();
-   if(header){header.style.display=mode==='review'?'block':'none';document.getElementById('hojaTeamReviewLabel').textContent=caption;}
+   const withHeader=mode==='review'||!!caption;
+   if(header){header.style.display=withHeader?'block':'none';document.getElementById('hojaTeamReviewLabel').textContent=caption;}
+   // HOJA 1.5: the review header sits ABOVE the question (not over its top lines)
+   if(frame){const hh=withHeader&&header?Math.ceil(header.getBoundingClientRect().height):0;frame.style.top=hh+'px';frame.style.height=hh?'calc(100% - '+hh+'px)':'100%';}
    if(nextButton)nextButton.style.display='none';
    try {
      const h=await loaded;
@@ -319,12 +322,29 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      answerHandler=onAnswer;
    }catch(e){error(e);}
  }
- function reviewFeedback(label,onNext){
+ function reviewFeedback(label,onNext,correct){
    if(!header||!nextButton)return;
    document.getElementById('hojaTeamReviewLabel').textContent=label;
-   nextButton.textContent='다음 문제';
+   let done=false;const go=()=>{if(done)return;done=true;nextButton.style.display='none';window.removeEventListener('keydown',key,true);inputWindow()?.removeEventListener('keydown',key,true);clearJudgment();onNext();};
+   const key=ev=>{if(ev.code==='Enter'||ev.code==='NumpadEnter'||ev.code==='Space'){ev.preventDefault();ev.stopImmediatePropagation();go();}};
+   nextButton.textContent='다음 문제 ▶';
    nextButton.style.display='inline-block';
-   nextButton.onclick=()=>{nextButton.style.display='none';onNext();};
+   nextButton.onclick=go;
+   // HOJA 1.5 (teacher): a clear green/red verdict in the review too, with a big next button.
+   if(typeof correct==='boolean'&&overlay()?.dataset.hojaUnified==='yes'){
+     clearJudgment();
+     judgment=document.createElement('div');judgment.id='hojaSoloJudgment';judgment.dataset.review='yes';
+     judgment.setAttribute('role','status');judgment.setAttribute('aria-live','assertive');
+     judgment.style.cssText='position:absolute;inset:0;z-index:45;display:grid;place-items:center;align-content:center;gap:22px;pointer-events:none;background:rgba(5,12,21,.5)';
+     const mark=document.createElement('div');
+     mark.style.cssText='border-radius:20px;box-shadow:0 12px 55px #000a;padding:22px 45px;max-width:90%;font:900 clamp(30px,4.8vw,60px)/1.25 system-ui,sans-serif;text-align:center;color:#fff;border:4px solid rgba(255,255,255,.75);background:'+(correct?'#176c4b':'#a3263a');
+     mark.textContent=correct?'✓ 정답!':'✕ 오답 · 다음 회차에 다시 풀어요';
+     const big=document.createElement('button');big.type='button';big.id='hojaTeamReviewNextBig';big.textContent='다음 문제 ▶';
+     big.style.cssText='pointer-events:auto;justify-self:center;padding:14px 40px;border-radius:14px;border:3px solid #ffdb67;background:#23555a;color:#fff;font:900 clamp(20px,2.4vw,32px) system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 20px #0008';
+     big.onclick=go;judgment.append(mark,big);overlay().append(judgment);
+     setTimeout(()=>{try{big.focus();}catch(_e){}},30);
+   }
+   window.addEventListener('keydown',key,true);inputWindow()?.addEventListener('keydown',key,true);
  }
  function hide(){
    serial++;answerHandler=null;clearJudgment();
@@ -1208,7 +1228,9 @@ function openQuestion(number){
    window.HOJA_V055_SFX?.(ok?'correct':'wrong');
    if(!ok){
      $('hqOverlay').hidden=true;paint();
-     display('오답입니다',state.current.explanation||'이번 문제는 점수를 획득하지 못했습니다.',[oneVisual('JUMPY')],[act('다음 팀',finishTurn,'htPrimary')]);
+     {const ex=state.current.explanation;   // HOJA 1.5 (teacher): explanation in a big modal with big text; no monster art when there is an explanation
+      display('오답입니다',ex||'이번 문제는 점수를 획득하지 못했습니다.',ex?[]:[oneVisual('JUMPY')],[act('다음 팀',finishTurn,'htPrimary')]);
+      if(ex)modal.classList.add('htWrongExplain');}
      return;
    }
    // Hold the correct answer on screen for a short, visible success hit.
@@ -1370,7 +1392,9 @@ function peachBoard(name,description,images,before){
    if(!q?.approvedBinding){window.HOJA_TEAM_APPROVED_TRIAL.error('REVIEW_BINDING_MISSING');return;}
    $('htItemLayer').hidden=true;
    $('hqOverlay').hidden=false;
-   window.HOJA_TEAM_APPROVED_TRIAL.show(q,'review',answer=>{
+   // HOJA 1.5 (teacher): the review uses the SAME question screen as the team game (selectable MC/OX choices,
+   // SHORT = teacher reveal + judge). The old 'review' screen only offered '정답 확인' and could not be answered.
+   window.HOJA_TEAM_APPROVED_TRIAL.show(q,'team',answer=>{
      if(!state||state.phase!=='review'||teamReviewSession.state.phase!=='asking')return;
      let correct=false;
      if(q.type==='SUBJECTIVE'){
@@ -1387,7 +1411,7 @@ function peachBoard(name,description,images,before){
          const next=teamReviewSession.next();
          if(next.complete){finishTeamReview();return;}
          presentTeamReview();
-       });
+       },correct);
    },'오답 복습 · '+row.teamName+' 담당 · '+s.round+'회차 · 남은 '+s.remaining+'문항');
  }
  function startTeamReview(){
@@ -1480,7 +1504,7 @@ function showResult(title,desc,images,tx=null,options={}){
   }else runUnifiedScoreFx(tx);
 }
 function display(title,desc,images=[],actions=[]){
-  $('hqOverlay').hidden=true;$('htItemLayer').hidden=false;$('htItemLayer').classList.toggle('htFinalFull',state?.phase==='final');placeItemPanelInCenter();modal.classList.remove('htFinalSequence','htWinnerRevealed');modal.replaceChildren();
+  $('hqOverlay').hidden=true;$('htItemLayer').hidden=false;$('htItemLayer').classList.toggle('htFinalFull',state?.phase==='final');placeItemPanelInCenter();modal.classList.remove('htFinalSequence','htWinnerRevealed','htWrongExplain');modal.replaceChildren();
   const h=document.createElement('h2');h.className='htModalTitle';h.textContent=title;
   const p=document.createElement('p');p.className='htModalDesc';p.textContent=desc;modal.append(h,p);
   if(images.length){const strip=document.createElement('div');strip.className='htItemArt';
@@ -1821,6 +1845,25 @@ function display(title,desc,images=[],actions=[]){
   font-size:clamp(13px,1.4vw,20px)!important;
   padding:clamp(7px,1vw,12px)!important;
   min-height:38px!important;
+}
+/* HOJA 1.5: team wrong-answer explanation = big modal, big text (no monster art). */
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain{
+  height:94%!important;max-height:94%!important;justify-content:center!important;
+  gap:clamp(14px,3.2vh,40px)!important;padding:clamp(16px,2.4vw,44px)!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain .htModalTitle{
+  font-size:clamp(40px,4.4vw,78px)!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain .htModalDesc{
+  font-size:clamp(26px,3vw,54px)!important;line-height:1.5!important;overflow:auto!important;
+  word-break:keep-all!important;overflow-wrap:anywhere!important;max-height:62vh!important;
+}
+#hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain .htAction{
+  font-size:clamp(20px,2vw,32px)!important;padding:clamp(10px,1.3vw,18px) clamp(24px,3vw,48px)!important;
+}
+@media(max-width:600px){
+  #hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain .htModalTitle{font-size:30px!important;}
+  #hojaGamePlay[data-mode="team"] #htItemLayer:not(.htFinalFull) .htModalCard.htWrongExplain .htModalDesc{font-size:20px!important;}
 }
 /* Final settlement intentionally restores the original full-width result layout. */
 #hojaGamePlay[data-mode="team"] #htItemLayer.htFinalFull{

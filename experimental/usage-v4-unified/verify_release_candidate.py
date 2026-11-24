@@ -21,6 +21,15 @@ for marker in (b'hoja-ext-media-v1', b'hoja-ext-math-v1', b'hoja-ext-input-guard
 ok(b'withFailureHandler(()=>{}).recordUsageStartU1' not in game, 'OLD_TELEMETRY_STILL_PRESENT')
 # HOJA 1.5: display-only title overlay is injected AFTER the package cache. Removing it
 # first restores the original cached-game bytes for F4 audit, without changing the pinned RC.
+# 40-6CF: the join/QR layer is injected LAST (after the display layer); strip it first.
+join_mark = b'<script id="hoja15-join-v1">'
+ok(game.count(join_mark) == 1, 'JOIN_BLOCK_COUNT')
+if game.count(join_mark) == 1:
+    ji = game.index(join_mark)
+    jj = game.index(b'</script>', ji) + len(b'</script>\n')
+    ok(hashlib.sha256(game[ji:jj-1]).hexdigest() == rc.get('joinBlockSha256'), 'JOIN_BLOCK_SHA')
+    ok(b'hojaJoinResolve' in game[ji:jj] and b'HOJA_B_LIVE' in game[ji:jj], 'JOIN_BLOCK_CONTENT')
+    game = game[:ji] + game[jj:]
 display_mark = b'<script id="hoja15-approved-cartridge-display-v1">'
 ok(game.count(display_mark) == 1, 'DISPLAY_BLOCK_COUNT')
 without_display = game
@@ -40,7 +49,7 @@ if without_display.count(mark) == 1:
 # Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
 # UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
 # 40-6BV: re-pinned after HOJA 1.5 UX fixes (was 22aa9041… 40-6BG, 1cb387c7… 40-6BF, 617f2228… before)
-ok(rc.get('rcGameSha256') == '1f19f5e20d519b7081dfff99ac721978c42225842c67ecca615a5d1dc3443242', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+ok(rc.get('rcGameSha256') == '5e2e9a5e94a2b05d27a2215136d0f568135579fc82600b298f5b51dcf44bf0c4', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}

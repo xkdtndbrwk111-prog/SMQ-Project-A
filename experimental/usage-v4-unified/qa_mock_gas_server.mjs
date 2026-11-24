@@ -31,7 +31,10 @@ if (pkgDir) {
     return f && f.startsWith(root + '/') && existsSync(f) ? {code: 200, body: readFileSync(f, 'utf8')} : {code: 404, body: ''};
   });
 }
-const ALLOWED = new Set(['hojaListPublicCartridges', 'hojaGetPublicQuestions', 'recordUsageStartU1', 'hojaRankList', 'hojaRankSave']);
+const ALLOWED = new Set(['hojaListPublicCartridges', 'hojaGetPublicQuestions', 'recordUsageStartU1', 'hojaRankList', 'hojaRankSave',
+  'hojaJoinCreate', 'hojaJoinResolve', 'hojaJoinRevoke']);
+// 40-6CF: optional fake /exec URL so the join QR can be drawn in the offline E2E (never a real deployment)
+if (process.env.HOJA_JOIN_TEST_URL) p.ctx.__serviceUrl = process.env.HOJA_JOIN_TEST_URL;
 const calls = [];
 const ev = ss.getSheetByName('EVENT_LOG');
 const startRows = ev.getLastRow();

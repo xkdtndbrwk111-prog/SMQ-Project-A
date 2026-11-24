@@ -29,7 +29,9 @@ test('public RPC surface of the whole single GAS project equals the allowlist',(
   // 40-6AI-2: operator-gated, disabled-by-default auto-seal handler (trigger target; never installed by code)
   'hojaV4OpsAutoSealDaily',
   // 40-6-U B: read-only approved-catalog RPCs (embedded active list only)
-  'hojaListApprovedCartridges','hojaGetApprovedQuestions'].sort());
+  'hojaListApprovedCartridges','hojaGetApprovedQuestions',
+  // 40-6CF: single-mode join code (routing alias to approved public units only; no data, no auth)
+  'hojaJoinCreate','hojaJoinResolve','hojaJoinRevoke'].sort());
  const src=readFileSync(GAS_DIR+'/UsageV4Unified.gs','utf8');
  for(const ops of ['hojaV4OpsSealPendingDays','hojaV4OpsStatus','hojaV4OpsAutoSealDaily'])
   assert.match(src,new RegExp('function '+ops+'\\(\\)\\{\\n hojaV4uRequireOperator_\\(\\);'));

@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {createContext,runInContext} from 'node:vm';
 
 export const GAS_DIR='experimental/usage-v4-unified/gas';
-export const GAS_FILES=['Code.gs','ApprovedActiveCatalog.gs','UsageV4Core.gs','UsageV4Public.gs','UsageV4Unified.gs'];
+export const GAS_FILES=['Code.gs','ApprovedActiveCatalog.gs','UsageV4Core.gs','UsageV4Public.gs','UsageV4Unified.gs','Hoja15Join.gs'];
 export const EVENT_HEADER=['eventId','timestamp','date','mode','repositoryKind','grade',
  'subject','publisher','cartridge','cartridgeCount','teamCount','cartridgeIds',
  'publicRepositoryNamespace','usageSchemaVersion','cartridgeTitlesJson'];
@@ -66,7 +66,9 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
   Date:FixedDate,console:{error(){},log(){}},
   PropertiesService:{getScriptProperties(){return{
    getProperty:k=>store.has(k)?store.get(k):null,
-   setProperty:(k,v)=>{trace.push('PROP:'+k);store.set(k,String(v));}}}},
+   setProperty:(k,v)=>{trace.push('PROP:'+k);store.set(k,String(v));},
+   getProperties:()=>Object.fromEntries(store),
+   deleteProperty:k=>{trace.push('PROPDEL:'+k);store.delete(k);}}}},
   SpreadsheetApp:{openById(id){trace.push('OPEN:'+id);
    const ss=spreadsheets.get(id);if(!ss)throw Error('NO_SUCH_SPREADSHEET');return ss;},
    flush(){trace.push('FLUSH');}},
@@ -85,6 +87,7 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
   Utilities:{DigestAlgorithm:{SHA_256:'SHA_256'},Charset:{UTF_8:'UTF_8'},
    computeDigest(_a,s){return [...createHash('sha256').update(String(s),'utf8').digest()]
     .map(b=>b>127?b-256:b);},
+   getUuid(){return [...createHash('sha256').update(String(Math.random())).digest('hex')].slice(0,32).join('');},
    formatDate(d,tz,f){if(tz!=='Asia/Seoul'||f!=='yyyy-MM-dd')throw Error('FORMAT');
     return kstDay(d.getTime());}},
   HtmlService:{XFrameOptionsMode:{ALLOWALL:'ALLOWALL'},createHtmlOutputFromFile(name){
@@ -96,8 +99,8 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
    fetchAll(reqs){if(typeof env.__fetch!=='function')throw Error('NETWORK_DISABLED_IN_TEST');
     return reqs.map(r=>{trace.push('FETCH:'+r.url);const x=env.__fetch(r);
      return {getResponseCode:()=>x.code,getContentText:()=>String(x.body)};});}},
-  ScriptApp:{getOAuthToken(){return 'x';},getScriptId(){return env.__scriptId;},newTrigger(){throw Error('TRIGGER_FORBIDDEN');}},
-  __scriptId:'MOCK_ISOLATED_TEST_SCRIPT_ID_0001',__fetch:null,
+  ScriptApp:{getService(){return {getUrl:()=>env.__serviceUrl};},getOAuthToken(){return 'x';},getScriptId(){return env.__scriptId;},newTrigger(){throw Error('TRIGGER_FORBIDDEN');}},
+  __scriptId:'MOCK_ISOLATED_TEST_SCRIPT_ID_0001',__fetch:null,__serviceUrl:null,
   __active:activeEmail
  };
  const ctx=createContext(env);
