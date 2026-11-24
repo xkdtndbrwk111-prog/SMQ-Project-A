@@ -1205,3 +1205,23 @@
 | `AUTO-SEAL-TRIGGER-INSTALL` | **HOLD** | 교사 승인 + 11-23 실기록 읽기 전용 감사 후 격리 프로젝트에서만 | — |
 | `R7-A 11-23 감사` / `R7-ISOLATED-GAS` / `R7-REAL-MIDNIGHT` | **NOT RUN** | | `r7_nov23_audit_STATUS.txt` |
 - [ ] 다음(40-6AH 순서): F4 IndexedDB 캐시 C5(보호 목록·onblocked) — 별도 체크포인트에서 착수. 게시/push/배포는 계속 HOLD.
+
+
+### 40-6AL. GPT-6 검증 및 다음 지시 — F4 캐시 C5 동시 실행 보호·IndexedDB 차단 복구 (2026-11-24)
+
+**상태:** 40-6AJ·40-6AK **로컬 증거와 GitHub/CI 저장 확인**. **C5 지시 저장, 구현·검증 NOT RUN.** 개발 브랜치 `work/usage-v4-40-6-u-20261123`, PR #6 Draft 유지.
+
+**선행 검증(Claude 보고와 실제 저장본 대조):**
+- [x] 40-6AJ `50330f7`: 전날 대기 이벤트 같은 eventId 재전송, D+2 이상 `expiredBeyondHorizon` 폐기(중복집계 위험 입증), 18/18 LOCAL PASS, Node 115/115, 변이 2/2 검출. 첫 브라우저 UI 38/46 후 **FAIL(180초 navigation timeout)**, 재실행 46/46 PASS; 원인 미확정이므로 이슈 유지.
+- [x] 40-6AK `e0965b2`: `hojaV4OpsAutoSealDaily()` 기본 비활성+operator gate, **mock 8/8**, 전체 Node **123/123**, 변이 2/2 검출. 실제 트리거 생성·설치, 실 GAS, seal, 11-23 감사 **NOT RUN/HOLD**.
+- [x] GitHub Actions 두 실행 성공(45289519102, 45289960101). 두 실행 모두 QBank 고정 원본 checkout 및 drift 비교 **SKIPPED**(PASS 아님). 코드 변경으로 운영 활성/승인 상태가 바뀌지 않았음을 보고.
+- [ ] 잔여 관측: 180초 UI 페이지 로드 지연의 재현성·환경 데이터 확보, R6 서버 단독 19/40, R7 A 실기록 감사, 실제 GAS 및 자정 경계 모두 별도 HOLD.
+
+**다음 C5 실행 지시(개발 브랜치에서만, 한 단계씩 체크포인트 저장):**
+1. [ ] **C5-1 보호 집합 수명/경합 재현·수정:** `gas/ApprovedPackageCacheClient.html`의 `get(names)`에서 전역 `protect.clear()`가 이전 GET이 아직 사용 중인 단원을 보호 해제하는지, 다른 GET·해시 검증·다운로드·LRU·90일 purge·동일 단원 두 탭에 미치는 영향을 테스트. 단일 전역 set 초기화 대신 참조 수/작업별 lease 또는 이에 준하는 안전 규칙 사용. 완료·예외·중단 시 보호 해제, active/use 중 단원 축출 0, 10 MiB 상한 유지.
+2. [ ] **C5-2 IndexedDB onblocked/거부 복구:** 현재 `db(): req.onblocked=()=>{}`는 응답 대기 제한이 없어 보인다. 버전 업그레이드 충돌·타 탭 오픈·blocked/abort/error/transaction stall을 브라우저에서 강제로 재현한 뒤 유한 timeout + DB 정리/복구 또는 **검증된 1회성 네트워크 경로**로 안전하게 폴백. 해시·구조 검증 불변, 잘못된 콘텐츠를 절대 사용/저장하지 않기. timeout만 무작정 늘려 시험을 통과시키지 말 것.
+3. [ ] **C5-3 실제 브라우저 회귀:** 기존 14/14 캐시 E2E, Node 123/123, 46/46 UI/팀전·아케이드(가능 범위) 재실행. 첫 실행 38/46의 `Page.goto waitUntil=domcontentloaded 180 s` 원인을 확인하기 위한 경량 계측(페이지 네트워크/DOM 로드·CPU·메모리·브라우저 수명, 테스트 서버 응답)을 별도 재현. 시간 초과가 안 나오면 **NOT REPRODUCED**로, 원인 확인 없이는 `FIXED` 금지. 페이지 로딩 목표/실측을 별도로 보고.
+4. [ ] **C5-4 저장/경계:** 실험 실패 로그도 숨기지 말고, 재현 전후 시험 원시 출력·원인 가설·코드 diff·실행 환경·exit 코드·스크린샷/추적(가능할 때)을 evidence에 저장. 작업일지와 본 중앙 체크리스트 신규 **40-6AM 이후**를 코드와 **같은 커밋**으로 push하고 PR #6에 SHA/성공·미완료 수치를 보고.
+5. [ ] **후속 대기:** 런타임 패키지 23단원/732문항의 원본 SHA·INDEX/overlay 감사, QBank 공개 파일 게시(별도 승인 필요), 경량 GAS 실제 push·익명 웹앱 시험 배포(각 승인 필요), 실 GAS iframe/iOS Safari/QR 확인, R6/G 실부하 등 기존 40-6AH 게이트 유지.
+
+**금지 경계:** 실 GAS 배포·트리거 설치·Seal·EVENT_LOG/Sheets/랭킹·운영 활성화, `main`, `versions/2.0.0`, 운영 자료 수정·PR merge 금지. QBank CI SKIPPED와 R7 실기록 감사 NOT RUN을 PASS로 승격 금지.
