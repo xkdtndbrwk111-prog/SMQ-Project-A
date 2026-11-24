@@ -1,0 +1,215 @@
+{
+ "schemaVersion": "hoja-approved-deployment-v1",
+ "deploymentId": "HOJA15-PRODUCTION-DRAFT-20261124",
+ "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+ "note": "HOJA 1.5 production DRAFT (40-6BP). NOT the committed active-deployment.json (which stays 0). Used only to assemble the production bundle OUTSIDE the repo for a SEPARATE new deployment (existing URL keeps the 76 legacy cartridges). teacherDeploymentApproval: teacher chat approvals 40-6AZ/40-6AU/40-6BE. rendererGate/questionValidationGate: F3-3 render 732x4 + real @7/@9 play (40-6BF/BK). mediaRightsAcknowledged=true records the teacher decision to publish; it does NOT prove third-party rights (mediaRights stay HOLD in the index).",
+ "entries": [
+  {
+   "cartridgeId": "eng5-ham-u10",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "8d5aa7b8bce0dd23c617001d9fd08c11da65eb64d3e9df86e7dd04aa125ed227",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng5-ham-u11",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "a9713a6b9df5dbc371ad7903ae212b3ad7557a5547ee37c55cdda7a4325ccdbc",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng5-ham-u12",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "813d3c5908114644f33962fcb89f4de15f0c55c3edfedaf1c56ac2189e35008f",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng5-ybm-kim-u10",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "e1b5c4e7ec3109b99af97c27ab0e3cfebf8c9755877fdb9b58ee11dc0af4b6b3",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng5-ybm-kim-u11",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "3b9e0cae41cba379354e6e52dd7df38bb41b8f4729cde20ac79139b02e8ce04c",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng5-ybm-kim-u12",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "47d1f6a3504f7887ae5c24a29055ad47bda69c14118bd4a00544445a446222e1",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ham-u10",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "cfadf777f5e79df61f06a8f2533757cd92cc1ffc1ceba1b23cec1f9026319907",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ham-u11",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "1a13eea859eb6349372fb807393000956d00b1478a0c6e450970444bf804df9a",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ham-u12",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "eef14cd78547833be25b6a06bb030a95e78a14da74e159cab97b6f2c5504e449",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u10",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "97a1243becd6f6109a093bcf368be71b7ad576191f5dda048a1600dddd47fa8c",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u11",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "e327646a02ee243658a646d5679e11cd14e9d555184790262cee2b1dbc915077",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "eng6-ybm-kim-u12",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "8b7618efa9c6c9df69db166bd623c6e18027626ae85e3adef77a3d80901dc80d",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math5-s2-u4",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "c30d44e8dcbf0ab4a830762fa0d32609178dd76300ac1dae3e63bd2f8487855d",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math5-s2-u5",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "ef2872c9c4414f24297de3e24ed01c47b0d6d44a552c40b48632153cf5b01df0",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math5-s2-u6",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "1810a55da396b832c7e11c5f357fcbe3a4bd67e06119d355562510c2dff6e878",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math6-s2-u4",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "0bd25c188f9c1c411ba72b2087115ab65ded5223ec0ce5cbf75e46a54b8f008e",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math6-s2-u5",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "558da21a65faa935e6242b17c4e67abb7161e42cf43c9d9763d29214c39693bd",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "math6-s2-u6",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "83f8b35b1087d443605a686f9e2e649fdfd4956aa32453fab1f4ad6197929518",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "soc5-s2-u2-2-common",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "63dafa7eca706cdd339ca734aa678ca49844a5aa96ed3ff0034e5c9c5ae15dd2",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "soc5-s2-u3-1-common",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "ccb6d5bfc3d6b0a427c5db3ed4e426fd91898893f81c07e6b564baf582f23412",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "soc5-s2-u3-2-common",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "0eb66fa69064f6672d12e012fe3231cff827460f020ce3ed441285250d051067",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "soc6-s2-u3-1-common",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "c10a50fd9d8e7a4a258fb340470d4b62b85b4e9e0eae9dfde7eafc60f4ef7d3a",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  },
+  {
+   "cartridgeId": "soc6-s2-u3-2-common",
+   "teacherDeploymentApproval": "APPROVED",
+   "approvedOn": "2026-11-24",
+   "effectiveSha256": "d6645f4d4d9e6dbaf7aebb0f0b05b2e1e8bc8b818a28503aac47473d60772daf",
+   "rendererGate": "PASS",
+   "questionValidationGate": "PASS",
+   "mediaRightsAcknowledged": true
+  }
+ ]
+}

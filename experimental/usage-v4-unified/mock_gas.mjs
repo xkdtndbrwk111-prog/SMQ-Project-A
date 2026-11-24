@@ -55,7 +55,7 @@ export function kstDay(ms){return new Date(ms+9*3600000).toISOString().slice(0,1
 
 /* Loads the exact gas/*.gs files into one V8 context (= one GAS project). */
 export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
- activeEmail='',effectiveEmail='owner@example.test',catalog}){
+ activeEmail='',effectiveEmail='owner@example.test',catalog,gasDir,gasFiles}){
  const clock={ms:Date.parse(now)};
  class FixedDate extends Date{constructor(...a){super(...(a.length?a:[clock.ms]));}
   static now(){return clock.ms;}}
@@ -101,7 +101,8 @@ export function loadProject({spreadsheets,props={},now='2026-11-23T03:00:00Z',
   __active:activeEmail
  };
  const ctx=createContext(env);
- for(const f of GAS_FILES)runInContext(readFileSync(GAS_DIR+'/'+f,'utf8'),ctx,{filename:f});
+ // 40-6BP: optional gasDir/gasFiles load a built bundle (e.g. the HOJA 1.5 production bundle) instead of gas/.
+ for(const f of (gasFiles||GAS_FILES))runInContext(readFileSync((gasDir||GAS_DIR)+'/'+f,'utf8'),ctx,{filename:f});
  const cat=catalog||[{sheetId:'101',title:'6-사회-천재-2단원'},{sheetId:'102',title:'5-수학-비상-3단원'}];
  ctx.__catalog=cat;
  runInContext('hojaPublicSheets_=function(){return {sheets:__catalog.map(x=>({title:x.title,sheetId:x.sheetId})),generation:"1",incarnationId:"a"};}',ctx);

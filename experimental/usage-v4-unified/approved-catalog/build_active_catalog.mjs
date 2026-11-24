@@ -3,12 +3,15 @@
  * approved-source index + teacher deployment manifest -> gas/ApprovedActiveCatalog.gs
  * (the ONLY cartridge list the single Project A GAS consults at runtime for
  * approved content; GAS never reads GitHub). Metadata only; no question text.
- *   node build_active_catalog.mjs [--index f] [--deployment f] [--out f] [--check]
+ *   node build_active_catalog.mjs [--index f] [--deployment f] [--out f] [--check] [--content-commit <40-hex>]
+ * 40-6BP: --content-commit declares contentSource GITHUB_RAW_PINNED_V1 (public QBank runtime packages pinned to that
+ * commit) so the RELEASE ships NO embedded content; without it the output is byte-identical to before.
  */
 import {readFileSync, writeFileSync, existsSync} from 'node:fs';
 import {join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {activeApprovedCatalog} from './approved_catalog_normalizer.mjs';
+import {withContentSource, RUNTIME_REPO} from './qa_preview.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
@@ -33,7 +36,9 @@ for (const e of active.entries) {
   e.packageSha256 = r.packageSha256;
 }
 active.buildType = 'RELEASE';
-const text = renderGs(active);
+const cc = opt('--content-commit');
+if (cc && !/^[a-f0-9]{40}$/.test(cc)) { console.error('CONTENT_COMMIT_MUST_BE_40_HEX'); process.exit(1); }
+const text = renderGs(cc ? withContentSource(active, {repo: RUNTIME_REPO, commit: cc}) : active);
 if (args.includes('--check')) {
   if (!existsSync(out) || readFileSync(out, 'utf8') !== text) { console.error('DRIFT ApprovedActiveCatalog.gs'); process.exit(1); }
 } else writeFileSync(out, text);

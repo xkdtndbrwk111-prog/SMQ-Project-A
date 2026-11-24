@@ -1,0 +1,24 @@
+{
+ "noStartDate": "APPROVED_ACTIVE_BEFORE_ERA_START",
+ "list": {
+  "rows": 23,
+  "withPkg": 23,
+  "commit": [
+   "440cc1f"
+  ]
+ },
+ "v4Enabled": false,
+ "approvedStart": {
+  "ok": true,
+  "rowsAdded": 1,
+  "schema": "A1",
+  "ids": "math5-s2-u4",
+  "ns": "APPROVED"
+ },
+ "sameEventIdAgain": {
+  "ok": true,
+  "rowsNow": 2
+ },
+ "legacyStartOnNewDeployment": "USAGE_LEGACY_CATALOG_RETIRED",
+ "anonymousOps": "HOJA_V4_OPS_DENIED"
+}

@@ -1,0 +1,52 @@
+{
+ "out": "<SCRATCH>",
+ "files": {
+  "ApprovedActiveCatalog.gs": {
+   "bytes": 15833,
+   "sha8": "ff418d8f"
+  },
+  "Code.gs": {
+   "bytes": 36075,
+   "sha8": "9af17eff"
+  },
+  "Game.html": {
+   "bytes": 8636221,
+   "sha8": "2d9e22df"
+  },
+  "Stats.html": {
+   "bytes": 14636,
+   "sha8": "b3da909d"
+  },
+  "UsageRollupU3S.gs": {
+   "bytes": 25470,
+   "sha8": "d39f96a5"
+  },
+  "UsageV4Core.gs": {
+   "bytes": 10306,
+   "sha8": "d4ec5268"
+  },
+  "UsageV4Public.gs": {
+   "bytes": 12964,
+   "sha8": "a45a6fab"
+  },
+  "UsageV4Unified.gs": {
+   "bytes": 27636,
+   "sha8": "74f59757"
+  },
+  "appsscript.json": {
+   "bytes": 348,
+   "sha8": "c97703e7"
+  }
+ },
+ "bundleBytes": 8779489,
+ "activeEntries": 23,
+ "contentSource": {
+  "kind": "GITHUB_RAW_PINNED_V1",
+  "repo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+  "commit": "440cc1fe60c6545004e9039bfa75142ff8fe8e7a"
+ },
+ "deploymentId": "HOJA15-PRODUCTION-DRAFT-20261124",
+ "rcAudit": "PASS",
+ "fails": []
+}
+HOJA15_PRODUCTION_BUNDLE_PASS
