@@ -1,4 +1,4 @@
-# 40-6BU HOJA 1.5 production cutover + UX fixes, 2026-11-24 (IDs/URLs omitted)
+# 40-6BX HOJA 1.5 production cutover + UX fixes, 2026-11-24 (IDs/URLs omitted)
 production project: teacher-provided editor link; student /exec deployment found in it (read-only match), was @406
 live HEAD before: == GitHub versions/2.0.0 (Code == 2.0.0/Code.gs, Game sha 4ac5c4ef, rollup identical, manifest newline only); backup kept locally
 push 1 (HOJA 1.5 bundle da04ddd): HEAD == bundle 9/9; student deployment still @406 then -> read-only check: 76 legacy rows
