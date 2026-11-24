@@ -1,0 +1,5 @@
+# 40-6BZ question window: renderer top strip removed, gaps removed, renderer slightly larger, 2026-11-24
+- injected per question frame (quiz/team part-22 and arcade runtime): body.hoja-embedded #hqTop{display:none} + #hqStage{height:100%}
+- renderer resolution follows the frame ratio (height 1000, width 1280..2560; was fixed 1920x1080 letterboxed) -> ~8% larger text, 4px edge margin (was 14px), refit on resize
+- checks: arcade 25 balloons @1000x560 PASS, reveals 24/24 drawn, review full width; quiz UX check PASS; UI E2E (math + image unit) PASS; TEAM full (image unit) PASS; trial smokes PASS; Node PASS; RC audit PASS (re-pinned); production bundle PASS
+- production HEAD pushed (live == push 9/9). Student deployment @408 -> needs update

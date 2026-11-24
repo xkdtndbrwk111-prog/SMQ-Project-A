@@ -170,6 +170,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   loading=new Promise((resolve,reject)=>{
    frame.addEventListener('load',async()=>{
     try{
+     // HOJA 1.5: hide the renderer's unused top strip (HOJA · 혼자 놀기 / ROUND / TEAM / QUESTION).
+     try{const d=frame.contentDocument;if(d&&!d.getElementById('hoja15NoTopStrip')){const st=d.createElement('style');st.id='hoja15NoTopStrip';st.textContent='body.hoja-embedded #hqTop{display:none!important}body.hoja-embedded #hqStage{height:100%!important}';(d.head||d.documentElement).append(st);const sc=d.createElement('script');sc.textContent='(function(){if(window.__hoja15Fit)return;window.__hoja15Fit=1;fitScreen=function(){var a=state.res.split("x").map(Number),host=document.getElementById("screenWrap"),scr=document.getElementById("screen");var s=Math.min((host.clientWidth-4)/a[0],(host.clientHeight-4)/a[1]);scr.style.transform="scale("+s+") translate(-50%,-50%)";requestAnimationFrame(fitContent);};function fit(){try{var W=innerWidth,H=innerHeight;if(!W||!H)return;var h=1000,w=Math.max(1280,Math.min(2560,Math.round(h*W/H))),r=w+"x"+h;if(state.res!==r){state.res=r;updateStage();}fitScreen();}catch(e){}}addEventListener("resize",fit);fit();})();';(d.head||d.documentElement).append(sc);frame.contentWindow.dispatchEvent(new Event('resize'));}}catch(_e){}
      frame.contentWindow?.addEventListener('keydown',shortcut,true);
      host=core.createApprovedFrameHost({frame,onAnswer:answer,timeoutMs:15000});
      await host.initialize();
