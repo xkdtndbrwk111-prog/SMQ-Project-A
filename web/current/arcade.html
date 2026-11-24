@@ -4208,8 +4208,8 @@ class HojaScene extends Phaser.Scene{
       const visualHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
       if(g.visualHeight!==undefined){
         const beside=(edge,side)=>SOLIDS.some(s=>s.kind==='ground'&&Math.abs((side==='left'?s.x+s.w:s.x)-edge)<.01&&s.y<visual.surfaceY+visualHeight&&s.y+s.h>visual.surfaceY);
-        if(beside(g.leftX,'left'))visual.left-=TILE;
-        if(beside(g.rightX,'right'))visual.right+=TILE;
+        if(beside(g.leftX,'left'))visual.left-=TILE/2;
+        if(beside(g.rightX,'right'))visual.right+=TILE/2;
         visual.width=visual.right-visual.left;
       }
       const swim=HOJA_MAKER_MODE&&sp[4]==='swim';
@@ -6038,7 +6038,7 @@ class HojaScene extends Phaser.Scene{
       // The visible 64px Hoja sprite extends beyond its 36px physics body.
       // Keep that visible edge out of solid walls only while swimming; retain
       // the existing body and all normal land collisions and motion.
-      const visualHalfWidth=24;let x=this.playerBody.x;
+      const visualHalfWidth=26;let x=this.playerBody.x;
       for(const s of SOLIDS){
         if(s.kind!=='ground'||b.bottom<=s.y+3||b.top>=s.y+s.h-3)continue;
         if(x<=s.x&&x+visualHalfWidth>s.x)x=Math.min(x,s.x-visualHalfWidth);
