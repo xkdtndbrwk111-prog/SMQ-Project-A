@@ -1353,3 +1353,19 @@
 - [ ] 교사: 편집기에서 웹앱 새 배포를 만들고 URL을 Claude에게 전달 → Claude가 스모크(익명 DENIED) 확인 후 R6 1회 실행.
 - [x] **GPT-6 제출 증거 감수:** `5c1913b`에 backup 9파일/게임 SHA `f9647ad6`, 승인된 tail 1줄만 수정, `clasp push --force` exit 0 및 재-pull 동일성을 기록한 파일이 존재함을 확인. **실제 격리 GAS 연결 성공을 GPT-6가 직접 검증한 것은 아님**. Claude의 `clasp create-deployment` 권한 차단, 임시 익명 배포·보안 스모크·R6 실측 모두 NOT RUN 유지. 후속 조치는 교사 배포 UI에서 생성된 `/exec` 주소를 Claude가 받는 것뿐. R6 결과 보고 때 체크리스트 다시 갱신.
 
+
+
+### 40-6AW. Claude 실행 — 임시 익명 배포 확인, 보안 스모크, R6 실 GAS 1회 (2026-11-24, 40-6AU 승인)
+**경계:** 격리 시험 프로젝트의 임시 배포(@6, 교사가 편집기에서 생성)와 격리 쓰기 사본만 대상이다. URL·ID·토큰은 남기지 않았다. GPT-6 감수는 미완료로 둔다.
+| 항목 | 상태 | 근거(`experimental/usage-v4-unified/evidence/r6/`) |
+|---|---|---|
+| 익명 보안 스모크 | **PASS 9/9 DENIED** | `r6b_access_smoke_20261124.txt` |
+| R6a 서버 단독 | **21/40**(lock timeout 19), 서버 단독 FAIL 기록 유지 | `r6b_real_gas_run_20261124.log` |
+| 요청별 결과 분류 | **PASS** 0/0/0(acceptedButMissing / failedButStored / storedNotSent) | 동상 |
+| 실패분 같은-eventId 1회 재전송 | **미충족** 17/19(2건 다시 lock timeout, 미저장, 중복 0) | 동상 |
+| 실제 클라이언트 40 | **PASS** 40 고유행, 중복 0, watermark 일치, 재시도 17 | 동상 |
+| 공개 +40 | **측정 불가**(사전 호출이 non-OK, 코드 미기록) → fail-fast 중단. 역산은 17819 = 17741 + 38 + 40으로 일치 | `r6b_verdict_20261124.md` |
+| R6c / 최종 사본 재검증 | **NOT RUN**(중단, 1회 원칙으로 재실행 안 함) | 동상 |
+| 치명적 실패(중복·유실·비인가 쓰기) | 관찰 없음 | 동상 |
+- [ ] 총판정: **완전 PASS 아님.** 임시 배포는 교사 체험용으로 유지하고, 교사의 종료 지시가 있으면 삭제한다.
+- [ ] GPT-6 독립 검수(미완료). 재전송 2건과 공개 delta 사전 호출 보완 여부는 결정 대기.

@@ -1,0 +1,18 @@
+# 40-6AW R6 real-GAS run (ONCE), isolated test deployment @6 + isolated write copy, 2026-11-24 KST. Raw output, redacted. Fail-fast stopped after R6B.
+R0_COPY_REVERIFY: {"manifestComplete": 61, "rawRows": 17672, "uniquePlays": 17670, "retries": 2, "zeroDays": 4, "bucketRows": 3969, "srcShaOk": 61, "bucketShaOk": 61, "bucketSetOk": 61, "bad": [], "watermark": 17744, "sourceLastRow": 17744}
+CATALOG: {"publicCartridges": 76}
+R6A_SERVER_ONLY_COLD_BURST: {"sent": 40, "ok": 21, "failures": {"USAGE_APPEND_LOCK_TIMEOUT": 19}, "rowsAdded": 21, "uniqueEventIds": 21, "duplicateRows": 0, "invalidRows": 0, "watermarkMinusLastRow": 0, "catalogSources": {"LIVE": 11, "CACHE": 10}, "sheetsApiCalls": 22, "lockWaitMs": {"p50": 9794, "p95": 19605, "max": 19982}, "lockHoldMs": {"p50": 914, "p95": 1739, "max": 1845}, "serverTotalMs": {"p50": 11607, "max": 22588}, "rpcMs": {"p50": 22872, "max": 24498}, "seconds": 28.2}
+R6A_PER_REQUEST_OUTCOME: {"input": 40, "acceptedStored": 21, "acceptedButMissing": 0, "duplicateIgnored": 0, "failedNotStored": 19, "failedButStored": 0, "storedNotSent": 0, "resent": 19, "resendOk": 17, "resendFailures": 2, "rowsAfterResend": 38, "uniqueAfterResend": 38, "duplicateRowsAfterResend": 0}
+R6B_GAME_PAGES: {"contexts": 8, "patchedClient": true}
+R6B_REAL_CLIENT_40: {"tracked": 40, "client": {"tracked": 40, "delivered": 40, "duplicateIgnored": 0, "retries": 17, "permanent": 0, "queued": 0, "expired": 0}, "rowsAdded": 40, "uniqueEventIds": 40, "duplicateRows": 0, "invalidRows": 0, "watermarkMinusLastRow": 0, "publicTotalDelta": "UNAVAILABLE", "pollTotalsSeen": [17781, 17789, 17795, 17802, 17805, 17811, 17817, 17819, 17819, 17819], "monotone": true, "seconds": 63.2, "lastErrors": ["USAGE_APPEND_LOCK_TIMEOUT"]}
+Traceback (most recent call last):
+  File "<HOME>", line 187, in <module>
+    asyncio.run(main())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "<HOME>", line 169, in main
+    assert s_after.get('status') == 'OK' and s_before.get('status') == 'OK' and \
+AssertionError: (None, {'all': 17819, 'days30': 4439, 'today': 78, 'days7': 1217})
+exit=1
