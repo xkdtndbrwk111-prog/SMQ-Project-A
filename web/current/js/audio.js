@@ -297,6 +297,18 @@ window.HOJA_CREATE_AUDIO=function({activeScene,remainingMs}){
     gimmickFan(){playSampleSfx('owlrise',.12,.70,900)},
     gimmickFlame(){playSampleSfx('strongstart',.28,.85,400)},
     gimmickBlocks(){playSampleSfx('stone1',.18,1.35,250)},
+    waterSplash(){
+      if(AUDIO_MUTED)return;
+      const ac=audioCtx();if(!ac||ac.state!=='running')return;
+      for(let i=0;i<3;i++){
+        const start=ac.currentTime+i*.055,osc=ac.createOscillator(),gain=ac.createGain();
+        osc.type='sine';osc.frequency.setValueAtTime(360+i*90,start);
+        osc.frequency.exponentialRampToValueAtTime(170+i*45,start+.11);
+        gain.gain.setValueAtTime(.0001,start);gain.gain.linearRampToValueAtTime(.045,start+.012);
+        gain.gain.exponentialRampToValueAtTime(.0001,start+.14);
+        osc.connect(gain);gain.connect(AUDIO_MASTER);osc.start(start);osc.stop(start+.15);
+      }
+    },
     spring(){playSampleSfx('jumpy',.62,1.08,60)},
     collect(){playSampleSfx('collect',.55,1.1,40)},
     crumble(){playSampleSfx('stone1',.32,1.35,120)},

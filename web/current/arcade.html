@@ -2108,6 +2108,7 @@ function hojaMakerValidateProject(p){
       if(t.hojaGroundStyle!==undefined&&!['legacy','seasonal'].includes(t.hojaGroundStyle))throw Error('지원하지 않는 지면 스타일');
       if(m.theme!=='cave'&&t.kind==='ground'&&(t.hojaGroundStyle||m.hojaGroundStyle)==='seasonal'&&!hojaMakerCustomTerrain(t)&&![t.x,t.y,t.w,t.h].every(Number.isInteger))throw Error('사계절 지면은 타일 격자에 맞춰야 합니다. 소수점 지형은 기존 지면을 선택하세요.');
       if(t.x<0||t.y<0||t.x+t.w>m.width||t.y+t.h>m.height)throw Error(`오브젝트가 맵 밖에 있습니다: ${t.id||'unknown'}`);
+      if(t.type==='water'&&t.waterType!==undefined&&!['opaque','swim'].includes(t.waterType))throw Error('지원하지 않는 물 종류입니다.');
       if(t.type==='pipe'&&t.pipeLength!==undefined){const n=t.pipeLength,extra=n-4,dir=t.orientation||'up';if(!Number.isInteger(n)||n<4||n>128)throw Error(`토관 ${t.id}: 길이는 4~128칸입니다.`);if((dir==='up'&&t.y+t.h+extra>m.height)||(dir==='down'&&t.y-extra<0)||(dir==='left'&&t.x+t.w+extra>m.width)||(dir==='right'&&t.x-extra<0))throw Error(`토관 ${t.id}: 몸통이 맵 밖에 있습니다.`);}
     }
   }
@@ -2145,7 +2146,7 @@ function hojaMakerToStage(m,i){
       waypoints:(o.patrol?.waypoints||[]).map(p=>({x:tx(p.x),y:tx(p.y)})),pathMode:o.patrol?.mode||'pingpong'})),
     bricks,enemies:objects.filter(o=>o.type==='enemy').map(o=>({type:['JUMPY','OWL','HERMIE','ROACH','BLANKEY','BALLOONEY','MARTIAN','ROBOT','CIRCUIT'].includes(o.enemyType)?o.enemyType:'JUMPY',
       x:tx(o.x+1),y:tx(o.y+2),min:tx(o.patrol?.waypoints?.[0]?.x??o.x),max:tx(o.patrol?.waypoints?.[1]?.x??(o.x+8)),makerMode:o.aiMode||'native',makerSpeed:Number(o.speed)||80})),
-    water:objects.filter(o=>o.type==='water').map(o=>[o.x,o.x+o.w,o.y,o.h]),decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
+    water:objects.filter(o=>o.type==='water').map(o=>[o.x,o.x+o.w,o.y,o.h,o.waterType==='swim'?'swim':'opaque']),decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
     makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerParallaxAnchorY:Number.isFinite(m.parallaxAnchorY)?tx(m.parallaxAnchorY):null,makerObjects:objects,makerCave:m.theme==='cave',
     gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
@@ -2576,6 +2577,7 @@ function waterSurface(span){
 function waterAtX(x){
   const t=x/TILE;
   for(const sp of WATER_SPANS){
+    if(sp[4]==='swim')continue;
     if(t>=sp[0]&&t<sp[1]){
       const g=waterGap(sp);
       return g?g.surfaceY:null;
@@ -4177,6 +4179,13 @@ class HojaScene extends Phaser.Scene{
     this.waterFillObjects=[];
     this.waterZones=[];
     this.waterVisuals=[];
+    this.hojaSwimZones=[];
+    this.hojaSwimRipples=null;
+    this.hojaSwimWasInside=false;
+    this.hojaAmbientBubbles=[];
+    this.hojaBubbleClock=0;
+    this.hojaBubbleSerial=0;
+    this.hojaAmbientBubbleArt=null;
 
     for(const sp of WATER_SPANS){
       const g=waterGap(sp);
@@ -4197,6 +4206,8 @@ class HojaScene extends Phaser.Scene{
       // retain their original water position and timing.
       visual.surfaceY+=TILE;
       const visualHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
+      const swim=HOJA_MAKER_MODE&&sp[4]==='swim';
+      if(swim)this.hojaSwimZones.push({x:g.leftX,y:visual.surfaceY,width:g.width,height:visualHeight});
       const backing=this.add.rectangle(visual.left+visual.width/2,
         visual.surfaceY+visualHeight/2,visual.width,visualHeight,THEME.water.deep,1).setDepth(-.25);
       this.waterFillObjects.push(backing);
@@ -4204,14 +4215,17 @@ class HojaScene extends Phaser.Scene{
       const fill=this.add.rectangle(g.leftX+g.width/2,visual.surfaceY+visualHeight/2,
         g.width,visualHeight,THEME.water.deep,1).setDepth(13);
       this.waterFillObjects.push(fill);
-      const surf=this.add.tileSprite(g.leftX,visual.surfaceY-crestRow*WATER_SCALE,
-        g.width,g.visualHeight===undefined?32*WATER_SCALE:Math.min(32*WATER_SCALE,g.visualHeight+crestRow*WATER_SCALE),'water',0).setOrigin(0,0).setDepth(14).setTileScale(WATER_SCALE,WATER_SCALE);
+      const manual=g.visualHeight!==undefined;
+      const surf=this.add.tileSprite(g.leftX,manual?visual.surfaceY:visual.surfaceY-crestRow*WATER_SCALE,
+        g.width,manual?Math.min((32-crestRow)*WATER_SCALE,g.visualHeight):32*WATER_SCALE,'water',0).setOrigin(0,0).setDepth(14).setTileScale(WATER_SCALE,WATER_SCALE);
+      if(manual)surf.tilePositionY=crestRow;
       if(THEME.water.tint!==0xffffff)surf.setTint(THEME.water.tint);
       this.waterObjects.push(surf);
       this.waterVisuals.push({leftX:g.leftX,rightX:g.rightX,leftTop:g.leftTop,rightTop:g.rightTop,
         surfaceY:visual.surfaceY,backLeft:visual.left,backRight:visual.right,physicsSurfaceY:g.surfaceY});
     }
 
+    if(this.hojaSwimZones.length){this.hojaSwimRipples=this.add.graphics().setDepth(13.5);this.hojaAmbientBubbleArt=this.add.graphics().setDepth(15);}
     this.time.addEvent({delay:190,loop:true,callback:()=>{
       const fr=(Math.floor(this.time.now/190)%2);
       this.waterObjects.forEach(o=>o.setFrame(fr));
@@ -5128,6 +5142,12 @@ class HojaScene extends Phaser.Scene{
       return null;
     });
     this.hoja.play('hoja-idle');
+    this.hojaSwimGhost=null;
+    if(this.hojaSwimZones?.length){
+      const maskShape=this.add.graphics().setVisible(false);maskShape.fillStyle(0xffffff,1);
+      for(const z of this.hojaSwimZones)maskShape.fillRect(z.x,z.y,z.width,z.height);
+      this.hojaSwimGhost=this.add.sprite(sx,gy,'hoja_IDLE_0').setOrigin(0.5,61/64).setDepth(13.7).setAlpha(.38).setMask(maskShape.createGeometryMask());
+    }
     // R3.4: restore pre-R2 rendering. The authoritative Hoja sprite is the
     // only visible actor, exactly as in R1.1; the same camera draws the
     // sprite, enemies and terrain. Brake/SIT/STOMP mechanics are unchanged.
@@ -5983,7 +6003,17 @@ class HojaScene extends Phaser.Scene{
       b.velocity.y>=-60&&
       hojaPressedAgainstMovingPlatform(this._hojaMovingPlatformSideHit,time,dir);
     const downHeld=this.keys.down.isDown||this.keys.s.isDown;
-    const sitIntent=grounded&&downHeld&&!this.strongStomp;
+    const swimZone=HOJA_MAKER_MODE&&this.hojaSwimZones?.find(z=>b.center.x>=z.x&&b.center.x<z.x+z.width&&b.center.y>=z.y&&b.center.y<z.y+z.height);
+    if(!!swimZone!==this.hojaSwimWasInside){
+      this.hojaSwimWasInside=!!swimZone;
+      for(let i=0;i<6;i++){
+        const bubble=this.add.circle(b.center.x+(i-2.5)*5,b.center.y+(i%2)*7,2+(i%2),0xc7f5ff,.75).setDepth(15);
+        bubble.__hojaWaterBubble=true;
+        this.tweens.add({targets:bubble,x:bubble.x+(i-2.5)*4,y:bubble.y-18-i*3,alpha:0,duration:450+i*40,onComplete:()=>bubble.destroy()});
+      }
+      SFX.waterSplash();
+    }
+    const sitIntent=grounded&&downHeld&&!this.strongStomp&&!swimZone;
     const cameraMotion=!!(dir||this.keys.jump.isDown||this.keys.z.isDown||
       this.keys.up.isDown||this.keys.w.isDown||
       this.keys.down.isDown||this.keys.s.isDown||!grounded||
@@ -6010,11 +6040,17 @@ class HojaScene extends Phaser.Scene{
     this.updatePipes(downPressed,grounded);
     if(this.transitioning)return;
     // Pipe entry has priority. Only then enter the SIT collision posture.
-    this.updateHojaSitting(downHeld,grounded);
+    this.updateHojaSitting(downHeld&&!swimZone,grounded);
     const spacePressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);
     const zPressed=Phaser.Input.Keyboard.JustDown(this.keys.z);
     const jumpPressed=spacePressed||zPressed; // Phase 1C: W 점프 없음
-    applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
+    if(swimZone){
+      this.strongStomp=false;this.jumpBufferAt=-1e9;b.setAccelerationY(0);
+      const up=this.keys.up.isDown||this.keys.w.isDown||this.keys.jump.isDown||this.keys.z.isDown;
+      const vertical=(downHeld?1:0)-(up?1:0),target=vertical*135+(vertical?0:18);
+      b.setVelocityY(Phaser.Math.Linear(b.velocity.y,target,Math.min(1,dt*5)));
+      b.setVelocityX(Phaser.Math.Clamp(b.velocity.x,-155,155));
+    }else applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
     if(this.hojaGimmicks){this.hojaGimmicks.update(gimmickDelta);if(this.dying)return;}
 
     this.updateSecrets(time);
@@ -6067,6 +6103,26 @@ class HojaScene extends Phaser.Scene{
     }
 
     this.updatePlayerVisual(run,delta);
+    if(this.hojaSwimGhost){const h=this.hoja,g=this.hojaSwimGhost;g.setTexture(h.texture.key,h.frame.name).setPosition(h.x,h.y).setFlipX(h.flipX).setFlipY(h.flipY).setScale(h.scaleX,h.scaleY).setAngle(h.angle).setAlpha(h.alpha*.38).setVisible(h.visible);}
+    if(this.hojaAmbientBubbleArt){
+      if(swimZone){
+        this.hojaBubbleClock+=delta;
+        if(this.hojaBubbleClock>=1800){
+          this.hojaBubbleClock%=1800;
+          const x=Phaser.Math.Clamp(b.center.x+this.facing*14,swimZone.x+3,swimZone.x+swimZone.width-3);
+          const y=Math.min(swimZone.y+swimZone.height-2,Math.max(swimZone.y+2,b.center.y-7));
+          if(this.hojaAmbientBubbles.length<8)this.hojaAmbientBubbles.push({id:this.hojaBubbleSerial++,x,y,baseX:x,top:swimZone.y,left:swimZone.x,right:swimZone.x+swimZone.width,age:0});
+        }
+      }else this.hojaBubbleClock=0;
+      const art=this.hojaAmbientBubbleArt;art.clear();art.lineStyle(1,0xd8faff,.85);
+      this.hojaAmbientBubbles=this.hojaAmbientBubbles.filter(p=>{
+        p.age+=delta;p.y-=Math.min(delta,50)*.055;
+        p.x=Phaser.Math.Clamp(p.baseX+Math.sin(p.age*.006)*4,p.left+2,p.right-2);
+        if(p.y<=p.top+2)return false;
+        art.strokeCircle(p.x,p.y,2.5);return true;
+      });
+    }
+    if(this.hojaSwimRipples){const g=this.hojaSwimRipples;g.clear();g.lineStyle(1,0xc6f8ff,.28);for(const z of this.hojaSwimZones){const n=Math.min(20,Math.floor(z.width*z.height/4096));for(let i=0;i<n;i++){const x=z.x+4+((i*53+time*.018)%Math.max(1,z.width-8)),y=z.y+5+((i*31+Math.sin(time*.002+i)*3)%Math.max(1,z.height-10));g.beginPath();g.moveTo(x,y);g.lineTo(Math.min(z.x+z.width,x+9),y);g.strokePath();}}}
     // STEP13-2: light-pass duplicate now receives current-frame texture/pose.
     this.updateCaveLanternLight(time);
     this.updateCamera(time);
