@@ -4937,6 +4937,30 @@ class HojaScene extends Phaser.Scene{
     const target=near.target;
     const spawn=HOJA_MAKER_MODE?'makerPortal':(cave?`fromSurface:${STAGE_INDEX}`:'surfacePipe');
     if(HOJA_MAKER_MODE)HOJA_MAKER_ARRIVAL=near.targetPortalId;
+    if(HOJA_MAKER_MODE&&(near.orientation==='left'||near.orientation==='right')){
+      // Walk into a horizontal mouth at the same measured pace as emergence.
+      // Crop the visible frame outside the lip: WebGL does not support masks.
+      const h=this.hoja,fromLeft=near.orientation==='left';
+      h.setFlipX(fromLeft).play('hoja-walk',true);h.anims.timeScale=.65;
+      const crop=()=>{
+        const r=h.getBounds();
+        const left=fromLeft?r.left:Math.max(r.left,near.x+32);
+        const right=fromLeft?Math.min(r.right,near.x-32):r.right;
+        const top=Math.max(r.top,near.top),bottom=Math.min(r.bottom,near.groundY);
+        const width=Math.max(0,right-left),height=Math.max(0,bottom-top);
+        const sx=64/Math.max(.001,r.width),sy=64/Math.max(.001,r.height);
+        let x=(left-r.left)*sx,y=(top-r.top)*sy;
+        const cw=width*sx,ch=height*sy;
+        if(h.flipX)x=64-x-cw;if(h.flipY)y=64-y-ch;
+        h.setCrop(Math.max(0,x),Math.max(0,y),Math.max(0,cw),Math.max(0,ch));
+      };
+      crop();
+      this.tweens.add({targets:h,x:near.x,duration:800,ease:'Linear',onUpdate:crop});
+      this.time.delayedCall(610,()=>this.cameras.main.fadeOut(185,0,0,0));
+      this.time.delayedCall(820,()=>startStage(target,false,spawn));
+      SFX.hop();
+      return true;
+    }
     // Step 1: center the whole sprite over the 64px pipe.
     this.tweens.add({targets:this.hoja,x:near.x,duration:105,ease:'Sine.Out',
       onComplete:()=>{
