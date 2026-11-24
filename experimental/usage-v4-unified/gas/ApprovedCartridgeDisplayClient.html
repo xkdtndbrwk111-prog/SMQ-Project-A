@@ -1,0 +1,198 @@
+<script id="hoja15-approved-cartridge-display-v1">
+/* HOJA 1.5 approved 23-unit DISPLAY ONLY — teacher approval 2026-11-24.
+ * Never change the LIST rows, request names, cartridge IDs, package pins, GET, usage or ranking.
+ * The canonical source titles are mapped only after a trusted approved LIST row with a
+ * matching cartridgeId and source-title suffix; legacy Project B cards are untouched.
+ * The info (ⓘ) panel still reveals the original full title.
+ */
+(()=>{'use strict';
+const byId=Object.freeze({
+ "eng5-ham-u10": {
+  "sourceTitle": "초등학교 영어 5 (천재·함순애) Lesson 10 What Time Do You Get Up?",
+  "number": "10",
+  "title": "What Time Do You Get Up?"
+ },
+ "eng5-ham-u11": {
+  "sourceTitle": "초등학교 영어 5 (천재·함순애) Lesson 11 My Favorite Subject Is Math",
+  "number": "11",
+  "title": "My Favorite Subject Is Math"
+ },
+ "eng5-ham-u12": {
+  "sourceTitle": "초등학교 영어 5 (천재·함순애) Lesson 12 What Do You Want to Be?",
+  "number": "12",
+  "title": "What Do You Want to Be?"
+ },
+ "eng5-ybm-kim-u10": {
+  "sourceTitle": "What’s Wrong?",
+  "number": "10",
+  "title": "What’s Wrong?"
+ },
+ "eng5-ybm-kim-u11": {
+  "sourceTitle": "Where Is the Library?",
+  "number": "11",
+  "title": "Where Is the Library?"
+ },
+ "eng5-ybm-kim-u12": {
+  "sourceTitle": "What Will You Do This Winter?",
+  "number": "12",
+  "title": "What Will You Do This Winter?"
+ },
+ "eng6-ham-u10": {
+  "sourceTitle": "초등학교 영어 6 (천재·함순애) Lesson 10 How Often Do You Eat Vegetables?",
+  "number": "10",
+  "title": "How Often Do You Eat Vegetables?"
+ },
+ "eng6-ham-u11": {
+  "sourceTitle": "초등학교 영어 6 (천재·함순애) Lesson 11 Do You Know Anything About Tuho?",
+  "number": "11",
+  "title": "Do You Know Anything About Tuho?"
+ },
+ "eng6-ham-u12": {
+  "sourceTitle": "초등학교 영어 6 (천재·함순애) Lesson 12 We Made a Class Album",
+  "number": "12",
+  "title": "We Made a Class Album"
+ },
+ "eng6-ybm-kim-u10": {
+  "sourceTitle": "What Season Do You Like?",
+  "number": "10",
+  "title": "What Season Do You Like?"
+ },
+ "eng6-ybm-kim-u11": {
+  "sourceTitle": "I Think It Looks Bright",
+  "number": "11",
+  "title": "I Think It Looks Bright"
+ },
+ "eng6-ybm-kim-u12": {
+  "sourceTitle": "Do You Know Anything About Jige?",
+  "number": "12",
+  "title": "Do You Know Anything About Jige?"
+ },
+ "math5-s2-u4": {
+  "sourceTitle": "초등 수학 5-2 4단원. 소수의 곱셈",
+  "number": "4",
+  "title": "소수의 곱셈"
+ },
+ "math5-s2-u5": {
+  "sourceTitle": "초등 수학 5-2 5단원. 직육면체",
+  "number": "5",
+  "title": "직육면체"
+ },
+ "math5-s2-u6": {
+  "sourceTitle": "초등 수학 5-2 6단원. 평균과 가능성",
+  "number": "6",
+  "title": "평균과 가능성"
+ },
+ "math6-s2-u4": {
+  "sourceTitle": "초등 수학 6-2 4단원. 비례식과 비례배분",
+  "number": "4",
+  "title": "비례식과 비례배분"
+ },
+ "math6-s2-u5": {
+  "sourceTitle": "초등 수학 6-2 5단원. 원의 둘레와 넓이",
+  "number": "5",
+  "title": "원의 둘레와 넓이"
+ },
+ "math6-s2-u6": {
+  "sourceTitle": "초등 수학 6-2 6단원. 원기둥, 원뿔, 구",
+  "number": "6",
+  "title": "원기둥, 원뿔, 구"
+ },
+ "soc5-s2-u2-2-common": {
+  "sourceTitle": "초등학교 사회 5-2 (출판사 공통) 2. 달라지는 시대, 변화하는 생활 모습 - 조선 후기 사회 변화와 개항기 생활 모습",
+  "number": "2-2",
+  "title": "조선 후기 사회 변화와 개항기 생활"
+ },
+ "soc5-s2-u3-1-common": {
+  "sourceTitle": "초등 사회 5-2 3-1. 일제 식민 통치와 우리 민족의 저항 (3종 공통)",
+  "number": "3-1",
+  "title": "일제 식민 통치와 우리 민족의 저항"
+ },
+ "soc5-s2-u3-2-common": {
+  "sourceTitle": "초등 사회 5-2 3-2. 8·15 광복과 6·25 전쟁 (3종 공통)",
+  "number": "3-2",
+  "title": "8·15 광복과 6·25 전쟁"
+ },
+ "soc6-s2-u3-1-common": {
+  "sourceTitle": "초등 사회 6-2 3-1. 세계의 인구 분포 (3종 공통)",
+  "number": "3-1",
+  "title": "세계의 인구 분포"
+ },
+ "soc6-s2-u3-2-common": {
+  "sourceTitle": "초등 사회 6-2 3-2. 지속가능한 지구촌 (3종 공통)",
+  "number": "3-2",
+  "title": "지속가능한 지구촌"
+ }
+});
+const active=new Map(); // canonical label -> approved display fields from the latest LIST
+const live=window.HOJA_B_LIVE;
+if(!live||typeof live.rpc!=='function')return;
+const previousRpc=live.rpc.bind(live);
+live.rpc=function(method,payload){
+ const response=previousRpc(method,payload);
+ if(method!=='LIST')return response;
+ return Promise.resolve(response).then(rows=>{
+  active.clear();
+  if(Array.isArray(rows))for(const row of rows){
+   const unit=row&&row.pkg&&byId[String(row.pkg.id)];
+   if(unit&&typeof row.name==='string'&&row.name.endsWith('-'+unit.sourceTitle))
+    active.set(unit.sourceTitle,unit);
+  }
+  return rows; // unchanged identity and package descriptors
+ });
+};
+function patchCards(){
+ const rail=document.getElementById('hcRail');
+ if(!rail||!active.size)return;
+ for(const button of rail.querySelectorAll('.hcPak.isUnit')){
+  if(button.dataset.hoja15DisplayDone==='1')continue;
+  const unit=active.get(button.title); // title is the original parsed LIST label
+  if(!unit)continue;
+  const face=button.querySelector('.hcFace');
+  const label=face&&face.querySelector('strong.hcUnitName');
+  if(!label)continue;
+  const number=document.createElement('span');
+  number.className='hoja15UnitNumber';
+  number.textContent=unit.number;
+  face.insertBefore(number,label);
+  label.textContent=unit.title;
+  label.dataset.fullLabel=unit.title; // existing word-based fitUnitNames() reads this
+  button.classList.toggle('isLong',unit.title.length>19);
+  button.classList.add('hoja15DisplayUnit');
+  button.title=unit.number+'. '+unit.title;
+  button.setAttribute('aria-label',unit.number+'단원 '+unit.title);
+  const small=face.querySelector('small');
+  if(small&&/^PAK\\s+\\d+$/u.test(small.textContent.trim()))small.hidden=true;
+  button.dataset.hoja15DisplayDone='1';
+  // button.onclick and the ⓘ info handler both retain the original sheetName/title.
+ }
+}
+function patchNextSelected(){
+ const el=document.getElementById('hcNextSelected');
+ if(!el||!active.size)return;
+ const prior=el.textContent;
+ let next=prior;
+ for(const [source,unit] of active)
+  if(next.includes(source))next=next.split(source).join(unit.number+'. '+unit.title);
+ if(next!==prior)el.textContent=next;
+}
+function initialize(){
+ const rail=document.getElementById('hcRail');
+ const selected=document.getElementById('hcNextSelected');
+ if(!rail||!selected)return;
+ const style=document.createElement('style');style.id='hoja15ApprovedDisplayStyle';
+ style.textContent=[
+  '#hojaCatalog .hcPak.hoja15DisplayUnit .hcEmblem{display:none!important}',
+  '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace{gap:9px!important;padding:8px 9px!important}',
+  '#hojaCatalog .hcPak.hoja15DisplayUnit .hoja15UnitNumber{display:block;flex:0 0 auto;font-size:clamp(21px,2.2vw,31px);font-weight:1000;line-height:1.1;color:#ffe4a0}',
+  '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace small[hidden]{display:none!important}'
+ ].join('\\n');
+ document.head.appendChild(style);
+ new MutationObserver(patchCards).observe(rail,{childList:true});
+ new MutationObserver(patchNextSelected).observe(selected,{childList:true,characterData:true,subtree:true});
+ patchCards();patchNextSelected();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
+else initialize();
+window.HOJA15_APPROVED_DISPLAY=Object.freeze({version:1,expectedUnits:23,get activeUnits(){return active.size}});
+})();
+</script>
