@@ -161,7 +161,7 @@ function patchCards(){
   button.title=unit.number+'. '+unit.title;
   button.setAttribute('aria-label',unit.number+'단원 '+unit.title);
   const small=face.querySelector('small');
-  if(small&&/^PAK\\s+\\d+$/u.test(small.textContent.trim()))small.hidden=true;
+  if(small&&/^PAK[ ]+[0-9]+$/u.test(small.textContent.trim()))small.hidden=true;
   button.dataset.hoja15DisplayDone='1';
   // button.onclick and the ⓘ info handler both retain the original sheetName/title.
  }
@@ -185,7 +185,7 @@ function initialize(){
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace{gap:9px!important;padding:8px 9px!important}',
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hoja15UnitNumber{display:block;flex:0 0 auto;font-size:clamp(21px,2.2vw,31px);font-weight:1000;line-height:1.1;color:#ffe4a0}',
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace small[hidden]{display:none!important}'
- ].join('\\n');
+ ].join(' ');
  document.head.appendChild(style);
  new MutationObserver(patchCards).observe(rail,{childList:true});
  new MutationObserver(patchNextSelected).observe(selected,{childList:true,characterData:true,subtree:true});
