@@ -59,6 +59,19 @@ def inject_package_cache(content):
     if i < 0 or b'window.HOJA_B_LIVE=' not in content[:i]: raise SystemExit('PACKAGE_CACHE_ANCHOR_MISSING')
     return content[:i] + block + b'\n' + content[i:], hashlib.sha256(block).hexdigest()
 
+DISPLAY_MARK = b'<script id="hoja15-approved-cartridge-display-v1">'
+def inject_hoja15_display(content):
+    """Display-only unit number/name overlay. The LIST/GET protocol and ranking keys remain unchanged."""
+    block = (GAS / 'ApprovedCartridgeDisplayClient.html').read_bytes().strip()
+    if not block.startswith(DISPLAY_MARK) or not block.endswith(b'</script>') or block.count(b'<script') != 1:
+        raise SystemExit('DISPLAY_BLOCK_INVALID')
+    if DISPLAY_MARK in content:
+        raise SystemExit('DISPLAY_BLOCK_ALREADY_PRESENT')
+    i = content.rfind(b'</body>')
+    if i < 0 or CACHE_MARK not in content[:i]:
+        raise SystemExit('DISPLAY_REQUIRES_APPROVED_PACKAGE_CACHE')
+    return content[:i] + block + b'\n' + content[i:], hashlib.sha256(block).hexdigest()
+
 def approved_rc_game(original_sha):
     """F3-3 release candidate: rebuild the verified trial game (only parts 14 and 22 differ from the
     pinned 2.0.0 snapshot) with the COMPOSED renderer (unchanged bridge + media + math extensions)
@@ -170,6 +183,8 @@ def main():
         rc['gameBeforePackageCacheSha256'] = hashlib.sha256(patched).hexdigest()
         patched, cache_sha = inject_package_cache(patched)
         rc['packageCacheBlockSha256'] = cache_sha
+        patched, display_sha = inject_hoja15_display(patched)
+        rc['approvedDisplayBlockSha256'] = display_sha
     (out / 'Game.html').write_bytes(patched)
     if b'getPublicUsageStatisticsV4' in patched:
         raise SystemExit('GAME_MUST_NOT_CALL_STATS')
