@@ -2935,7 +2935,7 @@ function hojaCameraSafeView(o){
   // Respect existing horizontal C1 look-ahead, or calmer centered tracking.
   const desiredLeft=clamp(o.manual?o.playerX-w*.35:o.playerX-w*.50,
     0,Math.max(0,o.worldW-w));
-  let x=o.manual||!Number.isFinite(o.prevLeft)?desiredLeft:
+  let x=(o.manual&&!o.smoothManual)||!Number.isFinite(o.prevLeft)?desiredLeft:
     o.prevLeft+(desiredLeft-o.prevLeft)*Math.min(1,Math.max(0,o.smoothing||.1));
   // Keep the Hoja silhouette inside the safe zone where possible. Near
   // stage ends, the strict stage border wins (no exterior world rendered).
@@ -6011,13 +6011,14 @@ class HojaScene extends Phaser.Scene{
       hojaPressedAgainstMovingPlatform(this._hojaMovingPlatformSideHit,time,dir);
     const downHeld=this.keys.down.isDown||this.keys.s.isDown;
     const swimZone=HOJA_MAKER_MODE&&this.hojaSwimZones?.find(z=>b.center.x>=z.x&&b.center.x<z.x+z.width&&b.center.y>=z.y&&b.center.y<z.y+z.height);
+    this.hojaSwimActive=!!swimZone;this.hojaSwimWallBlocked=false;
     if(this.hojaSurfaceJumpZone&&b.velocity.y>=0&&(b.bottom>=this.hojaSurfaceJumpZone.y+6||(confirmedGroundContact&&!swimZone)))this.hojaSurfaceJumpZone=null;
     if(!!swimZone!==this.hojaSwimWasInside){
       this.hojaSwimWasInside=!!swimZone;
-      for(let i=0;i<6;i++){
-        const bubble=this.add.circle(b.center.x+(i-2.5)*5,b.center.y+(i%2)*7,2+(i%2),0xc7f5ff,.75).setDepth(15);
+      for(let i=0;i<12;i++){
+        const bubble=this.add.circle(b.center.x+(i-5.5)*3,b.center.y+(i%3)*4,1+(i%2)*.4,0xc7f5ff,.75).setDepth(15);
         bubble.__hojaWaterBubble=true;
-        this.tweens.add({targets:bubble,x:bubble.x+(i-2.5)*4,y:bubble.y-18-i*3,alpha:0,duration:450+i*40,onComplete:()=>bubble.destroy()});
+        this.tweens.add({targets:bubble,x:bubble.x+(i-5.5)*2,y:bubble.y-18-i*2,alpha:0,duration:450+i*40,onComplete:()=>bubble.destroy()});
       }
       SFX.waterSplash();
     }
@@ -6041,10 +6042,11 @@ class HojaScene extends Phaser.Scene{
       const visualHalfWidth=26;let x=this.playerBody.x;
       for(const s of SOLIDS){
         if(s.kind!=='ground'||b.bottom<=s.y+3||b.top>=s.y+s.h-3)continue;
-        if(x<=s.x&&x+visualHalfWidth>s.x)x=Math.min(x,s.x-visualHalfWidth);
-        else if(x>=s.x+s.w&&x-visualHalfWidth<s.x+s.w)x=Math.max(x,s.x+s.w+visualHalfWidth);
+        if(x<=s.x&&x+visualHalfWidth>=s.x-.25){x=Math.min(x,s.x-visualHalfWidth);if(dir>0)this.hojaSwimWallBlocked=true;}
+        else if(x>=s.x+s.w&&x-visualHalfWidth<=s.x+s.w+.25){x=Math.max(x,s.x+s.w+visualHalfWidth);if(dir<0)this.hojaSwimWallBlocked=true;}
       }
-      if(x!==this.playerBody.x){this.playerBody.setX(x);b.position.x=x-b.halfWidth;if((dir>0&&b.velocity.x>0)||(dir<0&&b.velocity.x<0))b.setVelocityX(0);}
+      if(x!==this.playerBody.x){this.playerBody.setX(x);b.position.x=x-b.halfWidth;}
+      if(this.hojaSwimWallBlocked)b.setVelocityX(0);
     }
 
     // ↑/W at a door enters it instead of jumping (Space/Z always jump).
@@ -6140,15 +6142,15 @@ class HojaScene extends Phaser.Scene{
           if(this.hojaAmbientBubbles.length<8)this.hojaAmbientBubbles.push({id:this.hojaBubbleSerial++,x,y,baseX:x,top:swimZone.y,left:swimZone.x,right:swimZone.x+swimZone.width,age:0});
         }
       }else this.hojaBubbleClock=0;
-      const art=this.hojaAmbientBubbleArt;art.clear();art.lineStyle(1,0xd8faff,.85);
+      const art=this.hojaAmbientBubbleArt;art.clear();art.lineStyle(.6,0xd8faff,.85);
       this.hojaAmbientBubbles=this.hojaAmbientBubbles.filter(p=>{
         p.age+=delta;p.y-=Math.min(delta,50)*.055;
         p.x=Phaser.Math.Clamp(p.baseX+Math.sin(p.age*.006)*4,p.left+2,p.right-2);
         if(p.y<=p.top+2)return false;
-        art.strokeCircle(p.x,p.y,2.5);return true;
+        art.strokeCircle(p.x,p.y,1.8);return true;
       });
     }
-    if(this.hojaSwimRipples){const g=this.hojaSwimRipples;g.clear();g.lineStyle(1,0xc6f8ff,.28);for(const z of this.hojaSwimZones){const n=Math.min(20,Math.floor(z.width*z.height/4096));for(let i=0;i<n;i++){const x=z.x+4+((i*53+time*.018)%Math.max(1,z.width-8)),y=z.y+5+((i*31+Math.sin(time*.002+i)*3)%Math.max(1,z.height-10));g.beginPath();g.moveTo(x,y);g.lineTo(Math.min(z.x+z.width,x+9),y);g.strokePath();}}}
+    if(this.hojaSwimRipples){const g=this.hojaSwimRipples;g.clear();g.lineStyle(.5,0xc6f8ff,.3);for(const z of this.hojaSwimZones){const n=Math.min(64,Math.max(1,Math.floor(z.width*z.height/1400)));for(let i=0;i<n;i++){const x=z.x+4+((i*53+time*.018)%Math.max(1,z.width-8)),y=z.y+5+((i*31+Math.sin(time*.002+i)*3)%Math.max(1,z.height-10));g.beginPath();g.moveTo(x,y);g.lineTo(Math.min(z.x+z.width,x+5),y);g.strokePath();}}}
     // STEP13-2: light-pass duplicate now receives current-frame texture/pose.
     this.updateCaveLanternLight(time);
     this.updateCamera(time);
@@ -6298,8 +6300,10 @@ class HojaScene extends Phaser.Scene{
       }
     }else this.hojaStopSleep();
     const happy=this.time.now<this.happyUntil;
-    const desired=againstWind?'hoja-walk':hojaGroundAnimationForSpeed(speed,run,pressingSide,happy,P_CFG.walkTop);
-    if(againstWind)this.hoja.anims.timeScale=.65;
+    const swimWalking=this.hojaSwimActive&&!!inputDir;
+    const desired=(againstWind||swimWalking)?'hoja-walk':hojaGroundAnimationForSpeed(speed,run,pressingSide,happy,P_CFG.walkTop);
+    if(swimWalking)this.hoja.anims.timeScale=.45;
+    else if(againstWind)this.hoja.anims.timeScale=.65;
     if(this.visualState!==desired||!this.hoja.anims.isPlaying){
       this.hoja.play(desired,true);
       this.visualState=desired;
@@ -6509,7 +6513,7 @@ class HojaScene extends Phaser.Scene{
       initialLift:!HOJA_MAKER_MODE&&STAGE_INDEX===0&&STAGE.theme!=='cave'?20:0,
       sleeping:this.visualState==='hoja-sleep',
       prevLeft:this._hojaSafePrevLeft,prevTop:this._c1ViewTop,
-      manual:HOJA_C1_MANUAL_CAMERA,smoothing:.10
+      manual:HOJA_C1_MANUAL_CAMERA,smoothManual:!!this.hojaSwimActive,smoothing:this.hojaSwimActive?.05:.10
     });
     this._c1ViewTop=safe.top;
     this._hojaSafePrevLeft=safe.left;
