@@ -2195,7 +2195,7 @@ function hojaMakerReturnBase(){
   startStage(0,true,'start');
 }
 function hojaMakerDialogueLines(lines){
-  const speakers={'호자':'HOJA','나한상':'NAHAN','부엉이':'OWL','점피':'JUMPY','마션':'MARTIAN','로봇':'ROBOT','서킷':'CIRCUIT','안내':'NARRATOR'};
+  const speakers={'호':'HOJA','호자':'HOJA','나':'NAHAN','나한상':'NAHAN','수':'SUMAKSAE','수막새':'SUMAKSAE','칠':'CHILJIDO_ELDER','칠지도':'CHILJIDO_ELDER','칠지도 장로':'CHILJIDO_ELDER','무':'MURYEONG_KING','무령왕':'MURYEONG_KING','반':'BANGASAYUSANG','반가사유상':'BANGASAYUSANG','광':'GWANGGAETO_KING','광개토대왕':'GWANGGAETO_KING','부엉이':'OWL','점피':'JUMPY','마션':'MARTIAN','로봇':'ROBOT','서킷':'CIRCUIT','안내':'NARRATOR'};
   return (lines||[]).map(row=>({...row,speaker:speakers[row.speaker]||String(row.speaker||'NARRATOR').toUpperCase(),name:row.speaker||''}));
 }
 window.HOJA_V061_IMPORT=hojaMakerImport;
@@ -4941,7 +4941,7 @@ class HojaScene extends Phaser.Scene{
       // Walk into a horizontal mouth at the same measured pace as emergence.
       // Crop the visible frame outside the lip: WebGL does not support masks.
       const h=this.hoja,fromLeft=near.orientation==='left';
-      h.setFlipX(fromLeft).play('hoja-walk',true);h.anims.timeScale=.65;
+      h.setPosition(this.playerBody.x,b.bottom).setFlipX(fromLeft).play('hoja-walk',true);h.anims.timeScale=.65;
       const crop=()=>{
         const r=h.getBounds();
         const left=fromLeft?r.left:Math.max(r.left,near.x+32);
@@ -4951,8 +4951,13 @@ class HojaScene extends Phaser.Scene{
         const sx=64/Math.max(.001,r.width),sy=64/Math.max(.001,r.height);
         let x=(left-r.left)*sx,y=(top-r.top)*sy;
         const cw=width*sx,ch=height*sy;
+        // Phaser mirrors both crop geometry and texture UVs on flip. Keep
+        // the world-space clipped edge while retaining the matching pixels.
+        h.setCrop(Math.max(0,x),Math.max(0,y),Math.max(0,cw),Math.max(0,ch));
+        const uv={u0:h._crop.u0,u1:h._crop.u1,v0:h._crop.v0,v1:h._crop.v1};
         if(h.flipX)x=64-x-cw;if(h.flipY)y=64-y-ch;
         h.setCrop(Math.max(0,x),Math.max(0,y),Math.max(0,cw),Math.max(0,ch));
+        Object.assign(h._crop,uv);
       };
       crop();
       this.tweens.add({targets:h,x:near.x,duration:800,ease:'Linear',onUpdate:crop});
@@ -5204,8 +5209,13 @@ class HojaScene extends Phaser.Scene{
         const sx=64/Math.max(.001,bounds.width),sy=64/Math.max(.001,bounds.height);
         let x=(left-bounds.left)*sx,y=(top-bounds.top)*sy;
         const cw=w*sx,ch=height*sy;
+        // Phaser mirrors both crop geometry and texture UVs on flip. Keep
+        // the world-space clipped edge while retaining the matching pixels.
+        h.setCrop(Math.max(0,x),Math.max(0,y),Math.max(0,cw),Math.max(0,ch));
+        const uv={u0:h._crop.u0,u1:h._crop.u1,v0:h._crop.v0,v1:h._crop.v1};
         if(h.flipX)x=64-x-cw;if(h.flipY)y=64-y-ch;
         h.setCrop(Math.max(0,x),Math.max(0,y),Math.max(0,cw),Math.max(0,ch));
+        Object.assign(h._crop,uv);
       };
       cropArrival();
       this.hoja.play(side?'hoja-walk':'hoja-idle',true);
@@ -8444,6 +8454,11 @@ window.addEventListener('unhandledrejection',ev=>{
   const SPEAKERS={
     HOJA:{name:'호자',source:'hoja'},
     NAHAN:{name:'나한상',source:'nahan'},
+    SUMAKSAE:{name:'수막새',source:'SUMAKSAE'},
+    CHILJIDO_ELDER:{name:'칠지도 장로',source:'CHILJIDO_ELDER'},
+    MURYEONG_KING:{name:'무령왕',source:'MURYEONG_KING'},
+    BANGASAYUSANG:{name:'반가사유상',source:'BANGASAYUSANG'},
+    GWANGGAETO_KING:{name:'광개토대왕',source:'GWANGGAETO_KING'},
     OWL:{name:'부엉이',source:'enOwlIdle'},
     JUMPY:{name:'점피',source:'enJumpyIdle'},
     MARTIAN:{name:'마션',source:'enMartianIdle'},
@@ -8468,8 +8483,14 @@ window.addEventListener('unhandledrejection',ev=>{
       ill.alt=(kind==='NAHAN'?'나한상':'호자')+' 감정 일러스트 '+ix+'번 ('+(["기본", "깜짝 놀람", "화남", "지침", "부끄러움", "슬픔", "졸림", "당황", "반짝임", "궁금함"])[ix-1]+')';
       return;
     }
-    ill.style.display='none';portrait.style.display='block';
     const def=SPEAKERS[kind]||SPEAKERS.NARRATOR;
+    if(['SUMAKSAE','CHILJIDO_ELDER','MURYEONG_KING','BANGASAYUSANG','GWANGGAETO_KING'].includes(kind)){
+      const ix=Number.isFinite(Number(emotion))?Math.max(1,Math.min(10,Math.round(Number(emotion)))):1;
+      portrait.style.display='none';ill.style.display='block';ill.style.setProperty('--nahan-chest-shift','0%');
+      ill.src='assets/dialogue/'+kind+'/'+String(ix).padStart(2,'0')+'.webp';
+      ill.alt=def.name+' 감정 일러스트 '+ix+'번';return;
+    }
+    ill.style.display='none';portrait.style.display='block';
     const w=portrait.width,h=portrait.height;
     ctx.clearRect(0,0,w,h);
     ctx.imageSmoothingEnabled=false;
@@ -8579,7 +8600,7 @@ window.addEventListener('unhandledrejection',ev=>{
     if(running)close();
     const raw=Array.isArray(payload?.lines)?payload.lines:SAMPLE;
     const lines=raw.slice(0,32).map(it=>{
-      const speaker=({'나한상':'NAHAN','호자':'HOJA'})[String(it?.speaker||'')]||String(it?.speaker||'NARRATOR').toUpperCase();
+      const speaker=({'호':'HOJA','호자':'HOJA','나':'NAHAN','나한상':'NAHAN','수':'SUMAKSAE','수막새':'SUMAKSAE','칠':'CHILJIDO_ELDER','칠지도':'CHILJIDO_ELDER','칠지도 장로':'CHILJIDO_ELDER','무':'MURYEONG_KING','무령왕':'MURYEONG_KING','반':'BANGASAYUSANG','반가사유상':'BANGASAYUSANG','광':'GWANGGAETO_KING','광개토대왕':'GWANGGAETO_KING'})[String(it?.speaker||'')]||String(it?.speaker||'NARRATOR').toUpperCase();
       const def=SPEAKERS[speaker]||SPEAKERS.NARRATOR;
       const txt=String(it?.text??'').slice(0,displayLetterLimit);
       return {speaker,emotion:it?.emotion??1,name:typeof it?.name==='string'?it.name.slice(0,30):def.name,text:txt,glyphs:Array.from(txt)};
