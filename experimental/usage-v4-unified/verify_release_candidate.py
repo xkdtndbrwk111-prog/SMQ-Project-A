@@ -19,13 +19,23 @@ ok(hashlib.sha256(game).hexdigest() == info['patchedGameSha256'], 'GAME_SHA_MISM
 for marker in (b'hoja-ext-media-v1', b'hoja-ext-math-v1', b'hoja-ext-input-guard-v1', b'HOJA_TRIAL_APPROVED_HTML', b'hoja_usage_pending_v1'):
     ok(marker in game, 'MISSING_IN_GAME ' + marker.decode())
 ok(b'withFailureHandler(()=>{}).recordUsageStartU1' not in game, 'OLD_TELEMETRY_STILL_PRESENT')
+# HOJA 1.5: display-only title overlay is injected AFTER the package cache. Removing it
+# first restores the original cached-game bytes for F4 audit, without changing the pinned RC.
+display_mark = b'<script id="hoja15-approved-cartridge-display-v1">'
+ok(game.count(display_mark) == 1, 'DISPLAY_BLOCK_COUNT')
+without_display = game
+if game.count(display_mark) == 1:
+    di = game.index(display_mark)
+    dj = game.index(b'</script>', di) + len(b'</script>\n')
+    ok(hashlib.sha256(game[di:dj-1]).hexdigest() == rc.get('approvedDisplayBlockSha256'), 'DISPLAY_BLOCK_SHA')
+    without_display = game[:di] + game[dj:]
 # F4 (40-6AD): the browser package cache is exactly ONE injected block; without it the game is the audited RC
 mark = b'<script id="hoja-approved-package-cache-v1">'
-ok(game.count(mark) == 1, 'PACKAGE_CACHE_BLOCK_COUNT')
-if game.count(mark) == 1:
-    i = game.index(mark); j = game.index(b'</script>', i) + len(b'</script>\n')
-    ok(hashlib.sha256(game[i:j - 1]).hexdigest() == rc.get('packageCacheBlockSha256'), 'PACKAGE_CACHE_BLOCK_SHA')
-    ok(hashlib.sha256(game[:i] + game[j:]).hexdigest() == rc.get('gameBeforePackageCacheSha256'), 'GAME_WITHOUT_CACHE_BLOCK_MISMATCH')
+ok(without_display.count(mark) == 1, 'PACKAGE_CACHE_BLOCK_COUNT')
+if without_display.count(mark) == 1:
+    i = without_display.index(mark); j = without_display.index(b'</script>', i) + len(b'</script>\n')
+    ok(hashlib.sha256(without_display[i:j - 1]).hexdigest() == rc.get('packageCacheBlockSha256'), 'PACKAGE_CACHE_BLOCK_SHA')
+    ok(hashlib.sha256(without_display[:i] + without_display[j:]).hexdigest() == rc.get('gameBeforePackageCacheSha256'), 'GAME_WITHOUT_CACHE_BLOCK_MISMATCH')
 # 40-6AI: the telemetry client policy changed (R7 queue rollover), so the patched game hash moved from 876933... (40-6AF).
 # Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
 # UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
