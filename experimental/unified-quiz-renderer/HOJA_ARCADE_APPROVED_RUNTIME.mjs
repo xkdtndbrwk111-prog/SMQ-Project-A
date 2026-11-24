@@ -88,6 +88,9 @@ export function patchApprovedArcadeInnerHTML(html){
   s=substituteOnce(s,anchor,anchor+'!HOJA_RANK_FORBIDDEN_.has(hojaRankNormalize_(r.name))&&');
  }
  s=patchArcadeControls(s);
+ // HOJA 1.5: the approved parent renderer shows the question below the HUD. The original in-game quiz overlay
+ // stays active (pause/input) but transparent, so the HUD (score, questions, time) is never covered.
+ s=substituteOnce(s,'</head>','<style id="hoja15ArcadeQuizUnderlay">#quizOverlay.active{background:transparent!important}#quizOverlay.active #quizCard{visibility:hidden!important}</style>\n</head>');
  return substituteOnce(s,'</body>',CHILD_SCRIPT+'\n</body>');
 }
 
@@ -128,6 +131,8 @@ export function patchArcadeControls(html){
 
 
 export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame,getContainer}){
+ // HOJA 1.5: reveal only after the question's choices are painted (no text-only flash).
+ function hojaWhenDrawn_(f,qid){return new Promise(res=>{const t0=performance.now();const tick=()=>{let ok=false;try{const d=f.contentDocument,w=f.contentWindow;const cur=w.current&&w.current();const bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];ok=!d.body.classList.contains('hojaAwaitShow')&&bs.length>0&&(!qid||(cur&&cur.id===qid))&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===(cur&&cur.id));}catch(_e){ok=true}if(ok||performance.now()-t0>1500){requestAnimationFrame(()=>res());return;}requestAnimationFrame(tick)};tick();});}
  if(!core?.createApprovedFrameHost||!core?.teamApprovedPayload)throw Error('ARCADE_APPROVED_CORE_REQUIRED');
  let catalog=null,active=null,overlay=null,frame=null,host=null,loading=null,epoch=0,focus=-1,review=null,reviewBar=null,reviewLabel=null,reviewNext=null;
  const wrong=new Map();
@@ -208,6 +213,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    if(local!==epoch||active?.id!==msg.id)return;
    await h.show({questionId:mapping.binding.questionId,mode:'solo',omitChoiceId:mapping.binding.omitChoiceId});
    if(local!==epoch||active?.id!==msg.id)return;
+   await hojaWhenDrawn_(frame,mapping.binding.questionId);
+   if(local!==epoch||active?.id!==msg.id)return;
    overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();frame.style.visibility='visible';
    // HOJA 1.5: keyboard focus was inside the Phaser frame; move it to the question so 1-3 / O·X work at once.
    try{frame.focus();frame.contentWindow?.focus();}catch(_e){}
@@ -265,6 +272,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
    const h=await ensureHost();
    if(token!==epoch||review!==current)return;
    await h.show({questionId:binding.questionId,mode:'review',omitChoiceId:binding.omitChoiceId});
+   if(token!==epoch||review!==current)return;
+   await hojaWhenDrawn_(frame,binding.questionId);
    if(token!==epoch||review!==current)return;
    overlay.querySelector('#hojaArcadeApprovedLoading')?.remove();
    frame.style.visibility='visible';

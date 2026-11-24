@@ -319,6 +319,13 @@ window.HOJA_USAGE=Object.freeze({
 .logoBox .hoja15Ver{position:absolute;right:14px;bottom:9px;padding:3px 9px;border-radius:999px;background:#17305a;color:#fff;font:900 clamp(11px,1.3vw,16px)/1 system-ui,sans-serif;letter-spacing:.04em}
 /* HOJA 1.5: built-in cartridges only (no public/private choice). Shown only as a retry screen if the list fails. */
 #hrPrivate,#hrPrivatePanel,.hrDemo{display:none!important}
+/* HOJA 1.5: in the arcade the fixed 92px back/music/SFX buttons covered the HUD's first column (score) on ~1000px
+   screens. Scale them with the viewport (max = original 92px) so the HUD is never covered; question area unchanged. */
+@media(min-width:661px){
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqPlayBack{width:clamp(56px,6.4vw,92px)!important;min-width:0!important;height:clamp(28px,3.2vw,36px)!important;min-height:0!important;font-size:clamp(10px,1.05vw,13px)!important;padding:3px!important}
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop{left:calc(clamp(8px,1.5%,18px) + clamp(56px,6.4vw,92px) + 10px)!important;gap:clamp(4px,.5vw,6px)!important}
+#hojaGamePlay[data-mode="arcade"]:not([hidden]) > #hqAudioTop button{width:clamp(56px,6.4vw,92px)!important;min-width:0!important;height:clamp(28px,3.2vw,36px)!important;min-height:0!important;font-size:clamp(10px,1.05vw,13px)!important;padding:3px!important}
+}
 </style>
 <script id="hoja15BuiltInCatalog">
 (function(){

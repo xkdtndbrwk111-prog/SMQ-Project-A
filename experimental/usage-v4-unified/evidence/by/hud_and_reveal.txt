@@ -1,0 +1,25 @@
+# 40-6BY arcade HUD covered during questions + text-only flash, 2026-11-24
+BEFORE (1000x560): HUD row covered by the in-game quiz overlay (dark, ghost question text) and the 92px buttons over the score column (arcade_question_1000x560_BEFORE.png)
+fix: in-game #quizOverlay transparent while the approved renderer shows the question; top buttons scale with the viewport (max 92px); frames revealed only after the choices of the current question are painted
+real Phaser suite (25 balloons, review, finish, rank, time-up, 7 keys):
+ARCADE_REAL_PHASER_BOOT_PASS version 4.2.1 phaserScriptsServed 2
+ARCADE_REAL_H_HELP_OPEN_CLOSE_PASS
+ARCADE_REAL_DEATH_KEY_PASS w
+ARCADE_REAL_DEATH_KEY_PASS a
+ARCADE_REAL_DEATH_KEY_PASS s
+ARCADE_REAL_DEATH_KEY_PASS d
+ARCADE_REAL_DEATH_KEY_PASS ,
+ARCADE_REAL_DEATH_KEY_PASS .
+ARCADE_REAL_DEATH_KEY_PASS Enter
+ARCADE_REAL_CONTROL_SEVEN_DEATH_AND_H_PASS {'run': 188, 'comma': 188, 'jump': 190, 'period': 190}
+ARCADE_WORLD_BALLOON_COLLISION_HANDLER_PASS {'memKey': 'e10', 'found': 1}
+ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS {'found': 25, 'answered': 25, 'correct': 13, 'score': 130, 'unique': 2
+HOJA15_REVEAL_ONLY_WHEN_DRAWN_PASS 24
+ARCADE_REAL_PHASER_APPROVED_WRONG_REVIEW_PASS 12 unchangedScore 722
+ARCADE_REAL_PHASER_FINISH_RESULT_RANK_READONLY_PASS {'stage': 3, 'result': {'shown': True, 'verified': 'true'}
+ARCADE_RANK_KOREAN_2_TO_6_IME_READONLY_LIST_PASS ['김하늘', 'ABC123', 'A9', 'A9'] {'inProgress': 'ㅎ', 'fi
+ARCADE_REAL_PHASER_TIMEUP_RANK_READONLY_PASS {'rank': {'open': True, 'score': 0, 'eligible': False, 'reason': 
+quiz mode check:
+{"badge": "1.5", "signBg": "rgb(93, 179, 255)", "straightToCatalog": true, "backFromCatalog": {"repo": false, "catalog": false}, "visibleStatesPerQuestion": [["current"], ["current"], ["current"]], "spacePressesUsed": 3, "focusAfterMouseAnswer": "BODY", "spaceWorksAfterMouseAnswer": true, "questionOpenWhenBackPressed": true, "alertsAfterBackDuringQuestion": []}
+regression: Node 123/123, trial build verify + solo/arcade-transport/team smokes PASS, UI E2E PASS, RC audit PASS (re-pinned), production bundle PASS
+production HEAD pushed (live == push 9/9). Student deployment was @408 (teacher) -> needs update to the new version

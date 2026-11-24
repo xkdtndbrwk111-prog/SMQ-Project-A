@@ -22,6 +22,7 @@ async def run():
  p.add_argument('--control-smoke',action='store_true')
  p.add_argument('--movement-smoke',action='store_true')
  p.add_argument('--screens-dir',help='optional: save HOJA 1.5 verdict/results/review screenshots here')
+ p.add_argument('--viewport',help='WxH, default 1280x800')
  args=p.parse_args()
  assert args.phaser.is_file() and args.phaser.stat().st_size>500_000,'Phaser 4.2.1 library unavailable'
  sources=json.loads(args.sources.read_text()) if args.sources else social6_sources((ROOT.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html').read_text())
@@ -31,7 +32,8 @@ async def run():
   config={'headless':True,'args':['--no-sandbox','--disable-dev-shm-usage','--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader']}
   if chrome:config['executable_path']=chrome
   browser=await pw.chromium.launch(**config)
-  page=await browser.new_page(viewport={'width':1280,'height':800})
+  vw,vh=(int(x) for x in (args.viewport or '1280x800').split('x'))
+  page=await browser.new_page(viewport={'width':vw,'height':vh})
   console_errors=[];loaded=[0]
   page.on('pageerror',lambda e:console_errors.append(str(e)))
   page.on('dialog',lambda d:asyncio.create_task(d.dismiss()))
@@ -570,6 +572,7 @@ async def run():
        f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=2 &&
        document.getElementById('hojaArcadeApprovedParentOverlay')?.style.display==='block';
    }""",arg=canonical['id'],timeout=30000)
+   if i==0 and args.screens_dir: await page.screenshot(path=str(Path(args.screens_dir)/'arcade_question_open.png'))
    answer=canonical['answer']
    correct_id=str(answer['value']).lower() if row['type']=='OX' else answer['choiceId']
    choices=await page.evaluate("""()=>{
@@ -578,6 +581,11 @@ async def run():
    assert correct_id in choices,(family,choices,correct_id)
    choose_id=correct_id if i%2==0 else next(v for v in choices if v!=correct_id)
    if i==0:
+    await page.evaluate("""()=>{const f=document.getElementById('hojaArcadeApprovedParentFrame');window.__QA_REVEALS__=window.__QA_REVEALS__||[];
+      if(f&&!window.__QA_REVEAL_OBS__){window.__QA_REVEAL_OBS__=new MutationObserver(()=>{if(f.style.visibility!=='visible')return;
+        const d=f.contentDocument,w=f.contentWindow,cur=w.current&&w.current(),bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];
+        window.__QA_REVEALS__.push(bs.length>0&&!d.body.classList.contains('hojaAwaitShow')&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===cur?.id)?'drawn':'NOT_DRAWN');});
+        window.__QA_REVEAL_OBS__.observe(f,{attributes:true,attributeFilter:['style']});}}""")
     await page.evaluate("""()=>{window.__QA_VERDICTS__=[];new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes){
       if(n.id==='hojaArcadeApprovedJudgment'){const c=n.firstElementChild;window.__QA_VERDICTS__.push({text:c?.textContent||n.textContent,bg:c?getComputedStyle(c).backgroundColor:'none'});}}})
       .observe(document.getElementById('hojaArcadeApprovedParentOverlay'),{childList:true});}""")
@@ -628,6 +636,9 @@ async def run():
    }""")
    assert not blocked['consumed'] and blocked['alive'] and blocked['found']==25 and blocked['history']==25,blocked
    print('ARCADE_REAL_PHASER_25_BALLOON_DECK_PASS',totals,'blocked26th',blocked,flush=True)
+   reveals=await page.evaluate("window.__QA_REVEALS__||[]")
+   assert reveals and all(r=='drawn' for r in reveals),('QUESTION_SHOWN_BEFORE_CHOICES_DRAWN',reveals)
+   print('HOJA15_REVEAL_ONLY_WHEN_DRAWN_PASS',len(reveals),flush=True)
    if args.finish_check:
     # Enter the LAST stage through the original game stage transition API.
     # Mark it test-only, so this run is NEVER eligible for server ranking writes.
