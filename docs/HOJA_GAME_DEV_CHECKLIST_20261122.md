@@ -1419,3 +1419,14 @@
 - [x] 교사가 배포 @7을 생성했다. 익명 보안 스모크 **9/9 DENIED**.
 - [x] 실제 브라우저: LIST 23단원, 모두 pin `440cc1f`. 수학 5-2 4단원 GET은 실제 GitHub 다운로드 1회, SHA 검증 후 IndexedDB 저장, relay 0. 31문항.
 - [ ] **승인 단원 사용량 기록 미작동:** `USAGE_APPROVED_ERA_NOT_STARTED`. 격리 프로젝트 스크립트 속성 `HOJA_USAGE_APPROVED_ERA_START` 설정이 필요하다(교사, 편집기). 근거: `evidence/ba/isolated_deploy7_check_20261124.txt`.
+
+
+### 40-6BD. GPT-6 원격 점검 — QBank 공개 게시·main 병합·격리 배포 @7, 사용량 시작일 게이트 (2026-11-24)
+**범위:** GitHub main/PR #6, QBank commit 440cc1f, 저장된 GAS push 및 실제 브라우저 시험 증거 대조. 원격 clasp/script properties를 GPT-6가 직접 조회하거나 변경한 것은 아님. 이번 점검은 **실시한 범위만 확인**하고 무의미한 반복 시험은 추가하지 않는다.
+- [x] **공개 QBank 게시 확인:** `xkdtndbrwk111-prog/HOJA-QUESTION-BANK` commit `440cc1fe60c6545004e9039bfa75142ff8fe8e7a`에는 `game-runtime/README.md`, INDEX 및 23 JSON만 추가(25파일). INDEX의 sourceCommit은 여전히 `9573f91...`(패키지 재빌드 정본)이고, browser fetch pin은 **공개 게시 커밋 440cc1f**로 분리되어야 함. 실제 raw SHA/byte 23/23 및 CORS, QA mock 6/6은 **Claude 저장 증거** 확인; Gatsby/운영 배포 PASS 아님.
+- [x] **격리 GAS push 및 병합 보고 확인:** `evidence/ba/qbank_publish_isolated_push_20261124.txt`에서 격리 릴리스 `8,768,517 B` `clasp push --force` exit 0, 원격 재-pull 9/9 동일 보고. **크기 게이트는 격리 GAS에 한해 통과**. PR #6은 GitHub에서 현재 **closed/merged, draft=false, base=main**임을 직접 확인. 기록상 merge commit `9b6c279`. 기존 체크리스트의 'Draft/미병합' 문구는 **당시 역사 기록**으로만 읽고, 현재 상태로 재사용하지 말 것. 이 GitHub 병합은 운영 GAS 앱스크립트 배포·Sheets 변경의 증거가 아님.
+- [x] **@7 격리 배포 스모크 증거 확인:** `evidence/ba/isolated_deploy7_check_20261124.txt`: 익명 RPC 거부 **9/9**, LIST 23 approved packages, 실 GitHub GET `math5-s2-u4` 31문항, SHA 검사 후 IndexedDB 저장 1회·relay 0. 신규 게임 내용 조회와 캐시는 **실브라우저 대표 PASS**. 전체 23단원 실제 플레이 또는 사용량 측정 전체 PASS가 아님.
+- [ ] **현재 핵심 미완료 — 승인 단원 사용량 기록:** 실제 @7에서 `USAGE_APPROVED_ERA_NOT_STARTED` 확인. 격리 스크립트 속성 `HOJA_USAGE_APPROVED_ERA_START` (yyyy-MM-dd)이 필요. 이는 기능 무결성 장애가 아니라 **설정 차단 게이트**이고, 승인 단원 신규 시작은 지금 기록되지 않음. 운영 Project A에 속성을 넣지 말고 정확한 격리 scriptId/사본 canary 먼저 확인.
+- [ ] **KST 날짜 경계 주의(중요):** `Code.gs`는 `today>=start`가 되는 KST 날부터 approved-only 분류하며 이력이 있는 날의 기존 레거시 기록을 되돌리지 않는다. **11/24 당일 격리 사본에는 이미 legacy 시작 78건**이 있으므로 `HOJA_USAGE_APPROVED_ERA_START=2026-11-24`를 지금 설정하면 **같은 KST 일자에 LEGACY+APPROVED가 공존**, 코드 주석의 '날짜 단위 분리' 보장을 깨뜨릴 수 있다. **권고: 동일 사본을 보존하려면 격리 프로젝트에 `2026-11-25`를 설정하고 11/25 KST 이후 신규 승인 단원 1회만 실제 사용량 기록 확인**(선행 레거시 그날 0 확인). 오늘 즉시 별도 테스트를 해야 한다면 새 빈 격리 쓰기 사본/명시적 테스트 격리가 있어야 하며 기존 61일 이력을 손상시키는 우회는 금지. `2026-11-25` 설정도 실제 실행 전 올바른 격리 프로젝트 검증이 필요하며 GPT-6가 직접 쓰지 않았음.
+- [ ] **공개 이미지 권리:** 교사의 '공개 게시 진행' **행위 승인**은 기록됐지만 `mediaRights=HOLD`였던 23단원의 실제 제3자 저작권 사용 허락을 자동으로 입증하지는 않음. 권리 근거(자가 제작·적법한 이용 허락·재배포 가능한 라이선스 등)를 별도 확인 전 **LICENSE CLEARED로 변경 금지**. 권리가 불분명한 자료는 공개 노출 최소화/비공개 또는 대체를 우선 검토(일반 `git revert`만으로 이전 공개 SHA 접근은 사라지지 않음).
+- [ ] **계속 보류:** 운영 GAS 전환 및 실 데이터 이관·Seal·트리거 자동화는 격리 copy-only 코드와 운영 설계 미비로 구현·실검증하지 않았음. 과거 R6 서버 단독 19/40·21/40 FAIL 및 +40 직접 미계측, QBank 사전 CI FAIL 기록 보존. **다음은 게임 플레이/사용량의 필요한 1회 시험만** 하고 광범위 반복 회귀는 금지.
