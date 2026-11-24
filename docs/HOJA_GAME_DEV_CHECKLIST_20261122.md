@@ -1339,3 +1339,15 @@
 - [ ] **중단 조건:** 격리 대상 식별 불확실·백업 차이·운영 데이터 노출·익명 관리자 함수 호출 성공·test token 노출·R6 유실/중복/비정상 행 발생 시 공개 중지, 접근 차단·백업 복구, FAIL 근거 기록. 완전무결 반복 회귀 시험은 하지 않는다.
 - [ ] **승인하지 않은 범위:** ① HOJA-QUESTION-BANK 공개 runtime 패키지 23개/매체 권리 HOLD 자료 게시, ② 새 8.73MB 릴리스 push, ④ 11/23 실기록 감사와 실제 Seal·트리거, main/versions/운영 Project A GAS/Sheets/EVENT_LOG/랭킹 변경, PR merge. active 0 / Draft 유지.
 **배포 방식 보완:** 기존 40-6AS의 '교사가 익명 웹앱 생성/삭제'는 계정 권한 제약에 따른 실행 절차이다. 실제 연결된 도구로 Claude가 안전하게 수행할 수 있으면 사용자 승인 범위 내에서 맡되, 에디터/UI만 허용될 때는 사용자의 직접 클릭이 필요하다.
+
+
+### 40-6AV. Claude 실행 — R6 격리 GAS 최소 push 완료, 익명 배포는 교사 UI 대기 (2026-11-24, 40-6AU 승인)
+**경계:** 격리 시험 프로젝트(이름 접두 "HOJA V4 40-6U ISOLA")만 대상이다. ID·토큰·URL은 남기지 않았다. GPT-6 감수는 미완료로 둔다.
+| 단계 | 상태 | 근거 |
+|---|---|---|
+| 원격 백업(`clasp pull` 9파일) | 완료. 11/23 R6 번들과 바이트 동일(Game.html `f9647ad6`) | `evidence/r6/r6b_push_20261124.txt` |
+| 최소 push(`TestOnlyU3`의 tail이 시험 eventId를 반환하는 1줄) | **완료, exit 0**. 다시 pull해 원격 = push 사본, 백업 대비 차이는 `TestOnlyU3.js`뿐 | 동상 |
+| 되돌리기 | 백업 보관(로컬). 필요 시 그대로 다시 push | 동상 |
+| 임시 익명 배포 | **미실행.** Claude의 `clasp create-deployment`가 로컬 에이전트 권한 검사에서 차단됐다(우회 안 함). **교사 UI 배포 대기** | — |
+| 보안 스모크 / R6 실검증 / 체험 URL | **NOT RUN**(배포 후 진행) | `verify_r6_access_smoke.py` 준비 |
+- [ ] 교사: 편집기에서 웹앱 새 배포를 만들고 URL을 Claude에게 전달 → Claude가 스모크(익명 DENIED) 확인 후 R6 1회 실행.
