@@ -190,6 +190,11 @@ export function patchArcadeControls(html){
 
 export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame,getContainer}){
  // HOJA 1.5: reveal only after the question's choices are painted (no text-only flash).
+ // HOJA 1.5 (40-6CI): Chrome pauses requestAnimationFrame in a hidden/minimized window, so the renderer cannot answer
+ // (HOJA_RENDERER_TIMEOUT). That is not a failure: wait until the page is visible again and retry (no alert).
+ const hojaIsTimeout_=e=>/HOJA_RENDERER_TIMEOUT/.test(String(e&&e.message||e));
+ const hojaWhenVisible_=()=>document.visibilityState==='visible'?Promise.resolve():new Promise(r=>{const f=()=>{if(document.visibilityState==='visible'){document.removeEventListener('visibilitychange',f);r();}};document.addEventListener('visibilitychange',f);});
+ async function hojaRetryRender_(fn){for(let i=0;;i++){try{return await fn();}catch(e){if(!hojaIsTimeout_(e)||i>=3)throw e;await hojaWhenVisible_();await new Promise(r=>setTimeout(r,400));}}}
  function hojaWhenDrawn_(f,qid){return new Promise(res=>{const t0=performance.now();const tick=()=>{let ok=false;try{const d=f.contentDocument,w=f.contentWindow;const cur=w.current&&w.current();const bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];ok=!d.body.classList.contains('hojaAwaitShow')&&bs.length>0&&(!qid||(cur&&cur.id===qid))&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===(cur&&cur.id));}catch(_e){ok=true}if(ok||performance.now()-t0>1500){requestAnimationFrame(()=>res());return;}requestAnimationFrame(tick)};tick();});}
  if(!core?.createApprovedFrameHost||!core?.teamApprovedPayload)throw Error('ARCADE_APPROVED_CORE_REQUIRED');
  let catalog=null,active=null,overlay=null,frame=null,host=null,loading=null,epoch=0,focus=-1,review=null,reviewBar=null,reviewLabel=null,reviewNext=null;
@@ -256,8 +261,8 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
      try{const d=frame.contentDocument;if(d&&!d.getElementById('hoja15NoTopStrip')){const st=d.createElement('style');st.id='hoja15NoTopStrip';st.textContent='body.hoja-embedded #hqTop{display:none!important}body.hoja-embedded #hqStage{height:100%!important}';(d.head||d.documentElement).append(st);const sc=d.createElement('script');sc.textContent='(function(){if(window.__hoja15Fit)return;window.__hoja15Fit=1;fitScreen=function(){var a=state.res.split("x").map(Number),host=document.getElementById("screenWrap"),scr=document.getElementById("screen");var s=Math.min((host.clientWidth-4)/a[0],(host.clientHeight-4)/a[1]);scr.style.transform="scale("+s+") translate(-50%,-50%)";requestAnimationFrame(fitContent);};function fit(){try{var W=innerWidth,H=innerHeight;if(!W||!H)return;var h=1000,w=Math.max(1280,Math.min(2560,Math.round(h*W/H))),r=w+"x"+h;if(state.res!==r){state.res=r;updateStage();}fitScreen();}catch(e){}}addEventListener("resize",fit);fit();})();';(d.head||d.documentElement).append(sc);frame.contentWindow.dispatchEvent(new Event('resize'));}}catch(_e){}
      frame.contentWindow?.addEventListener('keydown',shortcut,true);
      host=core.createApprovedFrameHost({frame,onAnswer:answer,timeoutMs:15000});
-     await host.initialize();
-     await host.load(catalog.payload);
+     await hojaRetryRender_(()=>host.initialize());
+     await hojaRetryRender_(()=>host.load(catalog.payload));
      resolve(host);
     }catch(err){reject(err)}
    },{once:true});
@@ -295,7 +300,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   try{
    const h=await ensureHost();
    if(local!==epoch||active?.id!==msg.id)return;
-   await h.show({questionId:mapping.binding.questionId,mode:'solo',omitChoiceId:mapping.binding.omitChoiceId});
+   await hojaRetryRender_(()=>h.show({questionId:mapping.binding.questionId,mode:'solo',omitChoiceId:mapping.binding.omitChoiceId}));
    if(local!==epoch||active?.id!==msg.id)return;
    await hojaWhenDrawn_(frame,mapping.binding.questionId);
    if(local!==epoch||active?.id!==msg.id)return;
@@ -371,7 +376,7 @@ export function createApprovedArcadeRuntime({core,getApprovedHTML,getArcadeFrame
   try{
    const h=await ensureHost();
    if(token!==epoch||review!==current)return;
-   await h.show({questionId:binding.questionId,mode:'review',omitChoiceId:binding.omitChoiceId});
+   await hojaRetryRender_(()=>h.show({questionId:binding.questionId,mode:'review',omitChoiceId:binding.omitChoiceId}));
    if(token!==epoch||review!==current)return;
    await hojaWhenDrawn_(frame,binding.questionId);
    if(token!==epoch||review!==current)return;

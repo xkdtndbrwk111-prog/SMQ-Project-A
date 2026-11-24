@@ -48,7 +48,7 @@ async def main():
                     await r.fulfill(status=200 if f.is_file() else 404, body=f.read_bytes() if f.is_file() else b'', headers={'access-control-allow-origin': '*'})
                 elif u.startswith(('data:', f'http://127.0.0.1:{a.port}')): await r.continue_()
                 else: await r.abort()
-            await page.route('**/*', route)
+            await ctx.route('**/*', route)   # context-wide: new tabs of the same device are routed too
             if tutorial_done:
                 await ctx.add_init_script("try{for(const k of Object.keys(localStorage));}catch(e){}")
             return ctx, page, errs
@@ -105,7 +105,8 @@ async def main():
         quiz_code = re.sub(r'\D', '', await t.inner_text('#hoja15JoinDigits'))
         await t.click('#hoja15JoinTeacherStart')
         tsrc = await wait_game(t, 'quiz'); ok(tsrc == units, 'TEACHER_DIRECT_QUIZ_UNITS')
-        out['teacherDirectQuiz'] = {'started': True, 'units': len(tsrc)}
+        tlabel = await t.inner_text('#hqModeLabel'); ok('문제 풀이' not in tlabel and re.match(r'^[0-9-]+\. ', tlabel) is not None, 'QUIZ_LABEL_UNIT ' + tlabel)   # 40-6CI
+        out['teacherDirectQuiz'] = {'started': True, 'units': len(tsrc), 'headerLabel': tlabel}
         # ---------------- STUDENT 1: QR link (arcade), tutorial already completed on this device
         s1ctx, s1, s1err = await device(1180, 820)
         await s1ctx.add_init_script("try{localStorage.setItem('__probe','1')}catch(e){}")
@@ -135,10 +136,24 @@ async def main():
         await s2.fill('#hoja15JoinInput', quiz_code); await s2.click('#hoja15JoinGo')
         s2src = await wait_game(s2, 'quiz'); first_fetch = len(gh) - gh_before
         ok(s2src == units, 'STUDENT_MANUAL_QUIZ_UNITS')
+        slabel = await s2.inner_text('#hqModeLabel'); ok(slabel == tlabel, 'STUDENT_QUIZ_LABEL ' + slabel)
         gh_before = len(gh)
         await s2.goto(base + '?join=' + quiz_code, wait_until='domcontentloaded', timeout=180000)
         await wait_game(s2, 'quiz'); second_fetch = len(gh) - gh_before
         ok(second_fetch == 0, 'CACHE_NOT_REUSED ' + str(second_fetch))
+        # 40-6CI: a student who came in with a code never sees the entry button again in that tab
+        await s2.evaluate("window.HOJA_GAMEPLAY.stop();document.getElementById('hojaGamePlay').hidden=true;window.HOJA_FLOW.enterIntro({newRun:false})")
+        await s2.wait_for_timeout(1600)
+        ok(not await s2.evaluate("document.getElementById('hoja15JoinEntry').classList.contains('show')"), 'ENTRY_BUTTON_AFTER_JOIN')
+        # 40-6CI: reopening the plain address within 1 hour offers the last code
+        s3 = await s2ctx.new_page(); s3.on('dialog', lambda d: asyncio.ensure_future(d.dismiss()))
+        await s3.goto(base, wait_until='domcontentloaded', timeout=180000)
+        await s3.wait_for_selector('#hoja15ReconnectYes', timeout=30000)
+        offer = await s3.inner_text('#hoja15JoinLayer .h15Units')
+        ok(quiz_code[:3] in offer and quiz_code[3:] in offer, 'RECONNECT_OFFER ' + offer)
+        if shots: await s3.screenshot(path=str(shots / 'student_reconnect_offer.png'))
+        await s3.click('#hoja15ReconnectYes'); s3src = await wait_game(s3, 'quiz'); ok(s3src == units, 'RECONNECT_UNITS')
+        out['reconnect'] = {'offered': True, 'rejoinedSameUnits': s3src == units}
         out['studentManualQuiz'] = {'typoMessage': typo, 'started': True, 'units': len(s2src), 'firstLoadPackageFetches': first_fetch, 'sameDeviceReloadPackageFetches': second_fetch}
         await shot(s2, 'student_manual_quiz.png')
         errs = [e for e in terr + s1err + s2err if 'ResizeObserver' not in e]

@@ -239,7 +239,7 @@ window.HOJA_GAMEPLAY=(()=>{
   stop();window.HOJA_TRIAL_SCENE_AUDIO?.suspendAttract?.();const own=++loadId;page=which;season=SEASONS[requested]?requested:window.HOJA_SEASON_SESSION?.current?.()||'spring';
   window.HOJA_MODE_PREVIEW?.hide?.();host().hidden=false;
   host().dataset.mode=which;frame().hidden=which!=='arcade';stage().hidden=which!=='quiz';
-  img('hqArcadeInfo').hidden=true;img('hqHud').hidden=which!=='quiz';img('hqModeLabel').textContent=which==='arcade'?'아케이드 모드 · 호자 모험':'문제 풀이 모드';
+  img('hqArcadeInfo').hidden=true;img('hqHud').hidden=which!=='quiz';img('hqModeLabel').textContent=which==='arcade'?'아케이드 모드 · 호자 모험':((document.getElementById('hcNextSelected')?.textContent||'').trim()||(window.HOJA_B_LIVE?.sources||[]).map(x=>x.sheetName).join(' · ')||'문제 풀이 모드');img('hqModeLabel').title=img('hqModeLabel').textContent;
   if(which==='arcade'){
    if(new Set(window.HOJA_B_LIVE.sources.flatMap(e=>e.data.questions.filter(q=>q.type==='OX'||q.type==='MULTIPLE').map(q=>e.sheetName+'::'+q.familyId))).size<25){img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드는 고유 문제 묶음 25개 이상이 필요합니다. 다른 단원을 추가로 선택해 주세요.';return;}
    window.HOJA_AUDIO_CONTROL?.syncArcade?.();
