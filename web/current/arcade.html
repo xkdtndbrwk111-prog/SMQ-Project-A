@@ -6061,7 +6061,9 @@ class HojaScene extends Phaser.Scene{
       for(let i=0;i<12;i++){
         const bubble=this.add.circle(b.center.x+(i-5.5)*3,b.center.y+(i%3)*4,1+(i%2)*.4,0xc7f5ff,.75).setDepth(15);
         bubble.__hojaWaterBubble=true;
-        this.tweens.add({targets:bubble,x:bubble.x+(i-5.5)*2,y:bubble.y-18-i*2,alpha:0,duration:450+i*40,onComplete:()=>bubble.destroy()});
+        const riseMs=210+i*12;
+        this.tweens.add({targets:bubble,y:bubble.y-12-(i%4)*3,duration:riseMs,ease:'Sine.Out',yoyo:true});
+        this.tweens.add({targets:bubble,x:bubble.x+(i-5.5)*2,alpha:0,duration:riseMs*2,onComplete:()=>bubble.destroy()});
       }
       SFX.waterSplash();
     }
