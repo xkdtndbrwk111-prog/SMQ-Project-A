@@ -83,7 +83,8 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
       if(h.phase==='idle'&&body.right>c.x-24&&body.left<c.x+c.w+24&&body.top>=c.y+c.h&&body.top<=c.y+c.h+c.range)h.phase='fall';
       if(h.phase==='fall'){h.y=Math.min(limit,h.y+c.fallSpeed*delta/1000);if(h.y>=limit){h.phase='landed';h.landedMs=0;}}
       else if(h.phase==='landed'){h.landedMs+=delta;if(h.landedMs>=c.wait)h.phase='return';}
-      else if(h.phase==='return'){h.y=Math.max(c.y,h.y-c.returnSpeed*delta/1000);if(h.y<=c.y)h.phase='idle';}
+      else if(h.phase==='return'){h.y=Math.max(c.y,h.y-c.returnSpeed*delta/1000);if(h.y<=c.y){h.phase='reload';h.reloadMs=0;}}
+      else if(h.phase==='reload'){h.reloadMs+=delta;if(h.reloadMs>=2000)h.phase='idle';}
       const state={...model.state(c,elapsed),...h},visible=inView(scene,c);e.art.all.forEach(o=>o.setVisible(visible));if(visible)paint(scene,e,state,elapsed);
       if(model.rectHit(body,{x:c.x,y:Math.min(old,h.y),w:c.w,h:c.h+Math.abs(h.y-old)})){scene.hojaGimmickHit='spike_head';try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
       continue;
