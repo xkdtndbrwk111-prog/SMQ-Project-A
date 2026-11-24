@@ -2165,8 +2165,10 @@ async function hojaMakerPreload(p){
     try{await img.decode();HOJA_MAKER_IMAGES.set(path,img)}catch(err){console.warn('Asset decode failed',path,err)}
   }
 }
-async function hojaMakerImport(p,previewEventId=null){
+async function hojaMakerImport(p,previewEventId=null,startMapId=null){
   hojaMakerValidateProject(p);
+  const startIndex=startMapId==null?0:p.maps.findIndex(m=>m.id===startMapId);
+  if(startIndex<0)throw Error('선택한 시작 맵을 찾을 수 없습니다.');
   HOJA_MAKER_LAST_KEY=null;
   HOJA_MAKER_LAST_REQUEST=null;
   await hojaMakerPreload(p);
@@ -2177,7 +2179,7 @@ async function hojaMakerImport(p,previewEventId=null){
   RUN_STAGES=p.maps.map(hojaMakerToStage);
   const status=document.getElementById('v061Status');
   if(status)status.textContent=`✓ ${p.maps.length}개 맵 불러옴 · ${p.title||'Maker V0.61'}`;
-  startStage(0,true,'start');
+  startStage(startIndex,true,'start');
   if(previewEventId)window.setTimeout(()=>{
     const event=STAGE.makerEvents?.find(x=>x.id===previewEventId);
     if(event?.dialogue)window.HOJA_EVENT_DIALOGUE_PREVIEW?.({lines:hojaMakerDialogueLines(event.dialogue)});
@@ -2207,10 +2209,10 @@ async function hojaMakerDrainQueue(){
       try{
         if(incoming.dataVersion!=null&&incoming.dataVersion!==HOJA_V061_SCHEMA)throw Error('Maker 데이터 버전이 다릅니다.');
         if(incoming.gameVersion!=null&&incoming.gameVersion!==hojaArcadeVersion)throw Error('게임 버전이 다릅니다. Maker를 새로고침해 주세요.');
-        const key=JSON.stringify([incoming.project,incoming.eventId??null]);
+        const key=JSON.stringify([incoming.project,incoming.eventId??null,incoming.startMapId??null]);
         const requestId=incoming.requestId??null;
         if(!HOJA_MAKER_MODE||key!==HOJA_MAKER_LAST_KEY||requestId!==HOJA_MAKER_LAST_REQUEST){
-          await hojaMakerImport(incoming.project,incoming.eventId);
+          await hojaMakerImport(incoming.project,incoming.eventId,incoming.startMapId);
           HOJA_MAKER_LAST_KEY=key;
           HOJA_MAKER_LAST_REQUEST=requestId;
         }

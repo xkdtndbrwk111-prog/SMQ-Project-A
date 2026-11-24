@@ -62,7 +62,10 @@ if(test){
  reviewFiles['teacher-review-arcade.html']=reviewArcade(arcade,course,windCourse,steppingCourse,modesCourse);
  arcade=instrumentArcade(arcade);
  if(arcade.split('</body>').length!==2)throw Error('Maker 시험판 삽입 위치 오류');
- reviewFiles['maker-compat-arcade.html']=arcade.replace('</body>','<style>#hojaTestControls,#hojaTestDialogueControls{display:none!important}</style><script src="maker-compat-boot.js"></script></body>');
+ const makerReadyAnchor='    this.createInput();';
+ if(arcade.split(makerReadyAnchor).length!==2)throw Error('Maker 시험 장면 준비 위치 오류');
+ const makerArcade=arcade.replace(makerReadyAnchor,makerReadyAnchor+"\n    if(HOJA_MAKER_MODE)this.events.once('postupdate',()=>requestAnimationFrame(()=>document.getElementById('hojaMakerLoading')?.setAttribute('hidden','')));");
+ reviewFiles['maker-compat-arcade.html']=makerArcade.replace('</body>','<style>#hojaTestControls,#hojaTestDialogueControls{display:none!important}#hojaMakerLoading:not([hidden]){position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#132c3d;color:#fff1c9;font:bold 24px sans-serif}</style><div id="hojaMakerLoading" role="status">선택한 맵을 준비하고 있습니다…</div><script src="maker-compat-boot.js"></script></body>');
  for(const [name,data] of Object.entries(reviewFiles))files[name]=hash(data);
 }
 // Preserve Phase 1 QR compatibility at the frozen baseline. Any source asset change

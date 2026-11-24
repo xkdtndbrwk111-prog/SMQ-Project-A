@@ -14,7 +14,9 @@ test('실제 V0.61 편집기와 현재 게임의 반복 Play Test 및 응답 계
   const page=await browser.newPage({viewport:{width:1440,height:900},acceptDownloads:true});page.on('dialog',d=>d.accept());
   await page.goto(`http://127.0.0.1:${server.address().port}/maker-compat.html`);
   const [file]=await Promise.all([page.waitForEvent('download'),page.locator('#save').click()]);const sample=JSON.parse(await readFile(await file.path(),'utf8'));
-  assert.equal(sample.schemaVersion,6101);assert.ok(sample.maps[0].objects.some(o=>o.type==='saw'));assert.match(await page.locator('#validation').innerText(),/빈 토관/);
+  assert.equal(sample.schemaVersion,6101);assert.ok(sample.maps[0].objects.some(o=>o.type==='saw'));assert.match(await page.locator('#validation').innerText(),/검증 통과/);
+  const conflicting=structuredClone(sample);conflicting.maps[0].objects.find(o=>o.id==='pipe_a').pipeMode='solid';
+  await page.locator('#file').setInputFiles({name:'solid.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(conflicting))});assert.match(await page.locator('#validation').innerText(),/빈 토관/);assert.equal(await page.evaluate(()=>project.maps[0].objects.find(o=>o.id==='pipe_a').pipeMode),'solid');
   const extended=structuredClone(sample);extended.extraFuture={kept:123};extended.maps[0].objects.push({id:'future',type:'gimmick',x:4,y:18,w:2,h:4,gimmick:{kind:'flame',length:5,active:3000,customFuture:123}});
   await page.locator('#file').setInputFiles({name:'fixture.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(extended))});
   const [out]=await Promise.all([page.waitForEvent('download'),page.locator('#save').click()]);assert.deepEqual(JSON.parse(await readFile(await out.path(),'utf8')),extended);
