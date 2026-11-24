@@ -16,3 +16,16 @@ test('Maker rectangles join cliffs and steps without filling stacked gaps',()=>{
  assert.equal(g.tile(11,5),null);
  assert.ok(g.tile(11,10));
 });
+
+test('Maker narrow columns and suspended edges retain both outlines',()=>{
+ const g=a.fromRectangles([rect(2,2,1,5),rect(0,4,2,2),rect(3,4,2,2)]);
+ const parts=(x,y)=>Array.from(g.pieces(x,y),v=>Array.from(v));
+ assert.deepEqual(parts(2,3),[[3,2],[5,2],[3,2],[5,2]],'one-column vertical section has both edges');
+ assert.deepEqual(parts(0,5).slice(2),[[3,6],[4,6]],'exposed underside has a bottom outline');
+ assert.equal(g.pieces(7,3),null,'empty space stays empty');
+ const t=a.fromRectangles([rect(2,2,1,5),rect(0,4,2,3)]);
+ assert.deepEqual(parts(2,4).length,4);
+ assert.deepEqual(Array.from(t.pieces(2,4)[1]),[5,2],'exposed edge is kept at a one-sided junction');
+ const strip=a.fromRectangles([rect(0,0,3,1)]);
+ assert.deepEqual(Array.from(strip.pieces(1,0)[2]),[10,3],'one-tile-thick ledge has an underside');
+});

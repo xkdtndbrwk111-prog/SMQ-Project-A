@@ -3578,7 +3578,8 @@ class HojaScene extends Phaser.Scene{
             if(!tile)throw new Error('Ground autotile missing at '+worldX+','+rowY);
             cutX=tile[0]*TILE;cutY=tile[1]*TILE;
           }
-          ctx.drawImage(original,cutX,cutY,TILE,TILE,ii*TILE,yy*TILE,TILE,TILE);
+          if(isGround&&HOJA_MAKER_MODE){const parts=this.hojaMakerGroundGrid.pieces(Math.round(worldX/TILE),Math.round(rowY/TILE));if(!parts)throw new Error('Ground autotile parts missing');for(let q=0;q<4;q++){const dx=(q%2)*8,dy=Math.floor(q/2)*8;ctx.drawImage(original,parts[q][0]*TILE+dx,parts[q][1]*TILE+dy,8,8,ii*TILE+dx,yy*TILE+dy,8,8)}}
+          else ctx.drawImage(original,cutX,cutY,TILE,TILE,ii*TILE,yy*TILE,TILE,TILE);
         }
       }
       const key='hojaV2Solid_'+STAGE_INDEX+'_'+(this.hojaV2Serial++)+'_'+start;

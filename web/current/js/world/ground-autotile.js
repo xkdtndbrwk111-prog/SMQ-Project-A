@@ -107,7 +107,23 @@
   for(const s of ground){const left=Math.round(s.x/TILE_SIZE)-min,right=Math.round((s.x+s.w)/TILE_SIZE)-min,top=Math.round(s.y/TILE_SIZE),bottom=Math.round((s.y+s.h)/TILE_SIZE);for(let x=left;x<right;x++)columns[x].push([top,bottom]);}
   for(let x=0;x<columns.length;x++){const sorted=columns[x].sort((a,b)=>a[0]-b[0]),merged=[];for(const part of sorted){const last=merged[merged.length-1];if(last&&part[0]<=last[1])last[1]=Math.max(last[1],part[1]);else merged.push([...part]);}columns[x]=merged;}
   function heightAt(index,row){const col=columns[index];if(!col)return Infinity;for(const [top,bottom] of col){if(row<bottom)return top;}return Infinity;}
-  return {min,tile(worldColumn,row){const i=worldColumn-min,center=heightAt(i,row);if(!Number.isInteger(center)||row<center)return null;return chooseTile([heightAt(i-1,row),center,heightAt(i+1,row)],1,row,i);}};
+  function occupied(index,row){return columns[index]?.some(([top,bottom])=>row>=top&&row<bottom)||false;}
+  function tile(worldColumn,row){const i=worldColumn-min,center=heightAt(i,row);if(!Number.isInteger(center)||row<center)return null;return chooseTile([heightAt(i-1,row),center,heightAt(i+1,row)],1,row,i);}
+  // Maker shapes may expose any side, including the underside and both sides
+  // of a one-cell column. Assemble quadrants from the original 16px atlas.
+  function pieces(worldColumn,row){
+   const i=worldColumn-min;if(!occupied(i,row))return null;
+   const up=occupied(i,row-1),down=occupied(i,row+1),left=occupied(i-1,row),right=occupied(i+1,row);
+   const ul=occupied(i-1,row-1),ur=occupied(i+1,row-1);
+   const base=soilTile(i,row);
+   if(!up&&!down){const l=!left&&!right?[15,3]:!left?[9,3]:[10,3],r=!left&&!right?[15,3]:!right?[13,3]:[12,3];return [l,r,l,r];}
+   const tl=!up?(!left?[3,1]:ul?[6,3]:[4,1]):(!left?[3,2]:!ul?[3,3]:base);
+   const tr=!up?(!right?[5,1]:ur?[2,3]:[4,1]):(!right?[5,2]:!ur?[5,3]:base);
+   const bl=!down?(!left?[3,6]:[4,6]):!up?tl:(!left?[3,2]:base);
+   const br=!down?(!right?[5,6]:[4,6]):!up?tr:(!right?[5,2]:base);
+   return [tl,tr,bl,br];
+  }
+  return {min,tile,pieces};
  }
  function soilTile(x,row){const soil=[[4,2],[4,3],[4,4],[4,5]];return soil[hash(x,Math.floor(row/2))%soil.length];}
  function waterVisual(g,overlap=TILE_SIZE*2){
