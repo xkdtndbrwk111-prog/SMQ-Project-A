@@ -40,7 +40,7 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
    s.blocks.forEach((p,i)=>{const art=a.blocks[i],hit=a.blockBodies[i],x=p.x+16,y=p.y+16;art.setDepth(p.moving?8:7);if(art.x!==x||art.y!==y){art.setPosition(x,y);hit.setPosition(x,y);hit.body.updateFromGameObject();}});return;
   }
   if(c.kind==='saw'){a.main.setPosition(s.x,s.y).setDisplaySize(s.radius*2,s.radius*2).setFrame(frame%8);return;}
-  if(c.kind==='spike_head'){a.main.setTexture(key(scene,s.phase==='landed'?'spikeHit':'spikeHead'),s.phase==='landed'?Math.min(3,Math.floor((s.landedMs||0)/90)):0).setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h);return;}
+  if(c.kind==='spike_head'){const shake=s.phase==='warn'?Math.sin((s.warnMs||0)*.065)*3:0;a.main.setTexture(key(scene,s.phase==='landed'?'spikeHit':'spikeHead'),s.phase==='landed'?Math.min(3,Math.floor((s.landedMs||0)/90)):0).setPosition(s.x+s.w/2+shake,s.y+s.h/2).setDisplaySize(s.w,s.h);return;}
   if(c.kind==='pendulum'){a.chain.forEach((part,i)=>{const f=(i+.5)/a.chain.length;part.setPosition(s.anchorX+(s.x-s.anchorX)*f,s.anchorY+(s.y-s.anchorY)*f);});a.main.setPosition(s.x,s.y).setDisplaySize(s.radius*2,s.radius*2);return;}
   if(c.kind==='fan'){
    const horizontal=s.direction==='left'||s.direction==='right';
@@ -80,8 +80,9 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
      if(e.cfg.kind==='spike_head'){
       const c=e.cfg,h=e.head,old=h.y;let limit=c.y+c.drop;
       for(const group of [scene.solidGroup,scene.oneWayGroup,scene.brickGroup,scene.pipeGroup,scene.movingPlatformGroup,scene.crumbleGroup])for(const obj of group?.getChildren?.()||[]){const b=obj.body;if(b&&b.enable!==false&&b.right>c.x&&b.left<c.x+c.w&&b.top>=c.y+c.h-1)limit=Math.min(limit,b.top-c.h);}
-      if(h.phase==='idle'&&body.right>c.x-24&&body.left<c.x+c.w+24&&body.top>=c.y+c.h&&body.top<=c.y+c.h+c.range)h.phase='fall';
-      if(h.phase==='fall'){h.y=Math.min(limit,h.y+c.fallSpeed*delta/1000);if(h.y>=limit){h.phase='landed';h.landedMs=0;}}
+      if(h.phase==='idle'&&body.right>c.x-24&&body.left<c.x+c.w+24&&body.top>=c.y+c.h&&body.top<=c.y+c.h+c.range){h.phase='warn';h.warnMs=0;}
+      else if(h.phase==='warn'){h.warnMs+=delta;if(h.warnMs>=500)h.phase='fall';}
+      else if(h.phase==='fall'){h.y=Math.min(limit,h.y+c.fallSpeed*delta/1000);if(h.y>=limit){h.phase='landed';h.landedMs=0;}}
       else if(h.phase==='landed'){h.landedMs+=delta;if(h.landedMs>=c.wait)h.phase='return';}
       else if(h.phase==='return'){h.y=Math.max(c.y,h.y-c.returnSpeed*delta/1000);if(h.y<=c.y){h.phase='reload';h.reloadMs=0;}}
       else if(h.phase==='reload'){h.reloadMs+=delta;if(h.reloadMs>=2000)h.phase='idle';}
