@@ -1386,3 +1386,11 @@
 - [x] 익명 `?view=stats` 1회: RPC status **OK**(code 없음), 페이지 정상 표시. 잠정 일자는 11-23, 11-24. 근거: `evidence/r6/r6b_stats_readonly_20261124.txt`.
 - [ ] 기록: **체험 스모크 정상, 증감 +40 미계측.** R6b 사전 non-OK의 원인은 미확인이다. 40-6AW의 "데이터 결함이 아니다" 표현은 근거가 없어 철회한다.
 - [ ] 유지: R6a 서버 단독 21/40(11/23 19/40) FAIL, 재전송 17/19, R6c와 종료 감사 NOT RUN. 추가 부하 재시험·group commit은 중단. 체험 배포는 교사 종료 지시까지 유지.
+
+
+### 40-6AZ. 교사 직접 승인 기록 — QBank 공개 게시 + 격리 작업 진행 (2026-11-24, Claude Code 채팅)
+**사용자 발언(원문):** "전부 다 승인해. 공개 저장소에 올리고 작업해." / "지금 챗지피티6는 먹통이야" → GPT-6 감수를 할 수 없어, 이 체크리스트는 Claude가 최신화한다. **GPT-6 독립 검수 항목은 자가 승인하지 않고 '감수자 부재(미완료)'로 남긴다.**
+- [x] **승인(교사):** HOJA-QUESTION-BANK 공개 저장소에 23단원 runtime 패키지 + INDEX 게시. **매체 권리 HOLD 23/23은 교사가 직접 게시를 결정했다**(공개 commit은 revert해도 SHA로 남는다는 점을 앞서 고지함).
+- [x] **승인(교사):** 게시한 실제 content commit으로 격리 GAS 새 release(약 8.73 MB) push와 검증.
+- [ ] **해석 보류 → 실행 전 재확인:** 운영 Project A/GAS/Sheets/EVENT_LOG/랭킹 변경, `main`·`versions/2.0.0` 반영, PR merge, 실제 Seal/트리거. "전부"라는 말만으로 실행하지 않는다.
+- [ ] 참고: QBank 자체 CI(`check-handoff.yml`)는 게시 전부터 main에서 FAIL(`missing/duplicate workstreams`, 9573f91 포함 최근 3회). 게시와 무관한 기존 상태다.
