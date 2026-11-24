@@ -1299,3 +1299,15 @@
 | 격리 GAS(push 크기 8.73 MB, 익명 배포, R6 재실행) | **NOT RUN / F4-SIZE-GATE OPEN** | 동상 |
 - [ ] GPT-6 독립 검수 40-6AQ(미완료).
 - [ ] 승인 대기: QBank 게시 / 격리 GAS push / 익명 시험 배포 / 실기록 감사·Seal·트리거(각각 별도).
+
+
+### 40-6AR. GPT-6 검수 — 적정 검증 종료·다음 실증 단계 전환 (2026-11-24)
+**교사 결정:** 반복 완전무결 시험을 지양하고, 치명적인 오류·데이터 손실/중복·보안 문제만 재검증한다. 이미 통과한 오프라인/로컬 시험은 동일 코드·조건에서 무의미하게 전수 재실행하지 않는다. 재발하면 해당 실패 범위를 다시 연다.
+
+- [x] **C5-2 / 40-6AN 로컬 증거 검수 PASS — 캐시 C5 현 단계 종료:** `d4af2ee` 소스·수정 전/후 Chromium 기록·시험 도구 최초 91분 HANG 이력 확인. 수정 전 B1·B3·B5(실제 탭 간 queued open)·B6a/b >15s FAIL → 수정 후 3초 open/tx 제한과 late-connection close 및 검증된 일회성 폴백, B **8/8 PASS**. SHA 변조 B6a fail-closed(사용/저장 0), GitHub 실패 B6b relay 1회. Node 123/123, C5-1 P1~P3, cache 14/14, RC audit, SOLO/TEAM 3단원×2 시작당 A1 1행, TEAM 전체 2단원도 1행의 **제출 로그** 확인. Actions [45313623478](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45313623478) head d4af2ee conclusion success. **실제 GAS iframe/iOS Safari/탭 사이 lease 및 느리지만 정상인 IndexedDB는 미검증**.
+- [x] **C5-3 추적 종료(해결 선언 아님):** 첫 UI E2E 38/46 이후 180초 navigation timeout **FAIL**, 후속 46/46 PASS. 원인은 **UNKNOWN / HOLD**, 더 이상 원인 프로파일링을 요구하지 않고 재발 시만 재개한다.
+- [x] **R6 / 40-6AP 원인 분석 증거 검수 완료 — 기능 FAIL은 그대로:** `c7173f8`, 기존 실로그·코드·mock profile 대조. 서버 단독 40건 중 **19 저장·21 USAGE_APPEND_LOCK_TIMEOUT**, 단일 ScriptLock과 20초 대기/잠금 안 4회 시트 왕복이 원인에 합치. 클라이언트 같은 eventId 재시도 경로는 기존 R6b **40/40**, 무재시도 서버 40/40은 **NOT PROVEN**. 제출된 per-eventId/재전송 verifier는 **정적 준비만**, 신규 실 GAS 미실행. group commit 도입·잠금 timeout 연장은 현 단계 진행하지 않는다. Actions [45314031072](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45314031072) success 확인.
+- [x] **문제은행 / 40-6AQ 오프라인 패키지 감사 종료:** `5a025ef` 증거 23/23 SHA/바이트/ID/문항 수 일치, **732문항**, pinned `9573f91`에서 재생성 INDEX 동일, overlay 1단원, active deployment **0** 확인. CI [45314212069](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45314212069) success. **세 CI 모두 QBank pinned checkout·drift 2단계 SKIPPED**(PASS 아님). 패키지 QBank 미게시·실 Apps Script 8.73 MB 저장 미검증·매체 권리 HOLD 23/23 유지.
+- [ ] **다음 필수 게이트(시간 절약):** 추가 C5/패키지 전수 반복을 중지하고, 격리 GAS 실제 연결을 위한 준비 사항과 실행·되돌리기 경계만 간결하게 정리. **별도 승인 전에는** QBank runtime 게시, 격리 GAS push/웹앱 익명 시험 배포, 11/23 실기록 읽기 전용 감사, seal/트리거 실행 금지. 승인 후에는 R6 실제 경로에서 시작당 고유 eventId 1행·중복 0·실패 복구 여부를 최소 실증하고 실제 GAS iframe/보안/용량의 치명적 실패만 확인.
+- [ ] **운영 안전·미해결 이력 유지:** R6 서버 단독 19/40 FAIL, C5-3 timeout 미해결, real R7 자정 NOT RUN, 실기록 감사 NOT RUN, QBank CI SKIPPED, QBank 게시/활성 0, PR #6 **Draft**, `main`·`versions/2.0.0`·운영 Project A GAS/EVENT_LOG/Sheets/랭킹 무변경.
+**감수 범위:** GitHub 소스/증거/CI 독립 대조이며 GPT-6이 로컬 Chromium·실 GAS를 직접 재실행했다는 뜻은 아니다. Claude의 체크포인트 자체보고 상태는 감사 기록으로 보존한다.
