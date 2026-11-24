@@ -637,3 +637,28 @@ Node: **97/97 PASS**(신규: LIST 핀은 원격 카탈로그에만 / 캐시 블�
   - 회귀: Node **123/123**, RC 감사 PASS, 캐시 E2E **14/14**(실제 Chromium).
   - 정적 시험: `protect.clear()` 재도입 금지, lease 해제는 finally.
 - **남은 것:** 탭 간 보호는 없다(탭별 메모리). 다른 탭이 사용 중인 단원은 그 탭의 최근 사용 시각에만 의존한다 → 기록만 하고 범위 밖. 다음은 C5-2.
+
+### C5-2 / 40-6AN — IndexedDB blocked·stall 재현·최소 패치, C5-3 보류 (2026-11-24, 40-6AO 우선순위 반영)
+- **1차 수정 전 실행:** 시험 도구가 약 91분간 멈춰서 수동으로 중단했다. 원인은 **시험 도구 결함**이다. GET에만 시간 제한이 있었고, 뒤따르는 `diagnose()`와 `fresh()`의 LIST는 멈춘 open을 무한정 기다렸다. 판정이 아니므로 원본 그대로 보존했다(`c5_2_attempt1_prefix_HARNESS_HANG.txt`). 이후 시험 도구의 모든 페이지 호출에 시간 제한을 걸었다.
+- **수정 전 재현(실제 Chromium, 시간 제한 15 s):**
+  - B1(open이 응답하지 않음), B3(transaction이 완료되지 않음), B6a/B6b(멈춘 상태에서 변조 바이트 / GitHub 불통): **HUNG > 15 s FAIL**. 이 넷은 API stub으로 만든 상황이다.
+  - **B5: stub 없는 실제 멈춤.** 다른 탭이 v1 연결을 쥔 채 versionchange를 무시하고 deleteDatabase를 대기시킨다. 캐시의 open이 그 뒤에 줄을 서며 **HUNG > 15 s FAIL**.
+  - Chromium은 `blocked`를 delete 요청에만 보내고, 줄 선 open에는 보내지 않는다(idbBlocked 0). 그래서 blocked 처리만으로는 부족하고 유한 timeout이 필요하다.
+  - B2(versionchange)와 B4(open 오류 / abort)는 수정 전에도 PASS.
+- **최소 패치(`ApprovedPackageCacheClient.html`):**
+  - open 3 s, 모든 transaction 3 s(단일 `runTx`). 초과하면 그 페이지는 **검증된 일회성 모드**로 전환한다: 고정 URL 다운로드 + SHA-256 + 구조 검사, 실패하면 GAS relay. relay 데이터는 SHA가 일치할 때만 저장한다.
+  - 늦게 도착한 연결은 즉시 닫는다.
+  - `blocked`는 무시하지 않고 셈한다.
+  - purgeUnused에 없던 abort 처리를 추가했다.
+  - timeout 숫자를 올려서 덮은 것이 아니다. 무한 대기를 유한 대기로 바꾼 것이다.
+- **수정 후:** B1~B6b **8/8 PASS**.
+  - B5: 3.0 s에 검증 다운로드. 다른 탭이 놓아준 뒤 v2 open이 blocked 없이 성공한다(늦은 연결을 닫았다는 뜻).
+  - B6a: 변조 바이트는 DIGEST_MISMATCH로 실패하고 relay 0, 저장 0(fail-closed).
+  - B6b: relay를 1회 사용했다.
+- **회귀:**
+  - Node **123/123**. F1 정적 시험에 빈 blocked 금지, timeout 상수, 늦은 연결 close, transaction은 runTx 한 곳만을 추가했다.
+  - C5-1 P1~P3 PASS, RC 감사 PASS, 캐시 E2E **14/14**.
+  - SOLO/TEAM 대표 3단원×2 = 6/6에서 시작마다 A1 usage 1행.
+  - TEAM 전체 2단원은 usageRows 1, 랭킹 RPC 0.
+- **NOT REPRODUCED / 범위 밖:** Safari·iOS·Android WebView, 실 GAS iframe, 브라우저 저장소 압박 축출, 3 s보다 느리지만 정상인 IndexedDB(그 페이지만 일회성 모드가 되어 다운로드가 늘어남). 추가 추적은 40-6AO에 따라 생략했다.
+- **C5-3: 보류(미해결 관측).** 최초 UI E2E 38/46의 180 s `Page.goto` timeout은 원인 불명으로 유지하고, 재시험 46/46 PASS도 보존한다. 40-6AO에 따라 반복 실행과 프로파일링은 하지 않았다. FIXED가 아니다.

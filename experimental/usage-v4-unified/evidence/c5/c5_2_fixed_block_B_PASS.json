@@ -1,0 +1,116 @@
+{
+ "block": "current",
+ "scenarios": {
+  "B1_open_stalls_blocked_fallback_bounded": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 3016,
+   "downloads": 1,
+   "idb": "UNAVAILABLE"
+  },
+  "B2_versionchange_from_newer_tab_no_hang": {
+   "pass": true,
+   "newerTabOpen": {
+    "opened": true,
+    "blocked": false
+   },
+   "result": [
+    "soc6-s2-u3-1-common"
+   ],
+   "error": null,
+   "ms": 11,
+   "downloads": 1
+  },
+  "B3_transaction_stall_bounded_fallback": {
+   "pass": true,
+   "first": [
+    [
+     "math5-s2-u4"
+    ],
+    null,
+    3017
+   ],
+   "second": [
+    [
+     "math5-s2-u4"
+    ],
+    null,
+    11
+   ],
+   "downloads": 2
+  },
+  "B4_openError_verified_one_time": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 15,
+   "storedUnits": 0,
+   "idb": "UNAVAILABLE"
+  },
+  "B4_txAbort_verified_one_time": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 5,
+   "storedUnits": 0,
+   "idb": "OK"
+  },
+  "B5_real_pending_delete_stall_bounded_and_late_conn_closed": {
+   "pass": true,
+   "otherTab": {
+    "held": true,
+    "deleteBlocked": true,
+    "deleteDone": false
+   },
+   "listErr": null,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 3016,
+   "downloads": 1,
+   "idb": "UNAVAILABLE",
+   "idbState": "OPEN_TIMEOUT",
+   "stats": {
+    "idbBlocked": 0,
+    "idbTimeouts": 1,
+    "stored": 0
+   },
+   "deleteAfterRelease": {
+    "blocked": true,
+    "done": true
+   },
+   "v2OpenAfter": {
+    "opened": true,
+    "blocked": false
+   }
+  },
+  "B6a_stall_tampered_bytes_fail_closed": {
+   "pass": true,
+   "result": null,
+   "error": "Page.evaluate: Error: APPROVED_CONTENT_DIGEST_MISMATCH\n    at fail (http://127.0",
+   "ms": 3015,
+   "relayCalls": 0,
+   "storedUnits": 0
+  },
+  "B6b_stall_github_down_relay_one_shot": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 4634,
+   "relayCalls": 1,
+   "relayed": 1,
+   "idb": "UNAVAILABLE"
+  }
+ },
+ "fails": []
+}

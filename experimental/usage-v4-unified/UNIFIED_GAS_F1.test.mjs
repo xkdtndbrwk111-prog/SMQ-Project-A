@@ -504,4 +504,10 @@ test('F4 cache client: one injected block, wraps only LIST/GET, IndexedDB only, 
   // C5-1 (40-6AL): no global protection reset; per-unit leases released in finally
   assert.doesNotMatch(code, /protect\.clear\(\)/);
   assert.match(code, /const release=lease\(entries\.map\(e=>e\.id\)\);\n try\{return await getLeased\(names,entries\)\}finally\{release\(\)\}/);
+  // C5-2 (40-6AN): finite IndexedDB open/transactions; blocked is counted (not ignored); late connection closed
+  assert.doesNotMatch(code, /onblocked=\(\)=>\{\}/, 'blocked is never silently ignored');
+  assert.match(code, /IDB_OPEN_TIMEOUT_MS=\d+,IDB_TX_TIMEOUT_MS=\d+/);
+  assert.match(code, /if\(settled\)\{try\{d\.close\(\)\}catch\(_e\)\{\}return\}/, 'a late open result is closed at once');
+  assert.equal((code.match(/\.transaction\(/g) || []).length, 1, 'only runTx opens transactions (all time-bounded)');
+  assert.match(code, /t=d\.transaction\(STORE,mode\)/);
 });

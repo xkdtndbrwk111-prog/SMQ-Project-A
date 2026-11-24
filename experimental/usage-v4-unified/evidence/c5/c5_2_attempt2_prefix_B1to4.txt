@@ -1,0 +1,13 @@
+# attempt 2 — pre-fix block, bounded harness (B1-B4 only; B5/B6 not yet added)
+START B1
+B1_open_stalls_blocked_fallback_bounded FAIL {"result": null, "error": "HUNG>15000ms", "ms": 15001, "downloads": null, "idb": "DIAGNOSE_HUNG>15000ms"}
+START B2
+B2_versionchange_from_newer_tab_no_hang PASS {"newerTabOpen": {"opened": true, "blocked": false}, "result": ["soc6-s2-u3-1-common"], "error": null, "ms": 10, "downloads": 1}
+START B3
+B3_transaction_stall_bounded_fallback FAIL {"first": [null, "HUNG>15000ms", 15001], "second": [null, "HUNG>15000ms", 15001], "downloads": null}
+START B4_openError
+B4_openError_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 16, "storedUnits": 0, "idb": "UNAVAILABLE"}
+START B4_txAbort
+B4_txAbort_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 6, "storedUnits": 0, "idb": "OK"}
+F4_CACHE_C5_FAIL ["B1_open_stalls_blocked_fallback_bounded", "B3_transaction_stall_bounded_fallback"]
+exit=1

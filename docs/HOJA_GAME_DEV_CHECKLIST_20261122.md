@@ -1257,3 +1257,18 @@
 - [ ] **최우선 다음 작업 R6:** 40건 중 서버 단독 19건 저장 현상의 실제 원인을 **기존 로그·코드부터** 식별. 전송률, LockService 경쟁/예외, 요청 수락/저장 성공/클라이언트 ACK를 구별해 카운터로 제시하고 모의 GAS·격리 테스트를 설계. '브라우저 재시도 후 결국 성공'과 '서버 단독 성공'을 혼동하지 말고, 40건 입력 대비 정확히 1행씩·중복 0·손실 0 목표의 대안/잔여 한계를 보고. 운영 데이터 변경 없이 최소 수정·부정 시험 및 회귀 수행; 해결이 확인되지 않으면 HOLD 유지.
 - [ ] **실제 연결 준비:** QBank 23단원/732문항 INDEX·pin SHA/overlay 검증 및 경량 번들 크기·격리 프로젝트 사전 조건을 현재 증거로 정리. 실 격리 GAS push, 익명 웹앱 시험 배포, 실 데이터 감사, Seal/트리거는 **각 별도 승인 전 NOT RUN/HOLD**. 먼저 교사 승인에 필요한 정확한 프로젝트·시트·파일·되돌리기 경계를 짧게 제시한다.
 - [ ] **게이트·기록:** PR #6 Draft, `main`·`versions/2.0.0`·운영 GAS/Sheets/EVENT_LOG/랭킹·active unit 0 불변. QBank CI 2개 skipped를 PASS로 바꾸지 말 것. 기존 최초 timeout 실패·R6 19/40·실 R7 감사/자정 미실행 사실 삭제 금지. 최소 구현에도 체크리스트와 증거를 항상 같은 commit에 기록.
+
+
+### 40-6AN. Claude 제출 — C5-2 IndexedDB blocked/stall 최소 복구 + C5-3 보류 (2026-11-24, 40-6AO 반영)
+**경계:** Claude 자체 보고. 로컬 실제 Chromium + mock GAS + Node. GPT-6 감수는 미완료로 둔다. 실 GAS·게시·배포 없음.
+| 항목 | 상태 | 근거(`experimental/usage-v4-unified/evidence/c5/`) |
+|---|---|---|
+| 1차 수정 전 실행 | **시험 도구 HANG**(도구 결함, 판정 아님), 보존 | `c5_2_attempt1_prefix_HARNESS_HANG.txt`, `c5_2_notes.txt` |
+| 수정 전 재현 | **FAIL 재현**: B1·B3·B5(stub 없는 실제 멈춤)·B6a·B6b HUNG > 15 s. B2·B4는 PASS | `c5_2_attempt2_prefix_B1to4.txt`, `c5_2_REPRO_prefix_block_FAIL.*` |
+| 최소 패치(open/tx 3 s → 검증된 일회성 direct/relay, 늦은 연결 close) | **LOCAL PASS** B 8/8, SHA fail-closed(B6a) | `c5_2_fixed_block_B_PASS.*`, `c5_2_idb_timeout_diff.patch` |
+| 회귀 | Node **123/123**, P1~P3 PASS, RC 감사 PASS, 캐시 E2E **14/14**, SOLO/TEAM 대표 6/6·TEAM 전체 2 — 시작당 usage 1행 | `c5_2_node_suite.txt`, `c5_2_P_regression.txt`, `c5_2_rc_audit.txt`, `c5_2_cache_e2e_14.txt`, `c5_2_solo_team_usage.txt` |
+| NOT REPRODUCED/범위 밖 | Safari/iOS/WebView, 실 GAS iframe, 저장소 압박, 느리지만 정상인 IndexedDB(> 3 s) | `c5_2_notes.txt` |
+| C5-3 최초 38/46 timeout | **HOLD(미해결 관측)** — 원인 불명 유지, 재시험 46/46 보존, 추적 중단(40-6AO) | 기존 F4 증거 |
+- [ ] GPT-6 독립 검수 C5-2(미완료).
+- [ ] 다음: R6 19/40 원인 분석(새 번호), 그다음 23단원 패키지 SHA/INDEX·격리 GAS 사전 정리.
+- [ ] 유지: QBank CI 2 SKIPPED, R6 19/40, 실 R7 감사·자정·트리거·Seal·게시·배포 HOLD/NOT RUN, PR Draft.

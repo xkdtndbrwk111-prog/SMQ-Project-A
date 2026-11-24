@@ -1,0 +1,19 @@
+# FIXED block (C5-2), full B set, --deadline-ms 15000
+START B1
+B1_open_stalls_blocked_fallback_bounded PASS {"result": ["math5-s2-u4"], "error": null, "ms": 3016, "downloads": 1, "idb": "UNAVAILABLE"}
+START B2
+B2_versionchange_from_newer_tab_no_hang PASS {"newerTabOpen": {"opened": true, "blocked": false}, "result": ["soc6-s2-u3-1-common"], "error": null, "ms": 11, "downloads": 1}
+START B3
+B3_transaction_stall_bounded_fallback PASS {"first": [["math5-s2-u4"], null, 3017], "second": [["math5-s2-u4"], null, 11], "downloads": 2}
+START B4_openError
+B4_openError_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 15, "storedUnits": 0, "idb": "UNAVAILABLE"}
+START B4_txAbort
+B4_txAbort_verified_one_time PASS {"result": ["math5-s2-u4"], "error": null, "ms": 5, "storedUnits": 0, "idb": "OK"}
+START B5
+B5_real_pending_delete_stall_bounded_and_late_conn_closed PASS {"otherTab": {"held": true, "deleteBlocked": true, "deleteDone": false}, "listErr": null, "result": ["math5-s2-u4"], "error": null, "ms": 3016, "downloads": 1, "idb": "UNAVAILABLE", "idbState": "OPEN_TIMEOUT", "stats": {"idbBlocked": 0, "idbTimeouts": 1, "stored": 0}, "deleteAfterRelease": {"blocked": true, "done": true}, "v2OpenAfter": {"opened": true, "blocked": false}}
+START B6a
+B6a_stall_tampered_bytes_fail_closed PASS {"result": null, "error": "Page.evaluate: Error: APPROVED_CONTENT_DIGEST_MISMATCH\n    at fail (http://127.0", "ms": 3015, "relayCalls": 0, "storedUnits": 0}
+START B6b
+B6b_stall_github_down_relay_one_shot PASS {"result": ["math5-s2-u4"], "error": null, "ms": 4634, "relayCalls": 1, "relayed": 1, "idb": "UNAVAILABLE"}
+F4_CACHE_C5_PASS []
+exit=0

@@ -1,0 +1,17 @@
+# C5-2 notes (40-6AN)
+attempt 1 (pre-fix, 09:47 KST): HARNESS HANG ~91 min, stopped manually. Harness defect, not a verdict: only GET was
+  bounded; B1's diagnose() and LIST in fresh() awaited the stalled indexedDB.open with no deadline. Kept as-is.
+attempt 2 (pre-fix, bounded harness, B1-B4): B1 HUNG>15s, B3 HUNG>15s (x2), B2 PASS, B4 openError/txAbort PASS.
+REPRO (pre-fix, B1-B6): FAIL B1, B3, B5, B6a, B6b (all HUNG>15000ms); PASS B2, B4.
+  B1/B3/B6 use an API stub (open never answers / transaction never completes) in real Chromium.
+  B5 is a REAL stall without any stub: another tab holds a v1 connection that ignores versionchange and has a
+  pending deleteDatabase; the cache's own open queues behind it. Pre-fix: GET HUNG>15s ("downloads":1 was recorded
+  only after the other tab let go and the queued open finally succeeded).
+  Observed: Chromium fires 'blocked' on the delete request, NOT on the queued open (idbBlocked stays 0) -> a
+  blocked handler alone would not have helped; only a finite timeout does.
+NOT REPRODUCED / not covered: Safari/iOS/Android WebView IndexedDB, real GAS iframe sandbox, storage-pressure eviction
+  by the browser, a slow-but-healthy IndexedDB > 3 s (would fall to one-time mode for that page = extra downloads).
+FIX (minimal): open 3 s and every transaction 3 s; on timeout -> this page uses verified one-time mode (pinned download
+  + SHA-256 + structure checks, else GAS relay; relay data cached only if its bytes hash to the pin). Late open result
+  closed immediately (B5: a later v2 open succeeded, not blocked). purgeUnused now also handles abort (was missing).
+FIXED: B1..B6b 8/8 PASS; B6a tampered bytes under stall -> DIGEST_MISMATCH, 0 relay calls, 0 stored (fail closed).

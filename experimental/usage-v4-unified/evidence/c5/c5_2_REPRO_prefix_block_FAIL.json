@@ -1,0 +1,112 @@
+{
+ "block": "<SCRATCH>",
+ "scenarios": {
+  "B1_open_stalls_blocked_fallback_bounded": {
+   "pass": false,
+   "result": null,
+   "error": "HUNG>15000ms",
+   "ms": 15002,
+   "downloads": null,
+   "idb": "DIAGNOSE_HUNG>15000ms"
+  },
+  "B2_versionchange_from_newer_tab_no_hang": {
+   "pass": true,
+   "newerTabOpen": {
+    "opened": true,
+    "blocked": false
+   },
+   "result": [
+    "soc6-s2-u3-1-common"
+   ],
+   "error": null,
+   "ms": 10,
+   "downloads": 1
+  },
+  "B3_transaction_stall_bounded_fallback": {
+   "pass": false,
+   "first": [
+    null,
+    "HUNG>15000ms",
+    15001
+   ],
+   "second": [
+    null,
+    "HUNG>15000ms",
+    15002
+   ],
+   "downloads": null
+  },
+  "B4_openError_verified_one_time": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 15,
+   "storedUnits": 0,
+   "idb": "UNAVAILABLE"
+  },
+  "B4_txAbort_verified_one_time": {
+   "pass": true,
+   "result": [
+    "math5-s2-u4"
+   ],
+   "error": null,
+   "ms": 6,
+   "storedUnits": 0,
+   "idb": "OK"
+  },
+  "B5_real_pending_delete_stall_bounded_and_late_conn_closed": {
+   "pass": false,
+   "otherTab": {
+    "held": true,
+    "deleteBlocked": true,
+    "deleteDone": false
+   },
+   "listErr": null,
+   "result": null,
+   "error": "HUNG>15000ms",
+   "ms": 15001,
+   "downloads": 1,
+   "idb": "DIAGNOSE_HUNG>15000ms",
+   "idbState": null,
+   "stats": {
+    "idbBlocked": null,
+    "idbTimeouts": null,
+    "stored": null
+   },
+   "deleteAfterRelease": {
+    "blocked": true,
+    "done": true
+   },
+   "v2OpenAfter": {
+    "opened": true,
+    "blocked": false
+   }
+  },
+  "B6a_stall_tampered_bytes_fail_closed": {
+   "pass": false,
+   "result": null,
+   "error": "HUNG>15000ms",
+   "ms": 15001,
+   "relayCalls": 0,
+   "storedUnits": null
+  },
+  "B6b_stall_github_down_relay_one_shot": {
+   "pass": false,
+   "result": null,
+   "error": "HUNG>15000ms",
+   "ms": 15001,
+   "relayCalls": 0,
+   "relayed": null,
+   "idb": "DIAGNOSE_HUNG>15000ms"
+  }
+ },
+ "fails": [
+  "B1_open_stalls_blocked_fallback_bounded",
+  "B3_transaction_stall_bounded_fallback",
+  "B5_real_pending_delete_stall_bounded_and_late_conn_closed",
+  "B6a_stall_tampered_bytes_fail_closed",
+  "B6b_stall_github_down_relay_one_shot"
+ ]
+}

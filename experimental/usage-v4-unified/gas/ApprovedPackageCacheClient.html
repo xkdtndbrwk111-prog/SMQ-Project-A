@@ -10,6 +10,9 @@
  *    units (server-verified); its data is cached only if its canonical bytes hash to the catalog SHA.
  *  - Storage: IndexedDB only (never localStorage), app limit 10 MiB, 90-day-unused purge, LRU eviction,
  *    units in use / downloading / verifying are never evicted; any IndexedDB failure -> verified one-time run.
+ *  - C5-2 (40-6AN): opening IndexedDB and every transaction are time-bounded (IDB_*_TIMEOUT_MS). A blocked /
+ *    stalled open or a transaction that never completes switches THIS page to verified one-time mode (pinned
+ *    download + SHA-256 + checks, else the GAS relay); a late connection is closed at once. Never unverified data.
  * No student identifiers, tokens or progress are stored. No student UI; diagnostics are dev-only. */
 (function(){
 'use strict';
@@ -22,7 +25,7 @@ const RAW='https://raw.githubusercontent.com/',REPOS=['xkdtndbrwk111-prog/HOJA-Q
 const ID_RE=/^[a-z0-9][a-z0-9-]{2,63}$/,SHA_RE=/^[a-f0-9]{64}$/,COMMIT_RE=/^[a-f0-9]{40}$/;
 const PATH_RE=/^[A-Za-z0-9][A-Za-z0-9_-]*(\/[A-Za-z0-9][A-Za-z0-9._-]*)*\.json$/;
 const IMG_RE=/^data:image\/(webp|png|jpeg|gif|svg\+xml);base64,[A-Za-z0-9+\/=]+$/;
-const RETRY_DELAYS=[400,1200],FETCH_TIMEOUT_MS=20000;
+const RETRY_DELAYS=[400,1200],FETCH_TIMEOUT_MS=20000,IDB_OPEN_TIMEOUT_MS=3000,IDB_TX_TIMEOUT_MS=3000;
 const baseRpc=live.rpc;
 let catalog=new Map();            // game name -> verified pkg descriptor (from the current LIST only)
 const inflight=new Map();         // sha256 -> Promise<text>  (one download per package per page)
@@ -33,7 +36,7 @@ const leases=new Map();          // unit id -> number of GETs currently using it
 const isProtected=id=>(leases.get(id)||0)>0;
 const lease=ids=>{for(const id of ids)leases.set(id,(leases.get(id)||0)+1);
  return ()=>{for(const id of ids){const n=(leases.get(id)||0)-1;if(n>0)leases.set(id,n);else leases.delete(id)}}};
-const stats={hits:0,misses:0,downloads:0,downloadAttempts:0,relayed:0,stored:0,notStored:0,evicted:0,purged:0,discarded:0,idbErrors:0};
+const stats={hits:0,misses:0,downloads:0,downloadAttempts:0,relayed:0,stored:0,notStored:0,evicted:0,purged:0,discarded:0,idbErrors:0,idbBlocked:0,idbTimeouts:0};
 const enc=new TextEncoder();
 const utf8Bytes=s=>enc.encode(s).length;
 async function sha256Hex(text){
@@ -42,26 +45,39 @@ async function sha256Hex(text){
 }
 function fail(code){return new Error(code)}
 /* ---------- IndexedDB (best effort: every failure degrades to a verified one-time run) ---------- */
-let dbPromise=null,dbBroken=false;
+let dbPromise=null,dbBroken=false,dbState='OK';
+const giveUp=state=>{dbBroken=true;dbState=state};   // this page only; the next page load tries IndexedDB again
 function db(){
  if(dbBroken)return Promise.resolve(null);
  if(!dbPromise)dbPromise=new Promise(resolve=>{
-  let req;
-  try{req=indexedDB.open(DB_NAME,DB_VERSION)}catch(_e){dbBroken=true;stats.idbErrors++;resolve(null);return}
+  let req,settled=false;
+  const settle=d=>{if(settled)return false;settled=true;clearTimeout(timer);resolve(d);return true};
+  // finite open: 'blocked' (another tab holds an older/newer connection, or a pending delete/upgrade) or no answer
+  const timer=setTimeout(()=>{if(settled)return;stats.idbTimeouts++;giveUp('OPEN_TIMEOUT');dbPromise=null;settle(null)},IDB_OPEN_TIMEOUT_MS);
+  try{req=indexedDB.open(DB_NAME,DB_VERSION)}catch(_e){stats.idbErrors++;giveUp('OPEN_ERROR');settle(null);return}
   req.onupgradeneeded=()=>{const d=req.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'cartridgeId'})};
-  req.onsuccess=()=>{const d=req.result;d.onversionchange=()=>{try{d.close()}catch(_e){}dbPromise=null};resolve(d)};
-  req.onerror=()=>{dbBroken=true;stats.idbErrors++;resolve(null)};
-  req.onblocked=()=>{};
+  req.onsuccess=()=>{const d=req.result;
+   if(settled){try{d.close()}catch(_e){}return}          // late connection after the timeout: never hold it (would block other tabs)
+   d.onversionchange=()=>{try{d.close()}catch(_e){}if(dbPromise)dbPromise=null};
+   settle(d)};
+  req.onerror=()=>{stats.idbErrors++;giveUp('OPEN_ERROR');settle(null)};
+  req.onblocked=()=>{stats.idbBlocked++};                 // keep waiting until the open timeout, then one-time mode
  });
  return dbPromise;
 }
-function tx(d,mode,fn){
+/* One transaction, time-bounded: body(store, setResult). Timeout -> abort + one-time mode for this page. */
+function runTx(d,mode,body){
  return new Promise((resolve,reject)=>{
-  let out;let t;
-  try{t=d.transaction(STORE,mode)}catch(e){reject(e);return}
-  t.oncomplete=()=>resolve(out);t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||fail('IDB_ABORT'));
-  try{const r=fn(t.objectStore(STORE));if(r)r.onsuccess=()=>{out=r.result}}catch(e){try{t.abort()}catch(_e){}reject(e)}
+  let out,t,done=false;
+  const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(timer);fn(v)};
+  const timer=setTimeout(()=>{if(done)return;stats.idbTimeouts++;giveUp('TX_TIMEOUT');try{t&&t.abort()}catch(_e){}finish(reject,fail('IDB_TIMEOUT'))},IDB_TX_TIMEOUT_MS);
+  try{t=d.transaction(STORE,mode)}catch(e){finish(reject,e);return}
+  t.oncomplete=()=>finish(resolve,out);t.onerror=()=>finish(reject,t.error);t.onabort=()=>finish(reject,t.error||fail('IDB_ABORT'));
+  try{body(t.objectStore(STORE),v=>{out=v})}catch(e){try{t.abort()}catch(_e){}finish(reject,e)}
  });
+}
+function tx(d,mode,fn){
+ return runTx(d,mode,(s,set)=>{const r=fn(s);if(r)r.onsuccess=()=>{set(r.result)}});
 }
 async function idbGet(id){
  const d=await db();if(!d)return null;
@@ -87,9 +103,7 @@ async function idbStore(entry,text){
   repo:entry.repo,path:entry.path,format:FORMAT,bytes:utf8Bytes(text),downloadedAt:now,verifiedAt:now,lastUsedAt:now,text};
  let stored=false;
  try{
-  await new Promise((resolve,reject)=>{
-   const t=d.transaction(STORE,'readwrite');const s=t.objectStore(STORE);
-   t.oncomplete=resolve;t.onerror=()=>reject(t.error);t.onabort=()=>reject(t.error||fail('IDB_ABORT'));
+  await runTx(d,'readwrite',s=>{
    const all=s.getAll();
    all.onsuccess=()=>{
     let live=all.result.filter(r=>r&&r.cartridgeId!==entry.id);
@@ -108,9 +122,7 @@ async function idbStore(entry,text){
 async function purgeUnused(){
  const d=await db();if(!d)return;
  const now=Date.now();
- try{await new Promise((resolve,reject)=>{
-  const t=d.transaction(STORE,'readwrite');const s=t.objectStore(STORE);
-  t.oncomplete=resolve;t.onerror=()=>reject(t.error);
+ try{await runTx(d,'readwrite',s=>{
   const c=s.openCursor();
   c.onsuccess=()=>{const cur=c.result;if(!cur)return;const r=cur.value;
    if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!isProtected(r.cartridgeId)){cur.delete();stats.purged++}cur.continue()};
@@ -226,7 +238,7 @@ live.rpc=function(method,payload){
 async function diagnose(){   // developer diagnostics only (not shown to students)
  const d=await db();let units=[];
  if(d)try{units=(await tx(d,'readonly',s=>s.getAll())||[]).map(r=>({id:r.cartridgeId,sha8:String(r.packageSha256).slice(0,8),bytes:r.bytes,lastUsedAt:r.lastUsedAt}))}catch(_e){}
- return {idb:d?'OK':'UNAVAILABLE',protectedUnits:[...leases.keys()].sort(),limitBytes:LIMIT_BYTES,usedBytes:units.reduce((n,u)=>n+u.bytes+META_BYTES,0),units,stats:Object.assign({},stats),catalogUnits:catalog.size};
+ return {idb:d?'OK':'UNAVAILABLE',idbState:dbState,protectedUnits:[...leases.keys()].sort(),limitBytes:LIMIT_BYTES,usedBytes:units.reduce((n,u)=>n+u.bytes+META_BYTES,0),units,stats:Object.assign({},stats),catalogUnits:catalog.size};
 }
 window.HOJA_APPROVED_PACKAGE_CACHE=Object.freeze({version:1,diagnose,get stats(){return Object.assign({},stats)}});
 })();
