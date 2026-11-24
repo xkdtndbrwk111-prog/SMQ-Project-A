@@ -5146,7 +5146,7 @@ class HojaScene extends Phaser.Scene{
     if(this.hojaSwimZones?.length){
       const maskShape=this.add.graphics().setVisible(false);maskShape.fillStyle(0xffffff,1);
       for(const z of this.hojaSwimZones)maskShape.fillRect(z.x,z.y,z.width,z.height);
-      this.hojaSwimGhost=this.add.sprite(sx,gy,'hoja_IDLE_0').setOrigin(0.5,61/64).setDepth(13.7).setAlpha(.38).setMask(maskShape.createGeometryMask());
+      this.hojaSwimGhost=this.add.sprite(sx,gy,'hoja_IDLE_0').setOrigin(0.5,61/64).setDepth(14.5).setAlpha(.38).setMask(maskShape.createGeometryMask());
     }
     // R3.4: restore pre-R2 rendering. The authoritative Hoja sprite is the
     // only visible actor, exactly as in R1.1; the same camera draws the
