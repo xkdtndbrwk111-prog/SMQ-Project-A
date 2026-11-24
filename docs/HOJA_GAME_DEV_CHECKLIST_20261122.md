@@ -1666,3 +1666,15 @@
 - [x] 문제창은 아케이드 시작 시 미리 준비하도록 변경(교사 요청). 반짝이 선행 그리기는 효과가 불확실해 되돌렸다.
 - [ ] 교사 Mac/Chrome 확인 필요: `chrome://gpu` 하드웨어 가속, 에너지 절약 모드, 무거운 탭. 근본 대책(35ms 제한 방식 변경, 셰이더 선행 컴파일)은 별도 결정.
 - [ ] 다음: 맵당 풍선 6개(총 30개), 종료 조건 25문제 유지(교사 지시).
+
+
+### 40-6CB. GPT-6 — 교사 승인 23단원 표시 이름 통일 패치 준비, 원본 ID/랭킹 보존 (2026-11-24)
+**최신 교사 승인:** "HOJA 1.5 카트리지 표시 이름 23개 시안을 모두 승인해. 기존 카트리지 ID·문항·랭킹은 유지하고 게임 표시 이름만 변경해줘." **목표는 UI 전용 수정**, 서버 LIST/GET 이름·카트리지 ID·랭킹 저장 키·질문 원본은 절대 수정하지 않는다.
+- [x] **승인 제목 23개 맵 코드 추가:** `experimental/usage-v4-unified/gas/ApprovedCartridgeDisplayClient.html`에 23개 정확한 `cartridgeId → {sourceTitle, number, title}` 매핑. 영어는 10~12, 수학은 4~6, 사회는 2-2·3-1·3-2 등. 사회 5-2 2-2는 승인된 간략형 **'조선 후기 사회 변화와 개항기 생활'** 사용. sourceTitle은 승인 source index의 `approvedTitle`과 대조. UI 카드에는 번호를 상단 별도 텍스트, 중앙 제목은 짧은 `title`로 변경. `PAK 01` 표기는 숨김. 원래 ⓘ 전체 제목 표시는 그대로.
+- [x] **원본 서버 프로토콜 보존:** 승인 `LIST` 응답에 기존 F4 `pkg.id`가 존재하고 요청 name suffix가 정확히 approvedTitle과 맞는 경우에만 브라우저 렌더러에 표시 패치. 기존 레거시 카트리지 무변경. 랭킹·캐시·GET·UI 선택 요청 `sheetName`은 원래 이름 그대로, `hojaApprovedGameName_` 및 `hojaApprovedIdsByTitle_` 함수 수정 없음.
+- [x] **빌더·감사 연결:** `build_unified_gas.py`에서 approved-rc Game.html에 UI용 스크립트 1개만 `</body>` 직전 삽입, `verify_release_candidate.py`는 해당 1개 블록 SHA 확인 후 제거하고 기존 정본/캐시 RC 감사 그대로 수행하도록 보완. `verify_approved_display_client.mjs`로 간단한 ID/23개/GET·RANK_SAVE·기존 레거시 유지 회귀 시험 추가.
+- [x] **GPT-6 가벼운 모의시험:** GitHub 소스 JS 문법 검증 PASS, 23/23 번호+표시명 변경 PASS, `LIST` 응답 원본 객체 유지, `GET` 원본 이름, `RANK_SAVE` 원본 이름 유지, 비승인 legacy 카드 무변경, 모드 선택 표시 이름 정리, PAK 숨김 PASS. 클로드가 실제 Node 단위시험과 RC 감사·운영 번들 조립을 재실행해야 하므로 아직 **빌드/운영 배포 PASS 선언 아님**.
+- [ ] **Claude Code 후속 실행:** main 최신화 후 `node experimental/usage-v4-unified/verify_approved_display_client.mjs`, 기존 승인판 RC 감사와 23단원 운영 번들 조립 **1회만**. 빠진 블록/고정 SHA가 발생하면 audit만 일치시킴. 새로운 게임 기능은 손대지 말 것. 운영 프로젝트 HEAD에 표시 UI 전용 `Game.html`만 반영 가능한지 확인하고, 기존 집계·리더/문제은행·랭킹과 diff가 없는지 검증. 현재 사용자와 동시 진행 중인 아케이드 풍선 작업과 결합 배포 시 덮어쓰기/경합 주의.
+- [ ] **교사 배포 단계 별도:** 기존 **학생용 동일 /exec URL**의 현재 deployment를 새 버전으로 수정해야 사용자에게 실제 보임. `새 배포` 금지. **지금은 GitHub 소스만 수정했으며 Google Apps Script 운영 HEAD·versioned 배포는 변경하지 않음**. 실제 반영 시 체크리스트 새 번호에 확인.
+- [x] **40-6CA 속도 보고 처리:** 35ms delta 제한 변경은 물리·조작감 회귀 위험으로 보류. 반짝이 선행 렌더는 근거 부족으로 유지하지 않음. 첫 문제창 사전 준비는 Claude 소스에 적용·실배포 대기. **풍선 맵당 6개 총 30개, 종료 25문항 유지** 기존 교사 결정 그대로. 이 타이틀 표시 패치와 혼동 금지.
+**진행상태:** 승인 23개 이름 매핑/표시 전용 코드 **GitHub 반영 완료**, 실제 운영 적용 **대기**.
