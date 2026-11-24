@@ -1394,3 +1394,17 @@
 - [x] **승인(교사):** 게시한 실제 content commit으로 격리 GAS 새 release(약 8.73 MB) push와 검증.
 - [ ] **해석 보류 → 실행 전 재확인:** 운영 Project A/GAS/Sheets/EVENT_LOG/랭킹 변경, `main`·`versions/2.0.0` 반영, PR merge, 실제 Seal/트리거. "전부"라는 말만으로 실행하지 않는다.
 - [ ] 참고: QBank 자체 CI(`check-handoff.yml`)는 게시 전부터 main에서 FAIL(`missing/duplicate workstreams`, 9573f91 포함 최근 3회). 게시와 무관한 기존 상태다.
+
+
+### 40-6BA. Claude 실행 — QBank 공개 게시 + 격리 GAS 새 release push(크기 게이트 통과) + 운영 판단 (2026-11-24, 40-6AZ 승인)
+**경계:** 교사 승인(채팅). GPT-6는 부재라 감수 미완료로 둔다. 근거: `experimental/usage-v4-unified/evidence/ba/qbank_publish_isolated_push_20261124.txt`.
+| 항목 | 상태 |
+|---|---|
+| QBank 공개 게시 | **완료** `440cc1f`. `game-runtime/approved-packages/v1/`(23 + INDEX)와 README만 추가. 재빌드 동일, 감사 PASS |
+| 실제 raw GitHub pin 검증 | **PASS** 23/23 SHA·바이트 일치, CORS `*` |
+| 격리 release(실 commit pin, QA, 격리 script만 허용) | mock 쌍둥이 UI E2E 6/6 PASS(Game.html 동일) |
+| 격리 GAS push 8.77 MB | **PASS, F4-SIZE-GATE 해소.** 다시 pull해 9/9 동일. 체험판 @6은 고정 버전이라 영향 없음 |
+| 새 버전 배포 | **교사 UI 필요.** Claude의 배포 명령이 로컬 권한 검사에서 차단됐고, 우회하지 않았다 |
+| main 병합 | 진행: 변경은 experimental, docs, workflows, 그리고 루트 Code.gs의 opt-in 가드(속성 미설정 시 동작 불변)뿐. 운영 자동 배포 없음(Pages 없음, private) |
+| **운영 GAS 전환** | **보류(치명적 불확실성).** V4 코드가 격리 사본 전용(`COPY_40_6U_ONLY` + canary)으로 fail-closed다. 운영 저장소·61일 이관·Seal 운영 모드 설계가 아직 없다. 운영 게임 교체는 학생 사용에 직접 영향을 준다 |
+| **실 Seal/트리거** | **보류.** 11/23 감사는 운영자 실행이 필요하다. 트리거 생성은 편집기 필요 |
