@@ -20,14 +20,14 @@
   const idx=clamp(x,0,heights.length-1);
   return row>=heights[idx];
  }
- function chooseTile(heights,x,row){
+ function chooseTile(heights,x,row,seedIndex=x){
   if(!Array.isArray(heights)||!Number.isInteger(x)||x<0||x>=heights.length)return null;
   const top=heights[x];
   if(!Number.isInteger(top)||row<top)return null;
   const L=heights[clamp(x-1,0,heights.length-1)];
   const R=heights[clamp(x+1,0,heights.length-1)];
   const leftOpen=row<L, rightOpen=row<R;
-  const seed=hash(x,Math.floor(row/2));
+  const seed=hash(seedIndex,Math.floor(row/2));
   if(row===top){
    // Taller neighbor is immediately beside this lower floor at a cliff foot.
    if(L<top&&R<top)return [4,1]; // narrow valley: full opaque surface
@@ -97,10 +97,22 @@
   for(const s of ground){const first=Math.round(s.x/TILE_SIZE)-min,last=Math.round((s.x+s.w)/TILE_SIZE)-min,top=Math.round(s.y/TILE_SIZE);for(let x=first;x<last;x++)heights[x]=Math.min(heights[x],top);}
   return {min,heights};
  }
+ // Maker maps can contain stacked/disconnected solid rectangles in one column.
+ // Keep the real occupied intervals instead of filling gaps below the topmost one.
+ function fromRectangles(solids){
+  const ground=solids.filter(s=>s.kind==='ground'&&!s.cave&&s.w>0&&s.h>0);
+  if(!ground.length)return {min:0,tile:()=>null};
+  for(const s of ground)if(![s.x,s.y,s.w,s.h].every(v=>Number.isFinite(v)&&Math.abs(v/TILE_SIZE-Math.round(v/TILE_SIZE))<1e-6))throw Error('GROUND_GRID_ALIGNMENT');
+  const min=Math.min(...ground.map(s=>Math.round(s.x/TILE_SIZE)))-1,end=Math.max(...ground.map(s=>Math.round((s.x+s.w)/TILE_SIZE)))+1,columns=Array.from({length:end-min},()=>[]);
+  for(const s of ground){const left=Math.round(s.x/TILE_SIZE)-min,right=Math.round((s.x+s.w)/TILE_SIZE)-min,top=Math.round(s.y/TILE_SIZE),bottom=Math.round((s.y+s.h)/TILE_SIZE);for(let x=left;x<right;x++)columns[x].push([top,bottom]);}
+  for(let x=0;x<columns.length;x++){const sorted=columns[x].sort((a,b)=>a[0]-b[0]),merged=[];for(const part of sorted){const last=merged[merged.length-1];if(last&&part[0]<=last[1])last[1]=Math.max(last[1],part[1]);else merged.push([...part]);}columns[x]=merged;}
+  function heightAt(index,row){const col=columns[index];if(!col)return Infinity;for(const [top,bottom] of col){if(row<bottom)return top;}return Infinity;}
+  return {min,tile(worldColumn,row){const i=worldColumn-min,center=heightAt(i,row);if(!Number.isInteger(center)||row<center)return null;return chooseTile([heightAt(i-1,row),center,heightAt(i+1,row)],1,row,i);}};
+ }
  function soilTile(x,row){const soil=[[4,2],[4,3],[4,4],[4,5]];return soil[hash(x,Math.floor(row/2))%soil.length];}
  function waterVisual(g,overlap=TILE_SIZE*2){
   if(!g||![g.leftX,g.rightX,g.leftTop,g.rightTop,overlap].every(Number.isFinite)||g.rightX<=g.leftX||overlap<0)throw Error('WATER_VISUAL_BOUNDS');
   return {left:g.leftX-overlap,right:g.rightX+overlap,width:g.rightX-g.leftX+2*overlap,surfaceY:Math.max(g.leftTop,g.rightTop)};
  }
- return Object.freeze({TILE_SIZE,ATLAS_COLUMNS,chooseTile,validate,paint,walls,filled,fromSolids,soilTile,waterVisual});
+ return Object.freeze({TILE_SIZE,ATLAS_COLUMNS,chooseTile,validate,paint,walls,filled,fromSolids,fromRectangles,soilTile,waterVisual});
 });

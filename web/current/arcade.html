@@ -2100,10 +2100,13 @@ function hojaMakerValidateProject(p){
     ids.add(m.id);
     if(!Number.isInteger(m.width)||m.width<32||m.width>512||!Number.isInteger(m.height)||m.height<24||m.height>256)throw Error('맵 크기 범위 오류');
     if(!Array.isArray(m.terrain)||!Array.isArray(m.objects)||m.terrain.length>4000||m.objects.length>1200)throw Error('지형/오브젝트 수 초과');
+    if(m.hojaGroundStyle!==undefined&&!['legacy','seasonal'].includes(m.hojaGroundStyle))throw Error('지원하지 않는 지면 스타일');
     objectCount+=m.objects.length;
     for(const o of m.objects)if(o?.type==='gimmick')hojaMakerGimmick(o);
     for(const t of [...m.terrain,...m.objects]){
       if(!t||!Number.isFinite(t.x)||!Number.isFinite(t.y)||!Number.isFinite(t.w)||!Number.isFinite(t.h)||t.w<=0||t.h<=0)throw Error('잘못된 지형/오브젝트 위치');
+      if(t.hojaGroundStyle!==undefined&&!['legacy','seasonal'].includes(t.hojaGroundStyle))throw Error('지원하지 않는 지면 스타일');
+      if(m.theme!=='cave'&&t.kind==='ground'&&(t.hojaGroundStyle||m.hojaGroundStyle)==='seasonal'&&!hojaMakerCustomTerrain(t)&&![t.x,t.y,t.w,t.h].every(Number.isInteger))throw Error('사계절 지면은 타일 격자에 맞춰야 합니다. 소수점 지형은 기존 지면을 선택하세요.');
       if(t.x<0||t.y<0||t.x+t.w>m.width||t.y+t.h>m.height)throw Error(`오브젝트가 맵 밖에 있습니다: ${t.id||'unknown'}`);
       if(t.type==='pipe'&&t.pipeLength!==undefined){const n=t.pipeLength,extra=n-4,dir=t.orientation||'up';if(!Number.isInteger(n)||n<4||n>128)throw Error(`토관 ${t.id}: 길이는 4~128칸입니다.`);if((dir==='up'&&t.y+t.h+extra>m.height)||(dir==='down'&&t.y-extra<0)||(dir==='left'&&t.x+t.w+extra>m.width)||(dir==='right'&&t.x-extra<0))throw Error(`토관 ${t.id}: 몸통이 맵 밖에 있습니다.`);}
     }
@@ -2137,7 +2140,7 @@ function hojaMakerToStage(m,i){
   return {
     id:i+1,theme,worldW:m.width,worldH:tx(m.height),goal:goalNode?goalNode.x+goalNode.w/2:m.width-3,start:startNode?startNode.x+startNode.w/2:m.spawn?.x??6,
     checkpoints:[m.spawn?.x??6],
-    solids:m.terrain.filter(t=>!hojaMakerCustomTerrain(t)).map(t=>({x:tx(t.x),y:tx(t.y),w:tx(t.w),h:tx(t.h),kind:t.kind==='ground'?'ground':'platform'})),
+    solids:m.terrain.filter(t=>!hojaMakerCustomTerrain(t)).map(t=>({x:tx(t.x),y:tx(t.y),w:tx(t.w),h:tx(t.h),kind:t.kind==='ground'?'ground':'platform',hojaGroundStyle:t.hojaGroundStyle||m.hojaGroundStyle||'legacy'})),
     moving:objects.filter(o=>o.type==='moving').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:8,makerSkin:o.platformSkin==='grey'?'grey':'brown',makerStandable:o.standable!==false,axis:'x',min:tx(o.x),max:tx(o.x+10),speed:Number(o.speed)||60,
       waypoints:(o.patrol?.waypoints||[]).map(p=>({x:tx(p.x),y:tx(p.y)})),pathMode:o.patrol?.mode||'pingpong'})),
     bricks,enemies:objects.filter(o=>o.type==='enemy').map(o=>({type:['JUMPY','OWL','HERMIE','ROACH','BLANKEY','BALLOONEY','MARTIAN','ROBOT','CIRCUIT'].includes(o.enemyType)?o.enemyType:'JUMPY',
@@ -3506,6 +3509,8 @@ class HojaScene extends Phaser.Scene{
     // Maker projects may position terrain between grid cells; retain their
     // existing renderer and reserve the grid-based renderer for game stages.
     this.hojaGroundGrid=window.HOJA_GROUND_AUTOTILE.fromSolids(HOJA_MAKER_MODE?[]:SOLIDS);
+    const aligned=s=>[s.x,s.y,s.w,s.h].every(v=>Number.isFinite(v)&&Math.abs(v/TILE-Math.round(v/TILE))<1e-6);
+    this.hojaMakerGroundGrid=HOJA_MAKER_MODE?window.HOJA_GROUND_AUTOTILE.fromRectangles(SOLIDS.filter(s=>aligned(s)&&s.hojaGroundStyle==='seasonal')):null;
     for(const s of SOLIDS){
       const r=this.add.rectangle(s.x+s.w/2,s.y+s.h/2,s.w,s.h,0x000000,0);
       this.physics.add.existing(r,true);
@@ -3523,7 +3528,7 @@ class HojaScene extends Phaser.Scene{
   }
   hojaV2DrawSolid(s,isCave){
     if(!Number.isFinite(s.x)||!Number.isFinite(s.y)||s.w<=0||s.h<=0)return;
-    const isGround=!HOJA_MAKER_MODE&&!isCave&&s.kind==='ground'&&!s.cave;
+    const isGround=(!HOJA_MAKER_MODE||s.hojaGroundStyle==='seasonal')&&!isCave&&s.kind==='ground'&&!s.cave;
     const sheet=this.textures.get(isGround?'hojaGround_'+STAGE.theme:'paV2Terrain');
     const original=sheet?.getSourceImage();
     if(!original)throw new Error('Terrain image unavailable');
@@ -3567,7 +3572,7 @@ class HojaScene extends Phaser.Scene{
           let cutX=((isCave?0:6)+tileColumn)*TILE,cutY=(family+tileRow)*TILE;
           if(isGround){
             const index=Math.round(worldX/TILE)-this.hojaGroundGrid.min;
-            const tile=window.HOJA_GROUND_AUTOTILE.chooseTile(this.hojaGroundGrid.heights,index,Math.round(rowY/TILE));
+            const tile=HOJA_MAKER_MODE?this.hojaMakerGroundGrid.tile(Math.round(worldX/TILE),Math.round(rowY/TILE)):window.HOJA_GROUND_AUTOTILE.chooseTile(this.hojaGroundGrid.heights,index,Math.round(rowY/TILE));
             if(!tile)throw new Error('Ground autotile missing at '+worldX+','+rowY);
             cutX=tile[0]*TILE;cutY=tile[1]*TILE;
           }

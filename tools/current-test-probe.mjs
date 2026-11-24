@@ -27,7 +27,7 @@ export function instrumentArcade(input, {keepProductionCave=false}={}) {
     A.edit('this.caveFovSoft=true;','this.caveFovSoft=window.HOJA_V047_FOV_SOFT!==false;');
   }
   // Legacy reference is selected only inside the instrumented test build.
-  A.edit("    const isGround=!HOJA_MAKER_MODE&&!isCave&&s.kind==='ground'&&!s.cave;","    const isGround=!HOJA_MAKER_MODE&&!isCave&&s.kind==='ground'&&!s.cave&&sessionStorage.getItem('HOJA_TEST_OLD_GROUND')!=='1';");
+  A.edit("    const isGround=(!HOJA_MAKER_MODE||s.hojaGroundStyle==='seasonal')&&!isCave&&s.kind==='ground'&&!s.cave;","    const isGround=(!HOJA_MAKER_MODE||s.hojaGroundStyle==='seasonal')&&!isCave&&s.kind==='ground'&&!s.cave&&sessionStorage.getItem('HOJA_TEST_OLD_GROUND')!=='1';");
   A.edit("function startStage(index,fresh,spawn='start',durationSeconds=900){", "function startStage(index,fresh,spawn='start',durationSeconds=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?600:900){");
   A.edit('RUN_TIME_SETTINGS=hojaCreateTimeSettings(durationSeconds);', "RUN_TIME_SETTINGS=sessionStorage.getItem('HOJA_TEST_LEGACY_TIME')==='1'?Object.freeze({durationSeconds:600,sunsetSeconds:100,nightSeconds:50,guideSeconds:50}):hojaCreateTimeSettings(durationSeconds);");
   A.edit('    RUN.deaths=(RUN.deaths||0)+1;', '    this.__phase4cDeathReason=reason;RUN.deaths=(RUN.deaths||0)+1;');

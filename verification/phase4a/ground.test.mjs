@@ -4,3 +4,15 @@ test('actual ground rectangles form padded columns without filling gaps or cave 
 test('six to ten tile rise and drop keep vertical walls and the reference foot joins',()=>{const h=[10,10,4,4,14,14],up=a.walls(h);assert.equal(up[0].height,6);assert.equal(up[1].height,10);assert.deepEqual(Array.from(a.chooseTile(h,2,4)),[3,1]);assert.deepEqual(Array.from(a.chooseTile(h,2,9)),[3,2]);assert.deepEqual(Array.from(a.chooseTile(h,2,10)),[3,3]);assert.deepEqual(Array.from(a.chooseTile(h,3,13)),[5,2]);assert.deepEqual(Array.from(a.chooseTile(h,3,14)),[5,3]);});
 test('soil variation is deterministic and geometry misalignment fails explicitly',()=>{assert.deepEqual(Array.from(a.soilTile(17,24)),Array.from(a.soilTile(17,24)));assert.throws(()=>a.fromSolids([{x:1,y:16,w:16,h:16,kind:'ground'}]),/GROUND_GRID_ALIGNMENT/);});
 test('visual water extends under both banks and uses the lower bank without changing physics',()=>{const gap={leftX:100,rightX:220,leftTop:96,rightTop:144,surfaceY:160};const v=a.waterVisual(gap,32);assert.deepEqual(JSON.parse(JSON.stringify(v)),{left:68,right:252,width:184,surfaceY:144});assert.equal(gap.surfaceY,160);const reverse=a.waterVisual({...gap,leftTop:144,rightTop:96},32);assert.equal(reverse.surfaceY,144);});
+
+test('Maker rectangles join cliffs and steps without filling stacked gaps',()=>{
+ const rects=[{kind:'ground',x:0,y:10*16,w:5*16,h:8*16},{kind:'ground',x:5*16,y:4*16,w:3*16,h:14*16},{kind:'ground',x:10*16,y:10*16,w:4*16,h:8*16},{kind:'ground',x:11*16,y:2*16,w:2*16,h:2*16}];
+ const g=a.fromRectangles(rects);
+ assert.deepEqual(Array.from(g.tile(4,10)),[2,3]);
+ assert.deepEqual(Array.from(g.tile(5,4)),[3,1]);
+ assert.deepEqual(Array.from(g.tile(5,10)),[3,3]);
+ assert.equal(g.tile(8,10),null);
+ assert.ok(g.tile(11,2));
+ assert.equal(g.tile(11,5),null);
+ assert.ok(g.tile(11,10));
+});
