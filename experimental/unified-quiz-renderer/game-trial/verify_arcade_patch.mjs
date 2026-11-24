@@ -9,7 +9,17 @@ const compressed=game.match(/const HOJA_V051_ARCADE_GZIP='([^']+)'/);
 assert(compressed,'Original compressed arcade source not found');
 const decoded=gunzipSync(Buffer.from(compressed[1],'base64')).toString('utf8');
 assert(decoded.length>1_200_000,'Arcade source truncated');
-const patched=patchApprovedArcadeInnerHTML(decoded);
+// 40-6BF: exactly like the game (part-14 expandArcade): production ranking patch FIRST, then the approved patch.
+const rp=game.match(/const HOJA_RANKING_PATCH_=(\[.*?\]\]);\n/s);
+assert(rp,'production ranking patch (HOJA_RANKING_PATCH_) not found in the game');
+const RANKING=JSON.parse(rp[1]);
+assert(RANKING.length===30,'production ranking patch must have 30 entries');
+let ranked=decoded;
+for(const [before,after] of RANKING){const first=ranked.indexOf(before);
+ assert(first>=0&&ranked.indexOf(before,first+before.length)<0,'production ranking patch anchor mismatch: '+before.slice(0,40));
+ ranked=ranked.slice(0,first)+after+ranked.slice(first+before.length);}
+assert(!game.includes('for(const [before,after] of rankingPatch)'),'launch() must not re-apply the ranking patch on the approved-patched arcade');
+const patched=patchApprovedArcadeInnerHTML(ranked);
 assert(patched.includes('hojaArcadeApprovedChildTrial'));
 assert(patched.includes('hojaTrialControlsHelpScript'),'H help panel must be injected');
 assert(patched.includes('jump:this.input.keyboard.addKey(K.PERIOD)'),'Period must be jump');
@@ -41,13 +51,12 @@ assert(patched.includes('m.found===25&&m.answered===25&&m.usedFamilies===25'),'F
 assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_START'));
 assert(patched.includes('HOJA_ARCADE_APPROVED_REVIEW_DONE'));
 assert(patched.includes('startReview?.(RUN.step09History||[]'));
-assert(patched.includes('maxlength="6"'),'Rank input must permit 2–6 characters');
-assert(patched.includes('aria-label="한글·영문·숫자 2~6자"'));
-assert(patched.includes("normalize('NFC').replace(/[a-z]/g,c=>c.toUpperCase()).replace(/[^가-힣A-Z0-9]/g,'').slice(0,6)"));
-assert(patched.includes('const valid=cleaned.length>=2&&cleaned.length<=6'));
-assert(patched.includes('compositionstart')&&patched.includes('compositionend'));
-assert(patched.includes('/^[가-힣A-Z0-9]{2,6}$/.test(r.name)'));
+assert(!patched.includes('maxlength="3"'),'3-character limit must be gone (production ranking patch)');
 assert(!patched.includes('aria-label="영문 또는 숫자 세 글자"'));
+assert(patched.includes('HOJA_RANK_COMPOSING_')&&patched.includes('compositionstart')&&patched.includes('compositionend'),'production IME handling');
+assert(!patched.includes("dataset.rankComposing"),'no second (approved) composition handler');
+assert(patched.includes('/^[가-힣A-Z0-9]{2,6}$/'),'2-6 Hangul/Latin/digit name policy');
+assert(patched.includes("failures.push('승인 25문항 미완료')"),'approved 25-question FINISH requirement added to the production failures list');
 const approvedBackend=readFileSync('versions/2.0.0/Code.gs','utf8');
 assert(approvedBackend.includes('/^[가-힣A-Z0-9]{2,6}$/.test(v)'),'Name policy must remain identical to the source GAS');
 assert(approvedBackend.includes("HOJA_RANK_FORBIDDEN_ = ['SEX','XES','EXS','SXE']"),'Forbidden-name rule must remain original');

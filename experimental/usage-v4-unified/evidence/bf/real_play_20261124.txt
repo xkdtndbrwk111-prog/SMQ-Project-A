@@ -1,0 +1,21 @@
+# 40-6BF REAL play on isolated deployment @7 (signed-out Chromium, real Apps Script iframe, real GitHub @440cc1f), 2026-11-24
+## run 1
+SOLO_QUIZ PASS {"unit": "math5-s2-u4", "answered": 27, "correctGiven": 14, "byType": {"OX": 6, "MCQ": 21}, "keyboardAnswers": 27, "result": {"answered": 27, "correct": 14, "pct": "52%", "shown": true, "retry": true, "back": true}, "verdictMismatches": [], "backToModeSelect": true, "pageErrors": []}
+REAL_PLAY_PASS []
+## run 2
+SOLO_QUIZ PASS {"unit": "soc6-s2-u3-2-common", "answered": 28, "correctGiven": 14, "byType": {"MCQ": 22, "OX": 6}, "keyboardAnswers": 28, "result": {"answered": 28, "correct": 14, "pct": "50%", "shown": true, "retry": true, "back": true}, "verdictMismatches": [], "backToModeSelect": true, "pageErrors": []}
+SOLO_ARCADE FAIL {"unit": "math5-s2-u4", "error": "TimeoutError('Locator.wait_for: Timeout 20000ms exceeded.\\nCall log:\\n  - waiting for locator(\"#hmSelections button.hmPick\").filter(has_text=\"게임 모드\").first to be visible\\n')"}
+TEAM_FULL FAIL {"unit": "eng5-ham-u10", "error": "TimeoutError('Locator.click: Timeout 10000ms exceeded.\\nCall log:\\n  - waiting for locator(\"iframe[id^=\\\\\"hojaTeamApproved\\\\\"]\").content_frame.locator(\"button.hqChoice[data-choice=\\\\\"c3\\\\\"]\")\\n    - locator resolved to <button class=\"hqChoice\" data-choice=\"c3\" data-hoja-gen=\"19\" data-hoja-qid=\"eng5-"}
+REAL_PLAY_FAIL ["SOLO_ARCADE:math5-s2-u4", "TEAM_FULL:eng5-ham-u10"]
+## run 3
+SOLO_ARCADE FAIL {"unit": "math5-s2-u4", "phaser": null, "canvas": null, "arcadeInfo": "Project B 공개 문제 연결", "pageErrors": []}
+TEAM_FULL FAIL {"unit": "eng5-ham-u10", "error": "TimeoutError('Locator.click: Timeout 10000ms exceeded.\\nCall log:\\n  - waiting for locator(\"iframe[id^=\\\\\"hojaTeamApproved\\\\\"]\").content_frame.locator(\"button.hqChoice[data-choice=\\\\\"c3\\\\\"]\")\\n    - locator resolved to <button class=\"hqChoice\" data-choice=\"c3\" data-hoja-gen=\"32\" data-hoja-qid=\"eng5-ham-u10:q32\">…</button>\\n  - attempting click action\\n    - waiting for element to be visible, enabled and stable\\n    - element is visible, enabled and stable\\n    - scrolling into view if needed\\n    - done scrolling\\n')"}
+REAL_PLAY_FAIL ["SOLO_ARCADE:math5-s2-u4", "TEAM_FULL:eng5-ham-u10"]
+## run 4 (arcade, story advanced by Enter without focus)
+SOLO_ARCADE FAIL {"unit": "math5-s2-u4", "phaser": null, "canvas": null, "arcadeInfo": "Project B 공개 문제 연결", "pageErrors": []}
+REAL_PLAY_FAIL ["SOLO_ARCADE:math5-s2-u4"]
+## team rerun (diagnostic wrapper, same driver)
+RESULT True {"unit": "eng5-ham-u10", "turnsAnswered": 24, "byType": {"OX": 5, "MCQ": 16, "SHORT": 3}, "wrongGiven": 12, "reviewAsked": 12, "winnerHeading": "호자 우승!", "finalScores": ["최종 290점", "최종 10점"], "scoresUnchangedByReview": true, "pageErrors": []}
+## arcade root cause (real @7, returning player): hqArcadeInfo = '아케이드 실행 준비 실패: 랭킹 패치 원본 불일치' (Phaser CDN 200)
+   approved arcade patch rewrote 9 ranking anchors BEFORE launch() applied the production rankingPatch (30) -> anchors missing
+## fix verified locally (mock, same Game.html as the isolated push): Phaser 4.2.1, 5 canvases, rank label '한글 영문 숫자 2~6자', approved child bridge present, no page error

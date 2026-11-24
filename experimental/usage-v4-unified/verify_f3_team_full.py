@@ -136,7 +136,8 @@ async def main():
     print('F3_TEAM_FULL_PASS')
     if a.github_packages: print('GITHUB_STANDIN_REQUESTS', len(GH_HITS), 'distinct', len(set(GH_HITS)), 'notFound', sum(h.endswith(':404') for h in GH_HITS))
 
-try:
-    asyncio.run(main())
-except Exception as e:
-    print('F3_TEAM_FULL_FAIL ' + repr(e)[:400]); sys.exit(1)
+if __name__ == '__main__':   # importable by verify_real_play.py (40-6BF)
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        print('F3_TEAM_FULL_FAIL ' + repr(e)[:400]); sys.exit(1)

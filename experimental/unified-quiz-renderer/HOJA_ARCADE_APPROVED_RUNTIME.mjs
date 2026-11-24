@@ -73,42 +73,15 @@ export function patchApprovedArcadeInnerHTML(html){
  "    return;\n"+
  "    // Original buttons preserved but not reached during the trial.\n"+
  '    q.choices.forEach((label,index)=>{');
+ // 40-6BF: the production ranking patch (Game part-14 rankingPatch) is applied FIRST and owns the whole
+ // ranking UI/name policy; this patcher only adds the approved 25-question FINISH requirement to its failures list.
  s=substituteOnce(s,
- "  const eligible=reason==='전체 스테이지 완료'&&verified&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;",
- "  const eligible=reason==='전체 스테이지 완료'&&verified&&m.found===25&&m.answered===25&&m.usedFamilies===25&&!!HOJA_RANK_CARTRIDGE_&&!HOJA_RANK_TEST_MODE_;");
+ "  const eligible=failures.length===0;",
+ "  if(!(m.found===25&&m.answered===25&&m.usedFamilies===25))failures.push('승인 25문항 미완료');\n  const eligible=failures.length===0;");
  s=substituteOnce(s,
  '  hojaStep09_3RenderProgress_();\n  hojaRankShow_(scene,reason);\n}',
  '  hojaStep09_3RenderProgress_();\n  if(!window.HOJA_ARCADE_APPROVED_BRIDGE?.startReview?.(RUN.step09History||[],()=>hojaRankShow_(scene,reason)))\n    hojaRankShow_(scene,reason);\n}');
- s=substituteOnce(s,
- "maxlength=\"3\" inputmode=\"text\" autocomplete=\"off\" autocapitalize=\"characters\" spellcheck=\"false\" aria-label=\"영문 또는 숫자 세 글자\" placeholder=\"AAA\"",
- "maxlength=\"6\" inputmode=\"text\" autocomplete=\"off\" autocapitalize=\"characters\" spellcheck=\"false\" aria-label=\"한글·영문·숫자 2~6자\" placeholder=\"호자\"");
- s=substituteOnce(s,
- "#hojaRankName{width:clamp(125px,28vw,215px);max-width:58%;height:clamp(50px,8vw,65px);",
- "#hojaRankName{width:clamp(160px,36vw,270px);max-width:64%;height:clamp(50px,8vw,65px);");
- s=substituteOnce(s,
- "  text-align:center;letter-spacing:.16em;text-indent:.16em;font-family:inherit;\n  font-size:clamp(22px,3.2vw,34px);",
- "  text-align:center;letter-spacing:.06em;text-indent:.06em;font-family:inherit;\n  font-size:clamp(18px,2.8vw,30px);");
- s=substituteOnce(s,
- "  return String(field?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3);",
- "  return String(field?.value||'').normalize('NFC').replace(/[a-z]/g,c=>c.toUpperCase()).replace(/[^가-힣A-Z0-9]/g,'').slice(0,6);");
- s=substituteOnce(s,
- "  const valid=cleaned.length===3&&!HOJA_RANK_FORBIDDEN_.has(cleaned);",
- "  const valid=cleaned.length>=2&&cleaned.length<=6&&!HOJA_RANK_FORBIDDEN_.has(cleaned);");
- s=substituteOnce(s,
- "'영문 A–Z 또는 숫자 0–9 세 글자를 입력하세요.'",
- "'한글·영문·숫자 2~6자를 입력하세요.'");
- s=substituteOnce(s,
- "  field?.addEventListener('input',hojaRankValidate_);",
- "  field?.addEventListener('compositionstart',()=>{field.dataset.rankComposing='yes';});\n  field?.addEventListener('compositionend',()=>{delete field.dataset.rankComposing;hojaRankValidate_();});\n  field?.addEventListener('input',e=>{if(e.isComposing||field.dataset.rankComposing==='yes')return;hojaRankValidate_();});");
- s=substituteOnce(s,
- "      HOJA_RANK_ROWS_=reply.rows.filter(r=>r&&/^[A-Z0-9]{3}$/.test(r.name)&&",
- "      HOJA_RANK_ROWS_=reply.rows.filter(r=>r&&/^[가-힣A-Z0-9]{2,6}$/.test(r.name)&&!HOJA_RANK_FORBIDDEN_.has(r.name)&&");
- s=substituteOnce(s,
- "    if(e.metaKey||e.ctrlKey||e.altKey||e.isComposing)return;",
- "    if(e.metaKey||e.ctrlKey||e.altKey||e.isComposing||e.keyCode===229||document.getElementById('hojaRankName')?.dataset.rankComposing==='yes')return;");
- s=substituteOnce(s,
- "      newValue=(value.slice(0,start)+e.key.toUpperCase()+value.slice(end)).slice(0,3);\n      cursor=Math.min(3,start+1);",
- "      newValue=(value.slice(0,start)+e.key.toUpperCase()+value.slice(end)).slice(0,6);\n      cursor=Math.min(6,start+1);");
+ // 40-6BF: ranking name/input substitutions removed (owned by the production rankingPatch applied before this).
  // Trial-only Phaser 2.0 input contract and death continue; original archive stays immutable.
  s=substituteOnce(s,"↑ 한 번 더: 끝내기","W 한 번 더: 끝내기");
  s=substituteOnce(s,"Enter / Space ▶ 스테이지 ","Enter ▶ 스테이지 ");

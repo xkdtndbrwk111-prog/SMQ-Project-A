@@ -12,7 +12,8 @@ ROOT=HERE.parents[2]
 ORIGINAL=ROOT/'versions/2.0.0/Game.html.parts'
 APPROVED=HERE.parent/'HOJA_APPROVED_RENDERER_BRIDGE.html'
 EXPECTED='4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6'
-EXPECTED_14='de83f2e30c03b082b7acbdf47a2c42bb2bc98eeb'
+# 40-6BF: arcade ranking patch applied before the approved patch (was de83f2e30c03b082b7acbdf47a2c42bb2bc98eeb)
+EXPECTED_14='47faed9728dcfb6e0e17710df747d782a78b2194'
 def gitblob(data):
     return hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
 def audit():
