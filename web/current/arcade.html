@@ -4206,6 +4206,12 @@ class HojaScene extends Phaser.Scene{
       // retain their original water position and timing.
       visual.surfaceY+=TILE;
       const visualHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
+      if(g.visualHeight!==undefined){
+        const beside=(edge,side)=>SOLIDS.some(s=>s.kind==='ground'&&Math.abs((side==='left'?s.x+s.w:s.x)-edge)<.01&&s.y<visual.surfaceY+visualHeight&&s.y+s.h>visual.surfaceY);
+        if(beside(g.leftX,'left'))visual.left-=TILE;
+        if(beside(g.rightX,'right'))visual.right+=TILE;
+        visual.width=visual.right-visual.left;
+      }
       const swim=HOJA_MAKER_MODE&&sp[4]==='swim';
       if(swim)this.hojaSwimZones.push({x:g.leftX,y:visual.surfaceY,width:g.width,height:visualHeight});
       const backing=this.add.rectangle(visual.left+visual.width/2,
@@ -5143,6 +5149,7 @@ class HojaScene extends Phaser.Scene{
     });
     this.hoja.play('hoja-idle');
     this.hojaSwimGhost=null;
+    this.hojaSurfaceJumpZone=null;
     if(this.hojaSwimZones?.length){
       const maskShape=this.add.graphics().setVisible(false);maskShape.fillStyle(0xffffff,1);
       for(const z of this.hojaSwimZones)maskShape.fillRect(z.x,z.y,z.width,z.height);
@@ -6004,6 +6011,7 @@ class HojaScene extends Phaser.Scene{
       hojaPressedAgainstMovingPlatform(this._hojaMovingPlatformSideHit,time,dir);
     const downHeld=this.keys.down.isDown||this.keys.s.isDown;
     const swimZone=HOJA_MAKER_MODE&&this.hojaSwimZones?.find(z=>b.center.x>=z.x&&b.center.x<z.x+z.width&&b.center.y>=z.y&&b.center.y<z.y+z.height);
+    if(this.hojaSurfaceJumpZone&&b.velocity.y>=0&&(b.bottom>=this.hojaSurfaceJumpZone.y+6||(confirmedGroundContact&&!swimZone)))this.hojaSurfaceJumpZone=null;
     if(!!swimZone!==this.hojaSwimWasInside){
       this.hojaSwimWasInside=!!swimZone;
       for(let i=0;i<6;i++){
@@ -6026,6 +6034,18 @@ class HojaScene extends Phaser.Scene{
       time-this.lastMoveInputAt>=2500&&!this.dying&&!this.clear;
 
     applyHorizontalMotion(this, dt, time, grounded, dir, run, sitIntent);
+    if(swimZone){
+      // The visible 64px Hoja sprite extends beyond its 36px physics body.
+      // Keep that visible edge out of solid walls only while swimming; retain
+      // the existing body and all normal land collisions and motion.
+      const visualHalfWidth=24;let x=this.playerBody.x;
+      for(const s of SOLIDS){
+        if(s.kind!=='ground'||b.bottom<=s.y+3||b.top>=s.y+s.h-3)continue;
+        if(x<=s.x&&x+visualHalfWidth>s.x)x=Math.min(x,s.x-visualHalfWidth);
+        else if(x>=s.x+s.w&&x-visualHalfWidth<s.x+s.w)x=Math.max(x,s.x+s.w+visualHalfWidth);
+      }
+      if(x!==this.playerBody.x){this.playerBody.setX(x);b.position.x=x-b.halfWidth;if((dir>0&&b.velocity.x>0)||(dir<0&&b.velocity.x<0))b.setVelocityX(0);}
+    }
 
     // ↑/W at a door enters it instead of jumping (Space/Z always jump).
     // Consume both edges independently: short-circuiting JustDown would
@@ -6044,13 +6064,19 @@ class HojaScene extends Phaser.Scene{
     const spacePressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);
     const zPressed=Phaser.Input.Keyboard.JustDown(this.keys.z);
     const jumpPressed=spacePressed||zPressed; // Phase 1C: W 점프 없음
-    if(swimZone){
+    const nearSwimSurface=HOJA_MAKER_MODE&&this.hojaSwimZones?.find(z=>b.center.x>=z.x&&b.center.x<z.x+z.width&&b.bottom>=z.y-6&&b.bottom<=z.y+38);
+    const surfaceJump=jumpPressed&&nearSwimSurface&&!this.hojaSurfaceJumpZone;
+    if(surfaceJump){
+      this.hojaSurfaceJumpZone=nearSwimSurface;this.strongStomp=false;this.coyoteMs=0;this.jumpBufferAt=-1e9;
+      this._jumpConsumedAirborne=true;this.jumpCut=false;b.setVelocityY(-Math.sqrt(2*P_CFG.gravityUp*P_CFG.jumpHeight*.5));SFX.jump();
+    }
+    if(swimZone&&!this.hojaSurfaceJumpZone){
       this.strongStomp=false;this.jumpBufferAt=-1e9;b.setAccelerationY(0);
       const up=this.keys.up.isDown||this.keys.w.isDown||this.keys.jump.isDown||this.keys.z.isDown;
       const vertical=(downHeld?1:0)-(up?1:0),target=vertical*135+(vertical?0:18);
       b.setVelocityY(Phaser.Math.Linear(b.velocity.y,target,Math.min(1,dt*5)));
       b.setVelocityX(Phaser.Math.Clamp(b.velocity.x,-155,155));
-    }else applyVerticalMotion(this, jumpPressed, downPressed, grounded, SFX);
+    }else applyVerticalMotion(this, surfaceJump?false:jumpPressed, downPressed, grounded, SFX);
     if(this.hojaGimmicks){this.hojaGimmicks.update(gimmickDelta);if(this.dying)return;}
 
     this.updateSecrets(time);
