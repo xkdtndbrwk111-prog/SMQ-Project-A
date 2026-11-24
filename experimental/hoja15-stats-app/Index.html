@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HOJA 1.5 통계</title>
+<style>
+:root{color-scheme:light;--bg:#f4f4f2;--card:#fcfcfb;--line:#e2e1dc;--grid:#ecebe7;--ink:#0b0b0b;--ink2:#52514e;--mute:#6f6e69;
+ --s1:#2a78d6;--s2:#e08a2c;--accent:#10253c;--warn-bg:#fff4dc;--warn-ink:#6b4a00;--err-bg:#fde8e8;--err-ink:#8a1c1c}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#121211;--card:#1a1a19;--line:#2e2e2c;--grid:#262624;--ink:#f0efec;
+ --ink2:#c3c2b7;--mute:#9a998f;--s1:#3987e5;--s2:#e89a45;--accent:#ffd85e;--warn-bg:#3a2f12;--warn-ink:#f5d999;--err-bg:#3d1a1a;--err-ink:#f3b6b6}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;-webkit-text-size-adjust:100%}
+.wrap{max-width:760px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;gap:10px;margin:4px 2px 10px}
+header h1{font-size:20px;margin:0;flex:1;letter-spacing:-.01em}
+header h1 small{display:block;font-size:12px;font-weight:500;color:var(--ink2);margin-top:2px}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 12px;font-size:14px;touch-action:manipulation}
+button:disabled{opacity:.5}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px;position:sticky;top:0;z-index:3}
+.seg button{border:0;padding:9px 4px;font-weight:700;font-size:14px;background:transparent;color:var(--ink2)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 12px 10px}
+.tile .k{font-size:12px;color:var(--ink2)}
+.tile .v{font-size:30px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.tile .h{font-size:11px;color:var(--mute);margin-top:1px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:baseline;gap:8px}
+.card h2 .note{font-weight:500}
+.note{font-size:12px;color:var(--ink2)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);margin-top:6px;flex-wrap:wrap}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+svg{display:block;width:100%}
+.hbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;margin:9px 0;font-size:14px}
+.hbar .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .num{color:var(--ink2);font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
+.hbar .track{grid-column:1/3;height:10px;background:var(--grid);border-radius:5px;overflow:hidden}
+.hbar .fill{height:10px;background:var(--s1);border-radius:0 5px 5px 0;min-width:3px}
+.hbar .sub{grid-column:1/3;font-size:11px;color:var(--mute);margin-top:-2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.split{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;margin:6px 0 8px}
+.split div{min-width:3px}
+.kv{display:flex;justify-content:space-between;font-size:14px;margin:6px 0}
+.kv b{font-variant-numeric:tabular-nums}
+.empty{color:var(--mute);font-size:13px;padding:6px 0}
+.banner{border-radius:12px;padding:12px;font-size:14px;margin-bottom:12px;line-height:1.5}
+.warn{background:var(--warn-bg);color:var(--warn-ink)}.err{background:var(--err-bg);color:var(--err-ink)}
+.hidden{display:none!important}
+#tip{position:fixed;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;display:none;box-shadow:0 3px 10px rgba(0,0,0,.18);z-index:9;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+th,td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--grid)}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;font-size:13px;color:var(--ink2);margin-top:8px}
+input[type=text]{width:100%;font:inherit;font-size:15px;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin:8px 0}
+.foot{font-size:11px;color:var(--mute);text-align:center;margin-top:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header>
+  <h1>HOJA 1.5 통계<small id="meta">불러오는 중…</small></h1>
+  <button id="refresh" type="button" aria-label="새로고침">새로고침</button>
+ </header>
+ <div id="error" class="banner err hidden" role="alert"></div>
+ <section id="setup" class="card hidden" aria-label="처음 설정">
+  <h2>처음 한 번만 설정</h2>
+  <p class="note">게임 이용 기록이 쌓이는 스프레드시트(EVENT_LOG 시트가 있는 파일)의 주소를 붙여 넣으세요. 이 통계 앱은 읽기만 합니다.</p>
+  <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
+  <button id="saveSetup" type="button">저장하고 통계 보기</button>
+  <p class="note" id="setupMsg" role="status"></p>
+ </section>
+ <section id="content" class="hidden" aria-label="통계">
+  <div class="seg" role="group" aria-label="기간">
+   <button type="button" data-p="today" aria-pressed="false">오늘</button>
+   <button type="button" data-p="d7" aria-pressed="true">7일</button>
+   <button type="button" data-p="d30" aria-pressed="false">30일</button>
+   <button type="button" data-p="all" aria-pressed="false">전체</button>
+  </div>
+  <div class="tiles">
+   <div class="tile"><div class="k" id="k-total">게임 시작</div><div class="v" id="t-total">–</div><div class="h" id="t-range"></div></div>
+   <div class="tile"><div class="k">하루 평균</div><div class="v" id="t-avg">–</div><div class="h" id="t-days"></div></div>
+   <div class="tile"><div class="k">혼자 놀기</div><div class="v" id="t-solo">–</div><div class="h" id="t-solo-p"></div></div>
+   <div class="tile"><div class="k">함께 놀기 (팀전)</div><div class="v" id="t-team">–</div><div class="h" id="t-team-p"></div></div>
+  </div>
+  <div class="card">
+   <h2>날짜별 게임 시작 <span class="note" id="daily-note"></span></h2>
+   <svg id="daily" role="img" aria-label="날짜별 게임 시작 수"></svg>
+   <div class="legend"><span><span class="sw" style="background:var(--s1)"></span>혼자 놀기</span><span><span class="sw" style="background:var(--s2)"></span>함께 놀기</span></div>
+   <details><summary>표로 보기</summary><table><thead><tr><th>날짜</th><th class="n">혼자</th><th class="n">함께</th><th class="n">합계</th></tr></thead><tbody id="daily-table"></tbody></table></details>
+  </div>
+  <div class="card"><h2>많이 고른 단원 <span class="note">한 게임에 여러 단원을 고르면 각각 1회</span></h2><div id="l-units"></div></div>
+  <div class="card"><h2>시간대 <span class="note">한국 시간 · 수업 시간 확인용</span></h2><svg id="hours" role="img" aria-label="시간대별 게임 시작 수"></svg></div>
+  <div class="card"><h2>요일</h2><svg id="weekdays" role="img" aria-label="요일별 게임 시작 수"></svg></div>
+  <div class="card"><h2>팀 수 <span class="note">함께 놀기</span></h2><div id="l-teams"></div></div>
+  <div class="card"><h2>학년</h2><div id="l-grade"></div></div>
+  <div class="card"><h2>교과</h2><div id="l-subject"></div></div>
+  <div class="card"><h2>한 번에 고른 단원 수</h2><div id="l-upg"></div></div>
+ </section>
+ <p class="foot">게임 시작 횟수만 셉니다. 학생 이름·학교·기기 정보는 없습니다.<br>숫자는 5분마다 새로 계산되며, 새로고침을 누르면 바로 다시 계산합니다.</p>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var fmt=function(n){return Number(n||0).toLocaleString('ko-KR');};
+var pct=function(a,b){return b?Math.round(a*1000/b)/10+'%':'–';};
+var DATA=null,PERIOD='d7',busy=false;
+var WD=['일','월','화','수','목','금','토'];
+function el(tag,text,cls){var e=document.createElement(tag);if(text!=null)e.textContent=String(text);if(cls)e.className=cls;return e;}
+function clear(n){while(n.firstChild)n.removeChild(n.firstChild);}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function svgEl(tag,attrs){var e=document.createElementNS('http://www.w3.org/2000/svg',tag);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
+var tip=$('tip');
+function showTip(text,x,y){tip.textContent=text;tip.style.display='block';var w=tip.offsetWidth;tip.style.left=Math.max(6,Math.min(innerWidth-w-6,x-w/2))+'px';tip.style.top=Math.max(6,y-44)+'px';}
+function hideTip(){tip.style.display='none';}
+document.addEventListener('scroll',hideTip,{passive:true});
+document.addEventListener('pointerdown',function(e){if(!e.target.closest||!e.target.closest('svg'))hideTip();});
+function bars(id,list,opts){
+ opts=opts||{};var box=$(id);clear(box);
+ if(!list||!list.length){box.appendChild(el('div','이 기간에는 기록이 없습니다.','empty'));return;}
+ var total=list.reduce(function(s,x){return s+x.count;},0),max=Math.max.apply(null,list.map(function(x){return x.count;}))||1;
+ list.slice(0,opts.limit||list.length).forEach(function(x){
+  var row=el('div',null,'hbar');var lab=el('div',x.label,'lab');lab.title=x.full||x.label;
+  row.appendChild(lab);row.appendChild(el('div',fmt(x.count)+'회 · '+pct(x.count,total),'num'));
+  if(opts.sub&&x.full&&x.full!==x.label)row.appendChild(el('div',x.full,'sub'));
+  var tr=el('div',null,'track'),f=el('div',null,'fill');f.style.width=(x.count/max*100)+'%';tr.appendChild(f);row.appendChild(tr);
+  box.appendChild(row);
+ });
+}
+function columns(svgId,values,labels,opts){
+ opts=opts||{};var svg=$(svgId);clear(svg);
+ var W=svg.clientWidth||340,H=opts.h||150,pad={l:28,r:6,t:8,b:22};svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.style.height=H+'px';
+ var n=values.length,max=Math.max(1,Math.max.apply(null,values.map(function(v){return opts.stack?v[0]+v[1]:v;})));
+ var nice=Math.pow(10,Math.floor(Math.log10(max)));var step=[1,2,5,10].map(function(m){return m*nice;}).find(function(s){return max/s<=4;})||nice*10;var top=Math.ceil(max/step)*step;
+ var iw=W-pad.l-pad.r,ih=H-pad.t-pad.b,bw=iw/n,gap=Math.min(2,bw*.2);
+ for(var g=0;g<=top;g+=step){var y=pad.t+ih-(g/top)*ih;svg.appendChild(svgEl('line',{x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:css('--grid'),'stroke-width':1}));
+  var t=svgEl('text',{x:pad.l-4,y:y+3,'text-anchor':'end','font-size':10,fill:css('--mute')});t.textContent=fmt(g);svg.appendChild(t);}
+ values.forEach(function(v,i){
+  var x=pad.l+i*bw+gap/2,w=Math.max(1,bw-gap),parts=opts.stack?v:[v,0],base=pad.t+ih,cols=[css('--s1'),css('--s2')];
+  parts.forEach(function(p,j){if(!p)return;var h=p/top*ih;base-=h;svg.appendChild(svgEl('rect',{x:x,y:base,width:w,height:Math.max(0,h-(j===0&&parts[1]?1:0)),rx:Math.min(3,w/3),fill:cols[j]}));});
+  var hit=svgEl('rect',{x:pad.l+i*bw,y:pad.t,width:bw,height:ih,fill:'transparent'});
+  hit.addEventListener('pointerdown',function(e){var b=hit.getBoundingClientRect();showTip(opts.tip(i),b.left+b.width/2,b.top+8);e.stopPropagation();});
+  hit.addEventListener('pointerenter',function(e){if(e.pointerType==='mouse'){var b=hit.getBoundingClientRect();showTip(opts.tip(i),b.left+b.width/2,b.top+8);}});
+  hit.addEventListener('pointerleave',function(e){if(e.pointerType==='mouse')hideTip();});
+  svg.appendChild(hit);
+  if(labels[i]){var t=svgEl('text',{x:pad.l+i*bw+bw/2,y:H-6,'text-anchor':'middle','font-size':10,fill:css('--mute')});t.textContent=labels[i];svg.appendChild(t);}
+ });
+}
+function md(d){return Number(d.slice(5,7))+'/'+Number(d.slice(8,10));}
+function render(){
+ if(!DATA||!DATA.periods)return;
+ var p=DATA.periods[PERIOD];
+ document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.p===PERIOD));});
+ var days={today:1,d7:7,d30:30,all:DATA.daily?Math.max(1,daysBetween(DATA.since,DATA.today)):1}[PERIOD];
+ var names={today:'오늘',d7:'최근 7일',d30:'최근 30일',all:'전체'};
+ $('k-total').textContent=names[PERIOD]+' 게임 시작';$('t-total').textContent=fmt(p.total);
+ $('t-range').textContent=PERIOD==='all'?DATA.since+'부터':PERIOD==='today'?DATA.today:'';
+ $('t-avg').textContent=PERIOD==='today'?fmt(p.total):(Math.round(p.total/days*10)/10).toLocaleString('ko-KR');$('t-days').textContent=days+'일 기준';
+ $('t-solo').textContent=fmt(p.solo);$('t-solo-p').textContent=pct(p.solo,p.total);
+ $('t-team').textContent=fmt(p.team);$('t-team-p').textContent=pct(p.team,p.total);
+ // daily: last 14 / 30 / up to 60 days
+ var span=PERIOD==='d30'||PERIOD==='all'?(PERIOD==='all'?DATA.daily.length:30):14;
+ var dl=DATA.daily.slice(-span);
+ $('daily-note').textContent='최근 '+dl.length+'일';
+ var every=Math.ceil(dl.length/7);
+ columns('daily',dl.map(function(d){return [d.solo,d.team];}),dl.map(function(d,i){return (dl.length-1-i)%every===0?md(d.date):'';}),
+  {stack:true,h:170,tip:function(i){var d=dl[i];return md(d.date)+' · 합계 '+fmt(d.count)+'회 (혼자 '+fmt(d.solo)+' · 함께 '+fmt(d.team)+')';}});
+ var tb=$('daily-table');clear(tb);dl.slice().reverse().forEach(function(d){var tr=el('tr');tr.appendChild(el('td',d.date));
+  [d.solo,d.team,d.count].forEach(function(v){var td=el('td',fmt(v));td.className='n';tr.appendChild(td);});tb.appendChild(tr);});
+ bars('l-units',p.units,{sub:true});
+ columns('hours',p.hours,p.hours.map(function(_,h){return h%3===0?h+'시':'';}),{h:140,tip:function(i){return i+'시대 · '+fmt(p.hours[i])+'회';}});
+ var wdOrder=[1,2,3,4,5,6,0];
+ columns('weekdays',wdOrder.map(function(i){return p.weekdays[i];}),wdOrder.map(function(i){return WD[i];}),{h:120,tip:function(k){return WD[wdOrder[k]]+'요일 · '+fmt(p.weekdays[wdOrder[k]])+'회';}});
+ bars('l-teams',Object.keys(p.teams).sort(function(a,b){return a-b;}).map(function(k){return {label:k+'팀',count:p.teams[k]};}));
+ bars('l-grade',p.grade.map(function(x){return {label:/^\d$/.test(x.label)?x.label+'학년':x.label,count:x.count};}));
+ bars('l-subject',p.subject);
+ bars('l-upg',Object.keys(p.unitsPerGame).sort().map(function(k){return {label:k+'개 단원',count:p.unitsPerGame[k]};}));
+}
+function daysBetween(a,b){return Math.round((Date.parse(b)-Date.parse(a))/86400000)+1;}
+function setMeta(v){
+ var t=new Date(v.generatedAt);var hh=('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2);
+ $('meta').textContent=(v.empty?'아직 HOJA 1.5 기록이 없습니다 · ':'')+hh+' 기준'+(v.cached?' (5분 캐시)':'');
+}
+function load(refresh){
+ if(busy)return;busy=true;$('refresh').disabled=true;$('error').classList.add('hidden');
+ $('meta').textContent='불러오는 중…';
+ google.script.run.withSuccessHandler(function(v){
+  busy=false;$('refresh').disabled=false;
+  if(v&&v.needsSetup){$('setup').classList.remove('hidden');$('content').classList.add('hidden');$('meta').textContent='설정이 필요합니다';return;}
+  $('setup').classList.add('hidden');DATA=v;setMeta(v);
+  if(v.empty){$('content').classList.add('hidden');return;}
+  $('content').classList.remove('hidden');render();
+ }).withFailureHandler(function(e){
+  busy=false;$('refresh').disabled=false;$('meta').textContent='';
+  var b=$('error');b.textContent='통계를 불러오지 못했습니다: '+String(e&&e.message||e);b.classList.remove('hidden');
+ }).hoja15StatsGet(!!refresh);
+}
+document.querySelector('.seg').addEventListener('click',function(e){var b=e.target.closest('button[data-p]');if(!b)return;PERIOD=b.dataset.p;hideTip();render();});
+$('refresh').addEventListener('click',function(){load(true);});
+$('saveSetup').addEventListener('click',function(){
+ var v=$('sheetUrl').value.trim();if(!v){$('setupMsg').textContent='주소를 붙여 넣어 주세요.';return;}
+ $('saveSetup').disabled=true;$('setupMsg').textContent='확인 중…';
+ google.script.run.withSuccessHandler(function(){$('saveSetup').disabled=false;$('setupMsg').textContent='저장했습니다.';load(true);})
+  .withFailureHandler(function(e){$('saveSetup').disabled=false;$('setupMsg').textContent=String(e&&e.message||e);}).hoja15StatsSetup(v);
+});
+var rt=0;addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(render,150);});
+load(false);
+})();
+</script>
+</body>
+</html>
