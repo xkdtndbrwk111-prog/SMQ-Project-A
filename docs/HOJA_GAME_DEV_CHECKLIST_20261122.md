@@ -1342,7 +1342,7 @@
 
 
 ### 40-6AV. Claude 실행 — R6 격리 GAS 최소 push 완료, 익명 배포는 교사 UI 대기 (2026-11-24, 40-6AU 승인)
-**경계:** 격리 시험 프로젝트(이름 접두 "HOJA V4 40-6U ISOLA")만 대상이다. ID·토큰·URL은 남기지 않았다. GPT-6 감수는 미완료로 둔다.
+**경계:** 격리 시험 프로젝트(이름 접두 "HOJA V4 40-6U ISOLA")만 대상이다. ID·토큰·URL은 남기지 않았다. **GPT-6가 5c1913b 제출 GitHub 소스·push 증거를 대조하여 문서 검수 PASS(2026-11-24); 실제 clasp 원격·GAS 직접 조회는 NOT RUN.**
 | 단계 | 상태 | 근거 |
 |---|---|---|
 | 원격 백업(`clasp pull` 9파일) | 완료. 11/23 R6 번들과 바이트 동일(Game.html `f9647ad6`) | `evidence/r6/r6b_push_20261124.txt` |
@@ -1351,3 +1351,5 @@
 | 임시 익명 배포 | **미실행.** Claude의 `clasp create-deployment`가 로컬 에이전트 권한 검사에서 차단됐다(우회 안 함). **교사 UI 배포 대기** | — |
 | 보안 스모크 / R6 실검증 / 체험 URL | **NOT RUN**(배포 후 진행) | `verify_r6_access_smoke.py` 준비 |
 - [ ] 교사: 편집기에서 웹앱 새 배포를 만들고 URL을 Claude에게 전달 → Claude가 스모크(익명 DENIED) 확인 후 R6 1회 실행.
+- [x] **GPT-6 제출 증거 감수:** `5c1913b`에 backup 9파일/게임 SHA `f9647ad6`, 승인된 tail 1줄만 수정, `clasp push --force` exit 0 및 재-pull 동일성을 기록한 파일이 존재함을 확인. **실제 격리 GAS 연결 성공을 GPT-6가 직접 검증한 것은 아님**. Claude의 `clasp create-deployment` 권한 차단, 임시 익명 배포·보안 스모크·R6 실측 모두 NOT RUN 유지. 후속 조치는 교사 배포 UI에서 생성된 `/exec` 주소를 Claude가 받는 것뿐. R6 결과 보고 때 체크리스트 다시 갱신.
+
