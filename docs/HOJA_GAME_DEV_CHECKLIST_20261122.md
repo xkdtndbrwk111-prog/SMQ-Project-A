@@ -1228,7 +1228,7 @@
 
 #### GPT-6 감독·체크리스트 관리 (교사 운영 지시, 2026-11-24)
 **기록 상태: 관리 원칙 등록. C5 구현 검수 미시작.** Claude는 개발 및 시험 로그 작성, GPT-6는 제출된 원격 커밋/원시 증거와 CI를 대조하여 **중앙 체크리스트에 독립 검수 상태를 계속 갱신**한다. Claude의 자체 PASS와 GPT-6의 검수 PASS를 구분한다.
-- [ ] **감독 C5-1:** 첫 코드/시험/증거 push 후 동시 GET 보호 해제 재현, lease 정리, 10MiB·90일·LRU 및 예외/두 탭 회귀 확인 후 체크리스트 상태를 실제 결과로 갱신.
+- [x] **감독 C5-1 — 로컬 증거 검수 PASS(실 GAS 아님, 2026-11-24):** `b58dd52`의 소스·전후 Chromium 출력·P1~P3(3/3)·Node 123/123·캐시 14/14·RC 감사 및 CI [45299999094](https://github.com/xkdtndbrwk111-prog/SMQ-Project-A/actions/runs/45299999094)를 교차 확인. CI HEAD `b58dd52ae70f97ee83c8080fce1c8b85c70d5a7f`, conclusion success; 원본 QBank checkout·drift 2단계 skipped. `protect.clear()` 제거→단원별 lease 참조 수와 `finally` 해제·LRU/90일 삭제 시 보호 검사 구현 확인. **첫 재현 시도 NOT REPRODUCED는 원시 로그 별도 미보존**, 정밀 재현에서는 수정 전 X 축출 FAIL/수정 후 유지 PASS; P2/P3 수정 전 FAIL은 진단 API 미존재 영향. 탭 간 보호는 여전히 범위 밖이므로 **다중 탭 전체 안전 PASS 아님**, 실 GAS/모바일은 NOT RUN.
 - [ ] **감독 C5-2:** blocked/versionchange/abort/stall의 실제 브라우저 재현 여부와 유한 복구·SHA 검증 fail-closed를 확인한 뒤 기록.
 - [ ] **감독 C5-3:** 기존 첫 UI E2E 38/46 FAIL 로그를 보존하고, 새 Node/브라우저/RC 감사·원인 판정(PASS, FAIL, NOT REPRODUCED)을 검토. 원인 불명 상태에서 FIXED 기재 금지.
 - [ ] **감독 C5-4:** Claude가 새로 만드는 40-6AM 이후 세부 체크포인트, 증거 경로, PR 코멘트, SHA, CI의 일치 여부를 확인. 중간에 실패해도 FAIL/HOLD/NOT RUN을 지우지 않는다.
