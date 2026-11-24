@@ -2145,7 +2145,7 @@ function hojaMakerToStage(m,i){
       waypoints:(o.patrol?.waypoints||[]).map(p=>({x:tx(p.x),y:tx(p.y)})),pathMode:o.patrol?.mode||'pingpong'})),
     bricks,enemies:objects.filter(o=>o.type==='enemy').map(o=>({type:['JUMPY','OWL','HERMIE','ROACH','BLANKEY','BALLOONEY','MARTIAN','ROBOT','CIRCUIT'].includes(o.enemyType)?o.enemyType:'JUMPY',
       x:tx(o.x+1),y:tx(o.y+2),min:tx(o.patrol?.waypoints?.[0]?.x??o.x),max:tx(o.patrol?.waypoints?.[1]?.x??(o.x+8)),makerMode:o.aiMode||'native',makerSpeed:Number(o.speed)||80})),
-    water:[],decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
+    water:objects.filter(o=>o.type==='water').map(o=>[o.x,o.x+o.w,o.y,o.h]),decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
     makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerParallaxAnchorY:Number.isFinite(m.parallaxAnchorY)?tx(m.parallaxAnchorY):null,makerObjects:objects,makerCave:m.theme==='cave',
     gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
@@ -2542,6 +2542,12 @@ function bankTopAtEdge(edgeX,side){
 function waterGap(span){
   const leftX=span[0]*TILE;
   const rightX=span[1]*TILE;
+  // Maker water has an explicitly placed visual surface and depth. Existing
+  // generated stages still derive their waterline from the surrounding banks.
+  if(HOJA_MAKER_MODE&&Number.isFinite(span[2])&&Number.isFinite(span[3])){
+    const top=span[2]*TILE-TILE;
+    return {leftX,rightX,width:rightX-leftX,leftTop:top,rightTop:top,surfaceY:top+TILE,visualHeight:span[3]*TILE};
+  }
   const leftTop=bankTopAtEdge(leftX,'left');
   const rightTop=bankTopAtEdge(rightX,'right');
 
@@ -4181,16 +4187,16 @@ class HojaScene extends Phaser.Scene{
         x:g.leftX,
         y:g.surfaceY,
         width:g.width,
-        height:WORLD_H-g.surfaceY+64
+        height:g.visualHeight??WORLD_H-g.surfaceY+64
       });
 
       // Keep gameplay water bounds unchanged. Draw a wider backing behind
       // both banks and align its visible surface to the lower bank's top.
-      const visual=window.HOJA_GROUND_AUTOTILE.waterVisual(g,2*TILE);
+      const visual=window.HOJA_GROUND_AUTOTILE.waterVisual(g,g.visualHeight===undefined?2*TILE:0);
       // Visual water sits one tile below the old line; collision and hazards
       // retain their original water position and timing.
       visual.surfaceY+=TILE;
-      const visualHeight=WORLD_H-visual.surfaceY+64;
+      const visualHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
       const backing=this.add.rectangle(visual.left+visual.width/2,
         visual.surfaceY+visualHeight/2,visual.width,visualHeight,THEME.water.deep,1).setDepth(-.25);
       this.waterFillObjects.push(backing);
@@ -4199,7 +4205,7 @@ class HojaScene extends Phaser.Scene{
         g.width,visualHeight,THEME.water.deep,1).setDepth(13);
       this.waterFillObjects.push(fill);
       const surf=this.add.tileSprite(g.leftX,visual.surfaceY-crestRow*WATER_SCALE,
-        g.width,32*WATER_SCALE,'water',0).setOrigin(0,0).setDepth(14).setTileScale(WATER_SCALE,WATER_SCALE);
+        g.width,g.visualHeight===undefined?32*WATER_SCALE:Math.min(32*WATER_SCALE,g.visualHeight+crestRow*WATER_SCALE),'water',0).setOrigin(0,0).setDepth(14).setTileScale(WATER_SCALE,WATER_SCALE);
       if(THEME.water.tint!==0xffffff)surf.setTint(THEME.water.tint);
       this.waterObjects.push(surf);
       this.waterVisuals.push({leftX:g.leftX,rightX:g.rightX,leftTop:g.leftTop,rightTop:g.rightTop,
