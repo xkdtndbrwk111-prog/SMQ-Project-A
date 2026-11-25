@@ -284,9 +284,9 @@ function validateProject(){const errs=[];const current=map();if(!current)return 
 function refreshValidation(){const e=validateProject(),box=$('validation');box.innerHTML=e.length?`<span class="warning">⚠ ${e.length}개 검토 필요<br>${e.map(safe).join('<br>')}</span>`:`<span class="ok">✓ 연결 및 배치 기본 검증 통과</span>`;const clipped=map().terrain.filter(t=>t.x<0||t.y<0||t.x+t.w>map().width||t.y+t.h>map().height).length;if(clipped){const note=document.createElement('p');note.className='mini';note.textContent=`맵 경계를 넘는 지형 ${clipped}개는 안쪽만 표시됩니다. 원본 좌표는 그대로 보존됩니다.`;box.append(note)}const a=project.maps.find(m=>m.id==='meadow')?.objects.find(o=>o.type==='pipe'&&o.id==='pipe_a'),b=project.maps.find(m=>m.id==='room2')?.objects.find(o=>o.type==='pipe'&&o.id==='pipe_b');if(['meadow','room2'].includes(mapId)&&a?.targetMapId==='room2'&&a.targetPortalId==='pipe_b'&&b?.targetMapId==='meadow'&&b.targetPortalId==='pipe_a'&&(a.pipeMode==='solid'||b.pipeMode==='solid')){const fix=document.createElement('button');fix.textContent='예제 토관 연결 설정 수정';fix.title='기존 예제의 토관을 연결 토관으로 바꿉니다';fix.onclick=()=>{if(!confirm('예제 토관 두 개를 연결 토관으로 설정할까요?'))return;addAction();a.pipeMode='linked';b.pipeMode='linked';drawSelected();refreshValidation();render()};box.append(document.createElement('br'),fix)}return e}
 function download(){const blob=new Blob([JSON.stringify(project,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='HOJA_MAKER_V061_PROJECT.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function importJson(v){clearGroup();if(v?.format!==fmt||v?.schemaVersion!==schema||!Array.isArray(v.maps))throw Error('V0.61 Maker JSON이 아닙니다.');if(v.maps.length<1||v.maps.length>12)throw Error('맵 수는 1~12개여야 합니다.');for(const m of v.maps){if(!Array.isArray(m.terrain)||!Array.isArray(m.objects)||!m.id)throw Error('맵 구조가 잘못되었습니다.')}project=v;mapId=v.maps[0].id;selectedId=null;focusAtSpawn();refresh()}
-let hojaTestWindow=null, hojaTestTimer=null, hojaTestRequest=null;
+let hojaTestWindow=null, hojaTestTimer=null, hojaTestRequest=null, hojaTestVersion=null;
 async function play(eventId=null,projectOverride=null){
- if(!hojaTestWindow||hojaTestWindow.closed){hojaTestWindow=window.open('maker-compat-arcade.html','hoja-maker-test');}
+ if(!hojaTestWindow||hojaTestWindow.closed){hojaTestWindow=window.open('about:blank','hoja-maker-test');hojaTestVersion=null;}
  if(!hojaTestWindow){alert('플레이 테스트를 위해 팝업을 허용해 주세요.');return}
  if(hojaTestTimer)clearInterval(hojaTestTimer);
  const requestId=crypto.randomUUID();hojaTestRequest=requestId;
@@ -295,6 +295,7 @@ async function play(eventId=null,projectOverride=null){
  try{const response=await fetch('BUILD.json',{cache:'no-store'});if(!response.ok)throw Error();build=await response.json();}
  catch(_){if(hojaTestRequest!==requestId)return;hojaTestRequest=null;$('status').textContent='게임 버전 확인 실패. 시험 서버를 다시 실행해 주세요.';return}
  if(hojaTestRequest!==requestId)return;
+ if(hojaTestVersion!==build.gameVersion){hojaTestWindow.location.replace('maker-compat-arcade.html?v='+encodeURIComponent(build.gameVersion));hojaTestVersion=build.gameVersion;}
  const startMapId=projectOverride?snapshot.maps[0]?.id:mapId;
  const payload={kind:'HOJA_V061_LOAD',requestId,project:snapshot,eventId,startMapId,dataVersion:schema,gameVersion:build.gameVersion};
  const started=Date.now();
