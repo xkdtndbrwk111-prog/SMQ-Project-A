@@ -2134,12 +2134,12 @@ function hojaMakerToStage(m,i){
   const tx=v=>Math.round(Number(v)*TILE);
   const theme=['grassland','autumn','tropics','winter','cave'].includes(m.theme)?m.theme:'grassland';
   const objects=m.objects||[];
-  const startNode=objects.find(o=>o.type==='maker_start'),goalNode=objects.find(o=>o.type==='maker_goal');
+  const goalNode=objects.find(o=>o.type==='maker_goal');
   const bricks=objects.filter(o=>o.type==='brick').flatMap(o=>{
     const a=[];for(let yy=0;yy<o.h;yy+=2)for(let xx=0;xx<o.w;xx+=2)a.push({x:tx(o.x+xx),y:tx(o.y+yy),type:'stone',hiddenQuiz:false});return a;
   });
   return {
-    id:i+1,theme,worldW:m.width,worldH:tx(m.height),goal:goalNode?goalNode.x+goalNode.w/2:m.width-3,start:startNode?startNode.x+startNode.w/2:m.spawn?.x??6,
+    id:i+1,theme,worldW:m.width,worldH:tx(m.height),goal:goalNode?goalNode.x+goalNode.w/2:m.width-3,start:m.spawn?.x??6,
     checkpoints:[m.spawn?.x??6],
     solids:m.terrain.filter(t=>!hojaMakerCustomTerrain(t)).map(t=>({x:tx(t.x),y:tx(t.y),w:tx(t.w),h:tx(t.h),kind:t.kind==='ground'?'ground':'platform',hojaGroundStyle:t.hojaGroundStyle||m.hojaGroundStyle||'legacy'})),
     moving:objects.filter(o=>o.type==='moving').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:8,makerSkin:o.platformSkin==='grey'?'grey':'brown',makerStandable:o.standable!==false,axis:'x',min:tx(o.x),max:tx(o.x+10),speed:Number(o.speed)||60,
@@ -2148,7 +2148,7 @@ function hojaMakerToStage(m,i){
       x:tx(o.x+1),y:tx(o.y+2),min:0,max:tx(m.width),makerMode:'native',makerSpeed:Number(o.speed)||80})),
     water:objects.filter(o=>o.type==='water').map(o=>[o.x,o.x+o.w,o.y,o.h,o.waterType==='swim'?'swim':'opaque']),decor:[],crumbles:objects.filter(o=>o.type==='crumble').map(o=>({x:tx(o.x),y:tx(o.y),w:tx(o.w),h:tx(o.h)})),
     rafts:[],springs:objects.filter(o=>o.type==='spring').map(o=>({x:tx(o.x),y:tx(o.y+1)})),flowers:[],secrets:[],caves:[],
-    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(startNode?startNode.y+startNode.h:m.spawn?.y??(m.height-5)),makerParallaxAnchorY:Number.isFinite(m.parallaxAnchorY)?tx(m.parallaxAnchorY):null,makerObjects:objects,makerCave:m.theme==='cave',
+    makerTerrainCustom:m.terrain.filter(hojaMakerCustomTerrain),makerId:m.id,makerName:m.name,makerHeight:tx(m.height),makerSpawnY:tx(m.spawn?.y??(m.height-5)),makerParallaxAnchorY:Number.isFinite(m.parallaxAnchorY)?tx(m.parallaxAnchorY):null,makerObjects:objects,makerCave:m.theme==='cave',
     gimmicks:objects.filter(o=>o.type==='gimmick').map(hojaMakerGimmick),
     makerEvents:objects.filter(o=>o.type==='trigger')
   };
@@ -3720,7 +3720,7 @@ class HojaScene extends Phaser.Scene{
   createMakerCheckpoints(){
     this.makerCheckpoints=(STAGE.makerObjects||[]).filter(o=>o.type==='maker_checkpoint').map(o=>{const x=(o.x+o.w/2)*TILE,y=(o.y+o.h)*TILE,visual=this.createCheckpointMachine(x,y,STAGE.theme==='cave');let glow=null;if(STAGE.theme==='cave'){const lightY=y-40;glow=this.add.image(x,lightY,this.createRadialLampTexture()).setDisplaySize(260,260).setBlendMode(Phaser.BlendModes.ADD).setDepth(16).setAlpha(.85);this.caveLanterns.push({x,y:lightY,glow});this.hojaStep136Cullables?.push(glow);}return {id:o.id,x,y,...visual,glow};});
     this.makerCheckpointId=this.mem.makerCheckpointId||null;
-    this.makerStartAnchor={x:this.playerBody.x,y:this.playerBody.y+21};
+    this.makerStartAnchor={x:Math.max(20,Math.min(WORLD_W-20,(STAGE.start??6)*TILE)),y:STAGE.makerSpawnY};
   }
   createCheckpointMachine(x,y,cave,scale=2){
     const spec=window.HOJA_STAGE_DECOR.item('street:vending-machine');
@@ -4877,7 +4877,7 @@ class HojaScene extends Phaser.Scene{
         const dx=orientation==='left'?offset:orientation==='right'?-offset:0;
         const dy=orientation==='up'?offset:orientation==='down'?-offset:0;
         const hit=verticalExtension
-          ?this.add.rectangle(x,top+32+dy,60,64+length,0,0)
+          ?this.add.rectangle(x,top+32+(orientation==='up'?length/2:-length/2),60,64+length,0,0)
           :this.add.rectangle(x+dx,top+32+dy,dx?length:60,dy?length:60,0,0);
         hit.__makerPipeId=options.portalId;this.physics.add.existing(hit,true);this.pipeGroup.add(hit);
       }
@@ -5178,7 +5178,7 @@ class HojaScene extends Phaser.Scene{
         }
       }
       this.makerSpawnGroundY=STAGE.makerSpawnY;
-      return Math.max(20,Math.min(WORLD_W-20,(STAGE.start||6)*TILE));
+      return Math.max(20,Math.min(WORLD_W-20,(STAGE.start??6)*TILE));
     }
     if(STAGE.theme==='cave'){
       const i=this.spawnKind.startsWith('fromSurface:')?Number(this.spawnKind.split(':')[1]):0;
@@ -7556,8 +7556,12 @@ class HojaScene extends Phaser.Scene{
 
   updateCheckpointAndHazards(){
     if(HOJA_MAKER_MODE&&this.makerCheckpoints){
-      const body=this.playerBody.body;
-      for(const cp of this.makerCheckpoints){const close=Math.abs(this.playerBody.x-cp.x)<48&&Math.abs(body.bottom-cp.y)<48;if(close&&this.makerCheckpointId!==cp.id){this.makerCheckpointId=cp.id;this.mem.makerCheckpointId=cp.id;this.showHojaToast('체크포인트 저장!');}this.updateCheckpointMachine(cp,this.makerCheckpointId===cp.id);}
+      const body=this.playerBody.body,px=this.playerBody.x,py=body.bottom;
+      const nearby=[{...this.makerStartAnchor,id:null},...this.makerCheckpoints]
+        .filter(cp=>Math.abs(px-cp.x)<48&&Math.abs(py-cp.y)<48)
+        .sort((a,b)=>(px-a.x)**2+(py-a.y)**2-((px-b.x)**2+(py-b.y)**2))[0];
+      if(nearby&&this.makerCheckpointId!==nearby.id){this.makerCheckpointId=nearby.id;this.mem.makerCheckpointId=nearby.id;this.showHojaToast(nearby.id===null?'시작 체크포인트 저장!':'체크포인트 저장!');}
+      for(const cp of this.makerCheckpoints)this.updateCheckpointMachine(cp,this.makerCheckpointId===cp.id);
     }else if(this.hojaCheckpoint&&!HOJA_MAKER_MODE&&STAGE.theme!=='cave'){
       const c=this.hojaCheckpoint,x=this.playerBody.x;
       if(window.HOJA_STAGE_DECOR.crossed(c.previousX,x,c.line)){
