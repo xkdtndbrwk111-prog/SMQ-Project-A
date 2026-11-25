@@ -3109,6 +3109,20 @@ class HojaScene extends Phaser.Scene{
     this.physics.add.collider(this.playerBody,this.movingPlatformGroup,(p,plat)=>{
       if(plat.__raft&&p.body.touching.down)plat.__raft.touchAt=this.time.now;
       if(plat.__sinkPlatform&&p.body.touching.down)plat.__sinkPlatform.touchAt=this.time.now;
+      // Keep an idle rider at the same horizontal offset, including brief
+      // contact gaps as a platform changes direction. Never carry through walls.
+      if(plat.__makerMoving&&!plat.__sinkPlatform&&p.body.touching.down){
+        const b=p.body,k=this.keys,active=k&&(k.left.isDown||k.right.isDown||k.a.isDown||k.d.isDown);
+        const last=this._hojaIdlePlatformRide;
+        if(active||Math.abs(b.velocity.x)>10||b.blocked.left||b.blocked.right){this._hojaIdlePlatformRide=null;}
+        else if(last&&last.plat===plat&&this.time.now-last.at<200){
+          const delta=plat.x+last.offset-p.x;
+          if(Math.abs(delta)<=8){p.x+=delta;b.position.x+=delta;}
+          else last.offset=p.x-plat.x;
+          last.at=this.time.now;
+        }else this._hojaIdlePlatformRide={plat,offset:p.x-plat.x,at:this.time.now};
+      }
+
       // R3.15: record side contact only for a real full-solid moving
       // platform. Maker platforms remain top-only; rafts/platform landings
       // are excluded by the vertical-overlap check in the helper.
