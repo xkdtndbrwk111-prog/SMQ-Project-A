@@ -14,7 +14,7 @@
  const baseSelect=selectComposition;
  selectComposition=function(){
    const q=current(),card=document.getElementById('hqCard'),media=document.getElementById('hqMedia'),stim=document.getElementById('hqStimulus');
-   const eligible=state.layout==='C'&&!media.hidden&&!q.choices?.some(c=>c.image);
+   const eligible=(state.layout==='C'||state.layout==='D')&&!media.hidden&&!q.choices?.some(c=>c.image);
    const hint=q.layoutHint||q.renderTags?.layout?.rendererHint;
    if(eligible&&(state.composition==='split'||(state.composition!=='stack'&&hint==='split'))){
      const chosen=stim.hidden?'split':stim.classList.contains('stimulus-dialogue')?'dialogue-image':'picture-stimulus';
@@ -46,5 +46,5 @@
      }
    }
  };
- window.HOJA_RENDERER_SPLIT_LOCK_EXT=Object.freeze({version:1});
+ window.HOJA_RENDERER_SPLIT_LOCK_EXT=Object.freeze({version:2});
 })();
