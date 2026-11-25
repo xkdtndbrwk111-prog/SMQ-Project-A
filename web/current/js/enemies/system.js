@@ -24,13 +24,15 @@ window.HOJA_ENEMIES = (() => {
 
     const key=types[s.type].texture;
     const sprite=scene.add.sprite(s.x,spawnY,key,0).setOrigin(0.5,1).setScale(2).setDepth(11);
+    if(s.makerFacing==='left')sprite.setFlipX(true);
 
+    const initialDir=s.makerFacing==='left'?-1:s.makerFacing==='right'?1:(i%2?-1:1);
     const e={
       type:s.type,bodyObj,sprite,min:s.min,max:s.max,baseY:spawnY,
-      dir:i%2?-1:1,faceDir:1,state:s.type==='OWL'?'PERCH':'IDLE',
+      dir:initialDir,faceDir:s.makerFacing?initialDir:1,state:s.type==='OWL'?'PERCH':'IDLE',
       timer:25+(i*19)%55,phase:(i*1.73)%6.28,step:i*7,
       alive:true,shellTimer:0,dashStart:0,riseTarget:0,
-      spawnX:s.x,spawnY:spawnY,spawnDir:i%2?-1:1,
+      spawnX:s.x,spawnY:spawnY,spawnDir:initialDir,makerFacing:s.makerFacing||null,
        makerMoveMode:s.makerMode||'native',makerMoveSpeed:s.makerSpeed||80,
       scored:false,despawned:false,consumed:false,stationary:false,
       safeRespawnBlocked:false,memKey:'e'+i
@@ -62,6 +64,8 @@ window.HOJA_ENEMIES = (() => {
       }
 
       types[e.type]?.update(scene, e, frame, dx, dy);
+      // Authored facing applies while an enemy is passive; active AI still turns naturally.
+      if(makerMode&&e.makerFacing&&((e.type==='OWL'&&e.state==='PERCH'&&(Math.abs(dx)>=150||Math.abs(py-e.baseY)>=170))||(e.type==='BLANKEY'&&Math.abs(dx)>=420)||e.type==='BALLOONEY'))e.faceDir=e.makerFacing==='left'?-1:1;
 
       if((e.type==='MARTIAN'&&e.state==='CHARGE')||
          (e.type==='OWL'&&e.state==='DASH')||
