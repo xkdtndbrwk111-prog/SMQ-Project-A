@@ -63,7 +63,7 @@ input[type=text]{width:100%;font:inherit;font-size:15px;padding:11px;border-radi
  </header>
  <div id="error" class="banner err hidden" role="alert"></div>
  <section id="setup" class="card hidden" aria-label="처음 설정">
-  <h2>처음 한 번만 설정</h2>
+  <h2 id="setupTitle">처음 한 번만 설정</h2>
   <p class="note">게임 이용 기록이 쌓이는 스프레드시트(EVENT_LOG 시트가 있는 파일)의 주소를 붙여 넣으세요. 이 통계 앱은 읽기만 합니다.</p>
   <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off">
   <button id="saveSetup" type="button">저장하고 통계 보기</button>
@@ -96,6 +96,8 @@ input[type=text]{width:100%;font:inherit;font-size:15px;padding:11px;border-radi
   <div class="card"><h2>교과</h2><div id="l-subject"></div></div>
   <div class="card"><h2>한 번에 고른 단원 수</h2><div id="l-upg"></div></div>
  </section>
+ <p class="foot" id="sourceLine"></p>
+ <p class="foot"><button id="changeSheet" type="button">연결 시트 바꾸기</button></p>
  <p class="foot">게임 시작 횟수만 셉니다. 학생 이름·학교·기기 정보는 없습니다.<br>숫자는 5분마다 새로 계산되며, 새로고침을 누르면 바로 다시 계산합니다.</p>
 </div>
 <div id="tip" role="tooltip"></div>
@@ -189,6 +191,7 @@ function load(refresh){
   busy=false;$('refresh').disabled=false;
   if(v&&v.needsSetup){$('setup').classList.remove('hidden');$('content').classList.add('hidden');$('meta').textContent='설정이 필요합니다';return;}
   $('setup').classList.add('hidden');DATA=v;setMeta(v);
+  $('sourceLine').textContent=v.sourceName?'연결된 시트: '+v.sourceName:'';
   if(v.empty){$('content').classList.add('hidden');return;}
   $('content').classList.remove('hidden');render();
  }).withFailureHandler(function(e){
@@ -198,6 +201,7 @@ function load(refresh){
 }
 document.querySelector('.seg').addEventListener('click',function(e){var b=e.target.closest('button[data-p]');if(!b)return;PERIOD=b.dataset.p;hideTip();render();});
 $('refresh').addEventListener('click',function(){load(true);});
+$('changeSheet').addEventListener('click',function(){$('setupTitle').textContent='연결 시트 바꾸기';$('setup').classList.remove('hidden');$('sheetUrl').value='';$('setupMsg').textContent='';$('sheetUrl').focus();scrollTo(0,0);});
 $('saveSetup').addEventListener('click',function(){
  var v=$('sheetUrl').value.trim();if(!v){$('setupMsg').textContent='주소를 붙여 넣어 주세요.';return;}
  $('saveSetup').disabled=true;$('setupMsg').textContent='확인 중…';

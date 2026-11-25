@@ -103,3 +103,15 @@ test('rows deleted at the top of EVENT_LOG: the remembered start row is re-check
   assert.equal(after.periods.all.total, before - 20);
   assert.equal(Number(p.props.get('HOJA15_STATS_FIRST_ROW')), 2);
 });
+
+test('the connected sheet can be changed later (copy -> original); the result names the connected file', () => {
+  const a = new MockSpreadsheet('copySheetcopySheet000000'); a.getName = () => 'SMQ_USAGE_TELEMETRY의 사본'; a.add('EVENT_LOG', syntheticLog({days: 2, perDay: 3}));
+  const b = new MockSpreadsheet('origSheetorigSheet000000'); b.getName = () => 'SMQ_USAGE_TELEMETRY'; b.add('EVENT_LOG', syntheticLog());
+  for (const s of [a, b]) for (const sh of s.sheets.values()) sh.getParent = () => s;
+  const p = loadProject({spreadsheets: new Map([[a.id, a], [b.id, b]]), props: {}, now: '2026-11-24T05:00:00Z', gasDir: DIR, gasFiles: ['Code.gs']});
+  p.call(`hoja15StatsSetup('${a.id}')`); const v1 = p.call('hoja15StatsGet(false)');
+  assert.equal(v1.sourceName, 'SMQ_USAGE_TELEMETRY의 사본');
+  p.call(`hoja15StatsSetup('https://docs.google.com/spreadsheets/d/${b.id}/edit')`); const v2 = p.call('hoja15StatsGet(false)');
+  assert.equal(v2.sourceName, 'SMQ_USAGE_TELEMETRY'); assert.equal(v2.cached, false, 'cache cleared on change');
+  assert.ok(v2.periods.all.total > v1.periods.all.total);
+});

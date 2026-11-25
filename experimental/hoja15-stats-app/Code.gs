@@ -247,6 +247,7 @@ function hoja15StatsGet(refresh){
   if(!sh)return {needsSetup:true};
   h15sCheckHeader_(sh);
   const v=h15sCompute_(sh);
+  try{v.sourceName=sh.getParent().getName();}catch(e){v.sourceName='';}   // shown in the app so the connected file is visible
   try{cache.put(H15S_CACHE_KEY_,JSON.stringify(v),H15S_CACHE_SECONDS_);}catch(e){}
   v.cached=false;return v;
 }
