@@ -1745,3 +1745,12 @@
 - [x] 시험: 실 Phaser 키 조합(D , . / D Shift Space / A Shift Space / D , Space / D Shift .) 모두 점프, 키보드·조작 스모크 PASS, 정적 패치 검사 갱신(점프 = . 또는 Space, 달리기 = , 또는 Shift, W/Z/화살표는 점프 아님), 25문항·랭킹 PASS, QR E2E PASS, 단위 136/136. 운영 HEAD 업로드 + readback 11/11 동일.
 - [x] 키 동시 입력 시험 페이지: `experimental/tools/hoja_keytest.html`(문제 PC에서 D + , + . 가 켜지는지 확인용).
 - [ ] **교사 액션:** 기존 학생용 배포 수정 → 새 버전 → 배포. 가능하면 실패했던 Windows PC에서 Shift + D + Space로 확인.
+
+
+### 40-6CK. 교사 실기기 제보 — iPad Safari 물리 키보드가 튜토리얼에서 먹히지 않음 (2026-11-25)
+**상태: 실사용 FAIL / 원인 가설 / 실제 수정·배포 NOT RUN. (이전 40-6CJ Windows D+, +. 고스팅과 다른 문제)**
+- [x] **교사 제공 사진:** 키보드 케이스를 장착한 iPad Safari에서 HOJA 1.5 스테이지 0 첫 연습 화면 'A·D 키로 이동해 보세요' 표시. 키보드 자체 정상, 한영키 문제 아님, 화면 터치 조작 정상. 물리 A/D 키 이동이 안 됨.
+- [x] **소스 구조 확인:** `experimental/unified-quiz-renderer/game-trial/part-23.txt`의 `#hojaTutApp` iframe과 `part-24.txt`의 `#hojaStage0Native` 중첩 iframe. 터치에는 별도 `postMessage` 합성 입력 루트 `HOJA_TT_PRACTICE_SOURCE` 존재. **물리 키보드의 실제 iPad `keydown/keyup` 전달 및 Safari focus 경계는 실측 미확인**. 튜토리얼/본게임 별도 판별해야 함.
+- [ ] **Claude 진단 우선:** iPadOS Safari 1회 실기기에서 창·문서 capture `keydown/keyup` 수신 주체(최상위, 튜토리얼 iframe, 중첩 native iframe, 본게임 iframe), `code,key,repeat,isComposing,activeElement.tagName,hasFocus()` 비민감 로그. 일반 입력칸에는 A/D가 들어가는지 대조. 이벤트가 어느 창에도 오지 않는다면 Safari/기기 이벤트 레벨이고 JS로 반드시 해결된다고 단정 금지.
+- [ ] **최소 개선:** 실제 사용자 터치/게임 시작 시 키보드 입력을 받을 게임 표면에 `tabindex=0` + `focus()`를 마련하고, iPad에서 바깥 창에만 도착한 실제 키를 명확하게 지정된 활성 iframe으로만 `postMessage` 중계. `event.code` 비정상/Unidentified이면 `event.key` 보조 매핑. 중복 전달·키 눌림 고착 방지(blur/pagehide/overlay 전환에서 releaseAll), rank/input/선택지 입력은 예외. **가상 키보드가 뜨는 입력칸 강제 포커스 편법 금지**. 40-6CJ의 `A/D,W/S,점프 '.' 또는 Space,달리기 ',' 또는 Shift,H,Enter`를 유지.
+- [ ] **최소 검수:** iPad 실제 키보드 A/D 좌우 이동과 누름 유지·키 뗌, 본게임 진입, 모달 전환·복귀, 화면 터치와 물리키 공존, 크롬북·Windows·Mac 조작, QR 입장 후 첫 튜토리얼. iPad가 없으면 로컬 시험 PASS만 기록하고 실기기 NOT RUN. 실운영 HEAD 최신 변경+기존 학생용 /exec 버전 업데이트 경계 분리, 운영 랭킹·콘텐츠·통계 변경 금지.
