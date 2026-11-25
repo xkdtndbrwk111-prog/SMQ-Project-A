@@ -354,6 +354,105 @@ window.HOJA_USAGE=Object.freeze({
 <script id="hojaTeacherToolsArcadeSourceV1">window.HOJA_TT_ARCADE_BRIDGE_SOURCE="  /* TT TOUCH V7: actual Phaser keys; acknowledge action from inner game. */\n  (function hojaTTArcadeTouchReceiver(){\n    const names=Object.freeze({ArrowLeft:'a',ArrowRight:'d',ArrowUp:'w',ArrowDown:'s',Space:'jump',ShiftLeft:'run',KeyF:'fps'});\n    const held=new Set();\n    function getKey(code){return ACTIVE_SCENE?.keys?.[names[code]]||null}\n    function releaseKey(code){\n      held.delete(code);const key=getKey(code);if(!key)return false;\n      key.isDown=false;key.isUp=true;key._justDown=false;key._justUp=true;key.timeUp=performance.now();return true;\n    }\n    function releaseAll(){for(const code of [...held])releaseKey(code)}\n    window.addEventListener('message',function(e){\n      if(e.source!==window.parent||!e.data||e.data.kind!=='HOJA_TT_ARCADE_INPUT')return;\n      const m=e.data;\n      if(m.action==='releaseAll'){releaseAll();return;}\n      if(!Object.prototype.hasOwnProperty.call(names,m.code)||!['down','up'].includes(m.action))return;\n      let applied=false;\n      if(m.action==='up'){applied=releaseKey(m.code)}\n      else {\n        const key=getKey(m.code);\n        if(key){\n          applied=true;\n          if(!held.has(m.code)){\n            held.add(m.code);key.isDown=true;key.isUp=false;\n            key._justDown=true;key._justUp=false;\n            key.timeDown=performance.now();key.repeats=0;\n          }\n          if(ACTIVE_SCENE?.quizActive){\n            const keyNames={ArrowLeft:'ArrowLeft',ArrowRight:'ArrowRight',ArrowUp:'ArrowUp',ArrowDown:'ArrowDown',Space:' ',ShiftLeft:'Shift',KeyF:'f'};\n            window.dispatchEvent(new KeyboardEvent('keydown',{code:m.code,key:keyNames[m.code],bubbles:true}));\n          }\n        }\n      }\n      try{window.parent.postMessage({kind:'HOJA_TT_ARCADE_APPLIED',seq:m.seq,code:m.code,action:m.action,applied},'*')}catch{}\n    });\n    window.addEventListener('pagehide',releaseAll);\n    window.HOJA_TT_ARCADE_TOUCH_TEST={releaseAll,get held(){return [...held]}};\n  })();\n";</script>
 
 <script id="hojaTeacherToolsPracticeSourceV8">window.HOJA_TT_PRACTICE_SOURCE="/* Runs in the decoded tutorial document, with its existing state and keys. */\n(function(){\n 'use strict';\n const codes=new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','ShiftLeft','KeyF']);\n const held=new Set();\n const names={Space:' ',ShiftLeft:'Shift',KeyF:'f'};\n function ack(m,applied,stage){window.parent.postMessage({kind:'HOJA_TT_ARCADE_APPLIED',seq:m.seq,code:m.code,action:m.action,applied,stage},'*');}\n const toNew={ArrowLeft:'KeyA',ArrowRight:'KeyD',ArrowUp:'KeyW',ArrowDown:'KeyS',ShiftLeft:'Comma',Space:'Enter'};\n function dispatch(type,code){code=toNew[code]||code;window.dispatchEvent(new KeyboardEvent(type,{code,key:names[code]||code,bubbles:true,cancelable:true}));}\n function releaseAll(){for(const code of held){dispatch('keyup',code);keys.delete(toNew[code]||code)}held.clear();document.getElementById('hojaStage0Native')?.contentWindow?.postMessage({kind:'HOJA_TT_ARCADE_INPUT',action:'releaseAll'},'*');}\n window.addEventListener('message',e=>{\n  const native=document.getElementById('hojaStage0Native');\n  if(e.source===native?.contentWindow&&e.data?.kind==='HOJA_TT_ARCADE_APPLIED'){window.parent.postMessage(e.data,'*');return;}\n  if(e.source!==window.parent||e.data?.kind!=='HOJA_TT_PRACTICE_INPUT')return;\n  const m=e.data;\n  if(m.action==='releaseAll'){releaseAll();ack(m,true,'release');return;}\n  if(!codes.has(m.code)||!['down','up'].includes(m.action))return;\n  if(state.zone==='native'&&native&&(m.action==='up'||!state.dialogueOpen)){\n    if(m.action==='up'){held.delete(m.code);dispatch('keyup',m.code);keys.delete(toNew[m.code]||m.code)}\n    native.contentWindow.postMessage({...m,kind:'HOJA_TT_ARCADE_INPUT'},'*');return;\n  }\n  if(m.action==='down'){\n    window.focus();\n    if(!held.has(m.code)){held.add(m.code);dispatch('keydown',m.code)}\n  }else{held.delete(m.code);dispatch('keyup',m.code);keys.delete(toNew[m.code]||m.code)}\n  ack(m,true,state.dialogueOpen?'dialogue':'museum');\n });\n window.addEventListener('pagehide',releaseAll);\n})();\n";</script>
+<script id="hoja15KeyRelayV1">
+/* HOJA 1.5 (40-6CK): iPad + hardware keyboard. iOS Safari delivers hardware keys only to the FOCUSED frame, and tapping
+ * a canvas inside a nested iframe does not move focus there. (1) focus keeper: a tap in a game/practice frame focuses that
+ * frame; (2) relay: game keys that still arrive in THIS document go to the active game frame only (arcade or practice),
+ * as one keydown/keyup each (no repeats doubled, all released on blur/hide); (3) ?keydiag=1 shows where keys arrive.
+ * Not used while typing (input/textarea), during an open question/answer, a join-code dialog, or a native-dialogue Enter
+ * (that one has its own relay). Codes from key when code is empty/'Unidentified'. */
+(function(){'use strict';
+ function receiver(NAME,TUTORIAL){
+  if(window.__hoja15KeyRelay)return;window.__hoja15KeyRelay=true;
+  var held={},diag=false;
+  var editable=function(t){return !!t&&(['INPUT','TEXTAREA','SELECT'].indexOf(t.tagName)>=0||t.isContentEditable);};
+  function fire(type,d){
+   var ev=new KeyboardEvent(type,{key:d.key,code:d.code,bubbles:true,cancelable:true,repeat:!!d.repeat});
+   try{Object.defineProperty(ev,'keyCode',{get:function(){return d.keyCode;}});Object.defineProperty(ev,'which',{get:function(){return d.keyCode;}});}catch(_e){}
+   ev.__hoja15Relayed=true;document.dispatchEvent(ev);
+  }
+  function nativeFrame(){
+   if(!TUTORIAL)return null;
+   try{var f=document.getElementById('hojaStage0Native');if(f&&f.contentWindow&&typeof state!=='undefined'&&state.zone==='native'&&!state.dialogueOpen)return f;}catch(_e){}
+   return null;
+  }
+  function focusMe(){try{window.focus();}catch(_e){}
+   try{var b=document.body;if(b&&!editable(document.activeElement)){if(!b.hasAttribute('tabindex'))b.setAttribute('tabindex','-1');b.focus({preventScroll:true});}}catch(_e){}}
+  ['pointerdown','touchstart','mousedown'].forEach(function(t){window.addEventListener(t,function(e){if(!editable(e.target))focusMe();},{capture:true,passive:true});});
+  window.addEventListener('message',function(e){
+   var d=e.data;if(!d||typeof d!=='object')return;
+   var nf=TUTORIAL?document.getElementById('hojaStage0Native'):null;
+   if(nf&&e.source===nf.contentWindow&&d.kind==='HOJA15_KEYDIAG_EVT'){window.parent.postMessage(d,'*');return;}
+   if(e.source!==window.parent)return;
+   if(d.kind==='HOJA15_KEYDIAG_ON'){diag=true;if(nf&&nf.contentWindow)nf.contentWindow.postMessage(d,'*');return;}
+   if(d.kind==='HOJA15_FOCUS'){focusMe();var n0=nativeFrame();if(n0){try{n0.focus();}catch(_e){}n0.contentWindow.postMessage(d,'*');}return;}
+   if(d.kind==='HOJA15_KEY_RESET'){for(var c in held){if(held[c])fire('keyup',held[c]);}held={};if(nf&&nf.contentWindow)nf.contentWindow.postMessage(d,'*');return;}
+   if(d.kind!=='HOJA15_KEY_RELAY'||(d.type!=='keydown'&&d.type!=='keyup'))return;
+   var n=nativeFrame();
+   if(n){n.contentWindow.postMessage(d,'*');return;}
+   if(d.type==='keydown'){if(held[d.code]&&!d.repeat)return;held[d.code]=d;}else{if(!held[d.code])return;delete held[d.code];}
+   fire(d.type,d);
+  });
+  ['keydown','keyup'].forEach(function(t){window.addEventListener(t,function(e){
+   if(!diag)return;
+   try{window.parent.postMessage({kind:'HOJA15_KEYDIAG_EVT',doc:NAME,type:t,key:String(e.key),code:String(e.code),keyCode:e.keyCode,relayed:!!e.__hoja15Relayed,
+    active:(document.activeElement&&document.activeElement.tagName)||'',focus:document.hasFocus()},'*');}catch(_e){}
+  },true);});
+  window.addEventListener('pagehide',function(){for(var c in held){if(held[c])fire('keyup',held[c]);}held={};});
+ }
+ var src=function(name,tut){return '\n;('+receiver.toString()+')('+JSON.stringify(name)+','+(tut?'true':'false')+');\n';};
+ // inject into the arcade (and the practice stage-0 Phaser, built from the same bridge source) and into the tutorial document
+ if(typeof window.HOJA_TT_ARCADE_BRIDGE_SOURCE==='string')window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=src('phaser',false);
+ if(typeof window.HOJA_TT_PRACTICE_SOURCE==='string')window.HOJA_TT_PRACTICE_SOURCE+=src('tutorial',true);
+ // ---- this (game) document
+ var KC={KeyA:65,KeyD:68,KeyW:87,KeyS:83,Comma:188,Period:190,Space:32,ShiftLeft:16,ShiftRight:16,Enter:13,KeyH:72};
+ var BYKEY={a:'KeyA',d:'KeyD',w:'KeyW',s:'KeyS',',':'Comma','.':'Period',' ':'Space',shift:'ShiftLeft',enter:'Enter',h:'KeyH','ㅁ':'KeyA','ㅇ':'KeyD','ㅈ':'KeyW','ㄴ':'KeyS','ㅗ':'KeyH'};
+ var held={},diag=false,diagBox=null,last=null;
+ var editable=function(t){return !!t&&(['INPUT','TEXTAREA','SELECT'].indexOf(t.tagName)>=0||t.isContentEditable);};
+ function codeOf(e){var c=String(e.code||'');if(KC[c])return c;var k=String(e.key||'').toLowerCase();return BYKEY[k]||'';}
+ function vis(id){var el=document.getElementById(id);return !!el&&!el.hidden;}
+ function target(){
+  if(document.querySelector('#hoja15JoinLayer.open'))return null;
+  if(vis('hojaTutOverlay'))return document.getElementById('hojaTutApp');
+  var gp=document.getElementById('hojaGamePlay');
+  if(gp&&!gp.hidden&&gp.dataset.mode==='arcade'){
+   var ov=document.getElementById('hojaArcadeApprovedParentOverlay');if(ov&&ov.style.display==='block')return null;  // question / review open
+   var f=document.getElementById('hqArcadeFrame');if(f&&!f.hidden)return f;
+  }
+  return null;
+ }
+ function post(f,m){try{f.contentWindow.postMessage(m,'*');}catch(_e){}}
+ function handle(e){
+  if(e.__hoja15Relayed||editable(e.target))return;
+  var c=codeOf(e);if(!c)return;var f=target();if(!f||!f.contentWindow)return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  e.preventDefault();
+  if(e.type==='keydown'){if(held[c]&&!e.repeat)return;held[c]=f;}else{if(!held[c])return;delete held[c];}
+  post(f,{kind:'HOJA15_KEY_RELAY',type:e.type,code:c,key:e.key,keyCode:KC[c],repeat:!!e.repeat});
+  diagNote('game',e,true);
+ }
+ window.addEventListener('keydown',handle,true);window.addEventListener('keyup',handle,true);
+ // iOS: the Apps Script page is itself an iframe inside Google's page; a tap here pulls keyboard focus into this document
+ ['pointerdown','touchstart'].forEach(function(t){window.addEventListener(t,function(e){if(editable(e.target))return;try{window.focus();}catch(_e){}
+  try{var ae=document.activeElement;if(!ae||ae===document.body||ae===document.documentElement){if(!document.body.hasAttribute('tabindex'))document.body.setAttribute('tabindex','-1');document.body.focus({preventScroll:true});}}catch(_e){}},{capture:true,passive:true});});
+ function reset(){var fs=[];for(var c in held){if(fs.indexOf(held[c])<0)fs.push(held[c]);}held={};fs.forEach(function(f){post(f,{kind:'HOJA15_KEY_RESET'});});
+  var t=target();if(t&&fs.indexOf(t)<0)post(t,{kind:'HOJA15_KEY_RESET'});}
+ window.addEventListener('blur',reset);document.addEventListener('visibilitychange',function(){if(document.visibilityState!=='visible')reset();});
+ // focus the active game frame when it appears (game start / practice open / question closed)
+ setInterval(function(){var t=target();if(t!==last){last=t;if(t){try{t.focus({preventScroll:true});}catch(_e){}post(t,{kind:'HOJA15_FOCUS'});if(diag)post(t,{kind:'HOJA15_KEYDIAG_ON'});}}},400);
+ // ---- ?keydiag=1 : on-screen list of where key events arrive (key/code/frame only)
+ function diagNote(doc,e,relayed){if(!diag)return;var line=doc+' · '+(e.type||'')+' · key='+String(e.key)+' · code='+String(e.code)+(relayed?' · →게임으로 전달':'');show(line);}
+ function show(line){if(!diagBox){diagBox=document.createElement('div');diagBox.id='hoja15KeyDiag';diagBox.style.cssText='position:fixed;left:8px;bottom:8px;z-index:2147483600;max-width:min(96vw,520px);max-height:42vh;overflow:auto;background:#000c;color:#9f9;font:12px/1.45 ui-monospace,monospace;padding:8px 10px;border-radius:8px;pointer-events:none;white-space:pre-wrap';document.body.appendChild(diagBox);}
+  diagBox.textContent=(line+'\n'+diagBox.textContent).split('\n').slice(0,18).join('\n');}
+ window.addEventListener('message',function(e){var d=e.data;if(!diag||!d||d.kind!=='HOJA15_KEYDIAG_EVT')return;
+  show(d.doc+' · '+d.type+' · key='+d.key+' · code='+d.code+(d.relayed?' (전달받음)':' (직접 도착)')+' · focus='+d.focus);});
+ ['keydown','keyup'].forEach(function(t){window.addEventListener(t,function(e){if(diag&&!e.__hoja15Relayed&&!codeOf(e))show('game · '+t+' · key='+String(e.key)+' · code='+String(e.code)+' (게임 키 아님)');},true);});
+ function startDiag(){diag=true;show('키 진단 켜짐 — 게임/연습 화면을 한 번 터치한 뒤 A, D, . 를 눌러 보세요');var t=target();if(t)post(t,{kind:'HOJA15_KEYDIAG_ON'});}
+ try{if(window.google&&google.script&&google.script.url)google.script.url.getLocation(function(loc){if(loc&&loc.parameter&&loc.parameter.keydiag==='1')startDiag();});
+  else if(/[?&]keydiag=1/.test(location.search))startDiag();}catch(_e){}
+ window.HOJA15_KEY_RELAY={startDiag:startDiag,get held(){return Object.keys(held);}};
+})();
+</script>
 <script id="hojaTeacherToolsTouchV1">
 /* Teacher Tools local dashboard -> HtmlService game -> actual Phaser scene. TEST ONLY. */
 (function(){
