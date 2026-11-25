@@ -159,6 +159,12 @@ function h15sCheckHeader_(sh){
 }
 /** 처음 한 번: 이용 기록 스프레드시트 주소(또는 ID)를 저장한다. 웹 앱이 '나만' 접근이므로 교사만 호출할 수 있다. */
 function hoja15StatsSetup(urlOrId){
+  // only the owner may (re)connect the sheet, even if the web app is opened to anyone for viewing
+  const props0=PropertiesService.getScriptProperties();
+  if(props0.getProperty(H15S_PROP_ID_)){
+    let me='',owner='';try{me=String(Session.getActiveUser().getEmail()||'');owner=String(Session.getEffectiveUser().getEmail()||'');}catch(e){}
+    if(!me||me!==owner)throw new Error('시트 연결은 통계 앱을 만든 계정으로 로그인해야 바꿀 수 있습니다.');
+  }
   const raw=String(urlOrId||'').trim();
   const m=raw.match(/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/)||raw.match(/^([A-Za-z0-9_-]{20,})$/);
   if(!m)throw new Error('스프레드시트 주소를 확인해 주세요.');
