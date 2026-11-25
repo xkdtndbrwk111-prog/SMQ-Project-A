@@ -490,6 +490,23 @@ window.HOJA_USAGE=Object.freeze({
  try{if(window.google&&google.script&&google.script.url)google.script.url.getLocation(function(loc){if(loc&&loc.parameter&&loc.parameter.keydiag==='1')startDiag();});
   else if(/[?&]keydiag=1/.test(location.search))startDiag();}catch(_e){}
  window.HOJA15_KEY_RELAY={startDiag:startDiag,get held(){return Object.keys(held);}};
+ // 40-6CL: intro on iPad. The intro only listened to 'click' on #frame; on iPad the Phaser canvas cancels the click that
+ // a finger tap would create, so the intro never advanced. A touch/pen tap now advances it (once: the click that may
+ // follow is swallowed), and Enter / Space advance it from a keyboard. Same advance() as the mouse path.
+ (function(){
+  var fr=document.getElementById('frame'),lastTap=0;
+  var skip=function(t){return !!(t&&t.closest&&t.closest('button,a,input,textarea,select,#hojaRepoChoice,#hojaCatalog,#hojaNextMode,#hojaSharedBack,.hojaAudioTop'));};
+  var intro=function(){try{return window.HOJA_FLOW&&window.HOJA_FLOW.current()==='intro'&&!vis('hojaGamePlay')&&!vis('hojaTutOverlay')&&!document.querySelector('#hoja15JoinLayer.open');}catch(_e){return false;}};
+  if(fr){
+   fr.addEventListener('pointerup',function(e){if(e.pointerType==='mouse'||skip(e.target)||!intro())return;lastTap=Date.now();window.HOJA_INTRO_CLICKS&&window.HOJA_INTRO_CLICKS.advance(e);},true);
+   fr.addEventListener('click',function(e){if(Date.now()-lastTap<800)e.stopImmediatePropagation();},true);
+  }
+  window.addEventListener('keydown',function(e){
+   if(e.repeat||editable(e.target)||e.ctrlKey||e.metaKey||e.altKey||!intro())return;
+   var k=e.code||'';if(k!=='Enter'&&k!=='NumpadEnter'&&k!=='Space'&&e.key!=='Enter'&&e.key!==' ')return;
+   e.preventDefault();window.HOJA_INTRO_CLICKS&&window.HOJA_INTRO_CLICKS.advance({target:fr||document.body});
+  },true);
+ })();
 })();
 </script>
 <script id="hojaTeacherToolsTouchV1">
