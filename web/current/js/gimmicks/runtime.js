@@ -30,7 +30,7 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
    button=add('fireOn').setCrop(4,23,8,7);
    platform=scene.add.rectangle(c.x+c.w/2,c.y+c.h*.6,c.w,6,0,0);
    scene.physics.add.existing(platform,true);
-   collider=scene.physics.add.collider(scene.playerBody,platform,null,scene.playerOneWayProcess,scene);
+   collider=scene.physics.add.collider(scene.playerBody,platform,(player)=>{if(player.body.touching.down)platform.__pressAt=scene.time.now;},scene.playerOneWayProcess,scene);
   }
   return {all,main,chain,particles,flameExtension,button,platform,collider};
  }
@@ -56,7 +56,8 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
   // Reapply the crop after setTexture: Phaser resets it on frame changes.
   // The original 16x32 image includes a platform below the flame.
   if(a.flameExtension)a.flameExtension.setTexture(key(scene,'fireOn'),frame%3).setCrop(0,0,16,15).setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h+2*(s.length-1)*s.h*6/32*s.rise).setVisible(s.phase==='active'&&s.rise>0);
-  a.button.setPosition(s.x+s.w/2,s.y+s.h/2).setDisplaySize(s.w,s.h).setVisible(s.phase==='warn'&&frame%2===0);
+  const blink=s.reactive?Math.floor((s.warningMs||0)/400+((s.warningMs||0)**2)/(120*Math.max(1,c.warn)))%2===0:frame%2===0;
+  a.button.setPosition(s.x+s.w/2,s.y+s.h/2+(s.reactive?2:0)).setDisplaySize(s.w,s.h).setVisible(s.phase==='warn'&&blink);
  }
  function inView(scene,c){const v=scene.cameras?.main?.worldView;if(!v)return true;let left=c.x,top=c.y,right=c.x+c.w,bottom=c.y+c.h;if(c.kind==='spike_head')bottom+=c.drop;if(c.kind==='saw'){if(c.axis==='x')right+=c.distance;else bottom+=c.distance;left-=c.radius;top-=c.radius;right+=c.radius;bottom+=c.radius;}if(c.kind==='pendulum'){left-=c.length+c.radius;right+=c.length+c.radius;bottom+=c.length+c.radius;}if(c.kind==='flame')top-=(c.length-1)*c.h*6/32;if(c.kind==='stepping_blocks'){if(c.path){left=Math.min(left,...c.path.map(p=>c.x+p[0]*32));right=Math.max(right,...c.path.map(p=>c.x+p[0]*32+32));top=Math.min(top,...c.path.map(p=>c.y+p[1]*32));bottom=Math.max(bottom,...c.path.map(p=>c.y+p[1]*32+32));}else if(c.direction==='right')right+=(c.steps+c.count)*32;else left-=(c.steps+c.count)*32;}return right>=v.x-128&&left<=v.x+v.width+128&&bottom>=v.y-128&&top<=v.y+v.height+128;}
  function intersectsViewport(scene,s){const v=scene.cameras?.main?.worldView,top=s.y-(s.length-1)*s.h*6/32;return !v||(s.x+s.w>v.x&&s.x<v.x+v.width&&s.y+s.h>v.y&&top<v.y+v.height);}
@@ -72,9 +73,9 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
  }
  function create(scene,configs){
   if(!Array.isArray(configs))throw Error('기믹 목록 오류');
-  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null,localElapsed:0,nextSoundAt:0,lastSoundTick:-1,lastFlameSoundCycle:null,started:cfg.kind!=='stepping_blocks'||cfg.activation==='auto',head:cfg.kind==='spike_head'?{y:cfg.y,phase:'idle',landedMs:0}:null};});let elapsed=0;
-  for(const e of entries)paint(scene,e,model.state(e.cfg,0),0);
-  return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>e.cfg.kind==='spike_head'?({...model.state(e.cfg,elapsed),...e.head}):e.cfg.kind==='stepping_blocks'?({...model.state(e.cfg,e.localElapsed),started:e.started}):({...model.state(e.cfg,elapsed)}));},
+  const entries=configs.map(raw=>{const cfg=model.normalize(raw),art=make(scene,cfg);return {cfg,art,warnShown:false,warnCycle:null,localElapsed:0,nextSoundAt:0,lastSoundTick:-1,lastFlameSoundCycle:null,started:cfg.kind!=='stepping_blocks'||cfg.activation==='auto',reactive:cfg.kind==='flame'&&cfg.activation==='on_step'?{phase:'idle',ms:0,latched:false,cycle:0}:null,head:cfg.kind==='spike_head'?{y:cfg.y,phase:'idle',landedMs:0}:null};});let elapsed=0;
+  for(const e of entries){const initial=model.state(e.cfg,0);paint(scene,e,e.reactive?{...initial,phase:'wait',active:false,rise:0,reactive:true}:initial,0);}
+  return {entries,get elapsed(){return elapsed;},snapshot(){return entries.map(e=>e.reactive?({...model.state(e.cfg,0),...e.reactive,active:e.reactive.phase==='active'}):e.cfg.kind==='spike_head'?({...model.state(e.cfg,elapsed),...e.head}):e.cfg.kind==='stepping_blocks'?({...model.state(e.cfg,e.localElapsed),started:e.started}):({...model.state(e.cfg,elapsed)}));},
    update(delta){if(!Number.isFinite(delta)||delta<0)throw Error('기믹 시간 오류');if(scene.manualPaused||scene.quizActive||scene.dying||scene.timeUp||scene.clear||scene.transitioning)return;scene.hojaHorizontalWind=0;const before=elapsed;elapsed+=delta;const body=scene.playerBody?.body;if(!body||!body.enable)return;
     for(const e of entries){
      if(e.cfg.kind==='spike_head'){
@@ -88,6 +89,25 @@ window.HOJA_CREATE_GIMMICKS=(images,sfx)=>{
       else if(h.phase==='reload'){h.reloadMs+=delta;if(h.reloadMs>=2000)h.phase='idle';}
       const state={...model.state(c,elapsed),...h},visible=inView(scene,c);e.art.all.forEach(o=>o.setVisible(visible));if(visible)paint(scene,e,state,elapsed);
       if(model.rectHit(body,{x:c.x,y:Math.min(old,h.y),w:c.w,h:c.h+Math.abs(h.y-old)})){scene.hojaGimmickHit='spike_head';try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
+      continue;
+     }
+     if(e.reactive){
+      const c=e.cfg,r=e.reactive,hit=e.art.platform.body;
+      const touching=(scene.time.now-(e.art.platform.__pressAt??-1e9)<120)&&body.right>hit.left+1&&body.left<hit.right-1&&body.bottom>=hit.top-5&&body.bottom<=hit.top+8&&body.velocity.y>=-30;
+      if(!touching)r.latched=false;
+      if(r.phase==='idle'&&touching&&!r.latched){r.phase='warn';r.ms=0;r.latched=true;r.cycle++;}
+      else if(r.phase!=='idle'){
+       r.ms+=delta;const limit=r.phase==='warn'?c.warn:r.phase==='active'?c.active:c.cool;
+       if(r.ms>=limit){r.ms=0;r.phase=r.phase==='warn'?'active':r.phase==='active'?'cool':'idle';if(r.phase==='active')sfx?.gimmickFlame?.();}
+      }
+      const t=r.phase==='warn'?r.ms:r.phase==='active'?c.warn+r.ms:c.warn+c.active+r.ms;
+      const state=r.phase==='idle'?{...model.state(c,0),phase:'wait',active:false,rise:0}:{...model.state({...c,wait:0,phase:0},t),phase:r.phase,active:r.phase==='active'};
+      state.reactive=true;state.warningMs=r.ms;const visible=inView(scene,c);e.art.all.forEach(o=>o.setVisible(visible));if(visible)paint(scene,e,state,elapsed);
+      if(r.phase==='active'){
+       const area={x:state.x+state.w*.2,y:state.y-(state.length-1)*state.h*6/32*state.rise,w:state.w*.6,h:state.h*.55+(state.length-1)*state.h*6/32*state.rise};
+       for(const enemy of scene.enemies||[]){if(enemy.alive&&enemy.type!=='BALLOONEY'&&enemy.bodyObj?.body?.enable&&model.rectHit(enemy.bodyObj.body,area))scene.killEnemy(enemy,'strong');}
+       if(visible&&intersectsViewport(scene,state)&&model.rectHit(body,area)){scene.hojaGimmickHit='flame';try{scene.startDeath('enemy');}finally{scene.hojaGimmickHit=null;}if(scene.dying)return;}
+      }
       continue;
      }
      if(e.cfg.kind==='stepping_blocks'){

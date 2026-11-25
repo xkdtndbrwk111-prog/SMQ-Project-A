@@ -1,4 +1,11 @@
 'use strict';
+// Recolor only the two original yellow palette entries; all other pixels stay unchanged.
+window.HOJA_BLUE_LIFT_IMAGE=function(source){
+ const c=document.createElement('canvas');c.width=source.width;c.height=source.height;
+ const x=c.getContext('2d');x.drawImage(source,0,0);const im=x.getImageData(0,0,c.width,c.height),d=im.data;
+ for(let i=0;i<d.length;i+=4){if(d[i]===225&&d[i+1]===202&&d[i+2]===51){d[i]=63;d[i+1]=139;d[i+2]=230;}else if(d[i]===247&&d[i+1]===236&&d[i+2]===138){d[i]=151;d[i+1]=215;d[i+2]=255;}}
+ x.putImageData(im,0,0);return c;
+};
 window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2CaveRow, HOJA_V2_SURFACE_START, HOJA_V2_ATLAS_COLS, HOJA_CAVE_AMBIENT_TINT}) {
   function createMovingPlatforms(scene, {MOVING_PLATFORMS, HOJA_MAKER_MODE, STAGE, THEME, HOJA_V2_RENDER}){
     // Maker R5: use Pixel Adventure original 32×8 eight-frame platforms only
@@ -16,7 +23,9 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
       const image=HOJA_MAKER_IMAGES.get('Free/Traps/Falling Platforms/On (32x10).png');
       if(!image)throw new Error('내려가는 발판 원본 에셋을 불러오지 못했습니다.');
       if(!scene.textures.exists('hojaSinkPlatform'))scene.textures.addSpriteSheet('hojaSinkPlatform',image,{frameWidth:32,frameHeight:10});
+      if(!scene.textures.exists('hojaRisePlatform'))scene.textures.addSpriteSheet('hojaRisePlatform',window.HOJA_BLUE_LIFT_IMAGE(image),{frameWidth:32,frameHeight:10});
       if(!scene.anims.exists('hojaSinkPlatformOn'))scene.anims.create({key:'hojaSinkPlatformOn',frames:scene.anims.generateFrameNumbers('hojaSinkPlatform',{start:0,end:3}),frameRate:8,repeat:-1});
+      if(!scene.anims.exists('hojaRisePlatformOn'))scene.anims.create({key:'hojaRisePlatformOn',frames:scene.anims.generateFrameNumbers('hojaRisePlatform',{start:0,end:3}),frameRate:8,repeat:-1});
     }
     scene.movingPlatforms=[];
     scene.movingPlatformGroup=scene.physics.add.group({allowGravity:false,immovable:true});
@@ -38,7 +47,8 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
       if(cfg.makerSink){
         const art=[];
         for(let ox=0;ox<cfg.w;ox+=32){
-          const segment=Math.min(32,cfg.w-ox),sp=scene.add.sprite(cfg.x+ox,cfg.y,'hojaSinkPlatform',0).setOrigin(0,0).setDepth(4);
+          const segment=Math.min(32,cfg.w-ox),sp=scene.add.sprite(cfg.x+ox,cfg.y,cfg.makerRise?'hojaRisePlatform':'hojaSinkPlatform',0).setOrigin(0,0).setDepth(4);
+          sp.play(cfg.makerRise?'hojaRisePlatformOn':'hojaSinkPlatformOn');
           if(segment<32)sp.setCrop(0,0,segment,10);
           art.push({image:sp,makerArt:true,offsetX:ox,offsetY:0});
         }
@@ -100,18 +110,21 @@ window.HOJA_CREATE_MOVING_PLATFORMS = function ({TILE, HOJA_MAKER_IMAGES, hojaV2
       if(c.makerSink){
         const pb=scene.playerBody?.body,top=b.top,now=scene.time.now,grounded=!!(pb&&(pb.blocked.down||pb.touching.down));
         const over=!!pb&&pb.right>b.left+2&&pb.left<b.right-2;
-        const occupied=!!pb&&over&&pb.velocity.y>-40&&((now-p.touchAt<120)||(grounded&&Math.abs(pb.bottom-top)<=5)||(p.occupied&&pb.bottom>=top-12&&pb.bottom<=top+8));
-        const dt=Math.min(50,Math.max(0,scene.game.loop.delta||16.67))/1000;
-        let vy=occupied?c.sinkSpeed:(top>c.y? -c.returnSpeed:0);
-        let maxY=Math.min(c.y+c.sinkDepth,(scene.physics.world.bounds?.bottom??(c.y+c.sinkDepth+8))-b.height);
-        // Do not visually or physically sink through a solid surface below.
-        for(const group of [scene.solidGroup,scene.oneWayGroup,scene.brickGroup,scene.pipeGroup,scene.crumbleGroup])for(const object of group?.getChildren?.()||[]){const floor=object.body;if(floor&&floor.enable!==false&&floor.right>b.left&&floor.left<b.right&&floor.top>=c.y+b.height-1)maxY=Math.min(maxY,floor.top-b.height);}
-        maxY=Math.max(c.y,maxY);
-        if(occupied&&top+vy*dt>=maxY){b.reset(p.bodyObj.x,maxY+b.height/2);vy=0;}
-        if(!occupied&&top+vy*dt<=c.y){b.reset(p.bodyObj.x,c.y+b.height/2);vy=0;}
+        const occupied=!!pb&&over&&pb.velocity.y>-Math.max(40,c.sinkSpeed+8)&&((now-p.touchAt<120)||(grounded&&Math.abs(pb.bottom-top)<=5)||(p.occupied&&pb.bottom>=top-12&&pb.bottom<=top+8));
+        const dt=Math.min(50,Math.max(0,scene.game.loop.delta||16.67))/1000,dir=c.makerRise?-1:1;
+        let vy=occupied?dir*c.sinkSpeed:(Math.abs(top-c.y)>.01?-Math.sign(top-c.y)*c.returnSpeed:0);
+        let maxY=(scene.physics.world.bounds?.bottom??c.y+4096)-b.height,minY=0;
+        for(const group of [scene.solidGroup,scene.oneWayGroup,scene.brickGroup,scene.pipeGroup,scene.crumbleGroup])for(const object of group?.getChildren?.()||[]){
+          const floor=object.body;if(!floor||floor.enable===false||floor.right<=b.left||floor.left>=b.right)continue;
+          if(floor.top>=c.y+b.height-1)maxY=Math.min(maxY,floor.top-b.height);
+          if(group!==scene.oneWayGroup&&floor.bottom<=c.y)minY=Math.max(minY,floor.bottom+(occupied&&pb?pb.height:0));
+        }
+        maxY=Math.max(c.y,maxY);minY=Math.min(c.y,minY);
+        if(occupied&&dir>0&&top+vy*dt>=maxY){b.reset(p.bodyObj.x,maxY+b.height/2);vy=0;}
+        if(occupied&&dir<0&&top+vy*dt<=minY){b.reset(p.bodyObj.x,minY+b.height/2);vy=0;}
+        if(!occupied&&((top>c.y&&top+vy*dt<=c.y)||(top<c.y&&top+vy*dt>=c.y))){b.reset(p.bodyObj.x,c.y+b.height/2);vy=0;}
         b.setVelocity(0,vy);
-        if(occupied&&vy>0&&pb.velocity.y<vy)pb.setVelocityY(vy);
-        if(occupied!==p.occupied){for(const tile of p.tiles){if(occupied)tile.image.play('hojaSinkPlatformOn',true);else{tile.image.stop();tile.image.setFrame(0);}}}
+        if(occupied&&dir>0&&vy>0&&pb.velocity.y<vy)pb.setVelocityY(vy);
         p.occupied=occupied;
       }else if(c.waypoints?.length>=2){
         if(p.pathIndex===undefined){p.pathIndex=1;p.pathDir=1;}
