@@ -6034,6 +6034,7 @@ class HojaScene extends Phaser.Scene{
     this.updateWeather(delta);
 
     if(this.dying||this.timeUp||this.transitioning){
+      this.updateHojaSwimGhost();
       this.hojaStopSleep();
       this.updateCaveLanternLight(time);
       this.updateCamera(time);
@@ -6229,7 +6230,7 @@ class HojaScene extends Phaser.Scene{
     }
 
     this.updatePlayerVisual(run,delta);
-    if(this.hojaSwimGhost){const h=this.hoja,g=this.hojaSwimGhost;g.setTexture(h.texture.key,h.frame.name).setPosition(h.x,h.y).setFlipX(h.flipX).setFlipY(h.flipY).setScale(h.scaleX,h.scaleY).setAngle(h.angle).setAlpha(h.alpha*.38).setVisible(h.visible);}
+    this.updateHojaSwimGhost();
     if(this.hojaAmbientBubbleArt){
       if(swimZone){
         this.hojaBubbleClock+=delta;
@@ -7634,6 +7635,14 @@ class HojaScene extends Phaser.Scene{
     this.respawnNow();
   }
 
+  updateHojaSwimGhost(){
+    const h=this.hoja,g=this.hojaSwimGhost;
+    if(!h||!g)return;
+    g.setTexture(h.texture.key,h.frame.name).setPosition(h.x,h.y)
+      .setFlipX(h.flipX).setFlipY(h.flipY).setScale(h.scaleX,h.scaleY)
+      .setAngle(h.angle).setAlpha(h.alpha*.38).setVisible(h.visible&&!this.transitioning);
+  }
+
   startDeath(reason='enemy'){
     if(this.dying||this.clear||this.timeUp)return;
     // V0.57: brief mercy window after a respawn (enemy contact only;
@@ -7653,6 +7662,7 @@ class HojaScene extends Phaser.Scene{
 
     this.hoja.anims.stop();
     this.hoja.setTexture('hoja_break_0').setAlpha(1).setAngle(0);
+    this.updateHojaSwimGhost();
     this.visualState='STRAIGHT';
     SFX.death();
 
