@@ -340,14 +340,39 @@ window.HOJA_USAGE=Object.freeze({
  let backAt=0;
  document.addEventListener('click',e=>{if(e.target?.closest?.('#hojaSharedBack'))backAt=Date.now();},true);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')backAt=Date.now();},true);
- const show=R.show;
- R.show=function(){
-  show.apply(this,arguments);
-  if(Date.now()-backAt<800){R.back();return;}
-  // never start loading the catalog over a running game (e.g. the intro timer ending in the background)
+ // 40-6CM (teacher): the built-in/private choice screen is REMOVED, not skipped. It is never shown (CSS below) and
+ // R.show() itself loads the built-in list and opens the grade step. No scripted button click is involved, so no
+ // click filter can bring the screen back.
+ const css=document.createElement('style');css.id='hoja15NoRepoChoice';css.textContent='#hojaRepoChoice{display:none!important}';document.head.append(css);
+ const hide=R.hide.bind(R);let busy=false;
+ function toIntro(){hide();window.HOJA_ATTRACT_CONTROL?.restart?.();R.syncBack?.();}
+ function failCard(msg){
+  document.getElementById('hoja15ListFail')?.remove();
+  const box=document.createElement('div');box.id='hoja15ListFail';box.setAttribute('role','alert');
+  box.style.cssText='position:fixed;inset:0;z-index:2147482500;display:grid;place-items:center;background:#061222cc;font-family:system-ui,sans-serif';
+  const card=document.createElement('div');card.style.cssText='background:#13304e;color:#fff;border:4px solid #ffd85e;border-radius:18px;padding:24px 28px;max-width:min(90vw,560px);text-align:center;font-size:18px;line-height:1.5';
+  const t=document.createElement('div');t.textContent='카트리지 목록을 불러오지 못했어요.';t.style.cssText='font-size:24px;font-weight:900;margin-bottom:8px';
+  const m=document.createElement('div');m.textContent=msg;m.style.cssText='font-size:14px;opacity:.8;word-break:break-all';
+  const row=document.createElement('div');row.style.cssText='display:flex;gap:10px;justify-content:center;margin-top:16px';
+  const mk=(label,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.style.cssText='font:800 18px system-ui;padding:10px 22px;border-radius:12px;border:2px solid #ffd85e;background:#ffd85e;color:#10253c;cursor:pointer';b.onclick=()=>{box.remove();fn();};return b;};
+  row.append(mk('다시 시도',()=>R.show()),mk('처음으로',toIntro));card.append(t,m,row);box.append(card);document.body.append(box);
+ }
+ R.show=async function(){
+  if(Date.now()-backAt<800){toIntro();return;}               // '이전' from the grade step -> intro
   const game=document.getElementById('hojaGamePlay');
-  if(game&&!game.hidden){R.hide?.();return;}
-  document.getElementById('hrPublic')?.click();   // straight to the built-in catalog
+  if(game&&!game.hidden){hide();return;}                     // never over a running game
+  if(busy)return;busy=true;
+  const s=window.HOJA_ATTRACT_SCENE;if(s)s.pausedByUser=true;
+  window.HOJA_CATALOG?.hide?.();window.HOJA_MODE_PREVIEW?.hide?.();hide();
+  window.HOJA_LOADING?.show({purpose:'catalog'});
+  try{
+   const rows=await window.HOJA_B_LIVE.rpc('LIST');
+   if(!Array.isArray(rows)||rows.some(x=>!x||typeof x.name!=='string'||!x.name.trim())||new Set(rows.map(x=>x.name)).size!==rows.length)throw new Error('카트리지 목록 응답 오류');
+   const names=rows.map(x=>x.name);if(!names.length)throw new Error('게시된 카트리지가 없습니다.');
+   window.HOJA_B_LIVE.clear();
+   window.HOJA_LOADING?.hide();window.HOJA_CATALOG?.setSheets(names,{repositoryKind:'PUBLIC'});
+  }catch(error){window.HOJA_LOADING?.hide();failCard(window.HOJA_B_LIVE?.showError?window.HOJA_B_LIVE.showError(error):String(error&&error.message||error));}
+  finally{busy=false;R.syncBack?.();}
  };
 })();
 </script>
@@ -499,7 +524,8 @@ window.HOJA_USAGE=Object.freeze({
   var intro=function(){try{return window.HOJA_FLOW&&window.HOJA_FLOW.current()==='intro'&&!vis('hojaGamePlay')&&!vis('hojaTutOverlay')&&!document.querySelector('#hoja15JoinLayer.open');}catch(_e){return false;}};
   if(fr){
    fr.addEventListener('pointerup',function(e){if(e.pointerType==='mouse'||skip(e.target)||!intro())return;lastTap=Date.now();window.HOJA_INTRO_CLICKS&&window.HOJA_INTRO_CLICKS.advance(e);},true);
-   fr.addEventListener('click',function(e){if(Date.now()-lastTap<800)e.stopImmediatePropagation();},true);
+   // swallow only the browser's own click that follows a tap on the intro art; never buttons or scripted clicks (the built-in catalog skip)
+   fr.addEventListener('click',function(e){if(e.isTrusted&&!skip(e.target)&&intro()&&Date.now()-lastTap<800)e.stopImmediatePropagation();},true);
   }
   window.addEventListener('keydown',function(e){
    if(e.repeat||editable(e.target)||e.ctrlKey||e.metaKey||e.altKey||!intro())return;

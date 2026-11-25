@@ -49,7 +49,7 @@ if without_display.count(mark) == 1:
 # Pin instead: (1) the F3-3-audited game BEFORE any patch, (2) the telemetry block in the game == the current
 # UsageTelemetryClient.html block byte-for-byte (so the client policy file is the only source of that change).
 # 40-6BV: re-pinned after HOJA 1.5 UX fixes (was 22aa9041… 40-6BG, 1cb387c7… 40-6BF, 617f2228… before)
-ok(rc.get('rcGameSha256') == '3f63baa2ec49096312dce095fcf88daa60e2d25baeff00600c703d24675c161a', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+ok(rc.get('rcGameSha256') == '684c6451e6bcece00a05b0f4e45be50aa4235c5a888ccf02a9f9a6faa4b5fea4', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}
