@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>HOJA 키 동시 입력 시험</title>
+<style>body{font:700 22px system-ui;background:#10253c;color:#fff;display:grid;place-items:center;min-height:100vh;margin:0}
+.k{display:inline-grid;place-items:center;width:110px;height:110px;margin:8px;border-radius:16px;background:#ffffff22;font-size:40px;border:3px solid #ffffff55}
+.on{background:#ffd85e;color:#10253c;border-color:#ffd85e}p{font-size:18px;font-weight:500;text-align:center;line-height:1.6}#log{font-size:16px;font-weight:500;color:#ffe9a8}</style></head>
+<body><div style="text-align:center">
+<p>이 창을 한 번 클릭한 뒤<br><b>D를 누른 채 , 를 누른 채 . 를 누르세요.</b> 그다음 <b>A</b>로도 똑같이 해 보세요.</p>
+<div><span class="k" id="KeyA">A</span><span class="k" id="KeyD">D</span><span class="k" id="Comma">,</span><span class="k" id="Period">.</span></div>
+<p id="log">아직 입력 없음</p></div>
+<script>const held=new Set(),log=document.getElementById('log');
+function draw(){for(const id of ['KeyA','KeyD','Comma','Period'])document.getElementById(id).classList.toggle('on',held.has(id));}
+addEventListener('keydown',e=>{if(e.repeat)return;held.add(e.code);draw();
+ if(e.code==='Period'){const dir=held.has('KeyD')?'D':held.has('KeyA')?'A':'';log.textContent=(dir?dir+' + ':'')+(held.has('Comma')?', + ':'')+'. 입력 성공 ✓';}e.preventDefault();});
+addEventListener('keyup',e=>{held.delete(e.code);draw();});addEventListener('blur',()=>{held.clear();draw();});</script></body></html>

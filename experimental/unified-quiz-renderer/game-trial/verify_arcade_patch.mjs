@@ -32,13 +32,14 @@ assert(patched.includes('jump:this.input.keyboard.addKey(K.PERIOD)'),'Period mus
 assert(patched.includes('run:this.input.keyboard.addKey(K.COMMA)'),'Comma must be run');
 assert(patched.includes('const left=this.keys.a.isDown;')&&patched.includes('const right=this.keys.d.isDown;'),'Movement must use A/D only');
 assert(patched.includes('const upPressed=Phaser.Input.Keyboard.JustDown(this.keys.w);'),'W must be the sole door key');
-assert(patched.includes('const jumpPressed=Phaser.Input.Keyboard.JustDown(this.keys.jump);'),'Jump must not fire on W/Space/Z');
-assert(patched.includes('const jumpHeld=this.keys.jump.isDown;'),'Variable jump height must use only period');
-assert(patched.includes("const run=this.keys.run.isDown;"),'Double tap/Shift/X run must be disabled');
+// 40-6CJ (teacher): Space is a spare jump and Shift a spare run for keyboards that drop D + , + . ; W/Z/arrows never jump
+assert(patched.includes('const jumpPressed=Phaser.Input.Keyboard.JustDown(this.keys.jump)|Phaser.Input.Keyboard.JustDown(this.keys.jump2);')&&patched.includes('jump2:this.input.keyboard.addKey(K.SPACE)'),'Jump = period or Space only');
+assert(patched.includes('const jumpHeld=this.keys.jump.isDown||this.keys.jump2.isDown;'),'Variable jump height = period or Space');
+assert(patched.includes("const run=this.keys.run.isDown||this.keys.run2.isDown;")&&patched.includes('run2:this.input.keyboard.addKey(K.SHIFT)'),'Run = comma or Shift only (no double tap / X)');
 assert(!patched.includes('const doubleTapRun='),'Double tap running must be disabled');
 for(const oldInput of ['this.keys.left.isDown','this.keys.right.isDown','this.keys.up.isDown','this.keys.down.isDown','this.keys.z.isDown','this.keys.x.isDown'])
  assert(!patched.includes(oldInput),'Old gameplay key is still active: '+oldInput);
-assert(patched.includes("['KeyW','KeyA','KeyS','KeyD','Comma','Period','Enter'].includes(ev.code)"),'Death confirm must accept the seven official keys');
+assert(patched.includes("['KeyW','KeyA','KeyS','KeyD','Comma','Period','Enter','Space','ShiftLeft','ShiftRight'].includes(ev.code)"),'Death confirm accepts the official keys + spare Space/Shift');
 assert(!patched.includes("if(ev.code!=='Enter'&&ev.code!=='Space')return"),'Old Space death shortcut must be replaced');
 assert(patched.includes('this.continueHojaAfterDeath()'),'Original checkpoint respawn must remain');
 assert(patched.includes("document.getElementById('hojaDeathContinue')?.focus({preventScroll:true});"),'Death dialog must focus the child frame CTA');
