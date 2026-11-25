@@ -2167,7 +2167,23 @@ async function hojaMakerPreload(p){
     try{await img.decode();HOJA_MAKER_IMAGES.set(path,img)}catch(err){console.warn('Asset decode failed',path,err)}
   }
 }
+// Render and collide only with the portion of authored terrain inside the
+// map. Work on a copy: the Maker project and its saved coordinates stay intact.
+function hojaMakerClipTerrain(project){
+ const copy=structuredClone(project);
+ for(const m of copy?.maps||[]){
+  if(!Number.isFinite(m.width)||!Number.isFinite(m.height)||!Array.isArray(m.terrain))continue;
+  m.terrain=m.terrain.flatMap(t=>{
+   if(!t||![t.x,t.y,t.w,t.h].every(Number.isFinite)||t.w<=0||t.h<=0)return [t];
+   const x=Math.max(0,t.x),y=Math.max(0,t.y),right=Math.min(m.width,t.x+t.w),bottom=Math.min(m.height,t.y+t.h);
+   if(right<=x||bottom<=y)return [];
+   return [{...t,x,y,w:right-x,h:bottom-y}];
+  });
+ }
+ return copy;
+}
 async function hojaMakerImport(p,previewEventId=null,startMapId=null){
+  p=hojaMakerClipTerrain(p);
   hojaMakerValidateProject(p);
   const startIndex=startMapId==null?0:p.maps.findIndex(m=>m.id===startMapId);
   if(startIndex<0)throw Error('선택한 시작 맵을 찾을 수 없습니다.');
@@ -2219,7 +2235,7 @@ async function hojaMakerDrainQueue(){
           HOJA_MAKER_LAST_REQUEST=requestId;
         }
         reply({kind:'HOJA_V061_LOADED',mapCount:HOJA_MAKER_PROJECT.maps.length});
-      }catch(err){reply({kind:'HOJA_V061_ERROR',message:String(err.message||err)});}
+      }catch(err){const message=String(err.message||err);const loading=document.getElementById('hojaMakerLoading');if(loading){loading.textContent='맵을 열지 못했습니다: '+message+' · Maker에서 수정 후 다시 플레이해 주세요.';loading.removeAttribute('hidden');}reply({kind:'HOJA_V061_ERROR',message});}
     }
   }finally{HOJA_MAKER_IMPORTING=false;}
 }
