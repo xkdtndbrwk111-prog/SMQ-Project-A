@@ -327,12 +327,12 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      answerHandler=onAnswer;
    }catch(e){error(e);}
  }
- function reviewFeedback(label,onNext,correct){
+ function reviewFeedback(label,onNext,correct,wrongText,nextText){
    if(!header||!nextButton)return;
    document.getElementById('hojaTeamReviewLabel').textContent=label;
    let done=false;const go=()=>{if(done)return;done=true;nextButton.style.display='none';window.removeEventListener('keydown',key,true);inputWindow()?.removeEventListener('keydown',key,true);clearJudgment();onNext();};
    const key=ev=>{if(ev.code==='Enter'||ev.code==='NumpadEnter'||ev.code==='Space'){ev.preventDefault();ev.stopImmediatePropagation();go();}};
-   nextButton.textContent='다음 문제 ▶';
+   nextButton.textContent=nextText||'다음 문제 ▶';
    nextButton.style.display='inline-block';
    nextButton.onclick=go;
    // HOJA 1.5 (teacher): a clear green/red verdict in the review too, with a big next button.
@@ -343,8 +343,8 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      judgment.style.cssText='position:absolute;inset:0;z-index:45;display:grid;place-items:center;align-content:center;gap:22px;pointer-events:none;background:rgba(5,12,21,.5)';
      const mark=document.createElement('div');
      mark.style.cssText='border-radius:20px;box-shadow:0 12px 55px #000a;padding:22px 45px;max-width:90%;font:900 clamp(30px,4.8vw,60px)/1.25 system-ui,sans-serif;text-align:center;color:#fff;border:4px solid rgba(255,255,255,.75);background:'+(correct?'#176c4b':'#a3263a');
-     mark.textContent=correct?'✓ 정답!':'✕ 오답 · 다음 회차에 다시 풀어요';
-     const big=document.createElement('button');big.type='button';big.id='hojaTeamReviewNextBig';big.textContent='다음 문제 ▶';
+     mark.textContent=correct?'✓ 정답!':(wrongText||'✕ 오답 · 다음 회차에 다시 풀어요');
+     const big=document.createElement('button');big.type='button';big.id='hojaTeamReviewNextBig';big.textContent=nextText||'다음 문제 ▶';
      big.style.cssText='pointer-events:auto;justify-self:center;padding:14px 40px;border-radius:14px;border:3px solid #ffdb67;background:#23555a;color:#fff;font:900 clamp(20px,2.4vw,32px) system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 20px #0008';
      big.onclick=go;judgment.append(mark,big);overlay().append(judgment);
      setTimeout(()=>{try{big.focus();}catch(_e){}},30);

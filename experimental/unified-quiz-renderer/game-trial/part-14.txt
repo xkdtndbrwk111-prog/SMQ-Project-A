@@ -33,6 +33,7 @@ window.HOJA_GAMEPLAY=(()=>{
   winter:{sky:'#fff8ff',ground:'#a66567',family:8,bg:['thWinMountain','thWinHills','thWinFore']}
  };
  let questions=[];
+ let quizWrong=[],reviewBusy=false,reviewKey=null;   // HOJA 1.5 (40-6CO): quiz-mode wrong-answer retry
  function setServerQuestions(sources){
   const familyMap=new Map(), sourceNames=new Set();
   if(!Array.isArray(sources)||sources.length<1||sources.length>5)throw new Error('서버 카트리지 개수 오류');
@@ -255,6 +256,7 @@ window.HOJA_GAMEPLAY=(()=>{
    }catch(err){if(own!==loadId)return;img('hqArcadeInfo').hidden=false;img('hqArcadeInfo').textContent='아케이드 실행 준비 실패: '+err.message;}
   }else{
    window.HOJA_TEAM_APPROVED_TRIAL.begin(questions);
+   quizWrong=[];reviewBusy=false;img('hqResultReview')?.remove();img('hqResultReviewNote')?.remove();
    answered=0;correct=0;deck=questions.map((_,i)=>i);for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}activeQuiz=false;jumping=false;finished=false;lastCorrect=false;stage().dataset.quizFinished='false';img('hqResult').hidden=true;
    img('hqOverlay').hidden=true;updateQuizHud();
    quizEyeHappyUntil=0;quizEyeFailUntil=0;player().dataset.hojaEyeKey='';
@@ -263,6 +265,7 @@ window.HOJA_GAMEPLAY=(()=>{
   }
  }
  function stop(){
+  reviewBusy=false;clearReviewKey();
   window.HOJA_ARCADE_APPROVED_TRIAL?.reset?.();
   window.HOJA_TEAM_APPROVED_TRIAL?.reset?.();
   stopEnemyFrames();
@@ -306,7 +309,60 @@ window.HOJA_GAMEPLAY=(()=>{
   img('hqResultAnswered').textContent=String(answered);img('hqResultCorrect').textContent=String(correct);
   img('hqResultPercent').textContent=String(Math.round(correct*100/Math.max(1,answered)))+'%';
   img('hqResult').hidden=false;window.HOJA_INTRO_AUDIO?.play?.('clear',.7,1,0);
+  renderReviewButton();
  }
+ // HOJA 1.5 (40-6CO): like the single arcade — the answer is not shown first, each wrong question is answered once with a
+ // green/red verdict; questions still wrong can be retried again. Score / correct / percent never change.
+ function renderReviewButton(note){
+  img('hqResultReview')?.remove();img('hqResultReviewNote')?.remove();
+  const actions=document.querySelector('#hqResult .hqResultActions');if(!actions)return;
+  if(note){const p=document.createElement('p');p.id='hqResultReviewNote';p.textContent=note;p.style.cssText='font-weight:800;color:#ffdb67';actions.parentNode.insertBefore(p,actions);}
+  if(!quizWrong.length)return;
+  const b=document.createElement('button');b.type='button';b.id='hqResultReview';
+  b.textContent=(note?'남은 오답 다시 풀기':'오답 다시 풀기')+' ('+quizWrong.length+'문항)';
+  b.style.cssText='background:#a3263a;color:#fff;border-color:#ffdb67';
+  b.onclick=startQuizReview;actions.insertBefore(b,actions.firstChild);
+ }
+ function startQuizReview(){
+  if(reviewBusy||!quizWrong.length||page!=='quiz')return;
+  reviewBusy=true;img('hqResult').hidden=true;
+  const items=quizWrong.slice(),stillWrong=[];let index=0,right=0;
+  const done=()=>{
+   reviewBusy=false;clearReviewKey();window.HOJA_TEAM_APPROVED_TRIAL.hide();img('hqOverlay').hidden=true;
+   quizWrong=stillWrong;img('hqResult').hidden=false;
+   renderReviewButton(quizWrong.length?'오답 다시 풀기: '+right+'/'+items.length+' 정답':'오답을 모두 맞혔어요! ('+right+'/'+items.length+')');
+  };
+  const ask=()=>{
+   if(page!=='quiz'){reviewBusy=false;clearReviewKey();return;}
+   if(index>=items.length){done();return;}
+   const q=items[index];let locked=false;img('hqOverlay').hidden=false;
+   window.HOJA_TEAM_APPROVED_TRIAL.show(q,'solo',d=>{
+    if(locked||page!=='quiz')return;
+    let ix;try{ix=window.HOJA_UNIFIED_TRIAL_CORE.teamRendererAnswerIndex(q.approvedBinding,d.choiceId);}catch(e){window.HOJA_TEAM_APPROVED_TRIAL.error(e);return;}
+    if(!(ix>=0))return;locked=true;clearReviewKey();
+    const ok=ix===q.answer;if(ok)right++;else stillWrong.push(q);
+    window.HOJA_V055_SFX?.(ok?'correct':'wrong');
+    const last=index===items.length-1;
+    window.HOJA_TEAM_APPROVED_TRIAL.reviewFeedback('오답 다시 풀기 '+(index+1)+'/'+items.length+' · '+(ok?'정답':'오답'),
+     ()=>{index++;ask();},ok,'✕ 오답 · 정답: '+String((q.choices||[])[q.answer]??''),last?'결과 보기 ▶':'다음 문제 ▶');
+   },'오답 다시 풀기 '+(index+1)+'/'+items.length+' · 정답은 풀고 나서 보여요').then(()=>{
+    if(locked||page!=='quiz')return;
+    const child=window.HOJA_TEAM_APPROVED_TRIAL.inputWindow();
+    const buttons=()=>child?[...child.document.querySelectorAll('#hqChoices button.hqChoice')]:[];
+    reviewKey=e=>{
+     if(locked||e.repeat||e.isComposing||e.ctrlKey||e.altKey||e.metaKey)return;
+     if(['INPUT','TEXTAREA','SELECT'].includes(e.target?.tagName))return;
+     let pos=-1;const c=e.code;
+     if(/^Digit[123]$/.test(c)||/^Numpad[123]$/.test(c))pos=Number(c.at(-1))-1;
+     else if(q.type==='OX'&&(c==='KeyO'||c==='KeyX'))pos=buttons().findIndex(b=>b.dataset.choice===(c==='KeyO'?'true':'false'));
+     if(pos<0||!buttons()[pos])return;e.preventDefault();e.stopImmediatePropagation();buttons()[pos].click();
+    };
+    window.addEventListener('keydown',reviewKey,true);child?.addEventListener('keydown',reviewKey,true);
+   });
+  };
+  ask();
+ }
+ function clearReviewKey(){if(!reviewKey)return;window.removeEventListener('keydown',reviewKey,true);window.HOJA_TEAM_APPROVED_TRIAL?.inputWindow()?.removeEventListener('keydown',reviewKey,true);reviewKey=null;}
  function celebrate(){
   document.querySelectorAll('#hqStage .hqEnemy').forEach((en,i)=>{
    en.classList.remove('hqCelebrate');void en.offsetWidth;
@@ -332,6 +388,7 @@ window.HOJA_GAMEPLAY=(()=>{
   function choose(i){
    if(locked||i<0||i>=q.choices.length)return;locked=true;answered++;
    for(let k=0;k<choices.children.length;k++)if(k===q.answer)choices.children[k].classList.add('correct');
+   if(i!==q.answer)quizWrong.push(q);   // HOJA 1.5 (40-6CO): wrong answers for the retry
    if(i===q.answer){correct++;feedback.textContent='정답!  +10';window.HOJA_V055_SFX?.('correct');lastCorrect=true;quizHappyEye=hojaPickHappyEye();quizEyeHappyUntil=performance.now()+1400;quizEyeFailUntil=0;}else{choices.children[i]?.classList.add('wrong');feedback.textContent='오답 · 0점';window.HOJA_V055_SFX?.('wrong');lastCorrect=false;quizEyeFailUntil=performance.now()+950;quizEyeHappyUntil=0;}
    window.HOJA_TEAM_APPROVED_TRIAL.feedback(i===q.answer);
    updateQuizHud();
