@@ -200,6 +200,12 @@ function h15sCompute_(sh){
   const out={generatedAt:new Date(now).toISOString(),today,rowsRead:0};
   if(last<2)return Object.assign(out,{empty:true});
   let first=Number(props.getProperty(H15S_PROP_FIRST_)||0);
+  // the remembered start row is only a speed-up: if rows were deleted/inserted it must still point at the FIRST A1 row
+  if(first>=2&&first<=last){
+    const at=String(sh.getRange(first,H15S_COLS_.schema+1).getDisplayValue()).trim();
+    const before=first>2?String(sh.getRange(first-1,H15S_COLS_.schema+1).getDisplayValue()).trim():'';
+    if(at!==H15S_SCHEMA_||before===H15S_SCHEMA_)first=0;
+  }
   if(!(first>=2&&first<=last)){
     // 처음 한 번만: 버전 열(1열)만 읽어 HOJA 1.5 첫 기록 위치를 찾는다
     const col=sh.getRange(2,H15S_COLS_.schema+1,last-1,1).getDisplayValues();

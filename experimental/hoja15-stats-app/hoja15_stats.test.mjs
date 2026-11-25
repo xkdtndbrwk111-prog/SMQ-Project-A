@@ -90,3 +90,16 @@ test('read-only: no writes to the spreadsheet', () => {
   p.call("hoja15StatsSetup('statsSheetstatsSheet0000')"); p.call('hoja15StatsGet(true)');
   assert.ok(!ss.trace.some(t => /^(WRITE|APPEND|INSERT)/.test(t)), ss.trace.join(','));
 });
+
+test('rows deleted at the top of EVENT_LOG: the remembered start row is re-checked, nothing is skipped', () => {
+  const rows = syntheticLog();
+  const ss = new MockSpreadsheet('statsSheetstatsSheet0000'); const ev = ss.add('EVENT_LOG', rows);
+  const p = loadProject({spreadsheets: new Map([['statsSheetstatsSheet0000', ss]]), props: {}, now: '2026-11-24T05:00:00Z', gasDir: DIR, gasFiles: ['Code.gs']});
+  p.call("hoja15StatsSetup('statsSheetstatsSheet0000')");
+  const before = p.call('hoja15StatsGet(true)').periods.all.total;
+  assert.equal(Number(p.props.get('HOJA15_STATS_FIRST_ROW')), 32);
+  ev.rows.splice(1, 30 + 20);                        // teacher deletes the 30 legacy rows and the first 20 A1 rows
+  const after = p.call('hoja15StatsGet(true)');
+  assert.equal(after.periods.all.total, before - 20);
+  assert.equal(Number(p.props.get('HOJA15_STATS_FIRST_ROW')), 2);
+});
