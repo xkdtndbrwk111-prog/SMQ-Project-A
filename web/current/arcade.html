@@ -4838,10 +4838,13 @@ class HojaScene extends Phaser.Scene{
       if(options.portalId)art.setOrigin(.5,.5).setPosition(x,top+32).setAngle(orientation==='left'?-90:orientation==='right'?90:orientation==='down'?180:0);
       // Sprite is 32x32 at 2x -> a 64x64 world object.
       // Full-height, side-blocking static obstacle. Top can be landed on.
-      const collision=this.add.rectangle(x,top+32,60,64,0,0);
-      if(options.portalId)collision.__makerPipeId=options.portalId;
-      this.physics.add.existing(collision,true);
-      this.pipeGroup.add(collision);
+      const verticalExtension=options.length>4&&(orientation==='up'||orientation==='down');
+      if(!verticalExtension){
+        const collision=this.add.rectangle(x,top+32,60,64,0,0);
+        if(options.portalId)collision.__makerPipeId=options.portalId;
+        this.physics.add.existing(collision,true);
+        this.pipeGroup.add(collision);
+      }
       // Maker-only extension: the original 64px head stays interactive; each
       // added segment reuses the original pipe body and has solid collision.
       if(options.length>4){
@@ -4858,8 +4861,16 @@ class HojaScene extends Phaser.Scene{
         for(let i=0;i<steps;i+=2){
           const length=Math.min(2,steps-i)*16,offset=32+i*16+length/2,dx=orientation==='left'?offset:orientation==='right'?-offset:0,dy=orientation==='up'?offset:orientation==='down'?-offset:0;
           this.add.image(x+dx,top+32+dy,key,length<32?'half':'__BASE').setDisplaySize(64,length).setAngle(orientation==='left'||orientation==='right'?90:0).setDepth(4);
-          const hit=this.add.rectangle(x+dx,top+32+dy,dx?length:60,dy?length:60,0,0);hit.__makerPipeId=options.portalId;this.physics.add.existing(hit,true);this.pipeGroup.add(hit);
         }
+        // One continuous body avoids internal seams being mistaken for a
+        // ceiling when the player jumps while pressing against the pipe.
+        const length=steps*16,offset=32+length/2;
+        const dx=orientation==='left'?offset:orientation==='right'?-offset:0;
+        const dy=orientation==='up'?offset:orientation==='down'?-offset:0;
+        const hit=verticalExtension
+          ?this.add.rectangle(x,top+32+dy,60,64+length,0,0)
+          :this.add.rectangle(x+dx,top+32+dy,dx?length:60,dy?length:60,0,0);
+        hit.__makerPipeId=options.portalId;this.physics.add.existing(hit,true);this.pipeGroup.add(hit);
       }
       const label=this.add.text(x,top-23,`${orientation==='up'?'↓':orientation==='down'?'↑':orientation==='left'?'→':'←'} ${name}`,{
         fontFamily:'monospace',fontSize:'11px',color:'#beffe2',fontStyle:'bold',
