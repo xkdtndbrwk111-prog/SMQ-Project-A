@@ -3450,7 +3450,7 @@ class HojaScene extends Phaser.Scene{
       if(s.kind==='ground')this.solidGroup.add(r);else this.oneWayGroup.add(r);
       const cols=Math.round(s.w/TILE),rows=Math.round(s.h/TILE);
       if(HOJA_V2_RENDER){
-        this.hojaV2DrawSolid(s, true);
+        this.hojaV2DrawSolid(this.hojaMakerVisualSolid(s), true);
         continue;
       }
       const tileset=s.y<64*TILE?'caveGray':'caveBrown';
@@ -3548,6 +3548,12 @@ class HojaScene extends Phaser.Scene{
     this.hojaStep135ExtraSet=new Set(this.hojaStep135Extras);
   }
 
+  // The camera can reveal a short strip below a Maker map. Extend only
+  // visual terrain touching its bottom edge; keep SOLIDS and bodies intact.
+  hojaMakerVisualSolid(s){
+    if(!HOJA_MAKER_MODE||Math.abs(s.y+s.h-STAGE.makerHeight)>.01)return s;
+    return {...s,h:s.h+160};
+  }
   // HOJA V2: new terrain renderer. Physics and SOLIDS remain EXACTLY unchanged.
   // Tile art comes from Pixel Adventure 1, 16x16 cells, no source atlas scaling.
   hojaV2CreateSurface(){
@@ -3560,14 +3566,15 @@ class HojaScene extends Phaser.Scene{
     // existing renderer and reserve the grid-based renderer for game stages.
     this.hojaGroundGrid=window.HOJA_GROUND_AUTOTILE.fromSolids(HOJA_MAKER_MODE?[]:SOLIDS);
     const aligned=s=>[s.x,s.y,s.w,s.h].every(v=>Number.isFinite(v)&&Math.abs(v/TILE-Math.round(v/TILE))<1e-6);
-    this.hojaMakerGroundGrid=HOJA_MAKER_MODE?window.HOJA_GROUND_AUTOTILE.fromRectangles(SOLIDS.filter(s=>aligned(s)&&s.hojaGroundStyle==='seasonal')):null;
+    this.hojaVisualSolids=HOJA_MAKER_MODE?SOLIDS.map(s=>this.hojaMakerVisualSolid(s)):SOLIDS;
+    this.hojaMakerGroundGrid=HOJA_MAKER_MODE?window.HOJA_GROUND_AUTOTILE.fromRectangles(this.hojaVisualSolids.filter(s=>aligned(s)&&s.hojaGroundStyle==='seasonal')):null;
     for(const s of SOLIDS){
       const r=this.add.rectangle(s.x+s.w/2,s.y+s.h/2,s.w,s.h,0x000000,0);
       this.physics.add.existing(r,true);
       r.__terrainKind=s.kind;r.__terrainTop=s.y;
       if(s.kind==='ground')this.solidGroup.add(r);
       else this.oneWayGroup.add(r);
-      this.hojaV2DrawSolid(s,false);
+      this.hojaV2DrawSolid(this.hojaMakerVisualSolid(s),false);
     }
   }
   hojaV2DeleteStaleTextures(){
@@ -3587,11 +3594,11 @@ class HojaScene extends Phaser.Scene{
     // One completed image per solid when short. Very wide ground is segmented
     // ONLY on 16px tile borders, never on a 256px source-chunk boundary.
     const n=64; // max 1024px width, a single raster per short/medium platform
-    const full=!isCave&&s.y+s.h>=WORLD_H-1;
+    const full=!isCave&&s.y+s.h>=(HOJA_MAKER_MODE?STAGE.makerHeight:WORLD_H)-1;
     const last=rows-1;
     const touches=(side,rowY)=>{
       if(s.kind!=='ground')return false;
-      for(const o of SOLIDS){
+      for(const o of this.hojaVisualSolids||SOLIDS){
         if(o===s||o.kind!=='ground')continue;
         const contact=side==='left'
           ? o.x<s.x-.01&&o.x+o.w>=s.x-.01
@@ -4245,7 +4252,9 @@ class HojaScene extends Phaser.Scene{
       // Visual water sits one tile below the old line; collision and hazards
       // retain their original water position and timing.
       visual.surfaceY+=TILE;
-      const visualHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
+      const gameplayHeight=g.visualHeight??WORLD_H-visual.surfaceY+64;
+      const extendsBottom=HOJA_MAKER_MODE&&Number.isFinite(sp[2])&&Number.isFinite(sp[3])&&Math.abs((sp[2]+sp[3])*TILE-STAGE.makerHeight)<.01;
+      const visualHeight=gameplayHeight+(extendsBottom?160:0);
       if(g.visualHeight!==undefined){
         const beside=(edge,side)=>SOLIDS.some(s=>s.kind==='ground'&&Math.abs((side==='left'?s.x+s.w:s.x)-edge)<.01&&s.y<visual.surfaceY+visualHeight&&s.y+s.h>visual.surfaceY);
         if(beside(g.leftX,'left'))visual.left-=TILE/2;
@@ -4253,7 +4262,7 @@ class HojaScene extends Phaser.Scene{
         visual.width=visual.right-visual.left;
       }
       const swim=HOJA_MAKER_MODE&&sp[4]==='swim';
-      if(swim)this.hojaSwimZones.push({x:g.leftX,y:visual.surfaceY,width:g.width,height:visualHeight});
+      if(swim)this.hojaSwimZones.push({x:g.leftX,y:visual.surfaceY,width:g.width,height:gameplayHeight});
       const backing=this.add.rectangle(visual.left+visual.width/2,
         visual.surfaceY+visualHeight/2,visual.width,visualHeight,THEME.water.deep,1).setDepth(-.25);
       this.waterFillObjects.push(backing);
@@ -5346,20 +5355,23 @@ class HojaScene extends Phaser.Scene{
       const px=t.x*TILE,py=t.y*TILE,w=t.w*TILE,h=t.h*TILE;
       const alpha=Phaser.Math.Clamp(Number(t.opacity??1),0,1);
       const startCol=6,startRow=0;const anchor=t.visualAnchor||{x:t.x,y:t.y,w:t.w,h:t.h};
+      const extendsBottom=Math.abs((t.y+t.h)*TILE-STAGE.makerHeight)<.01;
+      const visualRows=t.h+(extendsBottom?10:0);
       if(alpha>0){
-        for(let cy=0;cy<t.h;cy+=16)for(let cx=0;cx<t.w;cx+=32){
-          const cw=Math.min(32,t.w-cx),ch=Math.min(16,t.h-cy);
+        for(let cy=0;cy<visualRows;cy+=16)for(let cx=0;cx<t.w;cx+=32){
+          const cw=Math.min(32,t.w-cx),ch=Math.min(16,visualRows-cy);
           const tile=document.createElement('canvas');tile.width=cw*TILE;tile.height=ch*TILE;
           const cc=tile.getContext('2d');cc.imageSmoothingEnabled=false;
           for(let yy=0;yy<ch;yy++)for(let xx=0;xx<cw;xx++){
             const gx=cx+xx,gy=cy+yy;
             const ax=t.x+gx-anchor.x,ay=t.y+gy-anchor.y;
-            const col=ax===0?0:ax===anchor.w-1?2:1,row=ay===0?0:ay===anchor.h-1?2:1;
+            const col=ax===0?0:ax===anchor.w-1?2:1,row=ay===0?0:!extendsBottom&&ay===anchor.h-1?2:1;
             cc.drawImage(atlas,(startCol+col)*TILE,(startRow+row)*TILE,TILE,TILE,xx*TILE,yy*TILE,TILE,TILE);
           }
           const key='v061TerrainCustom_'+(seq++);
           if(!this.textures.exists(key))this.textures.addCanvas(key,tile);
-          this.add.image(px+cx*TILE,py+cy*TILE,key).setOrigin(0,0).setDepth(2).setAlpha(alpha);
+          const customArt=this.add.image(px+cx*TILE,py+cy*TILE,key).setOrigin(0,0).setDepth(2).setAlpha(alpha);
+          customArt.__hojaMakerCustomTerrain=true;
         }
       }
       const collision=t.collision||(t.kind==='platform'?'oneway':'solid');
@@ -5430,6 +5442,10 @@ class HojaScene extends Phaser.Scene{
             this.physics.add.overlap(this.playerBody,art,()=>this.startDeath('enemy'));
           }
           this.makerGeneric.push(art);
+          if(Math.abs(y+TILE-STAGE.makerHeight)<.01){
+            const extension=this.add.tileSprite(x,y+TILE,TILE,160,tileKey).setOrigin(0,0).setDepth(3).setAlpha(Number(o.opacity??1));
+            this.makerGeneric.push(extension);
+          }
           continue;
         }
         const key='v061MakerAsset_'+Array.from(HOJA_MAKER_IMAGES.keys()).indexOf(o.assetPath);
