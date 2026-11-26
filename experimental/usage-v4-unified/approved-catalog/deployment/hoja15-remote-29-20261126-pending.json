@@ -2,7 +2,7 @@
   "schemaVersion": "hoja-approved-deployment-v1",
   "deploymentId": "HOJA15-REMOTE-29-20261126-PENDING",
   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
-  "note": "Candidate only. Teacher confirmed content review and operational deployment approval for four Korean and two science units on 2026-11-26. Immutable source/package pins and 29/899 technical CI evidence remain. The six separate questionValidationGate values below are pending; public redistribution rights remain unverified and mediaRightsAcknowledged stays false. Browser CI passed, but live isolated GAS and credential smoke remain.",
+  "note": "Candidate only. Teacher confirmed content review and operational deployment approval for four Korean and two science units on 2026-11-26. Their questionValidationGate values are PASS based on that decision, pinned 29/899 runtime checks, four-viewport renderer evidence and the latest required browser CI. This does not clear the independent textbook source rechecks marked in the Nabi/Charlotte source READMEs or public redistribution rights. All six mediaRightsAcknowledged values stay false. Live owner-only GAS solo/team/QR testing passed; trusted-main credential smoke, external student access and production validation remain.",
   "entries": [
     {
       "cartridgeId": "eng5-ham-u10",
@@ -217,7 +217,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "4a8c698fb2eeb17f558fc0778959a52416188b63a8a250ad196c4abe1f446a0c",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FULL_REGRESSION",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     },
     {
@@ -226,7 +226,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "7d498b0cf10a63452de4fc4d3e7e72d3345280a062a437433ef95fe7aadd2a7f",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FULL_REGRESSION",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     },
     {
@@ -235,7 +235,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "234ea4a775441f3d149804293986e41c858ee8b3f34e0aedc61e646d4d992f22",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FULL_REGRESSION",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     },
     {
@@ -244,7 +244,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "bf14ff916db4ceb4f99f97efc70a3519b230d7ca6426f5c18b2fa80a902e8422",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FULL_REGRESSION",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     },
     {
@@ -253,7 +253,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "84a430dbd68b6dd5513697e32775a7026ea922461bacd0a4f5d141a9b7e408f8",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FINAL_RELEASE",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     },
     {
@@ -262,7 +262,7 @@
       "approvedOn": "2026-11-26",
       "effectiveSha256": "0195d07956baeada3b07c5f7a037f74bf407e4c4f5862f9281b25e3d0418c9a8",
       "rendererGate": "PASS",
-      "questionValidationGate": "PENDING_FINAL_RELEASE",
+      "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": false
     }
   ]
