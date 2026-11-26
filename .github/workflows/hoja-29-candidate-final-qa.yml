@@ -1,0 +1,70 @@
+name: HOJA 29-unit candidate final QA
+on:
+  push:
+    branches: [work/hoja15-remote-catalog-20261126]
+    paths:
+      - '.github/workflows/hoja-29-candidate-final-qa.yml'
+      - 'experimental/usage-v4-unified/assemble_hoja15_production.py'
+      - 'experimental/usage-v4-unified/gas/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-and-assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c
+          path: qbank-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 8d809453fc9470aefa74c4ad9f7357574f918e5c
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Rebuild and verify exact registered candidate runtime bytes
+        run: |
+          P=experimental/usage-v4-unified/approved-catalog
+          node "$P/build_approved_index.mjs" --qbank qbank-source
+          node "$P/build_content_packages.mjs" --qbank qbank-source --packages-out "$RUNNER_TEMP/rebuilt"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          import {qaPreviewCatalog} from './experimental/usage-v4-unified/approved-catalog/qa_preview.mjs';
+          import {verifyRemoteRelease} from './experimental/usage-v4-unified/approved-catalog/build_remote_active_catalog.mjs';
+          const p='experimental/usage-v4-unified/approved-catalog/',read=f=>JSON.parse(fs.readFileSync(f));
+          const idx=read(p+'generated/approved-source-index.json'),report=read(p+'generated/approved-content-report.json');
+          const d='game-runtime/approved-packages/v1/INDEX.json',published=read('qbank-runtime/'+d),rebuilt=read(process.env.RUNNER_TEMP+'/rebuilt/'+d);
+          assert.deepEqual(published,rebuilt);assert.equal(idx.approvalUnits,29);assert.equal(idx.approvalQuestions,899);
+          for(const e of published.packages){
+            const raw=fs.readFileSync('qbank-runtime/'+e.path);
+            assert.equal(raw.length,e.bytes);assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),e.sha256);
+            assert.deepEqual(raw,fs.readFileSync(process.env.RUNNER_TEMP+'/rebuilt/'+e.path));
+          }
+          console.log('REMOTE_RUNTIME_BYTES_PASS 29/899');
+          for(const e of idx.entries.filter(e=>e.subject==='science'))console.log('SCIENCE_SOURCE_PIN',JSON.stringify({cartridgeId:e.cartridgeId,effectiveSha256:e.effectiveSha256,unit:e.unit,questionCount:e.questionCount,mediaRights:e.mediaRights.status}));
+          const commit='8d809453fc9470aefa74c4ad9f7357574f918e5c';
+          const qa=qaPreviewCatalog(idx,report,{schemaVersion:'hoja-qa-preview-v1',purpose:'TEST_ONLY_QA_NOT_DEPLOYMENT',sourceCommit:idx.sourceCommit,select:'ALL_READY'},{allowedScriptIds:['MOCK_ISOLATED_TEST_SCRIPT_ID_0001'],contentSource:{repo:idx.sourceRepo,commit}});
+          // This deliberately uses a synthetic in-memory RELEASE shape to exercise
+          // the exact production assembler. No manifest or deployment is approved.
+          const {allowedScriptIds,...rest}=qa;
+          const active={...rest,buildType:'RELEASE',deploymentId:'HOJA15-ISOLATED-TEST_ONLY-NOT_FOR_DEPLOYMENT',entries:rest.entries.map(e=>({...e,deploymentStatus:'DEPLOYED'}))};
+          const cat=verifyRemoteRelease(active,report,published,commit,path=>{
+            const raw=fs.readFileSync('qbank-runtime/'+path);return {sha256:crypto.createHash('sha256').update(raw).digest('hex'),bytes:raw.length,data:JSON.parse(raw)};
+          });
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
+          JS
+      - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
+        run: |
+          P=experimental/usage-v4-unified
+          python3 "$P/assemble_hoja15_production.py" --catalog "$RUNNER_TEMP/test-catalog.gs" --packages qbank-runtime --out "$RUNNER_TEMP/test-bundle" --expected-units 29
+          rm -rf "$RUNNER_TEMP/test-bundle" "$RUNNER_TEMP/test-catalog.gs"
+      - name: Run 29-unit catalog RPC integration on registered runtime
+        run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime 29 899
