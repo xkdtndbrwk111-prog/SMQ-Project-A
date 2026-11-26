@@ -82,7 +82,24 @@ jobs:
             const actual=crypto.createHash('sha256').update(raw).digest('hex');
             const good=actual===e.sha256&&raw.length===e.bytes&&source&&data.cartridgeId===e.cartridgeId&&data.questions.length===source.questionCount&&ready?.status==='READY'&&byId.get(e.cartridgeId)?.sha256===e.sha256;
             console.log(e.cartridgeId,good?'PASS':'MISMATCH','effectiveSha256='+source?.effectiveSha256,'packageSha256='+actual,'rebuilt='+byId.get(e.cartridgeId)?.sha256,'ready='+ready?.status);
-            if(!good)failed++;
+            if(!good){
+              failed++;
+              const fresh=JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'rebuilt-packages',e.path)));
+              const changes=[];
+              function compare(a,b,p=''){
+                if(a===b)return;
+                if(a===null||b===null||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b)){
+                  changes.push(p);return;
+                }
+                for(const k of new Set([...Object.keys(a),...Object.keys(b)])){
+                  if(!Object.hasOwn(a,k)||!Object.hasOwn(b,k)){changes.push(p+'/'+k);continue}
+                  compare(a[k],b[k],p+'/'+k);
+                }
+              }
+              compare(data,fresh);
+              console.log('semantic diff count='+changes.length,'paths='+changes.slice(0,80).join(','));
+              console.log('top-level order',Object.keys(data).join(','),Object.keys(fresh).join(','));
+            }
           }
           assert.equal(published.packages.length,27);assert.equal(rebuilt.packages.length,27);assert.equal(failed,0);
           JS
