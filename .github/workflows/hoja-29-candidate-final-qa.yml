@@ -12,7 +12,7 @@ permissions:
 jobs:
   verify-and-assemble:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,12 +59,40 @@ jobs:
           const cat=verifyRemoteRelease(active,report,published,commit,path=>{
             const raw=fs.readFileSync('qbank-runtime/'+path);return {sha256:crypto.createHash('sha256').update(raw).digest('hex'),bytes:raw.length,data:JSON.parse(raw)};
           });
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.json',JSON.stringify(cat));
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
           JS
       - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
         run: |
           P=experimental/usage-v4-unified
           python3 "$P/assemble_hoja15_production.py" --catalog "$RUNNER_TEMP/test-catalog.gs" --packages qbank-runtime --out "$RUNNER_TEMP/test-bundle" --expected-units 29
-          rm -rf "$RUNNER_TEMP/test-bundle" "$RUNNER_TEMP/test-catalog.gs"
+          # Keep test-only bundle inside this ephemeral CI job for browser tests.
       - name: Run 29-unit catalog RPC integration on registered runtime
         run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime 29 899
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install offline browser test dependencies
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/browser-deps" --ignore-scripts phaser@4.2.1 jsqr@1.4.0
+      - name: Actual game browser cache, solo/team and teacher/student QR
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified
+          B="$RUNNER_TEMP/test-bundle"
+          D="$RUNNER_TEMP/browser-deps/node_modules"
+          # The mock server loads only .gs files; use original source defaults
+          # plus the reader's strictly test-only fixture, not production data.
+          mkdir "$RUNNER_TEMP/mock-extra"
+          export HOJA_REMOTE_TEST_CATALOG="$RUNNER_TEMP/test-catalog.json"
+          export HOJA_JOIN_TEST_URL="https://script.google.com/macros/s/TEST_ONLY_LOCAL_QR_00000000000000/exec"
+          node "$P/qa_mock_gas_server.mjs" "$RUNNER_TEMP/mock-extra" 8790 qbank-runtime > "$RUNNER_TEMP/mock-server.log" 2>&1 &
+          SERVER=$!
+          trap 'kill "$SERVER" 2>/dev/null || true; cat "$RUNNER_TEMP/mock-server.log"; rm -rf "$B" "$RUNNER_TEMP/test-catalog.gs" "$RUNNER_TEMP/test-catalog.json"' EXIT
+          for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
+          grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
+          python3 "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790
+          python3 "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common
+          python3 "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common
