@@ -8,7 +8,11 @@ const HOJA_REMOTE_CATALOG_DIR_='game-runtime/active/v1/';
 const HOJA_REMOTE_CATALOG_CACHE_KEY_='HOJA_REMOTE_CATALOG_V1';
 const HOJA_REMOTE_CATALOG_FRESH_MS_=300000;
 const HOJA_REMOTE_CATALOG_LAST_GOOD_MS_=21600000;
-const HOJA_REMOTE_CATALOG_MAX_BYTES_=90000;
+const HOJA_REMOTE_CATALOG_MAX_BYTES_=350000;
+const HOJA_REMOTE_CATALOG_CHUNK_=7000;
+const HOJA_REMOTE_CATALOG_MAX_CHUNKS_=12;
+const HOJA_REMOTE_CATALOG_HEAD_='HOJA_REMOTE_CATALOG_ACCEPTED_HEAD_V1';
+const HOJA_REMOTE_CATALOG_STORE_='HOJA_REMOTE_CATALOG_STORE_V1_';
 let hojaRemoteCatalogMemo_;
 
 function hojaRemoteCatalogSha_(s){
@@ -62,52 +66,92 @@ function hojaRemoteCatalogFetch_(){
  if(hojaRemoteCatalogSha_(r.text)!==p.catalogSha256)throw Error('REMOTE_CATALOG_DIGEST');
  return {generation:p.generation,sha256:p.catalogSha256,catalogCommit:p.catalogCommit,checkedAt:Date.now(),text:r.text,catalog:hojaRemoteCatalogValidate_(r.data)};
 }
-/* Single cache record is atomic. CacheService can evict early: after initial success,
- * fail closed rather than resurrect an old embedded catalog that may contain revoked units.
- * The initial embedded fallback is allowed only before any successful remote read.
- * Durable last-known-good storage for larger catalogs is a separate pre-release gate.
+/* Two compressed property slots; the accepted head is the only commit marker.
+ * Under the script lock, write/verify the inactive slot before changing the head.
+ * Failed quota/write never invalidates the previous slot. Cache is optional.
+ * At most 2 x 84 KB property payload, plus metadata; 6h stale bound.
  */
+function hojaRemoteCatalogHead_(props){
+ const raw=props.getProperty(HOJA_REMOTE_CATALOG_HEAD_);
+ if(raw===null)return null;
+ const h=hojaRemoteCatalogPointer_(JSON.parse(raw));
+ if(!['A','B'].includes(h.slot)||!Number.isSafeInteger(h.chunks)||h.chunks<1||
+  h.chunks>HOJA_REMOTE_CATALOG_MAX_CHUNKS_||!Number.isSafeInteger(h.checkedAt))
+   throw Error('REMOTE_CATALOG_HEAD_INVALID');
+ return h;
+}
+function hojaRemoteCatalogRecord_(h,text,now){
+ if(h.checkedAt>now||now-h.checkedAt>=HOJA_REMOTE_CATALOG_LAST_GOOD_MS_||
+   hojaRemoteCatalogSha_(text)!==h.catalogSha256)throw Error('REMOTE_CATALOG_STALE_OR_CORRUPT');
+ return {generation:h.generation,sha256:h.catalogSha256,checkedAt:h.checkedAt,text,catalog:hojaRemoteCatalogValidate_(JSON.parse(text))};
+}
+function hojaRemoteCatalogReadSlot_(props,h){
+ let packed='';
+ for(let i=0;i<h.chunks;i++){
+  const part=props.getProperty(HOJA_REMOTE_CATALOG_STORE_+h.slot+'_'+i);
+  if(typeof part!=='string'||!part.length||part.length>HOJA_REMOTE_CATALOG_CHUNK_)throw Error('REMOTE_CATALOG_SLOT');
+  packed+=part;
+ }
+ const text=Utilities.ungzip(Utilities.newBlob(Utilities.base64Decode(packed),'application/gzip')).getDataAsString('UTF-8');
+ if(Utilities.newBlob(text).getBytes().length>HOJA_REMOTE_CATALOG_MAX_BYTES_)throw Error('REMOTE_CATALOG_SIZE');
+ return text;
+}
+function hojaRemoteCatalogWriteSlot_(props,next,latest){
+ const slot=latest&&latest.slot==='A'?'B':'A';
+ const packed=Utilities.base64Encode(Utilities.gzip(Utilities.newBlob(next.text,'application/json')).getBytes());
+ const chunks=Math.ceil(packed.length/HOJA_REMOTE_CATALOG_CHUNK_);
+ if(chunks<1||chunks>HOJA_REMOTE_CATALOG_MAX_CHUNKS_)throw Error('REMOTE_CATALOG_STORE_SIZE');
+ const h={schemaVersion:'hoja-active-catalog-pointer-v1',generation:next.generation,catalogSha256:next.sha256,
+  catalogCommit:next.catalogCommit,checkedAt:next.checkedAt,slot,chunks};
+ for(let i=0;i<chunks;i++)props.setProperty(HOJA_REMOTE_CATALOG_STORE_+slot+'_'+i,
+   packed.slice(i*HOJA_REMOTE_CATALOG_CHUNK_,(i+1)*HOJA_REMOTE_CATALOG_CHUNK_));
+ // Clear surplus inactive slot chunks to bound shared property use.
+ for(let i=chunks;i<HOJA_REMOTE_CATALOG_MAX_CHUNKS_;i++)props.deleteProperty(HOJA_REMOTE_CATALOG_STORE_+slot+'_'+i);
+ hojaRemoteCatalogRecord_(h,hojaRemoteCatalogReadSlot_(props,h),Date.now());
+ props.setProperty(HOJA_REMOTE_CATALOG_HEAD_,JSON.stringify(h));
+ return h;
+}
+function hojaRemoteCatalogPrior_(props,cache,h,now){
+ if(!h)return null;
+ try{
+  const raw=cache.get(HOJA_REMOTE_CATALOG_CACHE_KEY_);
+  if(raw){const v=JSON.parse(raw);
+   if(v.generation===h.generation&&v.sha256===h.catalogSha256&&v.checkedAt===h.checkedAt)
+    return hojaRemoteCatalogRecord_(h,v.text,now);
+  }
+ }catch(_){}
+ try{return hojaRemoteCatalogRecord_(h,hojaRemoteCatalogReadSlot_(props,h),now)}catch(_){return null}
+}
 function hojaRemoteCatalogGet_(embedded){
  if(PropertiesService.getScriptProperties().getProperty('HOJA_REMOTE_CATALOG_ENABLED')!=='1')return embedded;
  if(!embedded||embedded.buildType==='QA_TEST_ONLY'||!embedded.entries||!embedded.entries.length)return embedded;
  if(hojaRemoteCatalogMemo_)return hojaRemoteCatalogMemo_;
  const props=PropertiesService.getScriptProperties(),cache=CacheService.getScriptCache(),now=Date.now();
- const headKey='HOJA_REMOTE_CATALOG_ACCEPTED_HEAD_V1';
- let head=null,prior=null;
- function getHead(){const raw=props.getProperty(headKey);if(raw===null)return null;return hojaRemoteCatalogPointer_(JSON.parse(raw))}
- try{head=getHead()}catch(_){throw Error('REMOTE_CATALOG_HEAD_INVALID')}
- try{
-  const raw=cache.get(HOJA_REMOTE_CATALOG_CACHE_KEY_);
-  if(raw){
-   const v=JSON.parse(raw);
-   if(head&&v.generation===head.generation&&v.sha256===head.catalogSha256&&
-    Number.isFinite(v.checkedAt)&&v.checkedAt<=now&&now-v.checkedAt<HOJA_REMOTE_CATALOG_LAST_GOOD_MS_&&
-    hojaRemoteCatalogSha_(v.text)===v.sha256)
-      prior={...v,catalog:hojaRemoteCatalogValidate_(JSON.parse(v.text))};
-  }
- }catch(_){}
+ const head=hojaRemoteCatalogHead_(props),prior=hojaRemoteCatalogPrior_(props,cache,head,now);
  if(prior&&now-prior.checkedAt<HOJA_REMOTE_CATALOG_FRESH_MS_)return hojaRemoteCatalogMemo_=prior.catalog;
  try{
   const next=hojaRemoteCatalogFetch_();
   const lock=LockService.getScriptLock();
   if(!lock.tryLock(1000))throw Error('REMOTE_CATALOG_BUSY');
   try{
-   const latest=getHead();
+   const latest=hojaRemoteCatalogHead_(props);
    if(latest&&(next.generation<latest.generation||
-     (next.generation===latest.generation&&next.sha256!==latest.catalogSha256)))throw Error('REMOTE_CATALOG_ROLLBACK');
-   // Cache must fit BEFORE committing the accepted pointer. No silent truncation.
-   const serialized=JSON.stringify({generation:next.generation,sha256:next.sha256,checkedAt:next.checkedAt,text:next.text});
-   if(Utilities.newBlob(serialized).getBytes().length>100000)throw Error('REMOTE_CATALOG_CACHE_SIZE');
-   cache.put(HOJA_REMOTE_CATALOG_CACHE_KEY_,serialized,21600);
-   props.setProperty(headKey,JSON.stringify({schemaVersion:'hoja-active-catalog-pointer-v1',generation:next.generation,
-     catalogSha256:next.sha256,catalogCommit:next.catalogCommit}));
+     (next.generation===latest.generation&&(next.sha256!==latest.catalogSha256||next.catalogCommit!==latest.catalogCommit))))
+      throw Error('REMOTE_CATALOG_ROLLBACK');
+   if(latest&&next.generation===latest.generation&&next.checkedAt<latest.checkedAt)
+      throw Error('REMOTE_CATALOG_CONCURRENT');
+   hojaRemoteCatalogWriteSlot_(props,next,latest);
+   try{
+    const serialized=JSON.stringify({generation:next.generation,sha256:next.sha256,checkedAt:next.checkedAt,text:next.text});
+    if(Utilities.newBlob(serialized).getBytes().length<=100000)cache.put(HOJA_REMOTE_CATALOG_CACHE_KEY_,serialized,21600);
+   }catch(_){}
    return hojaRemoteCatalogMemo_=next.catalog;
   }finally{lock.releaseLock()}
  }catch(e){
-  // Recheck head: do not serve a cached older generation after another invocation advanced it.
-  const latest=getHead();
-  if(prior&&latest&&latest.generation===prior.generation&&latest.catalogSha256===prior.sha256&&
-     Date.now()-prior.checkedAt<HOJA_REMOTE_CATALOG_LAST_GOOD_MS_)return hojaRemoteCatalogMemo_=prior.catalog;
+  // Re-read the accepted head and exact slot; never resurrect a superseded release.
+  const latest=hojaRemoteCatalogHead_(props);
+  const fallback=hojaRemoteCatalogPrior_(props,cache,latest,Date.now());
+  if(fallback)return hojaRemoteCatalogMemo_=fallback.catalog;
   if(!latest)return hojaRemoteCatalogMemo_=embedded;
   throw Error('REMOTE_CATALOG_UNAVAILABLE');
  }
