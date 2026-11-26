@@ -33,3 +33,56 @@ jobs:
           node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
           node --test experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs
           node --test experimental/usage-v4-unified/HOJA15_JOIN.test.mjs
+  real-bank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 0edea5cb537aba8df1f9dcbc279e3c2854895248
+          path: qbank-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 5c95739ab9cbc1313023198e0608de30995c4313
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Rebuild approved source and packages (no publication)
+        run: |
+          P=experimental/usage-v4-unified/approved-catalog
+          node "$P/build_approved_index.mjs" --qbank qbank-source
+          node "$P/build_content_packages.mjs" --qbank qbank-source --packages-out "$RUNNER_TEMP/rebuilt-packages"
+      - name: Compare all 27 package pins and counts
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import assert from 'node:assert/strict';
+          import path from 'node:path';
+          const p='experimental/usage-v4-unified/approved-catalog/generated/';
+          const idx=JSON.parse(fs.readFileSync(p+'approved-source-index.json'));
+          const report=JSON.parse(fs.readFileSync(p+'approved-content-report.json'));
+          const published=JSON.parse(fs.readFileSync('qbank-runtime/game-runtime/approved-packages/v1/INDEX.json'));
+          const rebuilt=JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'rebuilt-packages/game-runtime/approved-packages/v1/INDEX.json')));
+          assert.equal(idx.approvalUnits,27);assert.equal(idx.approvalQuestions,835);
+          assert.equal(published.sourceCommit,idx.sourceCommit);
+          const byId=new Map(rebuilt.packages.map(e=>[e.cartridgeId,e]));
+          let failed=0;
+          for(const e of published.packages){
+            const raw=fs.readFileSync(path.join('qbank-runtime',e.path));
+            const data=JSON.parse(raw);
+            const source=idx.entries.find(x=>x.cartridgeId===e.cartridgeId);
+            const ready=report.entries.find(x=>x.cartridgeId===e.cartridgeId);
+            const actual=crypto.createHash('sha256').update(raw).digest('hex');
+            const good=actual===e.sha256&&raw.length===e.bytes&&source&&data.cartridgeId===e.cartridgeId&&data.questions.length===source.questionCount&&ready?.status==='READY'&&byId.get(e.cartridgeId)?.sha256===e.sha256;
+            console.log(e.cartridgeId,good?'PASS':'MISMATCH','effectiveSha256='+source?.effectiveSha256,'packageSha256='+actual,'rebuilt='+byId.get(e.cartridgeId)?.sha256,'ready='+ready?.status);
+            if(!good)failed++;
+          }
+          assert.equal(published.packages.length,27);assert.equal(rebuilt.packages.length,27);assert.equal(failed,0);
+          JS
