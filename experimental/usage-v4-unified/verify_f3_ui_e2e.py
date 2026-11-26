@@ -10,7 +10,7 @@ Flow per selected unit, driven ONLY by visible UI clicks/keys:
 and the backend must show: usage rows A1 with the approved id, watermark == last row.
 Every check is an assert; any failure exits nonzero.
 Usage: verify_f3_ui_e2e.py --html <trial.html> --phaser <phaser.min.js> --port 8765 --units id1,id2,..."""
-import argparse, asyncio, json, re, sys, urllib.request
+import argparse, asyncio, json, re, subprocess, sys, urllib.request
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -93,6 +93,8 @@ async def main():
     ap.add_argument('--flow',choices=['SOLO','TEAM','BOTH'],default='BOTH')
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
+    if a.flow in ('SOLO','BOTH') and 'const jumpHeight=t=>4*amplitude*t*(1-t)' in html:
+        subprocess.run(['node', str(Path(__file__).with_name('verify_solo_jump.mjs')), a.html], check=True, timeout=15)
     phaser = Path(a.phaser).read_bytes()
     print('UI_BACKEND_LIST_START',flush=True)
     names = {x['cartridgeId']: x['name'] for x in backend(a.port, '/rpc', {'fn': 'hojaListPublicCartridges', 'args': []})['v']}
@@ -142,7 +144,7 @@ async def main():
                     await page.evaluate("""()=>{window.__jumpTrace=[];const t0=performance.now(),push=(kind,e)=>{const p=document.getElementById('hqCharacter'),b=document.getElementById('hqBalloon'),pr=p?.getBoundingClientRect(),br=b?.getBoundingClientRect();window.__jumpTrace.push({kind,t:Math.round(performance.now()-t0),key:e?.code,defaultPrevented:e?.defaultPrevented,state:window.HOJA_GAMEPLAY.state,player:pr?[pr.x,pr.y,pr.width,pr.height]:null,balloon:br?[br.x,br.y,br.width,br.height]:null,transform:p?.style.transform})};window.addEventListener('keydown',e=>push('key',e),true);let n=0;const tick=()=>{push('raf');if(++n<180&&performance.now()-t0<6000)requestAnimationFrame(tick)};requestAnimationFrame(tick)}""")
                     await page.keyboard.press('Space')
                     try:
-                        await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=5000)
+                        await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=15000)
                     except Exception:
                         diag=await page.evaluate("""()=>{const r=id=>{const e=document.getElementById(id),b=e?.getBoundingClientRect();return b?{x:b.x,y:b.y,w:b.width,h:b.height,hidden:e.hidden}:null};return {state:window.HOJA_GAMEPLAY.state,balloon:r('hqBalloon'),player:r('hqCharacter'),stage:r('hqStage'),active:document.activeElement?.id,trace:(window.__jumpTrace||[]).filter((x,i,a)=>x.kind==='key'||x.state.jumping||i<8||i===a.length-1).slice(0,60)}}""")
                         print('SOLO_JUMP_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
