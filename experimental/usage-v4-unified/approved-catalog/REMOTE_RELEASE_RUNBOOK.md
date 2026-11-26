@@ -1,10 +1,10 @@
 # HOJA 1.5 remote catalog release — operator runbook
 
-Status: candidate only. Do not enable until the protected publication PR, 27-entry approved release manifest, exact package pins, actual GAS smoke tests and browser end-to-end tests are verified.
+Status: candidate only. Do not enable until the protected publication PR, 29-entry approved release manifest, exact package pins, actual GAS smoke tests and browser end-to-end tests are verified.
 
 ## One-time repository configuration
 
-1. On HOJA-QUESTION-BANK, merge the independent publication gate (PR #2) after its review. Merge canonical package correction (PR #1), preserving commit ancestry. Verify current runtime INDEX still matches the approved tree.
+1. On HOJA-QUESTION-BANK, merge the independent publication gate (PR #2) after its review. The canonical correction from PR #1 is already included in merged PR #4 (29 runtime packages); do not merge the obsolete PR #1. Science source PR #3 and runtime PR #4 are merged. Verify current runtime INDEX still matches the approved tree.
 2. Protect main: require PRs, strict up-to-date mandatory status check **Verify immutable catalog publication** for catalog PRs (configure gate to run on every PR if required globally), and prohibit direct writes/force pushes by publisher. Allow merge commits only; squash/rebase must be disabled because the immutable catalog commit must remain reachable. Do not allow the publisher to bypass branch protection.
 3. In private SMQ-Project-A, protect main and configure environment `hoja-catalog-publication` restricted to main. Store a least-privilege, expiring, QBank-only publishing credential in environment secret `HOJA_QBANK_PUBLISH_TOKEN` (contents write and pull requests write; reading settings if supported). Never put credentials in source, GAS, or chat. Initially leave `HOJA_QBANK_AUTO_MERGE` unset. Enable only after protected PR checks are actually exercised, including a tampered pointer rejection. A separate authorized operator must configure repository settings; the current integration cannot.
 4. The private release manifest `deployment/hoja15-remote-release.json` must be explicitly approved, not PENDING/DRAFT/TEST. Record every effective SHA, genuine renderer/question gate, and actual rights clearance or explicit rights acknowledgment under the existing policy. Teacher content approval is not rights clearance. Do not silently promote QA. Do not write a release manifest before required gates complete.
@@ -23,7 +23,9 @@ A rollback is a newly verified release with a higher generation, not a lower poi
 
 ## Evidence
 
-- 27/835 exact approved-source and canonical runtime package rebuild.
-- Four-viewports renderer test 835 × 4: no blank screens/JS errors/media failures (run 45768596119).
-- Isolated prior-release publication transaction and no-op, independent public validator + tampered digest rejection (run 45769064388).
+- 29/899 exact approved-source and canonical runtime package rebuild, GAS assembly and isolated RPC integration PASS (45773372635).
+- Four-viewports renderer test 899 × 4 = 3596 states: zero blank screens, JS errors and tested media failures (45772681662).
+- Full 29/899 isolated publication rehearsal, no-op, missing approval/inventory, rights hold, wrong digest and tampered pointer rejection PASS (45774954646).
+- Durable head-only refresh, corrupt-slot repair and quota-failure fallback regression PASS (45774436911 mock).
+- Browser tests 45774124915 and 45774418130 are not yet certified as PASS; consult actual job results.
 - Actual online GAS installation and live publication NOT done.
