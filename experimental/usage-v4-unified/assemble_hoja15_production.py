@@ -2,12 +2,12 @@
 """40-6BP: assemble + verify the HOJA 1.5 PRODUCTION bundle (no Google access, writes only OUTSIDE the repo).
 bundle = unified RELEASE build (RC-audited approved-rc game) with
   - ApprovedActiveCatalog.gs replaced by the given RELEASE catalog (from build_active_catalog.mjs --deployment <draft>
-    --content-commit <QBank commit>): 23 pinned remote units, NO embedded content
+    --content-commit <QBank commit>): validated pinned remote units, NO embedded content
   - the production UsageRollupU3S.gs (repo root, unchanged: the 00:15 trigger handler) and appsscript.json (repo root)
 Checks (fail closed): RC audit PASS on the release game; catalog RELEASE / not QA / GITHUB_RAW_PINNED_V1 at a 40-hex
 commit; every entry's packageSha256 + contentPath equal the published runtime INDEX (--packages = QBank checkout at
 that commit); rollup + manifest byte-identical to the repo root; no duplicate top-level names across .gs files.
-Usage: assemble_hoja15_production.py --catalog <gs> --packages <qbank checkout> --out <dir outside repo>"""
+Usage: assemble_hoja15_production.py --catalog <gs> --packages <qbank checkout> --out <dir outside repo> --expected-units <manifest size>"""
 import argparse, hashlib, json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 HERE = Path(__file__).resolve().parent
@@ -17,6 +17,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--catalog', required=True); ap.add_argument('--packages', required=True); ap.add_argument('--out', required=True)
     ap.add_argument('--student-url', help='40-6CF: the EXISTING student /exec URL for the join QR (written only into the bundle, never the repo)')
+    ap.add_argument('--expected-units', type=int, required=True, help='expected approved deployment manifest size (not hardcoded)')
     a = ap.parse_args()
     out = Path(a.out).resolve()
     if out == ROOT or ROOT in out.parents: raise SystemExit('OUTPUT_MUST_BE_OUTSIDE_REPO')
@@ -42,12 +43,25 @@ def main():
     idx = json.loads((Path(a.packages) / 'game-runtime/approved-packages/v1/INDEX.json').read_text())
     pub = {p['cartridgeId']: p for p in idx['packages']}
     ents = c.get('entries', [])
-    ok(len(ents) == 23, 'ENTRY_COUNT_' + str(len(ents)))
+    ok(0 < a.expected_units == len(ents), 'ENTRY_COUNT_' + str(len(ents)))
+    ok(len({e.get('cartridgeId') for e in ents}) == len(ents), 'DUPLICATE_ACTIVE_ID')
+    ok(idx.get('sourceCommit') == c.get('sourceCommit'), 'SOURCE_COMMIT_MISMATCH')
+    actual_commit = subprocess.check_output(['git', '-C', a.packages, 'rev-parse', 'HEAD'], text=True).strip()
+    ok(actual_commit == src.get('commit'), 'RUNTIME_CHECKOUT_MISMATCH')
     for e in ents:
         p = pub.get(e['cartridgeId'])
         ok(p is not None and p['sha256'] == e.get('packageSha256') and p['path'] == e.get('contentPath'), 'PIN_MISMATCH_' + e['cartridgeId'])
+        expected_path = 'game-runtime/approved-packages/v1/' + e['cartridgeId'] + '.json'
+        if p and p['path'] == expected_path and re.fullmatch(r'[a-z0-9][a-z0-9-]{2,63}', e['cartridgeId']):
+            raw = subprocess.check_output(['git', '-C', a.packages, 'show', actual_commit + ':' + expected_path])
+            ok(hashlib.sha256(raw).hexdigest() == p['sha256'] and len(raw) == p['bytes'], 'PACKAGE_BYTES_' + e['cartridgeId'])
+            data = json.loads(raw)
+            ok(data.get('cartridgeId') == e['cartridgeId'] and len(data.get('questions', [])) == e['questionCount'], 'PACKAGE_COUNT_' + e['cartridgeId'])
+        else:
+            ok(False, 'PACKAGE_PATH_' + e['cartridgeId'])
     (out / 'ApprovedActiveCatalog.gs').write_text(cat, encoding='utf-8')
     for f in ('UsageRollupU3S.gs', 'appsscript.json'): shutil.copyfile(ROOT / f, out / f)
+    shutil.copyfile(HERE / 'gas/RemoteActiveCatalog.gs', out / 'RemoteActiveCatalog.gs')  # disabled until explicit operator enable
     if a.student_url:
         ok(re.fullmatch(r'https://script\.google\.com/(?:a/[A-Za-z0-9.-]+/)?macros/s/[A-Za-z0-9_-]{20,}/exec', a.student_url) is not None, 'STUDENT_URL_NOT_EXEC')
         (out / 'Hoja15JoinConfig.gs').write_text("/* bundle-only (40-6CF): student /exec URL for the join QR. Not in the repository. */\n"
