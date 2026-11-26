@@ -10,6 +10,8 @@ import {loadProject,MockSpreadsheet,GAS_DIR,sha256} from './mock_gas.mjs';
 import {buildCopy,standardHistory,ISOLATED_PROPS,id} from './fixture.mjs';
 import {qaPreviewCatalog} from './approved-catalog/qa_preview.mjs';
 
+const expectedUnits=Number(process.argv[3]||27),expectedQuestions=Number(process.argv[4]||835);
+assert.ok(Number.isSafeInteger(expectedUnits)&&expectedUnits>1&&Number.isSafeInteger(expectedQuestions)&&expectedQuestions>0);
 const root=resolve(process.argv[2]),dir=GAS_DIR+'/../approved-catalog/generated/';
 const index=JSON.parse(readFileSync(dir+'approved-source-index.json'));
 const report=JSON.parse(readFileSync(dir+'approved-content-report.json'));
@@ -19,7 +21,7 @@ const qa=qaPreviewCatalog(index,report,{schemaVersion:'hoja-qa-preview-v1',purpo
  {allowedScriptIds:['MOCK_ISOLATED_TEST_SCRIPT_ID_0001'],contentSource:{repo,commit}});
 const {allowedScriptIds,...base}=qa;
 const catalog={...base,buildType:'RELEASE',deploymentId:'HOJA15-ISOLATED-MOCK-ONLY',entries:base.entries.map(e=>({...e,deploymentStatus:'DEPLOYED'}))};
-assert.equal(catalog.entries.length,27);
+assert.equal(catalog.entries.length,expectedUnits);
 const {ss}=buildCopy({history:standardHistory()});
 const p=loadProject({spreadsheets:new Map([['copy40',ss],['prod',new MockSpreadsheet('prod')],['cert',new MockSpreadsheet('cert')]]),
  props:{...ISOLATED_PROPS,HOJA_USAGE_APPROVED_ERA_START:'2026-11-23',HOJA_REMOTE_CATALOG_ENABLED:'1'}});
@@ -54,7 +56,7 @@ p.setFetch(r=>{
 // Each invocation is a separate GAS execution; reset only per-execution memo.
 function rpc(name,...args){runInContext('hojaRemoteCatalogMemo_=undefined',p.ctx);return p.rpc(name,...args)}
 const rows=rpc('hojaListPublicCartridges');
-assert.equal(rows.length,27,'actual catalog must be accepted, not embedded fallback');
+assert.equal(rows.length,expectedUnits,'actual catalog must be accepted, not embedded fallback');
 assert.equal(fetches,2);assert.equal(packageFetches,0);
 assert.ok(rows.every(r=>r.pkg.pinRelay===true&&r.display.sourceTitle&&r.display.number));
 let total=0;
@@ -66,8 +68,8 @@ for(const row of rows){
  assert.equal(got.data.questions.length,row.pkg.questionCount);
  total+=got.data.questions.length;
 }
-assert.equal(total,835);
-assert.equal(packageFetches,27);
+assert.equal(total,expectedQuestions);
+assert.equal(packageFetches,expectedUnits);
 assert.equal(fetches,2,'fresh catalog shared across calls');
 const charlotte=rows.find(r=>r.cartridgeId==='kor5-s2-u6-charlotte');
 assert.ok(charlotte);
@@ -83,9 +85,9 @@ assert.equal(row[12],'APPROVED:'+index.sourceCommit.slice(0,12));
 // New generation withdraws one unit. Stale list pins cannot serve it by relay.
 generation=2;body=JSON.stringify({...catalog,entries:catalog.entries.filter(e=>e.cartridgeId!==charlotte.pkg.id)});
 p.clock.ms+=301000;
-assert.equal(rpc('hojaListPublicCartridges').length,26);
+assert.equal(rpc('hojaListPublicCartridges').length,expectedUnits-1);
 assert.throws(()=>rpc('hojaGetPublicQuestions',{names:[charlotte.name],pins:[{id:charlotte.pkg.id,sha256:charlotte.pkg.sha256}]}),/PROJECT_B_CARTRIDGE_NOT_PUBLIC/);
 assert.throws(()=>rpc('recordUsageStartU1',{eventId:id(99),mode:'SOLO',repositoryKind:'PUBLIC',cartridgeIds:[charlotte.pkg.id],cartridgeCount:1,teamCount:1}),/USAGE_APPROVED_CARTRIDGE_NOT_ACTIVE/);
 p.cache.clear();offline=true;p.clock.ms+=301000;
-assert.equal(rpc('hojaListPublicCartridges').length,26,'durable fallback must not resurrect withdrawn unit');
-console.log('REMOTE_CATALOG_INTEGRATION_PASS 27/835; list, pinned relay, join, A1 telemetry, withdrawal, durable recovery');
+assert.equal(rpc('hojaListPublicCartridges').length,expectedUnits-1,'durable fallback must not resurrect withdrawn unit');
+console.log('REMOTE_CATALOG_INTEGRATION_PASS '+expectedUnits+'/'+expectedQuestions+'; list, pinned relay, join, A1 telemetry, withdrawal, durable recovery');
