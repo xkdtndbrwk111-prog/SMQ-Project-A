@@ -139,8 +139,12 @@ function hojaListPublicCartridges() {
     const src=hojaApprovedSource_(qa);
     return qa.entries.map(e=>{const row={name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId};
       if(src)row.pkg={id:e.cartridgeId,sha256:e.packageSha256,path:e.contentPath,commit:src.commit,repo:src.repo,
-        questionCount:e.questionCount,sourceCommit:qa.sourceCommit,pinRelay:true};
-      row.display={sourceTitle:e.title,number:String(e.unit)+(e.subunit==null?'':'-'+e.subunit),title:e.title};
+        questionCount:e.questionCount,sourceCommit:qa.sourceCommit};
+      // Only the verified live release opts into the extended LIST contract.
+      if(src&&typeof hojaRemoteCatalogMemo_!=='undefined'&&hojaRemoteCatalogMemo_===qa&&qa!==HOJA_APPROVED_ACTIVE_CATALOG_){
+        row.pkg.pinRelay=true;
+        row.display={sourceTitle:e.title,number:String(e.unit)+(e.subunit==null?'':'-'+e.subunit),title:e.title};
+      }
       return row;});
   }
   const sheets=hojaPublicSheets_().sheets;
