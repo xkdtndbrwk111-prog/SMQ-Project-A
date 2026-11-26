@@ -1,0 +1,12 @@
+name: HOJA publication environment branch denial test
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify-environment-denies-pr-ref:
+    runs-on: ubuntu-latest
+    environment: hoja-catalog-publication
+    steps:
+      - run: echo 'UNEXPECTED_ENVIRONMENT_ACCESS_FROM_PR_REF'
