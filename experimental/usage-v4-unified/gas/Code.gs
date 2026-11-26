@@ -139,7 +139,8 @@ function hojaListPublicCartridges() {
     const src=hojaApprovedSource_(qa);
     return qa.entries.map(e=>{const row={name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId};
       if(src)row.pkg={id:e.cartridgeId,sha256:e.packageSha256,path:e.contentPath,commit:src.commit,repo:src.repo,
-        questionCount:e.questionCount,sourceCommit:qa.sourceCommit};
+        questionCount:e.questionCount,sourceCommit:qa.sourceCommit,pinRelay:true};
+      row.display={sourceTitle:e.title,number:String(e.unit)+(e.subunit==null?'':'-'+e.subunit),title:e.title};
       return row;});
   }
   const sheets=hojaPublicSheets_().sheets;
