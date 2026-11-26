@@ -39,6 +39,7 @@ jobs:
           BASE="$(git -C "$RUNNER_TEMP/qbank" rev-parse HEAD)"
           echo "BASE=$BASE" >> "$GITHUB_ENV"
           bash "$P/publish_remote_catalog.sh" "$RUNNER_TEMP/qbank" "$P/deployment/hoja15-remote-release.json" "$RUNNER_TEMP/proposal" "$BASE"
+          node "$P/verify_required_approved_inventory.mjs" "$P/generated/approved-source-index.json" "$P/deployment/hoja15-remote-release.json"
       - name: Open protected release PR (no direct main writes)
         shell: bash
         env:
