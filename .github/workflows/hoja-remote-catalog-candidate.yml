@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
-          ref: 5c95739ab9cbc1313023198e0608de30995c4313
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
           path: qbank-runtime
           persist-credentials: false
       - name: Rebuild approved source and packages (no publication)
