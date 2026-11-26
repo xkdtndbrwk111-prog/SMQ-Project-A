@@ -1,10 +1,10 @@
 {
  "schemaVersion": "hoja-approved-source-index-v2",
  "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
- "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
- "catalogUpdatedAt": "2026-11-22",
- "approvalUnits": 23,
- "approvalQuestions": 732,
+ "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+ "catalogUpdatedAt": "2026-11-26",
+ "approvalUnits": 29,
+ "approvalQuestions": 899,
  "subjects": {
   "english": {
    "units": 12,
@@ -17,6 +17,14 @@
   "math": {
    "units": 6,
    "questions": 187
+  },
+  "korean": {
+   "units": 4,
+   "questions": 103
+  },
+  "science": {
+   "units": 2,
+   "questions": 64
   }
  },
  "gameDeployment": "NOT_DEPLOYED",
@@ -61,7 +69,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -105,7 +113,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -149,7 +157,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -200,7 +208,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -246,7 +254,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -292,7 +300,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -336,7 +344,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -380,7 +388,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -424,7 +432,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -470,7 +478,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -516,7 +524,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -562,7 +570,179 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "kor5-s2-u5-sara",
+   "subject": "korean",
+   "subjectLabel": "국어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 5,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "5. 추론하며 읽어요(사라, 버스를 타다)",
+   "approvedTitle": "5. 추론하며 읽어요(사라, 버스를 타다)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "5. 추론하며 읽어요(사라, 버스를 타다)",
+   "questionCount": 25,
+   "types": {
+    "MCQ": 21,
+    "OX": 4
+   },
+   "releaseId": "kor5-s2-u5-sara-teacher-20261126-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/korean/grade5/semester2/kor5-s2-u5-sara/manifest.json",
+   "archivePath": "approved/korean/grade5/semester2/kor5-s2-u5-sara/kor5-s2-u5-sara-teacher-approved-20261126-r1.zip",
+   "archiveSha256": "426d646aa358394809821d831f73b3a1be1ef3e4d9237511e70989161d2db99a",
+   "archiveFilesVerified": 11,
+   "effectiveSha256": "7d498b0cf10a63452de4fc4d3e7e72d3345280a062a437433ef95fe7aadd2a7f",
+   "effectiveFiles": 8,
+   "presentationSha256": "898ff7dd71a0b487c7f9ce33db4ad6662e3ad94698a4824568d19b6241fa3162",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "HOLD_TEXTBOOK_ILLUSTRATION_RIGHTS_UNVERIFIED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "kor5-s2-u6-charlotte",
+   "subject": "korean",
+   "subjectLabel": "국어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 6,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "6. 작품을 감상해요(샬럿의 거미줄)",
+   "approvedTitle": "6. 작품을 감상해요(샬럿의 거미줄)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6. 작품을 감상해요(샬럿의 거미줄)",
+   "questionCount": 25,
+   "types": {
+    "MCQ": 21,
+    "OX": 4
+   },
+   "releaseId": "kor5-s2-u6-charlotte-teacher-20261126-r1",
+   "effectiveRevision": 4,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/korean/grade5/semester2/kor5-s2-u6-charlotte/manifest.json",
+   "archivePath": "approved/korean/grade5/semester2/kor5-s2-u6-charlotte/kor5-s2-u6-charlotte-teacher-approved-20261126-r1.zip",
+   "archiveSha256": "c668270d66c4c6d37074a0bcc00e3ede7b88f8abf7bf0857fc8cec22d71e76d4",
+   "archiveFilesVerified": 9,
+   "effectiveSha256": "bf14ff916db4ceb4f99f97efc70a3519b230d7ca6426f5c18b2fa80a902e8422",
+   "effectiveFiles": 6,
+   "presentationSha256": "52cbb573cf4995ec82d2fbd56b3b675c64a27be8cacf97397e5a56af02b0ff2d",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "HOLD_TEXTBOOK_ILLUSTRATION_RIGHTS_UNVERIFIED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "kor5-s2-u6-mom",
+   "subject": "korean",
+   "subjectLabel": "국어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 6,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "6. 작품을 감상해요(엄마에게)",
+   "approvedTitle": "6. 작품을 감상해요(엄마에게)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6. 작품을 감상해요(엄마에게)",
+   "questionCount": 28,
+   "types": {
+    "MCQ": 18,
+    "OX": 10
+   },
+   "releaseId": "kor5-s2-u6-mom-teacher-20261126-r1",
+   "effectiveRevision": 1,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/korean/grade5/semester2/kor5-s2-u6-mom/manifest.json",
+   "archivePath": "approved/korean/grade5/semester2/kor5-s2-u6-mom/HOJA_KOR5_S2_U6_MOM_APPROVED_20261126_r1.zip",
+   "archiveSha256": "879a15ab40fe8b74222abb8f6b8fe4dc272c7da06379add10e70660f7ea37992",
+   "archiveFilesVerified": 12,
+   "effectiveSha256": "4a8c698fb2eeb17f558fc0778959a52416188b63a8a250ad196c4abe1f446a0c",
+   "effectiveFiles": 10,
+   "presentationSha256": "3c8a6957fc4e57c1c1ebe6ab6f1ca74bb9e44aae5079cdabea476d89000c6670",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "HOLD_SOURCE_TEXT_RIGHTS_UNVERIFIED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "kor5-s2-u6-nabi",
+   "subject": "korean",
+   "subjectLabel": "국어",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 6,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": null,
+   "author": null,
+   "unitTitle": "6. 작품을 감상해요(나비를 잡는 아버지)",
+   "approvedTitle": "6. 작품을 감상해요(나비를 잡는 아버지)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": "6. 작품을 감상해요(나비를 잡는 아버지)",
+   "questionCount": 25,
+   "types": {
+    "MCQ": 21,
+    "OX": 4
+   },
+   "releaseId": "kor5-s2-u6-nabi-teacher-20261126-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/korean/grade5/semester2/kor5-s2-u6-nabi/manifest.json",
+   "archivePath": "approved/korean/grade5/semester2/kor5-s2-u6-nabi/kor5-s2-u6-nabi-teacher-approved-20261126-r1.zip",
+   "archiveSha256": "26e042ab7dccac766dce2ccd2f135079c0fe4f70ea1021f2008377ef2d696d08",
+   "archiveFilesVerified": 8,
+   "effectiveSha256": "234ea4a775441f3d149804293986e41c858ee8b3f34e0aedc61e646d4d992f22",
+   "effectiveFiles": 5,
+   "presentationSha256": "a792b3e894a23ea21c9a1f6233990554fe048bb5c98bf91e9fa467517f393f9a",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "HOLD_TEXTBOOK_ILLUSTRATION_RIGHTS_UNVERIFIED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -606,7 +786,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -650,7 +830,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -694,7 +874,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -738,7 +918,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -782,7 +962,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -826,7 +1006,95 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "sci5-s2-heat-common",
+   "subject": "science",
+   "subjectLabel": "과학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 3,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "공통(3종 교과서 교차검증)",
+   "author": null,
+   "unitTitle": "열과 우리 생활",
+   "approvedTitle": "초등학교 5학년 2학기 과학 열과 우리 생활 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "sci5-s2-heat-common-teacher-20261121-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/science/grade5/semester2/sci5-s2-heat-common/manifest.json",
+   "archivePath": "approved/science/grade5/semester2/sci5-s2-heat-common/HOJA_SCI5_S2_HEAT_COMMON_APPROVED_20261121_r1.zip",
+   "archiveSha256": "a503459e875d4565e888ce40878d279e9b3513c76e95711ff6f806a610186947",
+   "archiveFilesVerified": 9,
+   "effectiveSha256": "84a430dbd68b6dd5513697e32775a7026ea922461bacd0a4f5d141a9b7e408f8",
+   "effectiveFiles": 6,
+   "presentationSha256": "41bfc256ac60fa83f7175f30df3f009c320b2318f7423124a3ce3036c79dc1d4",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
+   "approvalStatus": "APPROVED",
+   "deploymentStatus": "NOT_DEPLOYED"
+  },
+  {
+   "cartridgeId": "sci5-s2-u4-common",
+   "subject": "science",
+   "subjectLabel": "과학",
+   "subjectLabelSource": "EFFECTIVE_METADATA",
+   "grade": 5,
+   "semester": 2,
+   "unit": 4,
+   "subunit": null,
+   "classificationSource": "EFFECTIVE_METADATA",
+   "publisher": "공통(3종 교과서 교차검증)",
+   "author": null,
+   "unitTitle": "자원과 에너지",
+   "approvedTitle": "초등학교 5학년 2학기 과학 4단원 자원과 에너지 (3종 공통)",
+   "titleSource": "EFFECTIVE_CARTRIDGE_TITLE",
+   "approvalRecordTitle": null,
+   "questionCount": 32,
+   "types": {
+    "MCQ": 22,
+    "OX": 6,
+    "SHORT": 4
+   },
+   "releaseId": "sci5-s2-u4-common-teacher-20261121-r1",
+   "effectiveRevision": 3,
+   "sourceShape": "unit-effective-zip",
+   "sourceManifest": "approved/science/grade5/semester2/sci5-s2-u4-common/manifest.json",
+   "archivePath": "approved/science/grade5/semester2/sci5-s2-u4-common/HOJA_SCI5_S2_U4_COMMON_APPROVED_20261121_r1.zip",
+   "archiveSha256": "7b711e6d2d29e77152b49958b9bfe22690e1b297a45edd3828cb56270b8b7fae",
+   "archiveFilesVerified": 9,
+   "effectiveSha256": "0195d07956baeada3b07c5f7a037f74bf407e4c4f5862f9281b25e3d0418c9a8",
+   "effectiveFiles": 6,
+   "presentationSha256": "41bfc256ac60fa83f7175f30df3f009c320b2318f7423124a3ce3036c79dc1d4",
+   "mediaOverlay": null,
+   "mediaRights": {
+    "status": "HOLD",
+    "flags": [
+     "UNSTATED"
+    ]
+   },
+   "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -871,7 +1139,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -915,7 +1183,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -959,7 +1227,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -1003,7 +1271,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   },
@@ -1047,7 +1315,7 @@
     ]
    },
    "sourceRepo": "xkdtndbrwk111-prog/HOJA-QUESTION-BANK",
-   "sourceCommit": "9573f91d2845a9667e2540df051f499d937dd94a",
+   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
    "approvalStatus": "APPROVED",
    "deploymentStatus": "NOT_DEPLOYED"
   }
@@ -1126,6 +1394,22 @@
    "code": "SEMESTER_UNSTATED"
   },
   {
+   "id": "kor5-s2-u5-sara",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "kor5-s2-u6-charlotte",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "kor5-s2-u6-mom",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "kor5-s2-u6-nabi",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
    "id": "math5-s2-u4",
    "code": "MEDIA_RIGHTS_HOLD"
   },
@@ -1156,6 +1440,14 @@
   {
    "id": null,
    "code": "UNVERIFIABLE_RAW_HASH:ybm-kim/grade5-6-u10-12/r1:rawQuestionsSHA256"
+  },
+  {
+   "id": "sci5-s2-heat-common",
+   "code": "MEDIA_RIGHTS_HOLD"
+  },
+  {
+   "id": "sci5-s2-u4-common",
+   "code": "MEDIA_RIGHTS_HOLD"
   },
   {
    "id": "soc5-s2-u2-2-common",
