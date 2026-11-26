@@ -140,7 +140,18 @@ function hojaRemoteCatalogGet_(embedded){
       throw Error('REMOTE_CATALOG_ROLLBACK');
    if(latest&&next.generation===latest.generation&&next.checkedAt<latest.checkedAt)
       throw Error('REMOTE_CATALOG_CONCURRENT');
-   hojaRemoteCatalogWriteSlot_(props,next,latest);
+   // A verified unchanged revision only needs a fresh timestamp. Do not rewrite
+   // chunks every five minutes. If the durable slot is damaged, rebuild the
+   // inactive slot from the newly fetched and validated immutable bytes.
+   let reused=false;
+   if(latest&&next.generation===latest.generation){
+    try{
+     const text=hojaRemoteCatalogReadSlot_(props,latest);
+     reused=hojaRemoteCatalogSha_(text)===next.sha256;
+    }catch(_){}
+   }
+   if(reused)props.setProperty(HOJA_REMOTE_CATALOG_HEAD_,JSON.stringify({...latest,checkedAt:next.checkedAt}));
+   else hojaRemoteCatalogWriteSlot_(props,next,latest);
    try{
     const serialized=JSON.stringify({generation:next.generation,sha256:next.sha256,checkedAt:next.checkedAt,text:next.text});
     if(Utilities.newBlob(serialized).getBytes().length<=100000)cache.put(HOJA_REMOTE_CATALOG_CACHE_KEY_,serialized,21600);
