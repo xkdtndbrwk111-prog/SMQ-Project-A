@@ -14,13 +14,18 @@ git -C "$runtime" merge-base --is-ancestor "$source" "$base"
 git -C "$runtime" diff --exit-code "$source" "$base" -- approved
 # The manifest must explicitly bind to the exact approved source snapshot.
 node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1]));if(j.sourceCommit!==process.argv[2])throw Error("DEPLOYMENT_SOURCE_COMMIT_MISMATCH");if(!j.deploymentId.startsWith("HOJA15-")||/PENDING|DRAFT|SYNTHETIC|TEST_ONLY/i.test(j.deploymentId))throw Error("RELEASE_MANIFEST_REQUIRED")' "$manifest" "$source"
-sourceDir="$out/source"
+sourceDir="$out/source"; contentDir="$out/content"
+contentCommit="$(git -C "$runtime" log -1 --format=%H "$base" -- game-runtime/approved-packages/v1)"
+[[ "$contentCommit" =~ ^[0-9a-f]{40}$ ]]
+git -C "$runtime" merge-base --is-ancestor "$source" "$contentCommit"
+git -C "$runtime" diff --exit-code "$contentCommit" "$base" -- game-runtime/approved-packages/v1
+trap 'git -C "$runtime" worktree remove --force "$sourceDir" >/dev/null 2>&1 || true; git -C "$runtime" worktree remove --force "$contentDir" >/dev/null 2>&1 || true' EXIT
 git -C "$runtime" worktree add --detach "$sourceDir" "$source"
-trap 'git -C "$runtime" worktree remove --force "$sourceDir" >/dev/null 2>&1 || true' EXIT
+git -C "$runtime" worktree add --detach "$contentDir" "$contentCommit"
 node "$here/build_approved_index.mjs" --qbank "$sourceDir"
 node "$here/build_content_packages.mjs" --qbank "$sourceDir"
 index="$here/generated/approved-source-index.json"; report="$here/generated/approved-content-report.json"
-node "$here/build_remote_active_catalog.mjs" --index "$index" --deployment "$manifest" --report "$report" --runtime "$runtime" --content-commit "$base" --out "$out/catalog.json"
+node "$here/build_remote_active_catalog.mjs" --index "$index" --deployment "$manifest" --report "$report" --runtime "$contentDir" --content-commit "$contentCommit" --out "$out/catalog.json"
 dir=game-runtime/active/v1
 mkdir -p "$runtime/$dir"
 # Avoid generation bumps for a completely unchanged verified output. The current
@@ -33,10 +38,12 @@ if [[ -f "$runtime/$dir/current.json" ]]; then
 fi
 cp "$out/catalog.json" "$runtime/$dir/catalog.json"
 git -C "$runtime" add -- "$dir/catalog.json"
-git -C "$runtime" commit -m "Prepare verified HOJA active catalog" -- "$dir/catalog.json"
+if ! git -C "$runtime" diff --cached --quiet -- "$dir/catalog.json"; then
+  git -C "$runtime" commit -m "Prepare verified HOJA active catalog" -- "$dir/catalog.json"
+fi
 catalogCommit="$(git -C "$runtime" rev-parse HEAD)"
 extra=(); if [[ ! -f "$runtime/$dir/current.json" ]]; then extra+=(--bootstrap); fi
-node "$here/prepare_remote_pointer.mjs" --runtime "$runtime" --base-commit "$base" --content-commit "$base" --catalog-commit "$catalogCommit" --index "$index" --deployment "$manifest" --report "$report" --out "$out/current.json" "${extra[@]}"
+node "$here/prepare_remote_pointer.mjs" --runtime "$runtime" --base-commit "$base" --content-commit "$contentCommit" --catalog-commit "$catalogCommit" --index "$index" --deployment "$manifest" --report "$report" --out "$out/current.json" "${extra[@]}"
 cp "$out/current.json" "$runtime/$dir/current.json"
 git -C "$runtime" add -- "$dir/current.json"
 git -C "$runtime" commit -m "Propose verified HOJA catalog generation" -- "$dir/current.json"
