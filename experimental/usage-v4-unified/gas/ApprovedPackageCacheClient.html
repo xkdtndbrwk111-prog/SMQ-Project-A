@@ -203,7 +203,11 @@ async function getLeased(names,entries){
  const relayIdx=loaded.map((r,i)=>r.needsRelay?i:-1).filter(i=>i>=0);
  if(relayIdx.length){
   let rel;
-  try{rel=await baseRpc('GET',relayIdx.map(i=>names[i]))}
+  try{
+   const relayNames=relayIdx.map(i=>names[i]);
+   const pinned=relayIdx.every(i=>entries[i].pinRelay);
+   rel=await baseRpc('GET',pinned?{names:relayNames,pins:relayIdx.map(i=>({id:entries[i].id,sha256:entries[i].sha256}))}:relayNames);
+  }
   catch(e){throw fail('문제 다운로드 실패 — 인터넷 연결을 확인해 주세요. ('+String(e&&e.message||e)+')')}
   if(!Array.isArray(rel)||rel.length!==relayIdx.length)throw fail('APPROVED_CONTENT_FETCH_FAILED');
   for(let k=0;k<relayIdx.length;k++){
@@ -224,7 +228,7 @@ function setCatalog(rows){
   if(!p||typeof r.name!=='string')continue;
   if(!ID_RE.test(String(p.id))||!SHA_RE.test(String(p.sha256))||!COMMIT_RE.test(String(p.commit))||REPOS.indexOf(String(p.repo))<0||
      !PATH_RE.test(String(p.path))||String(p.path).indexOf('..')>=0||!Number.isSafeInteger(p.questionCount)||p.questionCount<1)continue;
-  next.set(r.name,{id:p.id,sha256:p.sha256,commit:p.commit,repo:p.repo,path:p.path,questionCount:p.questionCount,sourceCommit:String(p.sourceCommit||'')});
+  next.set(r.name,{id:p.id,sha256:p.sha256,commit:p.commit,repo:p.repo,path:p.path,questionCount:p.questionCount,sourceCommit:String(p.sourceCommit||''),pinRelay:p.pinRelay===true});
  }
  catalog=next;
  purgeUnused();   // app entry: 90-day-unused clean-up (runs only while the app is open)
