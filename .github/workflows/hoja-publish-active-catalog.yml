@@ -32,6 +32,7 @@ jobs:
           set -euo pipefail
           P=experimental/usage-v4-unified/approved-catalog
           test -f "$P/deployment/hoja15-remote-release.json"
+          node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1]));if(/DRYRUN|LOCAL|TEST|PENDING|DRAFT|SYNTHETIC/i.test(j.deploymentId))throw Error("TEST_RELEASE_REFUSED")' "$P/deployment/hoja15-remote-release.json"
           git clone --branch main https://github.com/xkdtndbrwk111-prog/HOJA-QUESTION-BANK.git "$RUNNER_TEMP/qbank"
           git -C "$RUNNER_TEMP/qbank" config user.name 'HOJA catalog publisher'
           git -C "$RUNNER_TEMP/qbank" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -63,7 +64,6 @@ jobs:
           # Optional one-time repository configuration. Only use merge commits
           # and require an actual mandatory PR gate before enabling auto-merge.
           if [[ "$ENABLE_AUTO_MERGE" == 1 ]]; then
-            CHECKS="$(gh api "repos/$REPO/branches/main/protection/required_status_checks" --jq '.contexts | length')"
-            [[ "$CHECKS" -gt 0 ]]
+            test "$(gh api "repos/$REPO/branches/main/protection/required_status_checks" --jq '.strict and ((.contexts // []) | index("Verify immutable catalog publication") != null)')" = true
             gh pr merge "$PR" --repo "$REPO" --auto --merge
           fi
