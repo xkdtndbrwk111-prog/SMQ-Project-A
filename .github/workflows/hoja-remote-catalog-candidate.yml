@@ -107,6 +107,21 @@ jobs:
           JS
       - name: Exercise real catalog across isolated GAS RPCs and withdrawal
         run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime
+      - name: Independent inventory must reject missing science registrations
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          import {verifyRequiredApprovedInventory as verify} from './experimental/usage-v4-unified/approved-catalog/verify_required_approved_inventory.mjs';
+          const p='experimental/usage-v4-unified/approved-catalog/';
+          const idx=JSON.parse(fs.readFileSync(p+'generated/approved-source-index.json'));
+          const manifest=JSON.parse(fs.readFileSync(p+'deployment/hoja15-remote-20261126-pending.json'));
+          const ledger=JSON.parse(fs.readFileSync(p+'required-approved-inventory.json'));
+          assert.equal(ledger.requiredIds.length,29);
+          assert.throws(()=>verify(idx,manifest),/APPROVED_INVENTORY_MISSING.*sci5-s2-heat-common.*sci5-s2-u4-common/);
+          const fixture={entries:ledger.requiredIds.map(cartridgeId=>({cartridgeId}))};
+          assert.equal(verify(fixture,fixture).required,29);
+          console.log('APPROVAL_INVENTORY_GATE_PASS');
+          JS
   renderer:
     needs: real-bank
     runs-on: ubuntu-latest
