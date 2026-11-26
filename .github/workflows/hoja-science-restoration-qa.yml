@@ -1,0 +1,99 @@
+name: HOJA restored science QA
+on:
+  push:
+    branches: [work/hoja15-remote-catalog-20261126]
+    paths:
+      - '.github/workflows/hoja-science-restoration-qa.yml'
+      - 'experimental/usage-v4-unified/approved-catalog/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: ecf67d68bc1bd830c17386a555d9127dcd6d13fa
+          path: qbank-restored
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          path: qbank-canonical
+          persist-credentials: false
+      - name: Verify original science archives, rebuild approved packages
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified/approved-catalog
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, zipfile, json
+          root=Path('qbank-restored/approved/science')
+          expected={'sci5-s2-heat-common':'a503459e875d4565e888ce40878d279e9b3513c76e95711ff6f806a610186947','sci5-s2-u4-common':'7b711e6d2d29e77152b49958b9bfe22690e1b297a45edd3828cb56270b8b7fae'}
+          for m in root.rglob('manifest.json'):
+              d=json.loads(m.read_text()); p=m.parent/d['archive']; raw=p.read_bytes()
+              assert len(raw)==d['archiveBytes'] and hashlib.sha256(raw).hexdigest()==expected.pop(d['id'])==d['archiveSha256']
+              with zipfile.ZipFile(p) as z:
+                  assert z.testzip() is None
+                  approval=json.loads(z.read('release/approval.json'))
+                  assert approval['teacherApproval']=='APPROVED'
+              print('SCIENCE_ARCHIVE_PASS',d['id'],len(raw))
+          assert not expected
+          PY
+          node "$P/build_approved_index.mjs" --qbank qbank-restored
+          node "$P/build_content_packages.mjs" --qbank qbank-restored --packages-out "$RUNNER_TEMP/rebuilt"
+      - name: Validate all 29 units, compare original 27 package pins
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const p='experimental/usage-v4-unified/approved-catalog/generated/';
+          const idx=JSON.parse(fs.readFileSync(p+'approved-source-index.json'));
+          const report=JSON.parse(fs.readFileSync(p+'approved-content-report.json'));
+          const dir=process.env.RUNNER_TEMP+'/rebuilt/';
+          const runtime=JSON.parse(fs.readFileSync(dir+'game-runtime/approved-packages/v1/INDEX.json'));
+          const old=JSON.parse(fs.readFileSync('qbank-canonical/game-runtime/approved-packages/v1/INDEX.json'));
+          console.log('SCIENCE_REPORT',JSON.stringify(report.entries.filter(x=>x.cartridgeId.startsWith('sci'))));
+          assert.equal(idx.approvalUnits,29);assert.equal(idx.approvalQuestions,899);
+          assert.equal(runtime.packages.length,29);assert.equal(runtime.sourceCommit,idx.sourceCommit);
+          const byId=new Map(runtime.packages.map(x=>[x.cartridgeId,x]));
+          for(const e of old.packages) assert.equal(byId.get(e.cartridgeId)?.sha256,e.sha256,'OLD_PACKAGE_CHANGED:'+e.cartridgeId);
+          for(const e of runtime.packages){
+            const bytes=fs.readFileSync(path.join(dir,e.path));const d=JSON.parse(bytes);
+            assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),e.sha256);
+            assert.equal(bytes.length,e.bytes);
+            assert.equal(d.questions.length,idx.entries.find(x=>x.cartridgeId===e.cartridgeId).questionCount);
+            assert.equal(report.entries.find(x=>x.cartridgeId===e.cartridgeId)?.status,'READY');
+          }
+          const ids=JSON.parse(fs.readFileSync('experimental/usage-v4-unified/approved-catalog/required-approved-inventory.json')).requiredIds;
+          assert.deepEqual([...byId.keys()].sort(),[...ids].sort());
+          console.log('RESTORED_BANK_PASS 29/899; prior 27 unchanged');
+          const units=runtime.packages.map(e=>{const d=JSON.parse(fs.readFileSync(path.join(dir,e.path)));return {id:e.cartridgeId,payload:{questions:d.questions.map(q=>q.rendererQuestion),originalQuestions:d.questions.map(q=>q.originalQuestion),images:d.images,tags:d.tags,unitMeta:d.unitMeta}}});
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/payloads.json',JSON.stringify(units));
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: restored-29-packages-candidate
+          path: |
+            ${{ runner.temp }}/rebuilt/
+            ${{ runner.temp }}/payloads.json
+            experimental/usage-v4-unified/approved-catalog/generated/approved-source-index.json
+            experimental/usage-v4-unified/approved-catalog/generated/approved-content-report.json
+          retention-days: 7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Render all restored questions at four viewports
+        run: |
+          node experimental/unified-quiz-renderer/compose_renderer.mjs "$RUNNER_TEMP/composed.html"
+          python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html"
