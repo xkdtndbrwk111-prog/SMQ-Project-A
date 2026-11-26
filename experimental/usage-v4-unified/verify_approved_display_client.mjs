@@ -30,9 +30,10 @@ for(const e of index.entries){
 const keys=Object.keys(mapping);
 const approved=keys.map(id=>({name:`6-사회-${mapping[id].sourceTitle}`,pkg:{id},cartridgeId:id}));
 const legacy={name:'5-수학-기존 카트리지',cartridgeId:123};
-const response=[...approved,legacy];
+const dynamic={name:'5-2학기-국어-새로운 작품',cartridgeId:'kor5-s2-u6-new',pkg:{id:'kor5-s2-u6-new'},display:{sourceTitle:'새로운 작품',number:'6',title:'새로운 작품'}};
+const response=[...approved,legacy,dynamic];
 const cards=keys.map(id=>makeCard(mapping[id].sourceTitle));
-cards.push(makeCard('기존 카트리지'));
+cards.push(makeCard('기존 카트리지'),makeCard('새로운 작품'));
 const rail={querySelectorAll:()=>cards.map(c=>c.button)};
 const selected={textContent:mapping[keys[0]].sourceTitle};
 const styles=[];const callbacks=[];
@@ -52,7 +53,7 @@ runInNewContext(body,{window,document,MutationObserver,Promise,Object,Array,Stri
 const listed=await window.HOJA_B_LIVE.rpc('LIST');
 for(const cb of callbacks)cb();
 assert.equal(listed,response,'LIST changed');
-assert.equal(window.HOJA15_APPROVED_DISPLAY.activeUnits,23);
+assert.equal(window.HOJA15_APPROVED_DISPLAY.activeUnits,24);
 cards.slice(0,23).forEach((c,i)=>{
  const d=mapping[keys[i]];
  assert.equal(c.title.textContent,d.title);
@@ -62,13 +63,17 @@ cards.slice(0,23).forEach((c,i)=>{
 });
 assert.equal(cards[23].title.textContent,'기존 카트리지','legacy title changed');
 assert.equal(cards[23].badge.hidden,false,'legacy PAK changed');
+assert.equal(cards[24].title.textContent,'새로운 작품');
+assert.equal(cards[24].face.children[0].textContent,'6');
+assert.equal(cards[24].button.title,'6. 새로운 작품');
+assert.equal(cards[24].badge.hidden,true);
 assert.equal(selected.textContent,mapping[keys[0]].number+'. '+mapping[keys[0]].title);
 await window.HOJA_B_LIVE.rpc('GET',[approved[0].name]);
 await window.HOJA_B_LIVE.rpc('RANK_SAVE',{cartridge:approved[0].name});
 assert.equal(calls[1].payload[0],approved[0].name,'GET renamed');
 assert.equal(calls[2].payload.cartridge,approved[0].name,'rank key renamed');
 assert.equal(styles.length,1);
-console.log('HOJA15_APPROVED_DISPLAY_PASS 23/23; GET and RANK_SAVE identities unchanged; legacy unaffected');
+console.log('HOJA15_APPROVED_DISPLAY_PASS 23 curated + 1 dynamic; GET and RANK_SAVE identities unchanged; legacy unaffected');
 
 function makeCard(original){
  const title={textContent:original,dataset:{fullLabel:original}};
