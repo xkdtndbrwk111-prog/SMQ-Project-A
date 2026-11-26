@@ -148,3 +148,56 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Render all 835 questions at four viewports
         run: python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html"
+  publication-dry-run:
+    needs: real-bank
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          fetch-depth: 0
+          path: publication-qbank
+          persist-credentials: false
+      - name: Test publication transaction in local clone; reject unfinished approvals
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified/approved-catalog
+          git -C publication-qbank config user.name 'Local publication test'
+          git -C publication-qbank config user.email 'test@example.invalid'
+          BASE="$(git -C publication-qbank rev-parse HEAD)"
+          # Preserve all existing 23 approved pin entries and their gates. This
+          # temporary manifest is for offline simulation only, never committed.
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const p='experimental/usage-v4-unified/approved-catalog/deployment/';
+          const j=JSON.parse(fs.readFileSync(p+'hoja15-remote-20261126-pending.json'));
+          j.entries=j.entries.filter(x=>!x.cartridgeId.startsWith('kor'));
+          if(j.entries.length!==23)throw Error('DRY_RUN_PRIOR_APPROVALS');
+          j.deploymentId='HOJA15-LOCAL-DRYRUN';
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/prior.json',JSON.stringify(j));
+          JS
+          if bash "$P/publish_remote_catalog.sh" publication-qbank "$P/deployment/hoja15-remote-20261126-pending.json" "$RUNNER_TEMP/rejected" "$BASE"; then
+            echo 'Unfinished release must not publish'; exit 1
+          fi
+          test "$(git -C publication-qbank rev-parse HEAD)" = "$BASE"
+          bash "$P/publish_remote_catalog.sh" publication-qbank "$RUNNER_TEMP/prior.json" "$RUNNER_TEMP/proposal" "$BASE"
+          HEAD="$(git -C publication-qbank rev-parse HEAD)"
+          test "$HEAD" != "$BASE"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {execFileSync} from 'node:child_process';
+          const dir='game-runtime/active/v1/', root='publication-qbank';
+          const pointer=JSON.parse(fs.readFileSync(root+'/'+dir+'current.json'));
+          const raw=execFileSync('git',['-C',root,'show',pointer.catalogCommit+':'+dir+'catalog.json']);
+          assert.equal(pointer.generation,1);assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),pointer.catalogSha256);
+          assert.equal(JSON.parse(raw).entries.length,23);
+          JS
+          # Second identical build must not bump generation or create a commit.
+          bash "$P/publish_remote_catalog.sh" publication-qbank "$RUNNER_TEMP/prior.json" "$RUNNER_TEMP/noop" "$HEAD"
+          test "$(git -C publication-qbank rev-parse HEAD)" = "$HEAD"
+          echo PUBLICATION_LOCAL_DRY_RUN_PASS
