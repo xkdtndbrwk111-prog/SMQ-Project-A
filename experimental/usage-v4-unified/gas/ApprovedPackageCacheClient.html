@@ -66,11 +66,11 @@ function db(){
  return dbPromise;
 }
 /* One transaction, time-bounded: body(store, setResult). Timeout -> abort + one-time mode for this page. */
-function runTx(d,mode,body){
+function runTx(d,mode,body,maintenance=false){
  return new Promise((resolve,reject)=>{
   let out,t,done=false;
   const finish=(fn,v)=>{if(done)return;done=true;clearTimeout(timer);fn(v)};
-  const timer=setTimeout(()=>{if(done)return;stats.idbTimeouts++;giveUp('TX_TIMEOUT');try{t&&t.abort()}catch(_e){}finish(reject,fail('IDB_TIMEOUT'))},IDB_TX_TIMEOUT_MS);
+  const timer=setTimeout(()=>{if(done)return;stats.idbTimeouts++;if(!maintenance)giveUp('TX_TIMEOUT');try{t&&t.abort()}catch(_e){}finish(reject,fail('IDB_TIMEOUT'))},IDB_TX_TIMEOUT_MS);
   try{t=d.transaction(STORE,mode)}catch(e){finish(reject,e);return}
   t.oncomplete=()=>finish(resolve,out);t.onerror=()=>finish(reject,t.error);t.onabort=()=>finish(reject,t.error||fail('IDB_ABORT'));
   try{body(t.objectStore(STORE),v=>{out=v})}catch(e){try{t.abort()}catch(_e){}finish(reject,e)}
@@ -119,14 +119,23 @@ async function idbStore(entry,text){
  if(stored)stats.stored++;
  return stored;
 }
+let purgeTimer=null,purgeStarted=false;
+function schedulePurge(){
+ if(purgeStarted||purgeTimer!==null)return;
+ // Maintenance must not compete with initial page rendering or the first
+ // cache read. Run once per page, not on every LIST.
+ purgeTimer=setTimeout(()=>{purgeTimer=null;purgeStarted=true;purgeUnused()},5000);
+}
 async function purgeUnused(){
  const d=await db();if(!d)return;
- const now=Date.now();
+ const now=Date.now();let removed=0;
  try{await runTx(d,'readwrite',s=>{
-  const c=s.openCursor();
-  c.onsuccess=()=>{const cur=c.result;if(!cur)return;const r=cur.value;
-   if(now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!isProtected(r.cartridgeId)){cur.delete();stats.purged++}cur.continue()};
- })}catch(_e){stats.idbErrors++}
+  // One IDB request, not one cursor round trip per large package.
+  const all=s.getAll();
+  all.onsuccess=()=>{for(const r of all.result){
+   if(r&&now-(r.lastUsedAt||0)>MAX_UNUSED_MS&&!isProtected(r.cartridgeId)){s.delete(r.cartridgeId);removed++}
+  }};
+ },true);stats.purged+=removed}catch(_e){stats.idbErrors++}
 }
 /* ---------- validation (mirrors the GAS loader) ---------- */
 function validate(entry,text){
@@ -180,7 +189,7 @@ function download(entry){
 async function loadUnit(entry){
  const rec=await idbGet(entry.id);
  if(rec){
-  if(rec.packageSha256===entry.sha256&&typeof rec.text==='string'&&await sha256Hex(rec.text)===entry.sha256){
+  if(Date.now()-(rec.lastUsedAt||0)<=MAX_UNUSED_MS&&rec.packageSha256===entry.sha256&&typeof rec.text==='string'&&await sha256Hex(rec.text)===entry.sha256){
    stats.hits++;idbTouch(rec);return {text:rec.text,source:'CACHE'};
   }
   stats.discarded++;await idbDelete(entry.id);   // other version or corrupted -> drop, re-download
@@ -231,7 +240,7 @@ function setCatalog(rows){
   next.set(r.name,{id:p.id,sha256:p.sha256,commit:p.commit,repo:p.repo,path:p.path,questionCount:p.questionCount,sourceCommit:String(p.sourceCommit||''),pinRelay:p.pinRelay===true});
  }
  catalog=next;
- purgeUnused();   // app entry: 90-day-unused clean-up (runs only while the app is open)
+ schedulePurge();   // once per page, outside the critical startup path
 }
 const handles=names=>Array.isArray(names)&&names.length>0&&names.every(n=>typeof n==='string'&&catalog.has(n));
 live.rpc=function(method,payload){
