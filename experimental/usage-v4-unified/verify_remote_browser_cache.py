@@ -17,6 +17,7 @@ async def main():
     pins={e['cartridgeId']:e for e in idx['packages']}
     assert len(pins)==29
     downloads=[]; relay=[]; offline=False
+    print('BROWSER_CACHE_BEGIN',flush=True)
     async with async_playwright() as pw:
         browser=await pw.chromium.launch(headless=True)
         ctx=await browser.new_context(viewport={'width':1280,'height':800})
@@ -44,27 +45,38 @@ async def main():
         async def load():
             await page.goto(url,wait_until='domcontentloaded',timeout=120000)
             await page.wait_for_function('!!window.HOJA_APPROVED_PACKAGE_CACHE&&!!window.HOJA_B_LIVE',timeout=90000)
-            rows=await page.evaluate("window.HOJA_B_LIVE.rpc('LIST')")
+            rows=await asyncio.wait_for(page.evaluate("window.HOJA_B_LIVE.rpc('LIST')"),timeout=60)
             assert len(rows)==29 and all(r['pkg']['pinRelay'] for r in rows),rows[:1]
             assert set(r['cartridgeId'] for r in rows)==set(pins)
             return rows
         rows=await load()
+        print('BROWSER_LIST_PASS',len(rows),flush=True)
         # Leave one science unit uncached for the pinned relay test.
         target=next(r for r in rows if r['cartridgeId']=='sci5-s2-u4-common')
         other=[r for r in rows if r!=target]
         async def get(rs):
-            return await page.evaluate("""async(rows)=>{let n=0;for(const r of rows){const [g]=await window.HOJA_B_LIVE.rpc('GET',[r.name]);if(g.data.cartridgeId!==r.cartridgeId||g.data.questions.length!==r.pkg.questionCount)throw Error('bad unit '+r.cartridgeId);n+=g.data.questions.length}return n}""",rs)
+            n=0
+            for r in rs:
+                try:
+                    n+=await asyncio.wait_for(page.evaluate("""async(r)=>{const [g]=await window.HOJA_B_LIVE.rpc('GET',[r.name]);if(g.data.cartridgeId!==r.cartridgeId||g.data.questions.length!==r.pkg.questionCount)throw Error('bad unit '+r.cartridgeId);return g.data.questions.length}""",r),timeout=75)
+                except Exception:
+                    print('BROWSER_GET_FAILED',r['cartridgeId'],'downloads',len(downloads),'relay',len(relay),flush=True)
+                    raise
+            return n
         assert await get(other)==867
-        assert len(downloads)==28 and not relay
+        assert len(downloads)==28 and not relay,(len(downloads),len(relay))
+        print('BROWSER_DIRECT_PASS 28/867',flush=True)
         offline=True
         assert await get([target])==32
         assert relay and relay[-1][0]['pins']==[{'id':target['pkg']['id'],'sha256':target['pkg']['sha256']}],relay[-1]
         offline=False
+        print('BROWSER_PINNED_RELAY_PASS',flush=True)
         # A canonical relay may not persist if server JSON reserializes; direct
         # retrieval then fills it. All units must survive an actual page reload.
         assert await get(rows)==899
         before=len(downloads);beforeRelay=len(relay)
         rows=await load()
+        print('BROWSER_RELOAD_LIST_PASS',flush=True)
         assert await get(rows)==899
         assert len(downloads)==before and len(relay)==beforeRelay
         diag=await page.evaluate('window.HOJA_APPROVED_PACKAGE_CACHE.diagnose()')
