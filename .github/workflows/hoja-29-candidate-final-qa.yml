@@ -7,6 +7,7 @@ on:
       - 'experimental/usage-v4-unified/assemble_hoja15_production.py'
       - 'experimental/usage-v4-unified/verify_remote_browser_cache.py'
       - 'experimental/usage-v4-unified/verify_f3_ui_e2e.py'
+      - 'experimental/usage-v4-unified/verify_hoja15_join_e2e.py'
       - 'experimental/usage-v4-unified/qa_mock_gas_server.mjs'
       - 'experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs'
       - 'experimental/usage-v4-unified/gas/**'
@@ -97,9 +98,14 @@ jobs:
           trap 'kill "$SERVER" 2>/dev/null || true; cat "$RUNNER_TEMP/mock-server.log"; rm -rf "$B" "$RUNNER_TEMP/test-catalog.gs" "$RUNNER_TEMP/test-catalog.json"' EXIT
           for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
           grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
+          result=0
+          # Cache is already certified for a5f96db, but keep a regression run.
           echo CACHE_START
-          timeout --kill-after=15s 240s python3 -u "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790
-          echo GAME_UI_START
-          timeout --kill-after=15s 300s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common
+          timeout --kill-after=15s 240s python3 -u "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo CACHE_FAILED; result=1; }
+          for flow in SOLO TEAM; do
+            echo "GAME_UI_START $flow"
+            timeout --kill-after=10s 150s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --flow "$flow" || { echo "GAME_UI_FAILED $flow"; result=1; }
+          done
           echo QR_START
-          timeout --kill-after=15s 360s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common
+          timeout --kill-after=15s 240s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common || { echo QR_FAILED; result=1; }
+          exit "$result"
