@@ -1,0 +1,35 @@
+name: HOJA remote catalog candidate QA
+on:
+  push:
+    branches:
+      - work/hoja15-remote-catalog-20261126
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and remote candidate tests
+        run: |
+          for f in experimental/usage-v4-unified/gas/*.gs; do
+            cp "$f" "$RUNNER_TEMP/$(basename "$f").js"
+            node --check "$RUNNER_TEMP/$(basename "$f").js"
+          done
+          node --test experimental/usage-v4-unified/approved-catalog/build_remote_active_catalog.test.mjs
+          node --test experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs
+      - name: Existing approved catalog and runtime regressions
+        run: |
+          node --test experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_D.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs
+          node --test experimental/usage-v4-unified/HOJA15_JOIN.test.mjs
