@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "hoja-required-approved-inventory-v1",
+  "asOf": "2026-11-26",
+  "policy": "Known teacher-approved catalog IDs must not disappear silently. Removal requires a separate reviewed withdrawal and inventory amendment. Approval alone does not override release gates.",
+  "requiredIds": [
+    "eng5-ham-u10",
+    "eng5-ham-u11",
+    "eng5-ham-u12",
+    "eng5-ybm-kim-u10",
+    "eng5-ybm-kim-u11",
+    "eng5-ybm-kim-u12",
+    "eng6-ham-u10",
+    "eng6-ham-u11",
+    "eng6-ham-u12",
+    "eng6-ybm-kim-u10",
+    "eng6-ybm-kim-u11",
+    "eng6-ybm-kim-u12",
+    "kor5-s2-u5-sara",
+    "kor5-s2-u6-charlotte",
+    "kor5-s2-u6-mom",
+    "kor5-s2-u6-nabi",
+    "math5-s2-u4",
+    "math5-s2-u5",
+    "math5-s2-u6",
+    "math6-s2-u4",
+    "math6-s2-u5",
+    "math6-s2-u6",
+    "sci5-s2-heat-common",
+    "sci5-s2-u4-common",
+    "soc5-s2-u2-2-common",
+    "soc5-s2-u3-1-common",
+    "soc5-s2-u3-2-common",
+    "soc6-s2-u3-1-common",
+    "soc6-s2-u3-2-common"
+  ],
+  "scienceRecovery": {
+    "status": "SOURCE_ARCHIVES_VERIFIED_LOCAL_REMOTE_PENDING",
+    "approvalDate": "2026-11-21",
+    "archives": [
+      {
+        "id": "sci5-s2-heat-common",
+        "sha256": "a503459e875d4565e888ce40878d279e9b3513c76e95711ff6f806a610186947"
+      },
+      {
+        "id": "sci5-s2-u4-common",
+        "sha256": "7b711e6d2d29e77152b49958b9bfe22690e1b297a45edd3828cb56270b8b7fae"
+      }
+    ]
+  }
+}
