@@ -105,6 +105,8 @@ jobs:
           }
           assert.equal(published.packages.length,27);assert.equal(rebuilt.packages.length,27);assert.equal(failed,0);
           JS
+      - name: Exercise real catalog across isolated GAS RPCs and withdrawal
+        run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime
   renderer:
     needs: real-bank
     runs-on: ubuntu-latest
