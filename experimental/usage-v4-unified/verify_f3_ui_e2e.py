@@ -223,7 +223,7 @@ async def main():
                     await page.wait_for_function("!window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqBalloon').hidden",timeout=15000)
                     STEP['last']='solo-balloon-pointer'; print('UI_STEP',STEP['last'],flush=True)
                     for attempt in range(5):
-                        point=await page.evaluate("""()=>{const e=document.getElementById('hqBalloon'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;return {x,y,hit:document.elementFromPoint(x,y)===e}}""")
+                        point=await page.evaluate("""()=>{const e=document.getElementById('hqBalloon'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;const top=document.elementFromPoint(x,y);return {x,y,hit:!!top&&e.contains(top),target:top?.tagName,targetId:top?.id,button:top?.closest('button')?.id,overlayHidden:document.getElementById('hqOverlay').hidden}}""")
                         print('SOLO_BALLOON_HIT',json.dumps(point),flush=True)
                         if point['hit']: await page.mouse.click(point['x'],point['y'])
                         try:
