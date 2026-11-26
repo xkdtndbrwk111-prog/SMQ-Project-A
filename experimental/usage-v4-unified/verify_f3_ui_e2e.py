@@ -86,6 +86,42 @@ async def approved_iframe(page, want_min=2):
        choiceText:[...d.querySelectorAll('#hqChoices .hqChoiceLabel')].map(x=>x.innerText.trim())}}""")
 
 GH_HITS = []
+async def arm_solo_verdict_observer(page):
+    # The verdict is transient (1100ms). Arm BEFORE real input, rather than
+    # starting a locator after Playwright has returned and the timer may expire.
+    await page.evaluate("""()=>{window.__soloVerdicts=[];window.__soloVerdictObserver?.disconnect();
+      const overlay=document.getElementById('hqOverlay'),seen=new WeakSet();
+      const observe=()=>{const e=overlay.querySelector('#hojaSoloJudgment');
+        if(!e||seen.has(e))return;
+        const r=e.getBoundingClientRect(),style=getComputedStyle(e),mark=e.firstElementChild,
+          mr=mark?.getBoundingClientRect(),state=window.HOJA_GAMEPLAY.state;
+        const visible=!overlay.hidden&&r.width>0&&r.height>0&&mr?.width>0&&mr?.height>0&&
+          style.visibility==='visible'&&style.display!=='none'&&Number(style.opacity)>0;
+        if(!visible)return;
+        seen.add(e);
+        const row={answered:state.answered,correct:state.correct,text:e.innerText,visible:!!visible,t:performance.now(),frameVisible:false};
+        window.__soloVerdicts.push(row);
+        requestAnimationFrame(()=>{row.frameVisible=e.isConnected&&!overlay.hidden&&e.getBoundingClientRect().width>0;});
+      };
+      window.__soloVerdictObserver=new MutationObserver(observe);
+      window.__soloVerdictObserver.observe(overlay,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','style']});
+    }""")
+
+
+async def expect_solo_verdict(page, answered, previous_correct):
+    await page.wait_for_function("""n=>window.HOJA_GAMEPLAY.state.answered===n&&
+      window.__soloVerdicts.some(v=>v.answered===n&&v.visible)""", arg=answered, timeout=15000)
+    rows = await page.evaluate("window.__soloVerdicts")
+    hits = [v for v in rows if v['answered'] == answered]
+    assert len(hits) == 1, ('SOLO_VERDICT_COUNT', rows)
+    v = hits[0]
+    assert v['correct'] - previous_correct in (0, 1), ('SOLO_SCORE_DELTA', v, previous_correct)
+    expected = '정답' if v['correct'] > previous_correct else '오답'
+    assert expected in v['text'], ('SOLO_VERDICT_SCORE_MISMATCH', v, expected)
+    print('SOLO_VISIBLE_VERDICT', json.dumps(v, ensure_ascii=False), flush=True)
+    return v
+
+
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
@@ -154,6 +190,7 @@ async def main():
                       .querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice)""")
                     key = 'O' if kinds == ['true', 'false'] else '1'
                     STEP['last'] = 'solo-answer key=' + key + ' choices=' + ','.join(kinds)
+                    await arm_solo_verdict_observer(page)
                     # real player input: click the first shown choice button inside the approved renderer
                     # Preserve real pointer input; do not force or synthesize an answer.
                     try:
@@ -178,27 +215,28 @@ async def main():
                         st = await page.evaluate("JSON.stringify(window.HOJA_GAMEPLAY.state)")
                         STEP['last'] += ' state=' + st[:200]
                         raise
-                    verdict = await page.locator('#hojaSoloJudgment').inner_text(timeout=2000)
-                    assert ('정답' in verdict) or ('오답' in verdict), ('VERDICT', verdict)
+                    STEP['last']='solo-first-verdict'
+                    first_verdict = await expect_solo_verdict(page, 1, 0)
+                    verdict = first_verdict['text']
                     # A second question must open by an actual pointer click on the balloon.
                     # Hit-test first, then use the real mouse instead of force-clicking a moving node.
-                    await page.wait_for_function("!window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqBalloon').hidden",timeout=5000)
+                    await page.wait_for_function("!window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqBalloon').hidden",timeout=15000)
                     STEP['last']='solo-balloon-pointer'; print('UI_STEP',STEP['last'],flush=True)
                     for attempt in range(5):
                         point=await page.evaluate("""()=>{const e=document.getElementById('hqBalloon'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;return {x,y,hit:document.elementFromPoint(x,y)===e}}""")
                         print('SOLO_BALLOON_HIT',json.dumps(point),flush=True)
                         if point['hit']: await page.mouse.click(point['x'],point['y'])
                         try:
-                            await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=1500)
+                            await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=5000)
                             break
                         except Exception:
                             if attempt==4: raise
                     await approved_iframe(page)
                     choices=page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice')
                     first=await choices.first.get_attribute('data-choice')
+                    STEP['last']='solo-keyboard-answer'
                     await page.keyboard.press('O' if first=='true' else '1')
-                    await page.wait_for_function("window.HOJA_GAMEPLAY.state.answered===2",timeout=10000)
-                    await page.locator('#hojaSoloJudgment').wait_for(state='visible',timeout=2000)
+                    await expect_solo_verdict(page, 2, first_verdict['correct'])
                     print('SOLO_POINTER_AND_KEYBOARD_PASS',flush=True)
                 else:
                     await mode(page, '함께 놀기', '2')
