@@ -222,7 +222,10 @@ function fromUrl(){
   if(c.length===6)join(c);else if(loc&&loc.parameter&&loc.parameter.join)askCode(ERR.HOJA15_JOIN_CODE_INVALID);else offerReconnect();
  });}catch(e){}
 }
-if(document.readyState==='complete')setTimeout(fromUrl,400);else window.addEventListener('load',()=>setTimeout(fromUrl,400),{once:true});
+// Join routing only requires the parsed game DOM and the GAS URL bridge,
+// not every image/audio/iframe finishing loading. Start once at DOM readiness.
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(fromUrl,400),{once:true});
+else setTimeout(fromUrl,400);
 window.HOJA15_JOIN={menu,issue,join,askCode,close,get view(){return state.view;}};
 })();
 </script>

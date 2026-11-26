@@ -140,7 +140,23 @@ async def main():
                     key = 'O' if kinds == ['true', 'false'] else '1'
                     STEP['last'] = 'solo-answer key=' + key + ' choices=' + ','.join(kinds)
                     # real player input: click the first shown choice button inside the approved renderer
-                    await page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice').first.click(timeout=15000)
+                    # Preserve real pointer input; do not force or synthesize an answer.
+                    try:
+                        await page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice').first.click(timeout=15000)
+                    except Exception:
+                        try:
+                            diag = await asyncio.wait_for(page.evaluate("""()=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]'),d=f?.contentDocument,b=d?.querySelector('button.hqChoice');
+                              const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}};
+                              const st=e=>e?{display:getComputedStyle(e).display,visibility:getComputedStyle(e).visibility,pointer:getComputedStyle(e).pointerEvents}:null;
+                              const fr=rect(f),br=rect(b),el=fr&&br?document.elementFromPoint(fr.x+br.x+br.w/2,fr.y+br.y+br.h/2):null;
+                              const inner=br?d.elementFromPoint(br.x+br.w/2,br.y+br.h/2):null;
+                              return {frame:fr,frameStyle:st(f),button:br,buttonStyle:b?{display:d.defaultView.getComputedStyle(b).display,visibility:d.defaultView.getComputedStyle(b).visibility,pointer:d.defaultView.getComputedStyle(b).pointerEvents,disabled:b.disabled}:null,
+                                parentHit:el?.id||el?.className,innerHit:inner?.id||inner?.className,awaitingShow:f?.contentWindow?.HOJA_RENDERER_INPUT_GUARD?.awaitingShow,
+                                qid:b?.dataset.hojaQid,current:f?.contentWindow?.current?.()?.id,body:d?.body?.className,overlayHidden:document.getElementById('hqOverlay')?.hidden,joinView:window.HOJA15_JOIN?.view};}"""),timeout=5)
+                            print('SOLO_CLICK_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
+                        except Exception as de:
+                            print('SOLO_CLICK_DIAG_FAILED',repr(de),flush=True)
+                        raise
                     try:
                         await page.wait_for_function("window.HOJA_GAMEPLAY.state.answered===1", timeout=15000)
                     except Exception:
@@ -187,6 +203,6 @@ async def run():
             shot = sys.argv[sys.argv.index('--fail-shot') + 1]
             try: await STEP['page'].screenshot(path=shot)
             except Exception: pass
-        print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:300]); sys.exit(1)
+        print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:6000]); sys.exit(1)
 if __name__ == '__main__':
     asyncio.run(run())
