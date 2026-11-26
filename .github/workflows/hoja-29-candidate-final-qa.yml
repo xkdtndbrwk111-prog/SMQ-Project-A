@@ -5,6 +5,10 @@ on:
     paths:
       - '.github/workflows/hoja-29-candidate-final-qa.yml'
       - 'experimental/usage-v4-unified/assemble_hoja15_production.py'
+      - 'experimental/usage-v4-unified/verify_remote_browser_cache.py'
+      - 'experimental/usage-v4-unified/verify_f3_ui_e2e.py'
+      - 'experimental/usage-v4-unified/qa_mock_gas_server.mjs'
+      - 'experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs'
       - 'experimental/usage-v4-unified/gas/**'
   workflow_dispatch:
 permissions:
@@ -12,7 +16,7 @@ permissions:
 jobs:
   verify-and-assemble:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -93,6 +97,9 @@ jobs:
           trap 'kill "$SERVER" 2>/dev/null || true; cat "$RUNNER_TEMP/mock-server.log"; rm -rf "$B" "$RUNNER_TEMP/test-catalog.gs" "$RUNNER_TEMP/test-catalog.json"' EXIT
           for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
           grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
-          python3 "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790
-          python3 "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common
-          python3 "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common
+          echo CACHE_START
+          timeout --kill-after=15s 240s python3 -u "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790
+          echo GAME_UI_START
+          timeout --kill-after=15s 300s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common
+          echo QR_START
+          timeout --kill-after=15s 360s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common
