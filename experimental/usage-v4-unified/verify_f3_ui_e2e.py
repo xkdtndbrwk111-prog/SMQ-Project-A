@@ -138,11 +138,13 @@ async def main():
                     STEP['last']='solo-jump-key'; print('UI_STEP',STEP['last'],flush=True)
                     # A supported player input: Space triggers a real jump. Do not mistake the
                     # preloaded, hidden renderer's first question for the opened question.
+                    # Record real key delivery and frame timing, without changing game state.
+                    await page.evaluate("""()=>{window.__jumpTrace=[];const t0=performance.now(),push=(kind,e)=>{const p=document.getElementById('hqCharacter'),b=document.getElementById('hqBalloon'),pr=p?.getBoundingClientRect(),br=b?.getBoundingClientRect();window.__jumpTrace.push({kind,t:Math.round(performance.now()-t0),key:e?.code,defaultPrevented:e?.defaultPrevented,state:window.HOJA_GAMEPLAY.state,player:pr?[pr.x,pr.y,pr.width,pr.height]:null,balloon:br?[br.x,br.y,br.width,br.height]:null,transform:p?.style.transform})};window.addEventListener('keydown',e=>push('key',e),true);let n=0;const tick=()=>{push('raf');if(++n<180&&performance.now()-t0<6000)requestAnimationFrame(tick)};requestAnimationFrame(tick)}""")
                     await page.keyboard.press('Space')
                     try:
                         await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=5000)
                     except Exception:
-                        diag=await page.evaluate("""()=>{const r=id=>{const e=document.getElementById(id),b=e?.getBoundingClientRect();return b?{x:b.x,y:b.y,w:b.width,h:b.height,hidden:e.hidden}:null};return {state:window.HOJA_GAMEPLAY.state,balloon:r('hqBalloon'),stage:r('hqStage'),active:document.activeElement?.id}}""")
+                        diag=await page.evaluate("""()=>{const r=id=>{const e=document.getElementById(id),b=e?.getBoundingClientRect();return b?{x:b.x,y:b.y,w:b.width,h:b.height,hidden:e.hidden}:null};return {state:window.HOJA_GAMEPLAY.state,balloon:r('hqBalloon'),player:r('hqCharacter'),stage:r('hqStage'),active:document.activeElement?.id,trace:(window.__jumpTrace||[]).filter((x,i,a)=>x.kind==='key'||x.state.jumping||i<8||i===a.length-1).slice(0,60)}}""")
                         print('SOLO_JUMP_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
                         raise
                     shown = await approved_iframe(page)
