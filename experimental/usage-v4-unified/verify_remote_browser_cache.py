@@ -75,11 +75,14 @@ async def main():
         # retrieval then fills it. All units must survive an actual page reload.
         assert await get(rows)==899
         before=len(downloads);beforeRelay=len(relay)
+        first=await page.evaluate('window.HOJA_APPROVED_PACKAGE_CACHE.diagnose()')
+        print('CACHE_BEFORE_RELOAD',json.dumps(first,ensure_ascii=False),flush=True)
         rows=await load()
         print('BROWSER_RELOAD_LIST_PASS',flush=True)
         assert await get(rows)==899
-        assert len(downloads)==before and len(relay)==beforeRelay
         diag=await page.evaluate('window.HOJA_APPROVED_PACKAGE_CACHE.diagnose()')
+        print('CACHE_AFTER_RELOAD',json.dumps(diag,ensure_ascii=False),flush=True)
+        assert len(downloads)==before and len(relay)==beforeRelay,{'redownloaded':downloads[before:],'relayCount':len(relay)-beforeRelay,'beforeState':first['idbState'],'afterState':diag['idbState']}
         assert diag['idb']=='OK' and len(diag['units'])==29 and diag['usedBytes']<=10485760,diag
         assert not errors,errors
         print('REMOTE_BROWSER_CACHE_PASS 29/899 direct, pinned relay, reload cache; bytes='+str(diag['usedBytes']),flush=True)
