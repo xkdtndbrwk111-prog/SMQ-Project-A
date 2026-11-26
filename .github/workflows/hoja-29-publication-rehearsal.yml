@@ -1,0 +1,91 @@
+name: HOJA full 29-unit publication rehearsal
+on:
+  push:
+    branches: [work/hoja15-remote-catalog-20261126]
+    paths:
+      - '.github/workflows/hoja-29-publication-rehearsal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rehearsal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 28e274cc307224f606617356c4821f28d42547b3
+          path: qbank
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: f05e796ef13d76418c2bffa3aba0aa7281939ff6
+          path: verifier
+          persist-credentials: false
+      - name: Verify all gates on local-only temporary catalog publication
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified/approved-catalog
+          git -C qbank config user.name 'Isolated publication rehearsal'
+          git -C qbank config user.email 'test@example.invalid'
+          BASE="$(git -C qbank rev-parse HEAD)"
+          git -C qbank remote remove origin
+          export BASE P
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const dir=process.env.RUNNER_TEMP, p=process.env.P;
+          const pending=JSON.parse(fs.readFileSync(p+'/deployment/hoja15-remote-29-20261126-pending.json'));
+          assert.equal(pending.entries.length,29);
+          // Temporary synthetic grants are local test fixtures ONLY.
+          // Never copy them into source control, production GAS or a publication PR.
+          const fixture=structuredClone(pending);
+          fixture.deploymentId='HOJA15-LOCAL-DRYRUN-29';
+          for(const e of fixture.entries)Object.assign(e,{teacherDeploymentApproval:'APPROVED',rendererGate:'PASS',questionValidationGate:'PASS',mediaRightsAcknowledged:true});
+          const write=(name,data)=>fs.writeFileSync(dir+'/'+name+'.json',JSON.stringify(data));
+          write('local-fixture',fixture);
+          const missing=structuredClone(fixture);missing.entries.pop();write('missing',missing);
+          const rights=structuredClone(fixture);rights.entries.find(e=>e.cartridgeId==='sci5-s2-heat-common').mediaRightsAcknowledged=false;write('rights-hold',rights);
+          const digest=structuredClone(fixture);digest.entries.find(e=>e.cartridgeId==='sci5-s2-u4-common').effectiveSha256='0'.repeat(64);write('wrong-digest',digest);
+          const unapproved=structuredClone(fixture);unapproved.entries[0].teacherDeploymentApproval='PENDING';write('unapproved',unapproved);
+          const pendingRenamed=structuredClone(pending);pendingRenamed.deploymentId=fixture.deploymentId;write('pending-renamed',pendingRenamed);
+          JS
+          # Rebuild source and runtime and verify inventory before attempting release.
+          git -C qbank worktree add --detach "$RUNNER_TEMP/source" 43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c
+          node "$P/build_approved_index.mjs" --qbank "$RUNNER_TEMP/source"
+          node "$P/build_content_packages.mjs" --qbank "$RUNNER_TEMP/source" --packages-out "$RUNNER_TEMP/rebuilt"
+          INDEX="$P/generated/approved-source-index.json"
+          node "$P/verify_required_approved_inventory.mjs" "$INDEX" "$RUNNER_TEMP/local-fixture.json"
+          if node "$P/verify_required_approved_inventory.mjs" "$INDEX" "$RUNNER_TEMP/missing.json"; then echo 'Missing unit accepted'; exit 1; fi
+          for bad in rights-hold wrong-digest unapproved pending-renamed; do
+            if bash "$P/publish_remote_catalog.sh" qbank "$RUNNER_TEMP/$bad.json" "$RUNNER_TEMP/reject-$bad" "$BASE"; then echo "Invalid release accepted: $bad"; exit 1; fi
+            test "$(git -C qbank rev-parse HEAD)" = "$BASE"
+            echo "NEGATIVE_GATE_PASS $bad"
+          done
+          bash "$P/publish_remote_catalog.sh" qbank "$RUNNER_TEMP/local-fixture.json" "$RUNNER_TEMP/proposal" "$BASE"
+          HEAD="$(git -C qbank rev-parse HEAD)"
+          test "$HEAD" != "$BASE"
+          V="$(realpath verifier/tools/verify_active_catalog_publication.py)"
+          (cd qbank && python3 "$V" "$BASE" "$HEAD")
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const p='qbank/game-runtime/active/v1/';
+          const cat=JSON.parse(fs.readFileSync(p+'catalog.json')),ptr=JSON.parse(fs.readFileSync(p+'current.json'));
+          assert.equal(cat.entries.length,29);assert.equal(cat.entries.reduce((s,e)=>s+e.questionCount,0),899);
+          assert.equal(ptr.generation,1);
+          JS
+          bash "$P/publish_remote_catalog.sh" qbank "$RUNNER_TEMP/local-fixture.json" "$RUNNER_TEMP/noop" "$HEAD"
+          test "$(git -C qbank rev-parse HEAD)" = "$HEAD"
+          node -e 'const f="qbank/game-runtime/active/v1/current.json",fs=require("fs"),j=JSON.parse(fs.readFileSync(f));j.catalogSha256="0".repeat(64);fs.writeFileSync(f,JSON.stringify(j))'
+          git -C qbank add game-runtime/active/v1/current.json
+          git -C qbank commit -m 'Deliberately corrupt pointer in local-only rehearsal'
+          BAD="$(git -C qbank rev-parse HEAD)"
+          if (cd qbank && python3 "$V" "$BASE" "$BAD"); then echo 'Corrupted pointer accepted'; exit 1; fi
+          test -z "$(git -C qbank remote)"
+          echo FULL_29_PUBLICATION_REHEARSAL_PASS
