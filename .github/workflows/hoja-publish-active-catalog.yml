@@ -1,0 +1,69 @@
+name: HOJA approved catalog publication
+# Only a final, explicitly approved manifest on trusted main can trigger publication.
+# This workflow is intentionally inert until the release manifest and protected
+# environment/token are configured. Never run it on untrusted PR code.
+on:
+  push:
+    branches: [main]
+    paths:
+      - experimental/usage-v4-unified/approved-catalog/deployment/hoja15-remote-release.json
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hoja-active-catalog-publisher
+  cancel-in-progress: false
+jobs:
+  propose:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment: hoja-catalog-publication
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build only from verified approved source and immutable package bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified/approved-catalog
+          test -f "$P/deployment/hoja15-remote-release.json"
+          git clone --branch main https://github.com/xkdtndbrwk111-prog/HOJA-QUESTION-BANK.git "$RUNNER_TEMP/qbank"
+          git -C "$RUNNER_TEMP/qbank" config user.name 'HOJA catalog publisher'
+          git -C "$RUNNER_TEMP/qbank" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          BASE="$(git -C "$RUNNER_TEMP/qbank" rev-parse HEAD)"
+          echo "BASE=$BASE" >> "$GITHUB_ENV"
+          bash "$P/publish_remote_catalog.sh" "$RUNNER_TEMP/qbank" "$P/deployment/hoja15-remote-release.json" "$RUNNER_TEMP/proposal" "$BASE"
+      - name: Open protected release PR (no direct main writes)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.HOJA_QBANK_PUBLISH_TOKEN }}
+          ENABLE_AUTO_MERGE: ${{ vars.HOJA_QBANK_AUTO_MERGE }}
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/qbank"
+          HEAD="$(git rev-parse HEAD)"
+          if [[ "$HEAD" == "$BASE" ]]; then echo 'No change'; exit 0; fi
+          test -n "$GH_TOKEN" || { echo 'Publication credential not configured'; exit 1; }
+          REPO=xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          # The pointer references an intermediate immutable Git commit; squash/rebase
+          # would discard its ancestry. Require merge-commit-only repository policy.
+          test "$(gh api "repos/$REPO/branches/main" --jq .protected)" = true
+          test "$(gh api "repos/$REPO" --jq '.allow_merge_commit and (.allow_squash_merge|not) and (.allow_rebase_merge|not)')" = true
+          test "$(gh api "repos/$REPO/branches/main" --jq .commit.sha)" = "$BASE"
+          gh auth setup-git
+          BRANCH="release/hoja-catalog-${HEAD:0:12}"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          PR="$(gh pr create --repo "$REPO" --base main --head "$BRANCH" --title "Publish verified HOJA active catalog" --body "Generated from explicit teacher deployment manifest, verified source and package pins. Preserve the immutable catalog commit via merge commit only. No GAS deployment.")"
+          echo "$PR"
+          # Optional one-time repository configuration. Only use merge commits
+          # and require an actual mandatory PR gate before enabling auto-merge.
+          if [[ "$ENABLE_AUTO_MERGE" == 1 ]]; then
+            CHECKS="$(gh api "repos/$REPO/branches/main/protection/required_status_checks" --jq '.contexts | length')"
+            [[ "$CHECKS" -gt 0 ]]
+            gh pr merge "$PR" --repo "$REPO" --auto --merge
+          fi
