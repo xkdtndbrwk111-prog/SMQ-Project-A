@@ -132,11 +132,20 @@ live.rpc=function(method,payload){
  if(method!=='LIST')return response;
  return Promise.resolve(response).then(rows=>{
   active.clear();
+  const ambiguous=new Set();
   if(Array.isArray(rows))for(const row of rows){
-   const unit=row&&row.pkg&&byId[String(row.pkg.id)];
-   if(unit&&typeof row.name==='string'&&row.name.endsWith('-'+unit.sourceTitle))
-    active.set(unit.sourceTitle,unit);
+   if(!row||!row.pkg||typeof row.name!=='string')continue;
+   const known=byId[String(row.pkg.id)];
+   const d=row.display;
+   const unit=known&&row.name.endsWith('-'+known.sourceTitle)?known:d;
+   if(!unit||typeof unit.sourceTitle!=='string'||typeof unit.title!=='string'||
+     !/^\d{1,2}(?:-\d{1,2})?$/.test(String(unit.number))||
+     !row.name.endsWith('-'+unit.sourceTitle))continue;
+   const prev=active.get(unit.sourceTitle);
+   if(prev&&(prev.number!==unit.number||prev.title!==unit.title))ambiguous.add(unit.sourceTitle);
+   else active.set(unit.sourceTitle,unit);
   }
+  for(const title of ambiguous)active.delete(title);
   return rows; // unchanged identity and package descriptors
  });
 };
@@ -193,6 +202,6 @@ function initialize(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
 else initialize();
-window.HOJA15_APPROVED_DISPLAY=Object.freeze({version:1,expectedUnits:23,get activeUnits(){return active.size}});
+window.HOJA15_APPROVED_DISPLAY=Object.freeze({version:2,get expectedUnits(){return active.size},get activeUnits(){return active.size}});
 })();
 </script>
