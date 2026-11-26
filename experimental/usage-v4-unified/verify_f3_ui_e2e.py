@@ -76,8 +76,10 @@ async def mode(page, *labels):
         await b.wait_for(state='visible', timeout=20000); await b.click(); await page.wait_for_timeout(1200)
 
 async def approved_iframe(page, want_min=2):
-    await page.wait_for_function("""(n)=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]');
-      return f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=n}""", arg=want_min, timeout=30000)
+    await page.wait_for_function("""(n)=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]'),d=f?.contentDocument;
+      return !!f&&!!d&&!document.getElementById('hqOverlay').hidden&&f.getBoundingClientRect().width>0&&
+        getComputedStyle(f).visibility==='visible'&&!d.body.classList.contains('hojaAwaitShow')&&
+        d.querySelectorAll('#hqChoices button.hqChoice').length>=n}""", arg=want_min, timeout=30000)
     return await page.evaluate("""()=>{const d=document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument;
       return {q:(d.getElementById('hqQuestion')?.innerText||'').trim(),n:d.querySelectorAll('#hqChoices button.hqChoice').length,
        imgs:[...d.querySelectorAll('#hqMedia img, #hqChoices img')].filter(i=>i.complete&&i.naturalWidth>0).length,
@@ -132,8 +134,17 @@ async def main():
                     await direct.wait_for(state='visible',timeout=15000)
                     STEP['last']='solo-direct'; print('UI_STEP',STEP['last'],flush=True)
                     await direct.click(timeout=15000)
-                    await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.answered===0", timeout=30000)
-                    await page.locator('#hqBalloon').click(force=True, timeout=20000)  # the balloon floats (never 'stable'); a player clicks it in motion
+                    await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.page==='quiz'&&!document.getElementById('hojaGamePlay').hidden&&window.HOJA_GAMEPLAY.state.answered===0", timeout=30000)
+                    STEP['last']='solo-jump-key'; print('UI_STEP',STEP['last'],flush=True)
+                    # A supported player input: Space triggers a real jump. Do not mistake the
+                    # preloaded, hidden renderer's first question for the opened question.
+                    await page.keyboard.press('Space')
+                    try:
+                        await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=5000)
+                    except Exception:
+                        diag=await page.evaluate("""()=>{const r=id=>{const e=document.getElementById(id),b=e?.getBoundingClientRect();return b?{x:b.x,y:b.y,w:b.width,h:b.height,hidden:e.hidden}:null};return {state:window.HOJA_GAMEPLAY.state,balloon:r('hqBalloon'),stage:r('hqStage'),active:document.activeElement?.id}}""")
+                        print('SOLO_JUMP_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
+                        raise
                     shown = await approved_iframe(page)
                     kinds = await page.evaluate("""()=>[...document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument
                       .querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice)""")
@@ -163,8 +174,28 @@ async def main():
                         st = await page.evaluate("JSON.stringify(window.HOJA_GAMEPLAY.state)")
                         STEP['last'] += ' state=' + st[:200]
                         raise
-                    verdict = await page.locator('#hojaSoloJudgment').inner_text()
+                    verdict = await page.locator('#hojaSoloJudgment').inner_text(timeout=2000)
                     assert ('정답' in verdict) or ('오답' in verdict), ('VERDICT', verdict)
+                    # A second question must open by an actual pointer click on the balloon.
+                    # Hit-test first, then use the real mouse instead of force-clicking a moving node.
+                    await page.wait_for_function("!window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqBalloon').hidden",timeout=5000)
+                    STEP['last']='solo-balloon-pointer'; print('UI_STEP',STEP['last'],flush=True)
+                    for attempt in range(5):
+                        point=await page.evaluate("""()=>{const e=document.getElementById('hqBalloon'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;return {x,y,hit:document.elementFromPoint(x,y)===e}}""")
+                        print('SOLO_BALLOON_HIT',json.dumps(point),flush=True)
+                        if point['hit']: await page.mouse.click(point['x'],point['y'])
+                        try:
+                            await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=1500)
+                            break
+                        except Exception:
+                            if attempt==4: raise
+                    await approved_iframe(page)
+                    choices=page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice')
+                    first=await choices.first.get_attribute('data-choice')
+                    await page.keyboard.press('O' if first=='true' else '1')
+                    await page.wait_for_function("window.HOJA_GAMEPLAY.state.answered===2",timeout=10000)
+                    await page.locator('#hojaSoloJudgment').wait_for(state='visible',timeout=2000)
+                    print('SOLO_POINTER_AND_KEYBOARD_PASS',flush=True)
                 else:
                     await mode(page, '함께 놀기', '2')
                     await page.wait_for_timeout(2800)
