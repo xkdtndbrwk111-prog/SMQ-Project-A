@@ -164,6 +164,12 @@ jobs:
           fetch-depth: 0
           path: publication-qbank
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 5ba3183cc1bff0805d28b39a7bf5254396f2eed3
+          path: publication-verifier
+          persist-credentials: false
       - name: Test publication transaction in local clone; reject unfinished approvals
         run: |
           set -euo pipefail
@@ -200,4 +206,15 @@ jobs:
           # Second identical build must not bump generation or create a commit.
           bash "$P/publish_remote_catalog.sh" publication-qbank "$RUNNER_TEMP/prior.json" "$RUNNER_TEMP/noop" "$HEAD"
           test "$(git -C publication-qbank rev-parse HEAD)" = "$HEAD"
+          # Independently check the exact same proposal with the public gate.
+          VERIFIER="$(realpath publication-verifier/tools/verify_active_catalog_publication.py)"
+          (cd publication-qbank && python3 "$VERIFIER" "$BASE" "$HEAD")
+          # Reject a pointer whose declared digest no longer matches.
+          node -e 'const f="publication-qbank/game-runtime/active/v1/current.json",fs=require("fs"),j=JSON.parse(fs.readFileSync(f));j.catalogSha256="0".repeat(64);fs.writeFileSync(f,JSON.stringify(j))'
+          git -C publication-qbank add game-runtime/active/v1/current.json
+          git -C publication-qbank commit -m "Deliberately corrupt pointer for negative test"
+          BAD="$(git -C publication-qbank rev-parse HEAD)"
+          if (cd publication-qbank && python3 "$VERIFIER" "$BASE" "$BAD"); then
+            echo 'Public gate accepted corrupt pointer'; exit 1
+          fi
           echo PUBLICATION_LOCAL_DRY_RUN_PASS
