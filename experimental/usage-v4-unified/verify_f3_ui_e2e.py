@@ -55,12 +55,12 @@ async def pick_unit(page, name):
     if pub: await click_card(page, pub)
     # exact full approved label (several titles share long prefixes)
     STEP['last'] = 'unit:' + label
-    idx = await page.evaluate("""(label)=>[...document.querySelectorAll('#hojaCatalog button.hcPak')]
-      .findIndex(b=>{const want=[label];
+    idx = await page.evaluate("""async(label)=>{const rows=await window.HOJA_B_LIVE.rpc('LIST');const row=rows.find(r=>r.name.endsWith('-'+label));const dynamic=row?.display;return [...document.querySelectorAll('#hojaCatalog button.hcPak')]
+      .findIndex(b=>{const want=[label];if(dynamic)want.push(dynamic.number+'. '+dynamic.title);
         // HOJA 1.5 display-only layer renames approved cards to '<number>. <short title>' (identity unchanged)
         const d=document.getElementById('hoja15-approved-cartridge-display-v1')?.textContent||'';
         for(const m of d.matchAll(/"sourceTitle":\s*"([^"]+)",\s*"number":\s*"([^"]+)",\s*"title":\s*"([^"]+)"/g))if(m[1]===label)want.push(m[2]+'. '+m[3]);
-        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})""", label)
+        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})}""", label)
     assert idx >= 0, ('UNIT_CARD_NOT_FOUND', label)
     await page.locator('#hojaCatalog button.hcPak').nth(idx).click()
     await page.wait_for_function("!document.getElementById('hojaNextMode').hidden", timeout=60000)
@@ -118,6 +118,8 @@ async def main():
                 await pick_unit(page, names[uid])
                 if flow == 'SOLO':
                     await mode(page, '혼자 놀기', '문제 풀이 모드')
+                    direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
+                    if await direct.count(): await direct.click()
                     await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.answered===0", timeout=30000)
                     await page.locator('#hqBalloon').click(force=True, timeout=20000)  # the balloon floats (never 'stable'); a player clicks it in motion
                     shown = await approved_iframe(page)
