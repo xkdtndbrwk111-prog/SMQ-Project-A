@@ -137,7 +137,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
-          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          ref: 8d809453fc9470aefa74c4ad9f7357574f918e5c
           path: qbank-runtime
           persist-credentials: false
       - name: Build audited release game (no actual deployment)
@@ -156,14 +156,14 @@ jobs:
             const b=fs.readFileSync(path.join(root,e.path));assert.equal(crypto.createHash('sha256').update(b).digest('hex'),e.sha256);
             const d=JSON.parse(b);return {id:e.cartridgeId,payload:{questions:d.questions.map(q=>q.rendererQuestion),originalQuestions:d.questions.map(q=>q.originalQuestion),images:d.images,tags:d.tags,unitMeta:d.unitMeta}};
           });
-          assert.equal(units.length,27);assert.equal(units.reduce((s,u)=>s+u.payload.questions.length,0),835);
+          assert.equal(units.length,29);assert.equal(units.reduce((s,u)=>s+u.payload.questions.length,0),899);
           fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'payloads.json'),JSON.stringify(units));
           JS
       - name: Install headless Chromium
         run: |
           python -m pip install playwright
           python -m playwright install --with-deps chromium
-      - name: Render all 835 questions at four viewports
+      - name: Render all 899 questions at four viewports
         run: python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html"
   publication-dry-run:
     needs: real-bank

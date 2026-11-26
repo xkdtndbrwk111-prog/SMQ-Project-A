@@ -29,3 +29,6 @@ A rollback is a newly verified release with a higher generation, not a lower poi
 - Durable head-only refresh, corrupt-slot repair and quota-failure fallback regression PASS (45774436911 mock).
 - Actual Chromium 29/899 cache PASS (45776472795): all 29 entries retained after reload; 0 new downloads, relay calls, IDB errors, timeouts; 7,120,666 bytes. The subsequent UI stage timed out, so full browser certification remains pending. Independent solo/team/QR stages run 45777465979. Branch protection and live GAS remain unverified.
 - Actual online GAS installation and live publication NOT done.
+
+- 24c5803: current 29/899 pinned runtime bytes, isolated assembly and RPC, cache, actual SOLO Space jump and mouse answer with visible correct verdict, real balloon descendant pointer hit, second keyboard answer with visible wrong verdict, score and usage, TEAM and QR E2E all PASS (45829732431). Sweep 8/8 PASS. Both verdicts frame-visible. Remote candidate workflow 45829732243 PASS, but its renderer job covered older 27/835 runtime; corrected renderer workflow to pin exact 8d80945 and require 29/899. This is not live GAS or release authorization.
+- Earlier 899 renderer PASS (45772681662) used a different runtime checkout; exact current runtime four-viewport rerun required before final gate.
