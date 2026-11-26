@@ -2,7 +2,7 @@
   "schemaVersion": "hoja-approved-deployment-v1",
   "deploymentId": "HOJA15-REMOTE-29-20261126-PENDING",
   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
-  "note": "Candidate only. All 29 approved source packages rebuilt and 899x4 renderer smoke PASS (45772681662); immutable runtime and GAS mock integration/assembly PASS (45773372635). Not final operational approval. Preserve existing rights holds and independent source verification requirements; science content approval 2026-11-21 does not grant deployment or rights clearance. Browser and live GAS gates remain.",
+  "note": "Candidate only. Teacher confirmed content review and operational deployment approval for four Korean and two science units on 2026-11-26. Immutable source/package pins and 29/899 technical CI evidence remain. The six separate questionValidationGate values below are pending; public redistribution rights remain unverified and mediaRightsAcknowledged stays false. Browser CI passed, but live isolated GAS and credential smoke remain.",
   "entries": [
     {
       "cartridgeId": "eng5-ham-u10",
@@ -249,8 +249,8 @@
     },
     {
       "cartridgeId": "sci5-s2-heat-common",
-      "teacherDeploymentApproval": "PENDING",
-      "approvedOn": "2026-11-21",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-26",
       "effectiveSha256": "84a430dbd68b6dd5513697e32775a7026ea922461bacd0a4f5d141a9b7e408f8",
       "rendererGate": "PASS",
       "questionValidationGate": "PENDING_FINAL_RELEASE",
@@ -258,8 +258,8 @@
     },
     {
       "cartridgeId": "sci5-s2-u4-common",
-      "teacherDeploymentApproval": "PENDING",
-      "approvedOn": "2026-11-21",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-26",
       "effectiveSha256": "0195d07956baeada3b07c5f7a037f74bf407e4c4f5862f9281b25e3d0418c9a8",
       "rendererGate": "PASS",
       "questionValidationGate": "PENDING_FINAL_RELEASE",
