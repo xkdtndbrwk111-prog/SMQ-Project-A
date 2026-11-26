@@ -35,6 +35,7 @@ def parse_name(name):
 STEP = {'page': None, 'last': ''}
 async def click_card(page, text):
     STEP['last'] = 'card:' + text
+    print('UI_STEP',STEP['last'],flush=True)
     btn = page.locator('#hojaCatalog button.hcPak', has_text=text).first
     await btn.wait_for(state='visible', timeout=20000)
     await btn.click()
@@ -55,12 +56,13 @@ async def pick_unit(page, name):
     if pub: await click_card(page, pub)
     # exact full approved label (several titles share long prefixes)
     STEP['last'] = 'unit:' + label
-    idx = await page.evaluate("""async(label)=>{const rows=await window.HOJA_B_LIVE.rpc('LIST');const row=rows.find(r=>r.name.endsWith('-'+label));const dynamic=row?.display;return [...document.querySelectorAll('#hojaCatalog button.hcPak')]
+    print('UI_STEP',STEP['last'],flush=True)
+    idx = await asyncio.wait_for(page.evaluate("""async(label)=>{const rows=await window.HOJA_B_LIVE.rpc('LIST');const row=rows.find(r=>r.name.endsWith('-'+label));const dynamic=row?.display;return [...document.querySelectorAll('#hojaCatalog button.hcPak')]
       .findIndex(b=>{const want=[label];if(dynamic)want.push(dynamic.number+'. '+dynamic.title);
         // HOJA 1.5 display-only layer renames approved cards to '<number>. <short title>' (identity unchanged)
         const d=document.getElementById('hoja15-approved-cartridge-display-v1')?.textContent||'';
         for(const m of d.matchAll(/"sourceTitle":\s*"([^"]+)",\s*"number":\s*"([^"]+)",\s*"title":\s*"([^"]+)"/g))if(m[1]===label)want.push(m[2]+'. '+m[3]);
-        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})}""", label)
+        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})}""", label),timeout=30)
     assert idx >= 0, ('UNIT_CARD_NOT_FOUND', label)
     await page.locator('#hojaCatalog button.hcPak').nth(idx).click()
     await page.wait_for_function("!document.getElementById('hojaNextMode').hidden", timeout=60000)
@@ -69,6 +71,7 @@ async def pick_unit(page, name):
 
 async def mode(page, *labels):
     for t in labels:
+        STEP['last']='mode:'+t; print('UI_STEP',STEP['last'],flush=True)
         b = page.locator('#hmSelections button.hmPick', has_text=t).first
         await b.wait_for(state='visible', timeout=20000); await b.click(); await page.wait_for_timeout(1200)
 
@@ -85,15 +88,19 @@ async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
     ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8765); ap.add_argument('--units', required=True); ap.add_argument('--fail-shot')
+    ap.add_argument('--flow',choices=['SOLO','TEAM','BOTH'],default='BOTH')
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     phaser = Path(a.phaser).read_bytes()
+    print('UI_BACKEND_LIST_START',flush=True)
     names = {x['cartridgeId']: x['name'] for x in backend(a.port, '/rpc', {'fn': 'hojaListPublicCartridges', 'args': []})['v']}
     results = []
+    print('UI_CHROMIUM_START',flush=True)
     async with async_playwright() as pw:
-        b = await pw.chromium.launch(headless=True)
+        b = await pw.chromium.launch(headless=True,timeout=30000,args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
         for uid in a.units.split(','):
-            for flow in ('SOLO', 'TEAM'):
+            for flow in (('SOLO','TEAM') if a.flow=='BOTH' else (a.flow,)):
+                STEP['last']='start:'+uid+':'+flow; print('UI_STEP',STEP['last'],flush=True)
                 before = backend(a.port)
                 ctx = await b.new_context(viewport={'width': 1280, 'height': 800}); page = await ctx.new_page(); errs = []
                 page.on('pageerror', lambda e: errs.append(str(e)[:140])); page.on('dialog', lambda d: asyncio.ensure_future(d.dismiss()))
@@ -111,15 +118,20 @@ async def main():
                 STEP['page'] = page
                 # served from http://127.0.0.1 (a secure context, like the real https Apps Script page:
                 # crypto.randomUUID exists); the body is the exact bundle Game.html
-                await page.goto(f'http://127.0.0.1:{a.port}/game.html', wait_until='domcontentloaded', timeout=180000)
+                STEP['last']='page-goto'; print('UI_STEP',STEP['last'],flush=True)
+                await page.goto(f'http://127.0.0.1:{a.port}/game.html', wait_until='domcontentloaded', timeout=60000)
                 assert await page.evaluate('window.isSecureContext && typeof crypto.randomUUID === "function"')
                 await page.wait_for_timeout(5000)
-                await to_catalog(page)
-                await pick_unit(page, names[uid])
+                STEP['last']='catalog-open'; print('UI_STEP',STEP['last'],flush=True)
+                await asyncio.wait_for(to_catalog(page),timeout=45)
+                await asyncio.wait_for(pick_unit(page, names[uid]),timeout=90)
+                # Selected via actual catalog UI.
                 if flow == 'SOLO':
                     await mode(page, '혼자 놀기', '문제 풀이 모드')
                     direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
-                    if await direct.count(): await direct.click()
+                    await direct.wait_for(state='visible',timeout=15000)
+                    STEP['last']='solo-direct'; print('UI_STEP',STEP['last'],flush=True)
+                    await direct.click(timeout=15000)
                     await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.answered===0", timeout=30000)
                     await page.locator('#hqBalloon').click(force=True, timeout=20000)  # the balloon floats (never 'stable'); a player clicks it in motion
                     shown = await approved_iframe(page)
