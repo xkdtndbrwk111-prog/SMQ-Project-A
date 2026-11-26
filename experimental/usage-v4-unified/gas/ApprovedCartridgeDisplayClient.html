@@ -179,9 +179,13 @@ function patchNextSelected(){
  const el=document.getElementById('hcNextSelected');
  if(!el||!active.size)return;
  const prior=el.textContent;
- let next=prior;
- for(const [source,unit] of active)
-  if(next.includes(source))next=next.split(source).join(unit.number+'. '+unit.title);
+ // Match exact source labels in one pass. Substring replacement can re-match
+ // the newly prefixed title (especially when sourceTitle === title for a new
+ // catalog unit), recursively retriggering the MutationObserver forever.
+ const next=prior.split(' · ').map(label=>{
+  const unit=active.get(label);
+  return unit?unit.number+'. '+unit.title:label;
+ }).join(' · ');
  if(next!==prior)el.textContent=next;
 }
 function initialize(){
