@@ -1,0 +1,114 @@
+name: HOJA 29-unit candidate final QA
+on:
+  # Pathless PR trigger supplies a stable required check for every PR to main.
+  pull_request:
+    branches: [main]
+  push:
+    branches: [work/hoja15-remote-catalog-20261126]
+    paths:
+      - '.github/workflows/hoja-29-candidate-final-qa.yml'
+      - 'experimental/usage-v4-unified/assemble_hoja15_production.py'
+      - 'experimental/usage-v4-unified/verify_remote_browser_cache.py'
+      - 'experimental/usage-v4-unified/verify_f3_ui_e2e.py'
+      - 'experimental/usage-v4-unified/verify_hoja15_join_e2e.py'
+      - 'experimental/usage-v4-unified/qa_mock_gas_server.mjs'
+      - 'experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs'
+      - 'experimental/usage-v4-unified/gas/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-and-assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c
+          path: qbank-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 8d809453fc9470aefa74c4ad9f7357574f918e5c
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Rebuild and verify exact registered candidate runtime bytes
+        run: |
+          P=experimental/usage-v4-unified/approved-catalog
+          node "$P/build_approved_index.mjs" --qbank qbank-source
+          node "$P/build_content_packages.mjs" --qbank qbank-source --packages-out "$RUNNER_TEMP/rebuilt"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          import {qaPreviewCatalog} from './experimental/usage-v4-unified/approved-catalog/qa_preview.mjs';
+          import {verifyRemoteRelease} from './experimental/usage-v4-unified/approved-catalog/build_remote_active_catalog.mjs';
+          const p='experimental/usage-v4-unified/approved-catalog/',read=f=>JSON.parse(fs.readFileSync(f));
+          const idx=read(p+'generated/approved-source-index.json'),report=read(p+'generated/approved-content-report.json');
+          const d='game-runtime/approved-packages/v1/INDEX.json',published=read('qbank-runtime/'+d),rebuilt=read(process.env.RUNNER_TEMP+'/rebuilt/'+d);
+          assert.deepEqual(published,rebuilt);assert.equal(idx.approvalUnits,29);assert.equal(idx.approvalQuestions,899);
+          for(const e of published.packages){
+            const raw=fs.readFileSync('qbank-runtime/'+e.path);
+            assert.equal(raw.length,e.bytes);assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),e.sha256);
+            assert.deepEqual(raw,fs.readFileSync(process.env.RUNNER_TEMP+'/rebuilt/'+e.path));
+          }
+          console.log('REMOTE_RUNTIME_BYTES_PASS 29/899');
+          for(const e of idx.entries.filter(e=>e.subject==='science'))console.log('SCIENCE_SOURCE_PIN',JSON.stringify({cartridgeId:e.cartridgeId,effectiveSha256:e.effectiveSha256,unit:e.unit,questionCount:e.questionCount,mediaRights:e.mediaRights.status}));
+          const commit='8d809453fc9470aefa74c4ad9f7357574f918e5c';
+          const qa=qaPreviewCatalog(idx,report,{schemaVersion:'hoja-qa-preview-v1',purpose:'TEST_ONLY_QA_NOT_DEPLOYMENT',sourceCommit:idx.sourceCommit,select:'ALL_READY'},{allowedScriptIds:['MOCK_ISOLATED_TEST_SCRIPT_ID_0001'],contentSource:{repo:idx.sourceRepo,commit}});
+          // This deliberately uses a synthetic in-memory RELEASE shape to exercise
+          // the exact production assembler. No manifest or deployment is approved.
+          const {allowedScriptIds,...rest}=qa;
+          const active={...rest,buildType:'RELEASE',deploymentId:'HOJA15-ISOLATED-TEST_ONLY-NOT_FOR_DEPLOYMENT',entries:rest.entries.map(e=>({...e,deploymentStatus:'DEPLOYED'}))};
+          const cat=verifyRemoteRelease(active,report,published,commit,path=>{
+            const raw=fs.readFileSync('qbank-runtime/'+path);return {sha256:crypto.createHash('sha256').update(raw).digest('hex'),bytes:raw.length,data:JSON.parse(raw)};
+          });
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.json',JSON.stringify(cat));
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
+          JS
+      - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
+        run: |
+          P=experimental/usage-v4-unified
+          python3 "$P/assemble_hoja15_production.py" --catalog "$RUNNER_TEMP/test-catalog.gs" --packages qbank-runtime --out "$RUNNER_TEMP/test-bundle" --expected-units 29
+          # Keep test-only bundle inside this ephemeral CI job for browser tests.
+      - name: Run 29-unit catalog RPC integration on registered runtime
+        run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime 29 899
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install offline browser test dependencies
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/browser-deps" --ignore-scripts phaser@4.2.1 jsqr@1.4.0
+      - name: Actual game browser cache, solo/team and teacher/student QR
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified
+          B="$RUNNER_TEMP/test-bundle"
+          D="$RUNNER_TEMP/browser-deps/node_modules"
+          # The mock server loads only .gs files; use original source defaults
+          # plus the reader's strictly test-only fixture, not production data.
+          mkdir "$RUNNER_TEMP/mock-extra"
+          export HOJA_REMOTE_TEST_CATALOG="$RUNNER_TEMP/test-catalog.json"
+          export HOJA_JOIN_TEST_URL="https://script.google.com/macros/s/TEST_ONLY_LOCAL_QR_00000000000000/exec"
+          node "$P/qa_mock_gas_server.mjs" "$RUNNER_TEMP/mock-extra" 8790 qbank-runtime > "$RUNNER_TEMP/mock-server.log" 2>&1 &
+          SERVER=$!
+          trap 'kill "$SERVER" 2>/dev/null || true; cat "$RUNNER_TEMP/mock-server.log"; rm -rf "$B" "$RUNNER_TEMP/test-catalog.gs" "$RUNNER_TEMP/test-catalog.json"' EXIT
+          for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
+          grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
+          result=0
+          # Cache is already certified for a5f96db, but keep a regression run.
+          echo CACHE_START
+          timeout --kill-after=15s 240s python3 -u "$P/verify_remote_browser_cache.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo CACHE_FAILED; result=1; }
+          for flow in SOLO TEAM; do
+            echo "GAME_UI_START $flow"
+            timeout --kill-after=10s 150s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --flow "$flow" || { echo "GAME_UI_FAILED $flow"; result=1; }
+          done
+          echo QR_START
+          timeout --kill-after=15s 240s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common || { echo QR_FAILED; result=1; }
+          exit "$result"

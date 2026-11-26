@@ -10,7 +10,7 @@ Flow per selected unit, driven ONLY by visible UI clicks/keys:
 and the backend must show: usage rows A1 with the approved id, watermark == last row.
 Every check is an assert; any failure exits nonzero.
 Usage: verify_f3_ui_e2e.py --html <trial.html> --phaser <phaser.min.js> --port 8765 --units id1,id2,..."""
-import argparse, asyncio, json, re, sys, urllib.request
+import argparse, asyncio, json, re, subprocess, sys, urllib.request
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -35,6 +35,7 @@ def parse_name(name):
 STEP = {'page': None, 'last': ''}
 async def click_card(page, text):
     STEP['last'] = 'card:' + text
+    print('UI_STEP',STEP['last'],flush=True)
     btn = page.locator('#hojaCatalog button.hcPak', has_text=text).first
     await btn.wait_for(state='visible', timeout=20000)
     await btn.click()
@@ -55,12 +56,13 @@ async def pick_unit(page, name):
     if pub: await click_card(page, pub)
     # exact full approved label (several titles share long prefixes)
     STEP['last'] = 'unit:' + label
-    idx = await page.evaluate("""(label)=>[...document.querySelectorAll('#hojaCatalog button.hcPak')]
-      .findIndex(b=>{const want=[label];
+    print('UI_STEP',STEP['last'],flush=True)
+    idx = await asyncio.wait_for(page.evaluate("""async(label)=>{const rows=await window.HOJA_B_LIVE.rpc('LIST');const row=rows.find(r=>r.name.endsWith('-'+label));const dynamic=row?.display;return [...document.querySelectorAll('#hojaCatalog button.hcPak')]
+      .findIndex(b=>{const want=[label];if(dynamic)want.push(dynamic.number+'. '+dynamic.title);
         // HOJA 1.5 display-only layer renames approved cards to '<number>. <short title>' (identity unchanged)
         const d=document.getElementById('hoja15-approved-cartridge-display-v1')?.textContent||'';
         for(const m of d.matchAll(/"sourceTitle":\s*"([^"]+)",\s*"number":\s*"([^"]+)",\s*"title":\s*"([^"]+)"/g))if(m[1]===label)want.push(m[2]+'. '+m[3]);
-        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})""", label)
+        return [b.querySelector('.hcUnitName')?.dataset.fullLabel,b.title].some(t=>want.includes((t||'').trim()))})}""", label),timeout=30)
     assert idx >= 0, ('UNIT_CARD_NOT_FOUND', label)
     await page.locator('#hojaCatalog button.hcPak').nth(idx).click()
     await page.wait_for_function("!document.getElementById('hojaNextMode').hidden", timeout=60000)
@@ -69,31 +71,76 @@ async def pick_unit(page, name):
 
 async def mode(page, *labels):
     for t in labels:
+        STEP['last']='mode:'+t; print('UI_STEP',STEP['last'],flush=True)
         b = page.locator('#hmSelections button.hmPick', has_text=t).first
         await b.wait_for(state='visible', timeout=20000); await b.click(); await page.wait_for_timeout(1200)
 
 async def approved_iframe(page, want_min=2):
-    await page.wait_for_function("""(n)=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]');
-      return f?.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length>=n}""", arg=want_min, timeout=30000)
+    await page.wait_for_function("""(n)=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]'),d=f?.contentDocument;
+      return !!f&&!!d&&!document.getElementById('hqOverlay').hidden&&f.getBoundingClientRect().width>0&&
+        getComputedStyle(f).visibility==='visible'&&!d.body.classList.contains('hojaAwaitShow')&&
+        d.querySelectorAll('#hqChoices button.hqChoice').length>=n}""", arg=want_min, timeout=30000)
     return await page.evaluate("""()=>{const d=document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument;
       return {q:(d.getElementById('hqQuestion')?.innerText||'').trim(),n:d.querySelectorAll('#hqChoices button.hqChoice').length,
        imgs:[...d.querySelectorAll('#hqMedia img, #hqChoices img')].filter(i=>i.complete&&i.naturalWidth>0).length,
        choiceText:[...d.querySelectorAll('#hqChoices .hqChoiceLabel')].map(x=>x.innerText.trim())}}""")
 
 GH_HITS = []
+async def arm_solo_verdict_observer(page):
+    # The verdict is transient (1100ms). Arm BEFORE real input, rather than
+    # starting a locator after Playwright has returned and the timer may expire.
+    await page.evaluate("""()=>{window.__soloVerdicts=[];window.__soloVerdictObserver?.disconnect();
+      const overlay=document.getElementById('hqOverlay'),seen=new WeakSet();
+      const observe=()=>{const e=overlay.querySelector('#hojaSoloJudgment');
+        if(!e||seen.has(e))return;
+        const r=e.getBoundingClientRect(),style=getComputedStyle(e),mark=e.firstElementChild,
+          mr=mark?.getBoundingClientRect(),state=window.HOJA_GAMEPLAY.state;
+        const visible=!overlay.hidden&&r.width>0&&r.height>0&&mr?.width>0&&mr?.height>0&&
+          style.visibility==='visible'&&style.display!=='none'&&Number(style.opacity)>0;
+        if(!visible)return;
+        seen.add(e);
+        const row={answered:state.answered,correct:state.correct,text:e.innerText,visible:!!visible,t:performance.now(),frameVisible:false};
+        window.__soloVerdicts.push(row);
+        requestAnimationFrame(()=>{row.frameVisible=e.isConnected&&!overlay.hidden&&e.getBoundingClientRect().width>0;});
+      };
+      window.__soloVerdictObserver=new MutationObserver(observe);
+      window.__soloVerdictObserver.observe(overlay,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','style']});
+    }""")
+
+
+async def expect_solo_verdict(page, answered, previous_correct):
+    await page.wait_for_function("""n=>window.HOJA_GAMEPLAY.state.answered===n&&
+      window.__soloVerdicts.some(v=>v.answered===n&&v.visible)""", arg=answered, timeout=15000)
+    rows = await page.evaluate("window.__soloVerdicts")
+    hits = [v for v in rows if v['answered'] == answered]
+    assert len(hits) == 1, ('SOLO_VERDICT_COUNT', rows)
+    v = hits[0]
+    assert v['correct'] - previous_correct in (0, 1), ('SOLO_SCORE_DELTA', v, previous_correct)
+    expected = '정답' if v['correct'] > previous_correct else '오답'
+    assert expected in v['text'], ('SOLO_VERDICT_SCORE_MISMATCH', v, expected)
+    print('SOLO_VISIBLE_VERDICT', json.dumps(v, ensure_ascii=False), flush=True)
+    return v
+
+
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
     ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8765); ap.add_argument('--units', required=True); ap.add_argument('--fail-shot')
+    ap.add_argument('--flow',choices=['SOLO','TEAM','BOTH'],default='BOTH')
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
+    if a.flow in ('SOLO','BOTH') and 'const jumpHeight=t=>4*amplitude*t*(1-t)' in html:
+        subprocess.run(['node', str(Path(__file__).with_name('verify_solo_jump.mjs')), a.html], check=True, timeout=15)
     phaser = Path(a.phaser).read_bytes()
+    print('UI_BACKEND_LIST_START',flush=True)
     names = {x['cartridgeId']: x['name'] for x in backend(a.port, '/rpc', {'fn': 'hojaListPublicCartridges', 'args': []})['v']}
     results = []
+    print('UI_CHROMIUM_START',flush=True)
     async with async_playwright() as pw:
-        b = await pw.chromium.launch(headless=True)
+        b = await pw.chromium.launch(headless=True,timeout=30000,args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
         for uid in a.units.split(','):
-            for flow in ('SOLO', 'TEAM'):
+            for flow in (('SOLO','TEAM') if a.flow=='BOTH' else (a.flow,)):
+                STEP['last']='start:'+uid+':'+flow; print('UI_STEP',STEP['last'],flush=True)
                 before = backend(a.port)
                 ctx = await b.new_context(viewport={'width': 1280, 'height': 800}); page = await ctx.new_page(); errs = []
                 page.on('pageerror', lambda e: errs.append(str(e)[:140])); page.on('dialog', lambda d: asyncio.ensure_future(d.dismiss()))
@@ -111,30 +158,86 @@ async def main():
                 STEP['page'] = page
                 # served from http://127.0.0.1 (a secure context, like the real https Apps Script page:
                 # crypto.randomUUID exists); the body is the exact bundle Game.html
-                await page.goto(f'http://127.0.0.1:{a.port}/game.html', wait_until='domcontentloaded', timeout=180000)
+                STEP['last']='page-goto'; print('UI_STEP',STEP['last'],flush=True)
+                await page.goto(f'http://127.0.0.1:{a.port}/game.html', wait_until='domcontentloaded', timeout=60000)
                 assert await page.evaluate('window.isSecureContext && typeof crypto.randomUUID === "function"')
                 await page.wait_for_timeout(5000)
-                await to_catalog(page)
-                await pick_unit(page, names[uid])
+                STEP['last']='catalog-open'; print('UI_STEP',STEP['last'],flush=True)
+                await asyncio.wait_for(to_catalog(page),timeout=45)
+                await asyncio.wait_for(pick_unit(page, names[uid]),timeout=90)
+                # Selected via actual catalog UI.
                 if flow == 'SOLO':
                     await mode(page, '혼자 놀기', '문제 풀이 모드')
-                    await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.answered===0", timeout=30000)
-                    await page.locator('#hqBalloon').click(force=True, timeout=20000)  # the balloon floats (never 'stable'); a player clicks it in motion
+                    direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
+                    await direct.wait_for(state='visible',timeout=15000)
+                    STEP['last']='solo-direct'; print('UI_STEP',STEP['last'],flush=True)
+                    await direct.click(timeout=15000)
+                    await page.wait_for_function("window.HOJA_GAMEPLAY?.state?.page==='quiz'&&!document.getElementById('hojaGamePlay').hidden&&window.HOJA_GAMEPLAY.state.answered===0", timeout=30000)
+                    STEP['last']='solo-jump-key'; print('UI_STEP',STEP['last'],flush=True)
+                    # A supported player input: Space triggers a real jump. Do not mistake the
+                    # preloaded, hidden renderer's first question for the opened question.
+                    # Record real key delivery and frame timing, without changing game state.
+                    await page.evaluate("""()=>{window.__jumpTrace=[];const t0=performance.now(),push=(kind,e)=>{const p=document.getElementById('hqCharacter'),b=document.getElementById('hqBalloon'),pr=p?.getBoundingClientRect(),br=b?.getBoundingClientRect();window.__jumpTrace.push({kind,t:Math.round(performance.now()-t0),key:e?.code,defaultPrevented:e?.defaultPrevented,state:window.HOJA_GAMEPLAY.state,player:pr?[pr.x,pr.y,pr.width,pr.height]:null,balloon:br?[br.x,br.y,br.width,br.height]:null,transform:p?.style.transform})};window.addEventListener('keydown',e=>push('key',e),true);let n=0;const tick=()=>{push('raf');if(++n<180&&performance.now()-t0<6000)requestAnimationFrame(tick)};requestAnimationFrame(tick)}""")
+                    await page.keyboard.press('Space')
+                    try:
+                        await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=15000)
+                    except Exception:
+                        diag=await page.evaluate("""()=>{const r=id=>{const e=document.getElementById(id),b=e?.getBoundingClientRect();return b?{x:b.x,y:b.y,w:b.width,h:b.height,hidden:e.hidden}:null};return {state:window.HOJA_GAMEPLAY.state,balloon:r('hqBalloon'),player:r('hqCharacter'),stage:r('hqStage'),active:document.activeElement?.id,trace:(window.__jumpTrace||[]).filter((x,i,a)=>x.kind==='key'||x.state.jumping||i<8||i===a.length-1).slice(0,60)}}""")
+                        print('SOLO_JUMP_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
+                        raise
                     shown = await approved_iframe(page)
                     kinds = await page.evaluate("""()=>[...document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument
                       .querySelectorAll('#hqChoices button.hqChoice')].map(b=>b.dataset.choice)""")
                     key = 'O' if kinds == ['true', 'false'] else '1'
                     STEP['last'] = 'solo-answer key=' + key + ' choices=' + ','.join(kinds)
+                    await arm_solo_verdict_observer(page)
                     # real player input: click the first shown choice button inside the approved renderer
-                    await page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice').first.click(timeout=15000)
+                    # Preserve real pointer input; do not force or synthesize an answer.
+                    try:
+                        await page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice').first.click(timeout=15000)
+                    except Exception:
+                        try:
+                            diag = await asyncio.wait_for(page.evaluate("""()=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]'),d=f?.contentDocument,b=d?.querySelector('button.hqChoice');
+                              const rect=e=>{if(!e)return null;const r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}};
+                              const st=e=>e?{display:getComputedStyle(e).display,visibility:getComputedStyle(e).visibility,pointer:getComputedStyle(e).pointerEvents}:null;
+                              const fr=rect(f),br=rect(b),el=fr&&br?document.elementFromPoint(fr.x+br.x+br.w/2,fr.y+br.y+br.h/2):null;
+                              const inner=br?d.elementFromPoint(br.x+br.w/2,br.y+br.h/2):null;
+                              return {frame:fr,frameStyle:st(f),button:br,buttonStyle:b?{display:d.defaultView.getComputedStyle(b).display,visibility:d.defaultView.getComputedStyle(b).visibility,pointer:d.defaultView.getComputedStyle(b).pointerEvents,disabled:b.disabled}:null,
+                                parentHit:el?.id||el?.className,innerHit:inner?.id||inner?.className,awaitingShow:f?.contentWindow?.HOJA_RENDERER_INPUT_GUARD?.awaitingShow,
+                                qid:b?.dataset.hojaQid,current:f?.contentWindow?.current?.()?.id,body:d?.body?.className,overlayHidden:document.getElementById('hqOverlay')?.hidden,joinView:window.HOJA15_JOIN?.view};}"""),timeout=5)
+                            print('SOLO_CLICK_DIAG',json.dumps(diag,ensure_ascii=False),flush=True)
+                        except Exception as de:
+                            print('SOLO_CLICK_DIAG_FAILED',repr(de),flush=True)
+                        raise
                     try:
                         await page.wait_for_function("window.HOJA_GAMEPLAY.state.answered===1", timeout=15000)
                     except Exception:
                         st = await page.evaluate("JSON.stringify(window.HOJA_GAMEPLAY.state)")
                         STEP['last'] += ' state=' + st[:200]
                         raise
-                    verdict = await page.locator('#hojaSoloJudgment').inner_text()
-                    assert ('정답' in verdict) or ('오답' in verdict), ('VERDICT', verdict)
+                    STEP['last']='solo-first-verdict'
+                    first_verdict = await expect_solo_verdict(page, 1, 0)
+                    verdict = first_verdict['text']
+                    # A second question must open by an actual pointer click on the balloon.
+                    # Hit-test first, then use the real mouse instead of force-clicking a moving node.
+                    await page.wait_for_function("!window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqBalloon').hidden",timeout=15000)
+                    STEP['last']='solo-balloon-pointer'; print('UI_STEP',STEP['last'],flush=True)
+                    for attempt in range(5):
+                        point=await page.evaluate("""()=>{const e=document.getElementById('hqBalloon'),r=e.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;const top=document.elementFromPoint(x,y);return {x,y,hit:!!top&&e.contains(top),target:top?.tagName,targetId:top?.id,button:top?.closest('button')?.id,overlayHidden:document.getElementById('hqOverlay').hidden}}""")
+                        print('SOLO_BALLOON_HIT',json.dumps(point),flush=True)
+                        if point['hit']: await page.mouse.click(point['x'],point['y'])
+                        try:
+                            await page.wait_for_function("window.HOJA_GAMEPLAY.state.activeQuiz&&!document.getElementById('hqOverlay').hidden",timeout=5000)
+                            break
+                        except Exception:
+                            if attempt==4: raise
+                    await approved_iframe(page)
+                    choices=page.frame_locator('iframe[id^="hojaTeamApproved"]').locator('button.hqChoice')
+                    first=await choices.first.get_attribute('data-choice')
+                    STEP['last']='solo-keyboard-answer'
+                    await page.keyboard.press('O' if first=='true' else '1')
+                    await expect_solo_verdict(page, 2, first_verdict['correct'])
+                    print('SOLO_POINTER_AND_KEYBOARD_PASS',flush=True)
                 else:
                     await mode(page, '함께 놀기', '2')
                     await page.wait_for_timeout(2800)
@@ -173,6 +276,6 @@ async def run():
             shot = sys.argv[sys.argv.index('--fail-shot') + 1]
             try: await STEP['page'].screenshot(path=shot)
             except Exception: pass
-        print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:300]); sys.exit(1)
+        print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:6000]); sys.exit(1)
 if __name__ == '__main__':
     asyncio.run(run())

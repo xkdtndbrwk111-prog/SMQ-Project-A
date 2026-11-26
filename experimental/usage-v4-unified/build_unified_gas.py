@@ -192,6 +192,10 @@ def main():
     if a.game == 'approved-rc':
         if a.trial_game: raise SystemExit('USE_EITHER_GAME_OR_TRIAL_GAME')
         content, rc = approved_rc_game(sha)
+        # Keep the original audited RC SHA pinned; apply a single exact SOLO fix afterward.
+        from solo_jump_patch import apply, PATCH_SHA256
+        content = apply(content)
+        rc['soloJumpPatchSha256'] = PATCH_SHA256
     if a.trial_game:
         if a.variant != 'qa': raise SystemExit('TRIAL_GAME_ONLY_WITH_QA_VARIANT')
         content = Path(a.trial_game).read_bytes()

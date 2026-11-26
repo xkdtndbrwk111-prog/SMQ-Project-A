@@ -107,6 +107,8 @@ async def main():
         tsrc = await wait_game(t, 'quiz'); ok(tsrc == units, 'TEACHER_DIRECT_QUIZ_UNITS')
         tlabel = await t.inner_text('#hqModeLabel'); ok('문제 풀이' not in tlabel and re.match(r'^[0-9-]+\. ', tlabel) is not None, 'QUIZ_LABEL_UNIT ' + tlabel)   # 40-6CI
         out['teacherDirectQuiz'] = {'started': True, 'units': len(tsrc), 'headerLabel': tlabel}
+        print('QR_TEACHER_STAGE',json.dumps(out,ensure_ascii=False),flush=True)
+        await tctx.close()
         # ---------------- STUDENT 1: QR link (arcade), tutorial already completed on this device
         s1ctx, s1, s1err = await device(1180, 820)
         await s1ctx.add_init_script("try{localStorage.setItem('__probe','1')}catch(e){}")
@@ -124,6 +126,8 @@ async def main():
         out['studentQrArcade'] = {'started': True, 'units': len(s1src), 'packageFetches': len(gh) - gh_before, 'noSelectionScreens':
                                   await s1.evaluate("document.getElementById('hojaCatalog').hidden&&document.getElementById('hojaNextMode').hidden")}
         await shot(s1, 'student_qr_arcade.png')
+        print('QR_ARCADE_STAGE',json.dumps(out['studentQrArcade'],ensure_ascii=False),flush=True)
+        await s1ctx.close()
         # ---------------- STUDENT 2: manual code, typo first, then reload -> cache hit
         s2ctx, s2, s2err = await device(820, 1180)
         await s2.goto(base, wait_until='domcontentloaded', timeout=180000); await s2.wait_for_timeout(5000)
@@ -145,17 +149,30 @@ async def main():
         await s2.evaluate("window.HOJA_GAMEPLAY.stop();document.getElementById('hojaGamePlay').hidden=true;window.HOJA_FLOW.enterIntro({newRun:false})")
         await s2.wait_for_timeout(1600)
         ok(not await s2.evaluate("document.getElementById('hoja15JoinEntry').classList.contains('show')"), 'ENTRY_BUTTON_AFTER_JOIN')
+        print('QR_MANUAL_STAGE',json.dumps({'sameUnits':s2src==units,'firstFetch':first_fetch,'reloadFetch':second_fetch,'checks':fails},ensure_ascii=False),flush=True)
+        stored=await s2.evaluate("""()=>{try{const v=JSON.parse(localStorage.getItem('hoja15LastJoinV1')||'null');return {present:!!v,age:v?Date.now()-v.at:null}}catch(e){return {present:false}}}""")
+        ok(stored['present'] and 0<=stored['age']<3600000,'RECONNECT_STORAGE '+json.dumps(stored))
+        # Release the original tab after verifying the same-tab entry restriction.
+        await s2.close()
         # 40-6CI: reopening the plain address within 1 hour offers the last code
         s3 = await s2ctx.new_page(); s3.on('dialog', lambda d: asyncio.ensure_future(d.dismiss()))
         await s3.goto(base, wait_until='domcontentloaded', timeout=180000)
-        await s3.wait_for_selector('#hoja15ReconnectYes', timeout=30000)
+        try:
+            await s3.wait_for_selector('#hoja15ReconnectYes', timeout=30000)
+        except Exception:
+            try:
+                diag=await asyncio.wait_for(s3.evaluate("""()=>{let v=null;try{v=JSON.parse(localStorage.getItem('hoja15LastJoinV1')||'null')}catch(e){}
+                  return {ready:document.readyState,hasJoin:!!window.HOJA15_JOIN,view:window.HOJA15_JOIN?.view,stored:!!v,age:v?Date.now()-v.at:null,asked:sessionStorage.getItem('hoja15ReconnectAsked'),hasUrlBridge:typeof window.google?.script?.url?.getLocation==='function',entry:document.getElementById('hoja15JoinEntry')?.className}}"""),timeout=5)
+                print('QR_RECONNECT_DIAG',json.dumps(diag),flush=True)
+            except Exception as de: print('QR_RECONNECT_DIAG_FAILED',repr(de),flush=True)
+            raise
         offer = await s3.inner_text('#hoja15JoinLayer .h15Units')
         ok(quiz_code[:3] in offer and quiz_code[3:] in offer, 'RECONNECT_OFFER ' + offer)
         if shots: await s3.screenshot(path=str(shots / 'student_reconnect_offer.png'))
         await s3.click('#hoja15ReconnectYes'); s3src = await wait_game(s3, 'quiz'); ok(s3src == units, 'RECONNECT_UNITS')
         out['reconnect'] = {'offered': True, 'rejoinedSameUnits': s3src == units}
         out['studentManualQuiz'] = {'typoMessage': typo, 'started': True, 'units': len(s2src), 'firstLoadPackageFetches': first_fetch, 'sameDeviceReloadPackageFetches': second_fetch}
-        await shot(s2, 'student_manual_quiz.png')
+        await shot(s3, 'student_reconnect_quiz.png')
         errs = [e for e in terr + s1err + s2err if 'ResizeObserver' not in e]
         ok(not errs, 'PAGE_ERRORS ' + json.dumps(errs, ensure_ascii=False)[:400]); out['pageErrors'] = len(errs)
         await b.close()

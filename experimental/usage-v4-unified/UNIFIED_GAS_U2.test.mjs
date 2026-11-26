@@ -81,8 +81,20 @@ test('existing game RPCs in the single GAS are byte-identical to the root produc
  // hojaListPublicCartridges / hojaGetPublicQuestions (inactive with the RELEASE catalog).
  // F4 (40-6AD): in hojaListPublicCartridges that route is a short block that adds the trusted package pin
  // (row.pkg) for the browser cache; it is still the ONLY difference (stripped as one exact block below).
- const noQa=t=>t.replace(/\n\s*const qa=hojaApprovedGameCatalog_\(\);[^\n]*(?:\n\s*\/\/[^\n]*)?\n\s*if\(qa\)return [^\n]*/,'')
-  .replace(/\n\s*const qa=hojaApprovedGameCatalog_\(\);[^\n]*\n  if\(qa\)\{\n(?:    [^\n]*\n)+  \}/,'');
+ // Strip only the approved-catalog branch; compare ALL remaining legacy bytes.
+ const noQa=t=>{
+  const start=t.indexOf('\n  const qa=hojaApprovedGameCatalog_();');
+  assert.ok(start>=0,'approved route start');
+  const legacy=t.includes('function hojaGetPublicQuestions(')
+   ?'\n  if(!Array.isArray(names)||!names.length'
+   :'\n  const sheets=hojaPublicSheets_().sheets;';
+  const end=t.indexOf(legacy,start);
+  assert.ok(end>start,'legacy route start');
+  const route=t.slice(start,end);
+  assert.match(route,/if\(qa\)\{/);
+  assert.doesNotMatch(route,/hojaPublicSheets_|hojaRows_|hojaReadCartridge_/);
+  return t.slice(0,start)+t.slice(end);
+ };
  assert.equal(noQa(fn(uni,'hojaGetPublicQuestions')),fn(root,'hojaGetPublicQuestions'));
  const strip=t=>noQa(t).replace(/\n\s*const sheets=hojaPublicSheets_\(\)\.sheets;\n\s*hojaUsageCatalogPut_\(sheets\);[^\n]*\n\s*return sheets\.map/,'\n  return hojaPublicSheets_().sheets.map');
  assert.equal(strip(fn(uni,'hojaListPublicCartridges')),fn(root,'hojaListPublicCartridges'));

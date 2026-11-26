@@ -15,6 +15,8 @@ ok(rc.get('originalSha256') == '4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651
 ok(rc.get('changedParts') == [14, 22, 23, 24], 'CHANGED_PARTS')   # 40-6BG: practice-mode control update in 23/24
 ok(rc.get('bridgeSha256') == '12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157', 'BRIDGE_SHA')
 game = (d / 'Game.html').read_bytes()
+from solo_jump_patch import verify, PATCH_SHA256
+ok(verify(game) and rc.get('soloJumpPatchSha256') == PATCH_SHA256, 'SOLO_JUMP_PATCH_MISMATCH')
 ok(hashlib.sha256(game).hexdigest() == info['patchedGameSha256'], 'GAME_SHA_MISMATCH_WITH_BUILD_REPORT')
 for marker in (b'hoja-ext-media-v1', b'hoja-ext-math-v1', b'hoja-ext-input-guard-v1', b'HOJA_TRIAL_APPROVED_HTML', b'hoja_usage_pending_v1'):
     ok(marker in game, 'MISSING_IN_GAME ' + marker.decode())

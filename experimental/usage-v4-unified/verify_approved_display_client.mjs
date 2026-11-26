@@ -13,26 +13,40 @@ const dir=dirname(fileURLToPath(import.meta.url));
 const source=readFileSync(join(dir,'gas/ApprovedCartridgeDisplayClient.html'),'utf8');
 const body=source.replace(/^<script[^>]+>\s*/, '').replace(/\s*<\/script>\s*$/, '');
 assert(!body.includes('<script'), 'unexpected nested script');
-const match=body.match(/Object\.freeze\((\{[\s\S]*?\})\);\nconst active/);
+const match=body.match(/Object\.freeze\((\{[\s\S]*?\})\);\nconst koreanById/);
 assert(match,'approved title map absent');
 const mapping=JSON.parse(match[1]);
+const koreanMatch=body.match(/const koreanById=Object\.freeze\((\{[\s\S]*?\})\);\nconst active/);
+assert(koreanMatch,'Korean display map absent');
+const korean=JSON.parse(koreanMatch[1]);
+assert.deepEqual(Object.keys(korean).sort(),['kor5-s2-u5-sara','kor5-s2-u6-charlotte','kor5-s2-u6-mom','kor5-s2-u6-nabi'].sort());
+assert.equal(korean['kor5-s2-u5-sara'].title,'추론하며 읽어요(사라, 버스를 타다)');
+for(const id of ['kor5-s2-u6-charlotte','kor5-s2-u6-mom','kor5-s2-u6-nabi'])assert.match(korean[id].title,/^작품을 감상해요\(.+\)$/u);
 const index=JSON.parse(readFileSync(join(dir,'approved-catalog/generated/approved-source-index.json'),'utf8'));
-assert.equal(index.entries.length,23);
+assert([23,29].includes(index.entries.length),'expected original or restored approved inventory');
 assert.equal(Object.keys(mapping).length,23);
-for(const e of index.entries){
+for(const e of index.entries.filter(e=>mapping[e.cartridgeId])){
  const d=mapping[e.cartridgeId];
  assert(d,'missing '+e.cartridgeId);
  assert.equal(d.sourceTitle,e.approvedTitle);
  assert.equal(d.number,String(e.unit)+(e.subunit==null?'':'-'+e.subunit));
  assert(d.title.trim()&&!/초등학교|출판사 공통|Lesson\s+\d+/i.test(d.title),e.cartridgeId);
 }
+if(index.entries.length===29)for(const e of index.entries.filter(e=>e.subject==='korean')){
+ const d=korean[e.cartridgeId];
+ assert(d,'missing Korean display '+e.cartridgeId);
+ assert.equal(d.sourceTitle,e.approvedTitle);
+ assert.equal(d.number,String(e.unit));
+}
 
 const keys=Object.keys(mapping);
 const approved=keys.map(id=>({name:`6-사회-${mapping[id].sourceTitle}`,pkg:{id},cartridgeId:id}));
+const koreanRows=Object.keys(korean).map(id=>({name:`5-2학기-국어-${korean[id].sourceTitle}`,pkg:{id},cartridgeId:id}));
 const legacy={name:'5-수학-기존 카트리지',cartridgeId:123};
-const response=[...approved,legacy];
+const dynamic={name:'5-2학기-국어-새로운 작품',cartridgeId:'kor5-s2-u6-new',pkg:{id:'kor5-s2-u6-new'},display:{sourceTitle:'새로운 작품',number:'6',title:'새로운 작품'}};
+const response=[...approved,...koreanRows,legacy,dynamic];
 const cards=keys.map(id=>makeCard(mapping[id].sourceTitle));
-cards.push(makeCard('기존 카트리지'));
+cards.push(...Object.values(korean).map(d=>makeCard(d.sourceTitle)),makeCard('기존 카트리지'),makeCard('새로운 작품'));
 const rail={querySelectorAll:()=>cards.map(c=>c.button)};
 const selected={textContent:mapping[keys[0]].sourceTitle};
 const styles=[];const callbacks=[];
@@ -52,7 +66,7 @@ runInNewContext(body,{window,document,MutationObserver,Promise,Object,Array,Stri
 const listed=await window.HOJA_B_LIVE.rpc('LIST');
 for(const cb of callbacks)cb();
 assert.equal(listed,response,'LIST changed');
-assert.equal(window.HOJA15_APPROVED_DISPLAY.activeUnits,23);
+assert.equal(window.HOJA15_APPROVED_DISPLAY.activeUnits,28);
 cards.slice(0,23).forEach((c,i)=>{
  const d=mapping[keys[i]];
  assert.equal(c.title.textContent,d.title);
@@ -60,15 +74,30 @@ cards.slice(0,23).forEach((c,i)=>{
  assert.equal(c.button.title,d.number+'. '+d.title);
  assert.equal(c.badge.hidden,true);
 });
-assert.equal(cards[23].title.textContent,'기존 카트리지','legacy title changed');
-assert.equal(cards[23].badge.hidden,false,'legacy PAK changed');
+Object.values(korean).forEach((d,i)=>{
+ assert.equal(cards[23+i].title.textContent,d.title);
+ assert.equal(cards[23+i].face.children[0].textContent,d.number);
+ assert.equal(cards[23+i].button.title,d.number+'. '+d.title);
+});
+assert.equal(cards[27].title.textContent,'기존 카트리지','legacy title changed');
+assert.equal(cards[27].badge.hidden,false,'legacy PAK changed');
+assert.equal(cards[28].title.textContent,'새로운 작품');
+assert.equal(cards[28].face.children[0].textContent,'6');
+assert.equal(cards[28].button.title,'6. 새로운 작품');
+assert.equal(cards[28].badge.hidden,true);
 assert.equal(selected.textContent,mapping[keys[0]].number+'. '+mapping[keys[0]].title);
+selected.textContent='새로운 작품';
+for(let i=0;i<20;i++)for(const cb of callbacks)cb();
+assert.equal(selected.textContent,'6. 새로운 작품','dynamic selected title must be idempotent across observers');
+selected.textContent=mapping[keys[0]].sourceTitle+' · 새로운 작품 · 기존 카트리지';
+for(let i=0;i<20;i++)for(const cb of callbacks)cb();
+assert.equal(selected.textContent,mapping[keys[0]].number+'. '+mapping[keys[0]].title+' · 6. 새로운 작품 · 기존 카트리지','multi-selection display idempotence');
 await window.HOJA_B_LIVE.rpc('GET',[approved[0].name]);
 await window.HOJA_B_LIVE.rpc('RANK_SAVE',{cartridge:approved[0].name});
 assert.equal(calls[1].payload[0],approved[0].name,'GET renamed');
 assert.equal(calls[2].payload.cartridge,approved[0].name,'rank key renamed');
 assert.equal(styles.length,1);
-console.log('HOJA15_APPROVED_DISPLAY_PASS 23/23; GET and RANK_SAVE identities unchanged; legacy unaffected');
+console.log('HOJA15_APPROVED_DISPLAY_PASS 23 curated + 4 Korean unit names + 1 dynamic; GET and RANK_SAVE identities unchanged; legacy unaffected');
 
 function makeCard(original){
  const title={textContent:original,dataset:{fullLabel:original}};

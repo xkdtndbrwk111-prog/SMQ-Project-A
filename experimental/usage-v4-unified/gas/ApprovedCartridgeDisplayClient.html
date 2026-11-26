@@ -1,5 +1,5 @@
 <script id="hoja15-approved-cartridge-display-v1">
-/* HOJA 1.5 approved 23-unit DISPLAY ONLY — teacher approval 2026-11-24.
+/* HOJA 1.5 approved DISPLAY ONLY — 23 original labels plus Korean unit names.
  * Never change the LIST rows, request names, cartridge IDs, package pins, GET, usage or ranking.
  * The canonical source titles are mapped only after a trusted approved LIST row with a
  * matching cartridgeId and source-title suffix; legacy Project B cards are untouched.
@@ -123,6 +123,28 @@ const byId=Object.freeze({
   "title": "지속가능한 지구촌"
  }
 });
+const koreanById=Object.freeze({
+ "kor5-s2-u5-sara": {
+  "sourceTitle": "5. 추론하며 읽어요(사라, 버스를 타다)",
+  "number": "5",
+  "title": "추론하며 읽어요(사라, 버스를 타다)"
+ },
+ "kor5-s2-u6-mom": {
+  "sourceTitle": "6. 작품을 감상해요(엄마에게)",
+  "number": "6",
+  "title": "작품을 감상해요(엄마에게)"
+ },
+ "kor5-s2-u6-nabi": {
+  "sourceTitle": "6. 작품을 감상해요(나비를 잡는 아버지)",
+  "number": "6",
+  "title": "작품을 감상해요(나비를 잡는 아버지)"
+ },
+ "kor5-s2-u6-charlotte": {
+  "sourceTitle": "6. 작품을 감상해요(샬럿의 거미줄)",
+  "number": "6",
+  "title": "작품을 감상해요(샬럿의 거미줄)"
+ }
+});
 const active=new Map(); // canonical label -> approved display fields from the latest LIST
 const live=window.HOJA_B_LIVE;
 if(!live||typeof live.rpc!=='function')return;
@@ -132,11 +154,20 @@ live.rpc=function(method,payload){
  if(method!=='LIST')return response;
  return Promise.resolve(response).then(rows=>{
   active.clear();
+  const ambiguous=new Set();
   if(Array.isArray(rows))for(const row of rows){
-   const unit=row&&row.pkg&&byId[String(row.pkg.id)];
-   if(unit&&typeof row.name==='string'&&row.name.endsWith('-'+unit.sourceTitle))
-    active.set(unit.sourceTitle,unit);
+   if(!row||!row.pkg||typeof row.name!=='string')continue;
+   const known=byId[String(row.pkg.id)]||koreanById[String(row.pkg.id)];
+   const d=row.display;
+   const unit=known&&row.name.endsWith('-'+known.sourceTitle)?known:d;
+   if(!unit||typeof unit.sourceTitle!=='string'||typeof unit.title!=='string'||
+     !/^\d{1,2}(?:-\d{1,2})?$/.test(String(unit.number))||
+     !row.name.endsWith('-'+unit.sourceTitle))continue;
+   const prev=active.get(unit.sourceTitle);
+   if(prev&&(prev.number!==unit.number||prev.title!==unit.title))ambiguous.add(unit.sourceTitle);
+   else active.set(unit.sourceTitle,unit);
   }
+  for(const title of ambiguous)active.delete(title);
   return rows; // unchanged identity and package descriptors
  });
 };
@@ -170,9 +201,13 @@ function patchNextSelected(){
  const el=document.getElementById('hcNextSelected');
  if(!el||!active.size)return;
  const prior=el.textContent;
- let next=prior;
- for(const [source,unit] of active)
-  if(next.includes(source))next=next.split(source).join(unit.number+'. '+unit.title);
+ // Match exact source labels in one pass. Substring replacement can re-match
+ // the newly prefixed title (especially when sourceTitle === title for a new
+ // catalog unit), recursively retriggering the MutationObserver forever.
+ const next=prior.split(' · ').map(label=>{
+  const unit=active.get(label);
+  return unit?unit.number+'. '+unit.title:label;
+ }).join(' · ');
  if(next!==prior)el.textContent=next;
 }
 function initialize(){
@@ -193,6 +228,6 @@ function initialize(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});
 else initialize();
-window.HOJA15_APPROVED_DISPLAY=Object.freeze({version:1,expectedUnits:23,get activeUnits(){return active.size}});
+window.HOJA15_APPROVED_DISPLAY=Object.freeze({version:2,get expectedUnits(){return active.size},get activeUnits(){return active.size}});
 })();
 </script>

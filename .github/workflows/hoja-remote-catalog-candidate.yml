@@ -1,0 +1,237 @@
+name: HOJA remote catalog candidate QA
+on:
+  push:
+    branches:
+      - work/hoja15-remote-catalog-20261126
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and remote candidate tests
+        run: |
+          for f in experimental/usage-v4-unified/gas/*.gs; do
+            cp "$f" "$RUNNER_TEMP/$(basename "$f").js"
+            node --check "$RUNNER_TEMP/$(basename "$f").js"
+          done
+          node --test experimental/usage-v4-unified/approved-catalog/build_remote_active_catalog.test.mjs
+          node --test experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs
+          node --test experimental/usage-v4-unified/approved-catalog/prepare_remote_pointer.test.mjs
+      - name: Existing approved catalog and runtime regressions
+        run: |
+          node --test experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_D.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs
+          node --test experimental/usage-v4-unified/HOJA15_JOIN.test.mjs
+          node experimental/usage-v4-unified/verify_approved_display_client.mjs
+  real-bank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 0edea5cb537aba8df1f9dcbc279e3c2854895248
+          path: qbank-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Rebuild approved source and packages (no publication)
+        run: |
+          P=experimental/usage-v4-unified/approved-catalog
+          node "$P/build_approved_index.mjs" --qbank qbank-source
+          node "$P/build_content_packages.mjs" --qbank qbank-source --packages-out "$RUNNER_TEMP/rebuilt-packages"
+      - name: Compare all 27 package pins and counts
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import assert from 'node:assert/strict';
+          import path from 'node:path';
+          const p='experimental/usage-v4-unified/approved-catalog/generated/';
+          const idx=JSON.parse(fs.readFileSync(p+'approved-source-index.json'));
+          const report=JSON.parse(fs.readFileSync(p+'approved-content-report.json'));
+          const published=JSON.parse(fs.readFileSync('qbank-runtime/game-runtime/approved-packages/v1/INDEX.json'));
+          const rebuilt=JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'rebuilt-packages/game-runtime/approved-packages/v1/INDEX.json')));
+          assert.equal(idx.approvalUnits,27);assert.equal(idx.approvalQuestions,835);
+          assert.equal(published.sourceCommit,idx.sourceCommit);
+          const byId=new Map(rebuilt.packages.map(e=>[e.cartridgeId,e]));
+          let failed=0;
+          for(const e of published.packages){
+            const raw=fs.readFileSync(path.join('qbank-runtime',e.path));
+            const data=JSON.parse(raw);
+            const source=idx.entries.find(x=>x.cartridgeId===e.cartridgeId);
+            const ready=report.entries.find(x=>x.cartridgeId===e.cartridgeId);
+            const actual=crypto.createHash('sha256').update(raw).digest('hex');
+            const good=actual===e.sha256&&raw.length===e.bytes&&source&&data.cartridgeId===e.cartridgeId&&data.questions.length===source.questionCount&&ready?.status==='READY'&&byId.get(e.cartridgeId)?.sha256===e.sha256;
+            console.log(e.cartridgeId,good?'PASS':'MISMATCH','effectiveSha256='+source?.effectiveSha256,'packageSha256='+actual,'rebuilt='+byId.get(e.cartridgeId)?.sha256,'ready='+ready?.status);
+            if(!good){
+              failed++;
+              const fresh=JSON.parse(fs.readFileSync(path.join(process.env.RUNNER_TEMP,'rebuilt-packages',e.path)));
+              const changes=[];
+              function compare(a,b,p=''){
+                if(a===b)return;
+                if(a===null||b===null||typeof a!=='object'||typeof b!=='object'||Array.isArray(a)!==Array.isArray(b)){
+                  changes.push(p);return;
+                }
+                for(const k of new Set([...Object.keys(a),...Object.keys(b)])){
+                  if(!Object.hasOwn(a,k)||!Object.hasOwn(b,k)){changes.push(p+'/'+k);continue}
+                  compare(a[k],b[k],p+'/'+k);
+                }
+              }
+              compare(data,fresh);
+              console.log('semantic diff count='+changes.length,'paths='+changes.slice(0,80).join(','));
+              console.log('top-level order',Object.keys(data).join(','),Object.keys(fresh).join(','));
+            }
+          }
+          assert.equal(published.packages.length,27);assert.equal(rebuilt.packages.length,27);assert.equal(failed,0);
+          JS
+      - name: Exercise real catalog across isolated GAS RPCs and withdrawal
+        run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime
+      - name: Independent inventory must reject missing science registrations
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          import {verifyRequiredApprovedInventory as verify} from './experimental/usage-v4-unified/approved-catalog/verify_required_approved_inventory.mjs';
+          const p='experimental/usage-v4-unified/approved-catalog/';
+          const idx=JSON.parse(fs.readFileSync(p+'generated/approved-source-index.json'));
+          const manifest=JSON.parse(fs.readFileSync(p+'deployment/hoja15-remote-20261126-pending.json'));
+          const ledger=JSON.parse(fs.readFileSync(p+'required-approved-inventory.json'));
+          assert.equal(ledger.requiredIds.length,29);
+          assert.throws(()=>verify(idx,manifest),/APPROVED_INVENTORY_MISSING.*sci5-s2-heat-common.*sci5-s2-u4-common/);
+          const fixture={entries:ledger.requiredIds.map(cartridgeId=>({cartridgeId}))};
+          assert.equal(verify(fixture,fixture).required,29);
+          console.log('APPROVAL_INVENTORY_GATE_PASS');
+          JS
+  renderer:
+    needs: real-bank
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 8d809453fc9470aefa74c4ad9f7357574f918e5c
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Build audited release game (no actual deployment)
+        run: |
+          P=experimental/usage-v4-unified
+          python3 -m py_compile "$P/assemble_hoja15_production.py"
+          python3 "$P/build_unified_gas.py" --output "$RUNNER_TEMP/gas" --game approved-rc > "$RUNNER_TEMP/build.json"
+          python3 "$P/verify_release_candidate.py" "$RUNNER_TEMP/gas" "$RUNNER_TEMP/build.json"
+      - name: Generate offline verified renderer payloads
+        run: |
+          node experimental/unified-quiz-renderer/compose_renderer.mjs "$RUNNER_TEMP/composed.html"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const root='qbank-runtime', idx=JSON.parse(fs.readFileSync(root+'/game-runtime/approved-packages/v1/INDEX.json'));
+          const units=idx.packages.map(e=>{
+            const b=fs.readFileSync(path.join(root,e.path));assert.equal(crypto.createHash('sha256').update(b).digest('hex'),e.sha256);
+            const d=JSON.parse(b);return {id:e.cartridgeId,payload:{questions:d.questions.map(q=>q.rendererQuestion),originalQuestions:d.questions.map(q=>q.originalQuestion),images:d.images,tags:d.tags,unitMeta:d.unitMeta}};
+          });
+          assert.equal(units.length,29);assert.equal(units.reduce((s,u)=>s+u.payload.questions.length,0),899);
+          fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'payloads.json'),JSON.stringify(units));
+          JS
+      - name: Install headless Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Render all 899 questions at four viewports
+        run: python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html"
+  publication-dry-run:
+    needs: real-bank
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          fetch-depth: 0
+          path: publication-qbank
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 5ba3183cc1bff0805d28b39a7bf5254396f2eed3
+          path: publication-verifier
+          persist-credentials: false
+      - name: Test publication transaction in local clone; reject unfinished approvals
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified/approved-catalog
+          git -C publication-qbank config user.name 'Local publication test'
+          git -C publication-qbank config user.email 'test@example.invalid'
+          BASE="$(git -C publication-qbank rev-parse HEAD)"
+          # Preserve all existing 23 approved pin entries and their gates. This
+          # temporary manifest is for offline simulation only, never committed.
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const p='experimental/usage-v4-unified/approved-catalog/deployment/';
+          const j=JSON.parse(fs.readFileSync(p+'hoja15-remote-20261126-pending.json'));
+          j.entries=j.entries.filter(x=>!x.cartridgeId.startsWith('kor'));
+          if(j.entries.length!==23)throw Error('DRY_RUN_PRIOR_APPROVALS');
+          j.deploymentId='HOJA15-LOCAL-DRYRUN';
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/prior.json',JSON.stringify(j));
+          JS
+          if bash "$P/publish_remote_catalog.sh" publication-qbank "$P/deployment/hoja15-remote-20261126-pending.json" "$RUNNER_TEMP/rejected" "$BASE"; then
+            echo 'Unfinished release must not publish'; exit 1
+          fi
+          test "$(git -C publication-qbank rev-parse HEAD)" = "$BASE"
+          bash "$P/publish_remote_catalog.sh" publication-qbank "$RUNNER_TEMP/prior.json" "$RUNNER_TEMP/proposal" "$BASE"
+          HEAD="$(git -C publication-qbank rev-parse HEAD)"
+          test "$HEAD" != "$BASE"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';import crypto from 'node:crypto';import {execFileSync} from 'node:child_process';
+          const dir='game-runtime/active/v1/', root='publication-qbank';
+          const pointer=JSON.parse(fs.readFileSync(root+'/'+dir+'current.json'));
+          const raw=execFileSync('git',['-C',root,'show',pointer.catalogCommit+':'+dir+'catalog.json']);
+          assert.equal(pointer.generation,1);assert.equal(crypto.createHash('sha256').update(raw).digest('hex'),pointer.catalogSha256);
+          assert.equal(JSON.parse(raw).entries.length,23);
+          JS
+          # Second identical build must not bump generation or create a commit.
+          bash "$P/publish_remote_catalog.sh" publication-qbank "$RUNNER_TEMP/prior.json" "$RUNNER_TEMP/noop" "$HEAD"
+          test "$(git -C publication-qbank rev-parse HEAD)" = "$HEAD"
+          # Independently check the exact same proposal with the public gate.
+          VERIFIER="$(realpath publication-verifier/tools/verify_active_catalog_publication.py)"
+          (cd publication-qbank && python3 "$VERIFIER" "$BASE" "$HEAD")
+          # Reject a pointer whose declared digest no longer matches.
+          node -e 'const f="publication-qbank/game-runtime/active/v1/current.json",fs=require("fs"),j=JSON.parse(fs.readFileSync(f));j.catalogSha256="0".repeat(64);fs.writeFileSync(f,JSON.stringify(j))'
+          git -C publication-qbank add game-runtime/active/v1/current.json
+          git -C publication-qbank commit -m "Deliberately corrupt pointer for negative test"
+          BAD="$(git -C publication-qbank rev-parse HEAD)"
+          if (cd publication-qbank && python3 "$VERIFIER" "$BASE" "$BAD"); then
+            echo 'Public gate accepted corrupt pointer'; exit 1
+          fi
+          echo PUBLICATION_LOCAL_DRY_RUN_PASS

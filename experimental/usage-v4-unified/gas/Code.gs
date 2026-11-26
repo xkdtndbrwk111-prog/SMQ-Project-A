@@ -140,6 +140,11 @@ function hojaListPublicCartridges() {
     return qa.entries.map(e=>{const row={name:hojaApprovedGameName_(e),cartridgeId:e.cartridgeId};
       if(src)row.pkg={id:e.cartridgeId,sha256:e.packageSha256,path:e.contentPath,commit:src.commit,repo:src.repo,
         questionCount:e.questionCount,sourceCommit:qa.sourceCommit};
+      // Only the verified live release opts into the extended LIST contract.
+      if(src&&typeof hojaRemoteCatalogMemo_!=='undefined'&&hojaRemoteCatalogMemo_===qa&&qa!==HOJA_APPROVED_ACTIVE_CATALOG_){
+        row.pkg.pinRelay=true;
+        row.display={sourceTitle:e.title,number:String(e.unit)+(e.subunit==null?'':'-'+e.subunit),title:e.title};
+      }
       return row;});
   }
   const sheets=hojaPublicSheets_().sheets;
@@ -218,7 +223,8 @@ function hojaApprovedActive_(){
       throw new Error('APPROVED_QA_CATALOG_SCRIPT_ID_NOT_ALLOWED');
   }else if(type!=='RELEASE')throw new Error('APPROVED_CATALOG_INVALID');
   hojaApprovedSource_(c);
-  return c;
+  // Remote reader is opt-in, and never runs for an isolated QA or empty legacy catalog.
+  return typeof hojaRemoteCatalogGet_==='function'?hojaRemoteCatalogGet_(c):c;
 }
 /* 40-6 F3/F3-2: the game's existing LIST/GET RPCs serve the approved catalog when
  *  - the TEST-ONLY QA catalog is embedded (refused outside the isolated project), or
@@ -269,7 +275,9 @@ function hojaListApprovedCartridges(){
 /* F1: lazy, per-unit approved content (only the selected units are loaded). The package
  * text is SHA-256 pinned by the SAME active catalog that list/usage validation use. */
 function hojaGetApprovedQuestions(ids){
-  const cat=hojaApprovedActive_();
+  return hojaGetApprovedQuestionsFromCatalog_(hojaApprovedActive_(),ids);
+}
+function hojaGetApprovedQuestionsFromCatalog_(cat,ids){
   const active=new Map(cat.entries.map(e=>[e.cartridgeId,e]));
   if(!Array.isArray(ids)||!ids.length||ids.length>5||new Set(ids).size!==ids.length||
      ids.some(id=>typeof id!=='string'||!HOJA_APPROVED_ID_RE_.test(id)))
@@ -408,7 +416,18 @@ function hojaReadCartridge_(sheet) {
 function hojaGetPublicQuestions(names) {
   const qa=hojaApprovedGameCatalog_(); // 40-6 F3: approved catalog when one is in use
   // the game requires sheetName === the requested catalog name (GET contract)
-  if(qa)return hojaGetApprovedQuestions(hojaApprovedIdsByTitle_(qa,names)).map((r,i)=>({sheetName:names[i].trim(),data:r.data}));
+  if(qa){
+    const pinned=names&&!Array.isArray(names)&&typeof names==='object';
+    const selected=pinned?names.names:names;
+    const ids=hojaApprovedIdsByTitle_(qa,selected);
+    if(pinned){
+      const pins=names.pins;
+      if(!Array.isArray(pins)||pins.length!==ids.length||
+        pins.some((p,i)=>!p||p.id!==ids[i]||p.sha256!==qa.entries.find(e=>e.cartridgeId===ids[i]).packageSha256))
+          throw Error('APPROVED_CATALOG_CHANGED_RETRY');
+    }
+    return hojaGetApprovedQuestionsFromCatalog_(qa,ids).map((r,i)=>({sheetName:selected[i].trim(),data:r.data}));
+  }
   if(!Array.isArray(names)||!names.length||names.length>5||
      names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>180)||
      new Set(names.map(n=>n.trim())).size!==names.length)
