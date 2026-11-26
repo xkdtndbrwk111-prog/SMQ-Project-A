@@ -34,6 +34,7 @@ jobs:
           node --test experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs
           node --test experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs
           node --test experimental/usage-v4-unified/HOJA15_JOIN.test.mjs
+          node experimental/usage-v4-unified/verify_approved_display_client.mjs
   real-bank:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -104,3 +105,46 @@ jobs:
           }
           assert.equal(published.packages.length,27);assert.equal(rebuilt.packages.length,27);assert.equal(failed,0);
           JS
+  renderer:
+    needs: real-bank
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: 7b32e32a408c0440598e0eea2c9ca9949baa98d9
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Build audited release game (no actual deployment)
+        run: |
+          P=experimental/usage-v4-unified
+          python3 -m py_compile "$P/assemble_hoja15_production.py"
+          python3 "$P/build_unified_gas.py" --output "$RUNNER_TEMP/gas" --game approved-rc > "$RUNNER_TEMP/build.json"
+          python3 "$P/verify_release_candidate.py" "$RUNNER_TEMP/gas" "$RUNNER_TEMP/build.json"
+      - name: Generate offline verified renderer payloads
+        run: |
+          node experimental/unified-quiz-renderer/compose_renderer.mjs "$RUNNER_TEMP/composed.html"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const root='qbank-runtime', idx=JSON.parse(fs.readFileSync(root+'/game-runtime/approved-packages/v1/INDEX.json'));
+          const units=idx.packages.map(e=>{
+            const b=fs.readFileSync(path.join(root,e.path));assert.equal(crypto.createHash('sha256').update(b).digest('hex'),e.sha256);
+            const d=JSON.parse(b);return {id:e.cartridgeId,payload:{questions:d.questions.map(q=>q.rendererQuestion),originalQuestions:d.questions.map(q=>q.originalQuestion),images:d.images,tags:d.tags,unitMeta:d.unitMeta}};
+          });
+          assert.equal(units.length,27);assert.equal(units.reduce((s,u)=>s+u.payload.questions.length,0),835);
+          fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'payloads.json'),JSON.stringify(units));
+          JS
+      - name: Install headless Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Render all 835 questions at four viewports
+        run: python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html"
