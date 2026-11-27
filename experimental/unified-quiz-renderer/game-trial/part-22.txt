@@ -260,9 +260,10 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
 
  function hojaWhenDrawn_(f,qid){return new Promise(res=>{const t0=performance.now();const tick=()=>{let ok=false;try{const d=f.contentDocument,w=f.contentWindow;const cur=w.current&&w.current();const bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];ok=!d.body.classList.contains('hojaAwaitShow')&&bs.length>0&&(!qid||(cur&&cur.id===qid))&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===(cur&&cur.id));}catch(_e){ok=true}if(ok||performance.now()-t0>1500){requestAnimationFrame(()=>res());return;}requestAnimationFrame(tick)};tick();});}
  let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0;
- let header=null,nextButton=null,judgment=null;
+ let header=null,nextButton=null,judgment=null,retryButton=null;
  function overlay(){return document.getElementById('hqOverlay')}
  function clearJudgment(){if(judgment){judgment.remove();judgment=null;}}
+ function clearRetry(){if(retryButton){retryButton.remove();retryButton=null;}}
  function showJudgment(correct){
    if(overlay()?.dataset.hojaUnified!=='yes')return;
    clearJudgment();
@@ -325,14 +326,15 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(frame){frame.style.visibility='hidden';frame.hidden=false;}
  }
  async function show(q,mode,onAnswer,caption=''){
-   const token=++serial;answerHandler=null;clearJudgment();reveal();
+   const token=++serial;answerHandler=null;clearJudgment();clearRetry();reveal();
    const withHeader=mode==='review'||!!caption;
    if(header){header.style.display=withHeader?'block':'none';document.getElementById('hojaTeamReviewLabel').textContent=caption;}
    // HOJA 1.5: the review header sits ABOVE the question (not over its top lines)
    if(frame){const hh=withHeader&&header?Math.ceil(header.getBoundingClientRect().height):0;frame.style.top=hh+'px';frame.style.height=hh?'calc(100% - '+hh+'px)':'100%';}
    if(nextButton)nextButton.style.display='none';
+   let h;
    try {
-     const h=await loaded;
+     h=await loaded;
      if(token!==serial)return;
      if(!q?.approvedBinding)throw Error('APPROVED_BINDING_REQUIRED');
      await hojaRetryRender_(()=>h.show({questionId:q.approvedBinding.questionId,mode,omitChoiceId:q.approvedBinding.omitChoiceId}));
@@ -341,7 +343,16 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      if(token!==serial)return;
      if(frame)frame.style.visibility='visible';
      answerHandler=onAnswer;
-   }catch(e){error(e);}
+   }catch(e){
+     if(token!==serial)return;
+     error(e);
+     if(token!==serial||!h||/HOJA_FRAME_CLOSED/.test(String(e?.message||e)))return;
+     retryButton=document.createElement('button');retryButton.id='hojaRendererRetry';retryButton.type='button';
+     retryButton.textContent='문제 다시 불러오기';
+     retryButton.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;padding:16px 28px;border:3px solid #ffdb67;border-radius:14px;background:#23555a;color:white;font:900 clamp(20px,2.4vw,32px) system-ui,sans-serif;cursor:pointer';
+     retryButton.onclick=()=>{if(token===serial)show(q,mode,onAnswer,caption);};
+     overlay().append(retryButton);retryButton.focus();
+   }
  }
  function reviewFeedback(label,onNext,correct,wrongText,nextText){
    if(!header||!nextButton)return;
@@ -368,7 +379,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    window.addEventListener('keydown',key,true);inputWindow()?.addEventListener('keydown',key,true);
  }
  function hide(){
-   serial++;answerHandler=null;clearJudgment();
+   serial++;answerHandler=null;clearJudgment();clearRetry();
    // HOJA 1.5: a mouse answer leaves keyboard focus inside the (now hidden) frame; give it back to the game.
    if(frame&&document.activeElement===frame){try{frame.blur();window.focus();}catch(_e){}}
    if(host)host.suspend();

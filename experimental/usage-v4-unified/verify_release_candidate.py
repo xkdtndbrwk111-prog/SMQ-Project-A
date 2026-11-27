@@ -58,7 +58,9 @@ if without_display.count(mark) == 1:
 # Intro-only scene pause / timestep sleep RC; evidence recorded in PR #14.
 # Prior intro timestep RC: 15206197a4c311f12afea9a47b54c3c50e3a880f8c23fc5fc54594126ce877c0.
 # Presentation identity adapter RC, evidence recorded in PR #14.
-ok(rc.get('rcGameSha256') == '4966846596244b166082c5d095cf42a235ef597d7df1d7c7abf3951f7e861b0b', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# Previous presentation identity RC: 4966846596244b166082c5d095cf42a235ef597d7df1d7c7abf3951f7e861b0b.
+# Renderer show-failure retry RC; two-build and source-boundary evidence in PR #14.
+ok(rc.get('rcGameSha256') == '8cddcbe1f84fdb51f015a756fdfcab9f84a947daf58ab93e41a4675c6ea1b69b', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}
