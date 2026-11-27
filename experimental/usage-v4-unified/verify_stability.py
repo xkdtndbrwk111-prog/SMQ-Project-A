@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Isolated team stability probe. Real pointer input; no production RPCs."""
-import argparse, asyncio, json, time, traceback
+import argparse, asyncio, json, os, time, traceback
 from pathlib import Path
 from playwright.async_api import async_playwright
 from verify_f3_ui_e2e import STUB, backend, to_catalog, pick_unit, mode, approved_iframe
@@ -28,7 +28,7 @@ async def main():
       b=await pw.chromium.launch(headless=True,channel=a.channel,args=['--enable-unsafe-swiftshader'])
       print('BROWSER',json.dumps({'version':b.version,'channel':a.channel or 'chromium'}),flush=True)
       for run in range(a.runs):
-        ctx=await b.new_context(viewport={'width':1280,'height':800}); await ctx.add_init_script('('+PROBE+')()'); page=await ctx.new_page(); dialogs=[]; errors=[]; step='setup'; result={'run':run+1}
+        ctx=await b.new_context(viewport={'width':1280,'height':800}); await ctx.tracing.start(screenshots=True,snapshots=True); await ctx.add_init_script('('+PROBE+')()'); page=await ctx.new_page(); dialogs=[]; errors=[]; step='setup'; result={'run':run+1}
         async def dialog(d):
           dialogs.append({'type':d.type,'message':d.message,'wallTime':time.time(),'step':step,'source':'javascript-dialog'}); await d.dismiss()
         page.on('dialog',lambda d: asyncio.create_task(dialog(d))); page.on('pageerror',lambda e: errors.append({'message':str(e),'step':step}))
@@ -65,6 +65,9 @@ async def main():
           result.update({'nextQuestionMs':(time.perf_counter()-start)*1000,'status':'PASS','answerType':kind})
         except Exception as e:
           result.update({'status':'FAIL','step':step,'error':repr(e),'trace':traceback.format_exc()})
+          try:
+            result['hitTest']=await asyncio.wait_for(page.evaluate('''()=>{const f=document.querySelector('iframe[id^="hojaTeamApproved"]'),d=f?.contentDocument,b=d?.querySelector('button.teacher-judge.correct,button.hqChoice');const r=b?.getBoundingClientRect(),fr=f?.getBoundingClientRect();return {button:r?{x:r.x,y:r.y,w:r.width,h:r.height,disabled:b.disabled}:null,frame:fr?{x:fr.x,y:fr.y,w:fr.width,h:fr.height}:null,inner:r?d.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML?.slice(0,500):null,parent:r&&fr?document.elementFromPoint(fr.x+r.x+r.width/2,fr.y+r.y+r.height/2)?.outerHTML?.slice(0,500):null}}'''),timeout=5)
+          except Exception as de: result['hitTestError']=repr(de)
         try:
           result['events']=await page.evaluate('window.__stability||[]')
           result['timing']=await page.evaluate('window.__timing||{}')
@@ -73,6 +76,11 @@ async def main():
         except Exception as e: result['eventReadError']=repr(e)
         result['dialogs']=dialogs; result['pageErrors']=errors
         if dialogs or errors: result['status']='FAIL'
+        if result['status']=='FAIL':
+          try:
+            out=Path(os.environ.get('RUNNER_TEMP','.'))/'stability-traces';out.mkdir(exist_ok=True); await page.screenshot(path=str(out/f'case-{run+1}.png'),timeout=5000); await ctx.tracing.stop(path=str(out/f'case-{run+1}.zip'))
+          except Exception as e: result['traceSaveError']=repr(e)
+        else: await ctx.tracing.stop()
         all_results.append(result); print('CASE',json.dumps(result,ensure_ascii=False),flush=True); await ctx.close()
       await b.close()
     passed=sum(x['status']=='PASS' for x in all_results); print('STABILITY_SUMMARY',json.dumps({'passed':passed,'total':len(all_results)}),flush=True)
