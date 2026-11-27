@@ -1,8 +1,8 @@
 /** Command/event host for the original teacher-approved A/C/D renderer. No scoring here. */
 export function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={}) {
  if(!frame||frame.tagName!=='IFRAME'||typeof onAnswer!=='function') throw Error('HOJA_FRAME_OPTIONS_REQUIRED');
- const pending=new Map();let seq=0,closed=false,activeId=null,accepted=false;
- const reset=()=>{activeId=null;accepted=false};
+ const pending=new Map();let seq=0,closed=false,activeId=null,accepted=false,generation=0;
+ const reset=()=>{generation++;activeId=null;accepted=false};
  function onMessage(ev){
    if(closed||ev.source!==frame.contentWindow)return;
    const d=ev.data;if(!d||typeof d!=='object')return;
@@ -32,7 +32,7 @@ export function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={
    async load(payload){reset();return request('load',payload)},
    async show({questionId,mode='team',omitChoiceId=null}={}){
      if(typeof questionId!=='string'||!questionId)throw Error('HOJA_QUESTION_ID_REQUIRED');
-     reset();const response=await request('show',{questionId,mode,omitChoiceId});activeId=questionId;return response;
+     reset();const currentGeneration=generation;const response=await request('show',{questionId,mode,omitChoiceId});if(!closed&&generation===currentGeneration)activeId=questionId;return response;
    },
    async inspect(){return request('inspect')},
    suspend(){reset()},

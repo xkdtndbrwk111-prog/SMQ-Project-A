@@ -35,3 +35,23 @@ test('foreign frames, suspended or stale questions cannot submit',async()=>{
   assert.equal(answers.length,0);h.close();
  }finally{f.cleanup()}
 });
+
+test('late show responses cannot reactivate stale or suspended questions',async()=>{
+ const listeners=new Set(),commands=[],answers=[],old=globalThis.window;
+ globalThis.window={addEventListener:(_,f)=>listeners.add(f),removeEventListener:(_,f)=>listeners.delete(f)};
+ const frame={tagName:'IFRAME',contentWindow:{postMessage:c=>commands.push(c)}};
+ const send=data=>listeners.forEach(f=>f({data,source:frame.contentWindow}));
+ try{
+  const h=createApprovedFrameHost({frame,onAnswer:v=>answers.push(v)});
+  const first=h.show({questionId:'old'}),second=h.show({questionId:'new'});
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[1].requestId,ok:true});await second;
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[0].requestId,ok:true});await first;
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'old',choiceId:'c1'});
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'new',choiceId:'c2'});
+  assert.deepEqual(answers.map(a=>a.questionId),['new']);
+  const third=h.show({questionId:'third'});h.suspend();
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[2].requestId,ok:true});await third;
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'third',choiceId:'c1'});
+  assert.equal(answers.length,1);h.close();
+ }finally{globalThis.window=old}
+});
