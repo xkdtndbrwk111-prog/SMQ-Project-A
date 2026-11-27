@@ -28,10 +28,10 @@ async def main():
       b=await pw.chromium.launch(headless=True,channel=a.channel,args=['--enable-unsafe-swiftshader'])
       print('BROWSER',json.dumps({'version':b.version,'channel':a.channel or 'chromium'}),flush=True)
       for run in range(a.runs):
-        ctx=await b.new_context(viewport={'width':1280,'height':800}); await ctx.tracing.start(screenshots=True,snapshots=True); await ctx.add_init_script('('+PROBE+')()'); page=await ctx.new_page(); dialogs=[]; errors=[]; step='setup'; result={'run':run+1}
+        ctx=await b.new_context(viewport={'width':1280,'height':800}); await ctx.tracing.start(screenshots=True,snapshots=True); await ctx.add_init_script('('+PROBE+')()'); page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1}
         async def dialog(d):
           dialogs.append({'type':d.type,'message':d.message,'wallTime':time.time(),'step':step,'source':'javascript-dialog'}); await d.dismiss()
-        page.on('dialog',lambda d: asyncio.create_task(dialog(d))); page.on('pageerror',lambda e: errors.append({'message':str(e),'step':step}))
+        page.on('dialog',lambda d: asyncio.create_task(dialog(d))); page.on('pageerror',lambda e: errors.append({'message':str(e),'stack':getattr(e,'stack',None),'step':step})); page.on('console',lambda m: console.append({'type':m.type,'text':m.text,'location':m.location,'step':step}) if m.type in ('warning','error') else None)
         async def route(r):
           u=r.request.url
           if u==f'http://127.0.0.1:{a.port}/game.html': await r.fulfill(body=html,content_type='text/html; charset=utf-8')
@@ -74,7 +74,7 @@ async def main():
           result['memoryEnd']=await page.evaluate('performance.memory?.usedJSHeapSize||null')
           result['measures']=await page.evaluate("performance.getEntriesByType('measure').filter(x=>x.name.includes('verdict')).map(x=>({name:x.name,duration:x.duration}))")
         except Exception as e: result['eventReadError']=repr(e)
-        result['dialogs']=dialogs; result['pageErrors']=errors
+        result['dialogs']=dialogs; result['pageErrors']=errors; result['console']=console
         if dialogs or errors: result['status']='FAIL'
         if result['status']=='FAIL':
           try:
