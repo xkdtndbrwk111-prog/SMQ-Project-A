@@ -32,6 +32,8 @@ async def main():
       await to_catalog(page);await pick_unit(page,names[a.unit])
       # Test fixture simulates the already-completed tutorial; the actual arcade opens through UI.
       await page.evaluate("localStorage.setItem('hoja_tutorial_stage0_completed_v1','1')")
+      # Test-only read-only hook inside the arcade closure; it never changes game state.
+      await page.evaluate("""()=>{if(typeof window.HOJA_TT_ARCADE_BRIDGE_SOURCE!=='string')throw Error('ARCADE_BRIDGE_MISSING');window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=`\nwindow.__testArcadePosition=()=>({x:ACTIVE_SCENE?.playerBody?.x,y:ACTIVE_SCENE?.playerBody?.y});\n`;}""")
       await mode(page,'혼자 놀기','아케이드 모드')
       direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
       if await direct.is_visible():await direct.click()
@@ -48,10 +50,23 @@ async def main():
       await arcade.locator('#gameViewport canvas').first.click(timeout=15000)
       for _ in range(4):
         await page.keyboard.press('Enter');await page.wait_for_timeout(400)
-      await page.keyboard.down('d');await page.wait_for_timeout(4000);await page.keyboard.up('d')
-      movement=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.HOJA_V064_PERF_READ()")
-      assert movement.get('connection')=='OK' and not movement.get('paused') and movement.get('movingRatio',0)>0.05,('ARCADE_MOVEMENT_NOT_OBSERVED',movement)
-      print('ARCADE_REAL_KEY_MOVEMENT_PASS',{'movingRatio':movement['movingRatio']},flush=True)
+      await page.evaluate("""()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;w.__testArcadeKeys=[];for(const t of ['keydown','keyup'])w.addEventListener(t,e=>{if(['KeyA','KeyD'].includes(e.code))w.__testArcadeKeys.push({type:t,code:e.code,trusted:e.isTrusted,time:performance.now()})},true)}""")
+      for key,code in (('a','KeyA'),('d','KeyD')):
+        origin=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+        assert isinstance(origin.get('x'),(int,float)),('ARCADE_POSITION_MISSING',origin)
+        await page.keyboard.down(key)
+        try:
+          await page.wait_for_function("v=>{const w=document.getElementById('hqArcadeFrame').contentWindow,p=w.HOJA_V064_PERF_READ(),x=w.__testArcadePosition().x;return p.connection==='OK'&&!p.paused&&(x-v.origin)*v.direction>1}",arg={'origin':origin['x'],'direction':-1 if key=='a' else 1},timeout=15000)
+          movement=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.HOJA_V064_PERF_READ()")
+          destination=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+          if key=='a':await page.wait_for_timeout(1500)  # move away from the observed initial right-side obstruction
+        except Exception:
+          diag=await page.evaluate("""()=>{const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow;return {outerFocus:document.activeElement?.id,innerFocus:f.contentDocument.activeElement?.tagName,keys:w.__testArcadeKeys,perf:w.HOJA_V064_PERF_READ()}}""")
+          print('ARCADE_MOVEMENT_DIAGNOSTIC',{'key':key,'details':diag},flush=True);raise
+        finally:await page.keyboard.up(key)
+        keys=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadeKeys")
+        assert any(x['type']=='keydown' and x['code']==code and x['trusted'] for x in keys),('ARCADE_KEYDOWN_NOT_DELIVERED',keys)
+        print('ARCADE_REAL_KEY_MOVEMENT_PASS',{'code':code,'from':origin,'to':destination,'movingRatio':movement['movingRatio'],'keys':keys},flush=True)
       await page.evaluate("window.HOJA_ATTRACT_CONTROL.restart()")
       await page.wait_for_function("window.HOJA_ATTRACT_GAME.loop.running&&!window.HOJA_ATTRACT_SCENE.scene.isPaused()",timeout=15000)
       t0=await page.evaluate('window.HOJA_ATTRACT_SCENE.elapsedMs');await page.wait_for_timeout(1000);t1=await page.evaluate('window.HOJA_ATTRACT_SCENE.elapsedMs')

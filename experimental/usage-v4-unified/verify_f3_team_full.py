@@ -26,7 +26,7 @@ async def question_open(page):
       const d=f&&f.contentDocument;
       return !!(o&&!o.hidden&&d&&d.body&&!d.body.classList.contains('hojaAwaitShow')&&d.querySelectorAll('#hqChoices button.hqChoice').length)}}""")
 
-async def answer(page, want_correct):
+async def answer(page, want_correct, keyboard=False):
     info = await page.evaluate(f"""()=>{{const w=document.querySelector('{IFR}').contentWindow;const q=w.current();
       const bs=[...w.document.querySelectorAll('#hqChoices button.hqChoice')];
       return {{id:q.id,type:q.type,ans:q.answer,choices:bs.map(b=>b.dataset.choice||''),stamped:bs.length>0&&bs.every(b=>b.dataset.hojaQid===q.id)}}}}""")
@@ -35,13 +35,15 @@ async def answer(page, want_correct):
     if info['type'] == 'MCQ' and info['ans']['choiceId'] not in info['choices']: return None, None
     fl = page.frame_locator(IFR)
     if info['type'] == 'SHORT':
-        await fl.locator('button.hqChoice').first.click(timeout=10000)          # teacher: 정답 확인 (reveal)
+        await (fl.locator('button.hqChoice').first.press('Enter',timeout=10000) if keyboard else fl.locator('button.hqChoice').first.click(timeout=10000))  # teacher reveal
         # teacher judgement buttons rendered by the approved renderer: ✓ 정답 처리 / ✕ 오답 처리
-        await fl.locator('button.teacher-judge.' + ('correct' if want_correct else 'incorrect')).first.click(timeout=10000)
+        judge=fl.locator('button.teacher-judge.' + ('correct' if want_correct else 'incorrect')).first
+        await (judge.press('Enter',timeout=10000) if keyboard else judge.click(timeout=10000))
         return info['type'], want_correct
     correct = info['ans']['choiceId'] if info['type'] == 'MCQ' else str(info['ans']['value']).lower()
     pick = correct if want_correct else next(c for c in info['choices'] if c != correct)
-    await fl.locator(f'button.hqChoice[data-choice="{pick}"]').click(timeout=10000)
+    choice=fl.locator(f'button.hqChoice[data-choice="{pick}"]')
+    await (choice.press('Enter',timeout=10000) if keyboard else choice.click(timeout=10000))
     return info['type'], want_correct
 
 async def click_first(page, sel):
@@ -50,14 +52,14 @@ async def click_first(page, sel):
     for i in range(n):
         el = loc.nth(i)
         if await el.is_visible() and await el.is_enabled():
-            await el.click(force=True, timeout=5000); return True
+            await el.click(timeout=5000); return True
     return False
 
 GH_HITS = []
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
-    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True); ap.add_argument('--channel', default=None)
+    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True); ap.add_argument('--channel', default=None); ap.add_argument('--keyboard', action='store_true')
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     phaser = Path(a.phaser).read_bytes()
@@ -87,15 +89,15 @@ async def main():
             for step in range(900):
                 await page.wait_for_timeout(350)
                 if review_mode and await page.evaluate("(()=>{const b=document.getElementById('hojaTeamReviewNext');return !!b&&b.style.display!=='none'})()"):
-                    await page.locator('#hojaTeamReviewNext').click(force=True); await page.wait_for_timeout(900); continue
+                    await page.locator('#hojaTeamReviewNext').click(); await page.wait_for_timeout(900); continue
                 if await question_open(page):
                     if review_mode:
-                        t, _ = await answer(page, True)
+                        t, _ = await answer(page, True, keyboard=a.keyboard)
                         if t is None: continue
                         reviewed += 1
                     else:
                         want = answered % 2 == 0
-                        t, _ = await answer(page, want)
+                        t, _ = await answer(page, want, keyboard=a.keyboard)
                         if t is None: continue
                         answered += 1; wrong += (not want); types[t] = types.get(t, 0) + 1
                     await page.wait_for_timeout(900); continue
