@@ -219,3 +219,20 @@ test('soft-coding: builder source embeds no real cartridge id or approved title'
     for (const t of [e.approvedTitle, e.unitTitle].filter(Boolean)) assert.ok(!code.includes(t), 'hardcoded title');
   }
 });
+
+
+test('explicit UNIT_TITLE release metadata selects only the approved short label; pins and other entries stay unchanged', () => {
+  const {index} = buildApprovedIndex(srcOf(fixture()), OPTS);
+  const src = index.entries.find(e => e.subject === 'social');
+  const another = index.entries.find(e => e.subject === 'math');
+  src.unitTitle = '짧은 단원명';
+  const pin = e => ({cartridgeId:e.cartridgeId, teacherDeploymentApproval:'APPROVED', approvedOn:'2026-11-27',
+    effectiveSha256:e.effectiveSha256, rendererGate:'PASS', questionValidationGate:'PASS', mediaRightsAcknowledged:true});
+  const deployment = {schemaVersion:DEPLOYMENT_SCHEMA, sourceCommit:COMMIT, deploymentId:'t', entries:[pin(src),pin(another)]};
+  const before = activeApprovedCatalog(index,deployment);
+  const after = activeApprovedCatalog(index,{...deployment,entries:[{...pin(src),titleStyle:'UNIT_TITLE'},pin(another)]});
+  assert.deepEqual(after.entries,before.entries.map(e=>e.cartridgeId===src.cartridgeId?{...e,title:src.unitTitle}:e));
+  assert.throws(()=>activeApprovedCatalog(index,{...deployment,entries:[{...pin(src),titleStyle:'arbitrary'}]}),/INVALID_TITLE_STYLE/);
+  src.unitTitle = '';
+  assert.throws(()=>activeApprovedCatalog(index,{...deployment,entries:[{...pin(src),titleStyle:'UNIT_TITLE'}]}),/INVALID_TITLE_STYLE/);
+});
