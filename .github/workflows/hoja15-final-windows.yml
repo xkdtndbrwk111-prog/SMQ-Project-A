@@ -9,6 +9,7 @@ on:
       - 'experimental/usage-v4-unified/verify_presentation_identity.py'
       - 'experimental/usage-v4-unified/verify_renderer_recovery.py'
       - 'experimental/usage-v4-unified/verify_stale_failure.py'
+      - 'experimental/usage-v4-unified/verify_solo_renderer_recovery.py'
       - 'experimental/usage-v4-unified/verify_f3_ui_e2e.py'
       - 'experimental/usage-v4-unified/verify_arcade_intro.py'
   workflow_dispatch:
@@ -121,6 +122,7 @@ jobs:
           python -u "$P/verify_presentation_identity.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome
           for fault in embed load show; do
             python -u "$P/verify_renderer_recovery.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome --failure "$fault"
+            python -u "$P/verify_solo_renderer_recovery.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome --failure "$fault"
           done
           python -u "$P/verify_stale_failure.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome
           python -u "$P/verify_arcade_intro.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome

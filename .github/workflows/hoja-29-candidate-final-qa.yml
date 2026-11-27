@@ -120,6 +120,7 @@ jobs:
           echo RENDERER_RECOVERY_START
           for fault in embed load show; do
             timeout --kill-after=10s 150s python3 -u "$P/verify_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --failure "$fault" || { echo "RENDERER_RECOVERY_FAILED $fault"; result=1; }
+            timeout --kill-after=10s 150s python3 -u "$P/verify_solo_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --failure "$fault" || { echo "SOLO_RENDERER_RECOVERY_FAILED $fault"; result=1; }
           done
           timeout --kill-after=10s 150s python3 -u "$P/verify_stale_failure.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo STALE_FAILURE_FAILED; result=1; }
           echo QR_START
