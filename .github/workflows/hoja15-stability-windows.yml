@@ -69,6 +69,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Restore verified source-part blob bytes
+        run: |
+          node --input-type=module <<'JS'
+          import {execFileSync} from 'node:child_process';
+          import {writeFileSync} from 'node:fs';
+          const files=execFileSync('git',['ls-files','-z','versions/2.0.0/Game.html.parts','experimental/unified-quiz-renderer/game-trial']).toString().split('\0').filter(Boolean);
+          for (const file of files) writeFileSync(file,execFileSync('git',['show','HEAD:'+file],{maxBuffer:30*1024*1024}));
+          console.log('RESTORED_GIT_BLOBS',files.length);
+          JS
       - name: Diagnose Windows bundle builder
         env:
           PYTHONUTF8: '1'
