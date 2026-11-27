@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify intro sleep and wake ordering
-        run: node --test experimental/unified-quiz-renderer/intro_loop.test.mjs
+        run: node --test experimental/unified-quiz-renderer/intro_loop.test.mjs experimental/unified-quiz-renderer/frame_host.test.mjs
       - uses: actions/checkout@v4
         with:
           repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
@@ -111,6 +111,8 @@ jobs:
             echo "GAME_UI_START $flow"
             timeout --kill-after=10s 150s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --flow "$flow" || { echo "GAME_UI_FAILED $flow"; result=1; }
           done
+          echo PRESENTATION_IDENTITY_START
+          timeout --kill-after=10s 150s python3 -u "$P/verify_presentation_identity.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo PRESENTATION_IDENTITY_FAILED; result=1; }
           echo QR_START
           timeout --kill-after=15s 240s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common || { echo QR_FAILED; result=1; }
           exit "$result"

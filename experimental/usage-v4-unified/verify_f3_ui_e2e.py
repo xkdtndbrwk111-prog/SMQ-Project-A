@@ -126,7 +126,7 @@ async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
     ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8765); ap.add_argument('--units', required=True); ap.add_argument('--fail-shot')
-    ap.add_argument('--flow',choices=['SOLO','TEAM','BOTH'],default='BOTH')
+    ap.add_argument('--flow',choices=['SOLO','TEAM','BOTH'],default='BOTH');ap.add_argument('--channel',default=None)
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     if a.flow in ('SOLO','BOTH') and 'const jumpHeight=t=>4*amplitude*t*(1-t)' in html:
@@ -137,7 +137,7 @@ async def main():
     results = []
     print('UI_CHROMIUM_START',flush=True)
     async with async_playwright() as pw:
-        b = await pw.chromium.launch(headless=True,timeout=30000,args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
+        b = await pw.chromium.launch(headless=True,channel=a.channel,timeout=30000,args=['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader'])
         for uid in a.units.split(','):
             for flow in (('SOLO','TEAM') if a.flow=='BOTH' else (a.flow,)):
                 STEP['last']='start:'+uid+':'+flow; print('UI_STEP',STEP['last'],flush=True)

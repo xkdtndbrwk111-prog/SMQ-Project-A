@@ -13,7 +13,8 @@ rc = info.get('releaseCandidate') or {}
 ok(info.get('variant') == 'release' and info.get('game') == 'approved-rc', 'NOT_A_RELEASE_RC_BUILD')
 ok(rc.get('originalSha256') == '4ac5c4efc985c4c5d08f10a4410a48d7b49070c30fb10651a0c78cec6b3ecfc6', 'ORIGINAL_SNAPSHOT_SHA')
 ok(rc.get('changedParts') == [14, 22, 23, 24], 'CHANGED_PARTS')   # 40-6BG: practice-mode control update in 23/24
-ok(rc.get('bridgeSha256') == '12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157', 'BRIDGE_SHA')
+# Previous approved bridge SHA-256: 12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157.
+ok(rc.get('bridgeSha256') == 'd4c93c612dd6486ec0554da300b703f595e36830268527908c5cc5e0c7bab82c', 'BRIDGE_SHA')
 game = (d / 'Game.html').read_bytes()
 from solo_jump_patch import verify, PATCH_SHA256
 ok(verify(game) and rc.get('soloJumpPatchSha256') == PATCH_SHA256, 'SOLO_JUMP_PATCH_MISMATCH')
@@ -55,7 +56,9 @@ if without_display.count(mark) == 1:
 # 2026-11-27 stability RC: only the documented frame-host generation guard changed (PR #14).
 # Previous frame-host stability RC: 6c62da8d15da4d8fb44aa429e7e6c4c086fba37f4bef9a5ae55d498d02938be2.
 # Intro-only scene pause / timestep sleep RC; evidence recorded in PR #14.
-ok(rc.get('rcGameSha256') == '15206197a4c311f12afea9a47b54c3c50e3a880f8c23fc5fc54594126ce877c0', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# Prior intro timestep RC: 15206197a4c311f12afea9a47b54c3c50e3a880f8c23fc5fc54594126ce877c0.
+# Presentation identity adapter RC, evidence recorded in PR #14.
+ok(rc.get('rcGameSha256') == '4966846596244b166082c5d095cf42a235ef597d7df1d7c7abf3951f7e861b0b', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}

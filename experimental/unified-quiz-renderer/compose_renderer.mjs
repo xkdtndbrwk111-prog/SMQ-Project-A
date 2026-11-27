@@ -1,18 +1,20 @@
 #!/usr/bin/env node
 /**
  * Compose the ONE shared approved renderer used by every game mode:
- *   unchanged HOJA_APPROVED_RENDERER_BRIDGE.html (SHA-256 pinned below)
+ *   HOJA_APPROVED_RENDERER_BRIDGE.html (SHA-256 pinned below)
  *   + <script id="hoja-ext-media-v1"> HOJA_RENDERER_MEDIA_EXT.js </script> appended before </body>.
  * The bridge's A/C/D CSS and renderQuestion/measureAndFit/fitContent/selectComposition stay
- * byte-identical because the bridge file itself is never edited.
+ * byte-identical; only the adapter message protocol changed.
  *   node compose_renderer.mjs <out.html>
  */
 import {readFileSync, writeFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
+// Previous bridge SHA-256: 12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157.
+// Adapter-only presentation IDs; approved visual rendering is unchanged.
 const here = dirname(fileURLToPath(import.meta.url));
-export const BRIDGE_SHA256 = '12b76fbbf667f3408f19059c0b0d3febd9bc471c038ddd004333ce135633b157';
+export const BRIDGE_SHA256 = 'd4c93c612dd6486ec0554da300b703f595e36830268527908c5cc5e0c7bab82c';
 const sha = b => createHash('sha256').update(b).digest('hex');
 export function composeRenderer() {
   const bridge = readFileSync(join(here, 'HOJA_APPROVED_RENDERER_BRIDGE.html'), 'utf8');
