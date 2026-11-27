@@ -121,7 +121,7 @@ jobs:
           trap 'kill "$SERVER" 2>/dev/null || true; cat "$RUNNER_TEMP/mock-server.log"' EXIT
           for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
           grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
-          python -u "$P/verify_stability.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$RUNNER_TEMP/browser-deps/node_modules/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --channel chrome --runs 10 --instrumentation '${{ matrix.instrumentation }}' --trace '${{ matrix.trace }}' | tee "$RUNNER_TEMP/stability.log"
+          python -u "$P/verify_stability.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$RUNNER_TEMP/browser-deps/node_modules/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --channel chrome --runs 10 --seed-base $(((${{ matrix.batch }}-1)*10)) --instrumentation '${{ matrix.instrumentation }}' --trace '${{ matrix.trace }}' | tee "$RUNNER_TEMP/stability.log"
       - name: Preserve diagnostic output
         if: always()
         uses: actions/upload-artifact@v4

@@ -20,7 +20,7 @@ PROBE = r'''() => {
 }'''
 
 async def main():
-    p=argparse.ArgumentParser(); p.add_argument('--html',required=True); p.add_argument('--phaser',required=True); p.add_argument('--github-packages',required=True); p.add_argument('--port',type=int,default=8790); p.add_argument('--units',required=True); p.add_argument('--channel',default=None); p.add_argument('--runs',type=int,default=10); p.add_argument('--instrumentation',choices=['minimal','detailed'],default='detailed'); p.add_argument('--trace',choices=['on','off'],default='on'); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--html',required=True); p.add_argument('--phaser',required=True); p.add_argument('--github-packages',required=True); p.add_argument('--port',type=int,default=8790); p.add_argument('--units',required=True); p.add_argument('--channel',default=None); p.add_argument('--runs',type=int,default=10); p.add_argument('--seed-base',type=int,default=0); p.add_argument('--instrumentation',choices=['minimal','detailed'],default='detailed'); p.add_argument('--trace',choices=['on','off'],default='on'); a=p.parse_args()
     html=Path(a.html).read_text(encoding='utf-8').replace('<head>','<head>'+STUB.replace('PORT',str(a.port)),1); phaser=Path(a.phaser).read_bytes()
     uid=a.units; names={x['cartridgeId']:x['name'] for x in backend(a.port,'/rpc',{'fn':'hojaListPublicCartridges','args':[]})['v']}
     all_results=[]
@@ -29,9 +29,11 @@ async def main():
       print('BROWSER',json.dumps({'version':b.version,'channel':a.channel or 'chromium'}),flush=True)
       for run in range(a.runs):
         ctx=await b.new_context(viewport={'width':1280,'height':800})
+        seed=a.seed_base+run+1
+        await ctx.add_init_script(f"(()=>{{let s={seed}>>>0;Math.random=()=>{{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}}})()")
         if a.trace=='on': await ctx.tracing.start(screenshots=True,snapshots=True)
         if a.instrumentation=='detailed': await ctx.add_init_script('('+PROBE+')()')
-        page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1,'instrumentation':a.instrumentation,'tracing':a.trace}
+        page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1,'instrumentation':a.instrumentation,'tracing':a.trace,'seed':seed}
         async def dialog(d):
           dialogs.append({'type':d.type,'message':d.message,'wallTime':time.time(),'step':step,'source':'javascript-dialog'}); await d.dismiss()
         page.on('dialog',lambda d: asyncio.create_task(dialog(d))); page.on('pageerror',lambda e: errors.append({'message':str(e),'stack':getattr(e,'stack',None),'step':step})); page.on('console',lambda m: console.append({'type':m.type,'text':m.text,'location':m.location,'step':step}) if m.type in ('warning','error') else None)
@@ -48,7 +50,7 @@ async def main():
           await page.goto(f'http://127.0.0.1:{a.port}/game.html',wait_until='domcontentloaded',timeout=60000); await page.wait_for_timeout(5000)
           step='catalog'; await to_catalog(page); await pick_unit(page,names[uid]); step='five-player'; await mode(page,'함께 놀기','5'); await page.wait_for_timeout(2800)
           step='first-balloon'; start=time.perf_counter(); await page.locator('#htTeamBoard button.htBalloon:visible').first.click(timeout=20000)
-          shown=await approved_iframe(page,1); assert shown['q'] and shown['n']>0,shown; result['firstQuestionMs']=(time.perf_counter()-start)*1000
+          shown=await approved_iframe(page,1); assert shown['q'] and shown['n']>0,shown; result['firstQuestionMs']=(time.perf_counter()-start)*1000; result['questionId']=await page.evaluate("document.querySelector('iframe[id^=hojaTeamApproved]').contentWindow.current().id")
           await page.evaluate('''()=>{window.__verdicts=[];window.__timing={};const t=window.__timing;
             const observe=()=>{const e=document.querySelector('.htCorrectImpactTitle');if(e&&e.getBoundingClientRect().width&&!t.verdict){t.verdict=performance.now();performance.mark('stability-verdict');window.__verdicts.push({node:e,text:e.textContent,t:t.verdict});requestAnimationFrame(()=>requestAnimationFrame(()=>{t.verdictPaint=performance.now();performance.mark('stability-verdict-paint');if(t.input)performance.measure('answer-to-verdict-paint','stability-input','stability-verdict-paint')}))}
             const p=document.querySelector('#htItemLayer .htPipeBtn');if(p&&p.getBoundingClientRect().width&&!t.pipe){t.pipe=performance.now();performance.mark('stability-pipe-visible');if(t.verdict)performance.measure('verdict-to-pipe','stability-verdict','stability-pipe-visible')}};
