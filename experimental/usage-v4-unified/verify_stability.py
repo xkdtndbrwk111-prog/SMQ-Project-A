@@ -30,7 +30,7 @@ async def main():
       for run in range(a.runs):
         ctx=await b.new_context(viewport={'width':1280,'height':800})
         seed=a.seed_base+run+1
-        await ctx.add_init_script(f"(()=>{{let s={seed}>>>0;Math.random=()=>{{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296}}}})()")
+        await ctx.add_init_script(f"Math.random=()=>({seed}/31)")
         if a.trace=='on': await ctx.tracing.start(screenshots=True,snapshots=True)
         if a.instrumentation=='detailed': await ctx.add_init_script('('+PROBE+')()')
         page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1,'instrumentation':a.instrumentation,'tracing':a.trace,'seed':seed}
