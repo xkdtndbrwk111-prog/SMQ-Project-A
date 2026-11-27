@@ -194,15 +194,15 @@ test('unit-id convention is only a fallback/cross-check', () => {
 
 /* ---------- real approved source (committed generated output) ---------- */
 const realIndexPath = join(here, 'generated', 'approved-source-index.json');
-test('REAL approved index: 23 units / 732 questions, all NOT_DEPLOYED, approved titles, q21 overlay', {skip: !existsSync(realIndexPath)}, () => {
+test('REAL approved index: 29 units / 899 questions, all NOT_DEPLOYED, approved titles, q21 overlay', {skip: !existsSync(realIndexPath)}, () => {
   const ix = JSON.parse(readFileSync(realIndexPath, 'utf8'));
-  assert.equal(ix.approvalUnits, 23);
-  assert.equal(ix.approvalQuestions, 732);
+  assert.equal(ix.approvalUnits, 29);
+  assert.equal(ix.approvalQuestions, 899);
   assert.deepEqual(Object.fromEntries(Object.entries(ix.subjects).map(([k, v]) => [k, [v.units, v.questions]])),
-    {english: [12, 384], social: [5, 161], math: [6, 187]});
+    {english: [12, 384], social: [5, 161], math: [6, 187], korean: [4, 103], science: [2, 64]});
   assert.ok(ix.entries.every(e => e.deploymentStatus === 'NOT_DEPLOYED'));
   assert.ok(ix.entries.every(e => e.approvedTitle && e.titleSource !== 'FALLBACK'));
-  assert.equal(new Set(ix.entries.map(e => e.cartridgeId)).size, 23);
+  assert.equal(new Set(ix.entries.map(e => e.cartridgeId)).size, 29);
   const overlays = ix.entries.filter(e => e.mediaOverlay);
   assert.equal(overlays.length, 1);
   assert.match(overlays[0].mediaOverlay.questionId, /:q21$/);
