@@ -409,7 +409,15 @@ export function activeApprovedCatalog(index, deployment) {
       fatal('MEDIA_RIGHTS_HOLD:' + id);
     for (const gate of ['rendererGate', 'questionValidationGate'])
       if (pin[gate] !== 'PASS') fatal('GATE_NOT_PASSED:' + gate + ':' + id);
-    out.push({cartridgeId: id, title: entry.approvedTitle, subject: entry.subject, subjectLabel: entry.subjectLabel,
+    // Explicit release metadata can select the already-approved short unit title.
+    // Never rewrite approved source archives, effective digests or question packages.
+    let title = entry.approvedTitle;
+    if (pin.titleStyle !== undefined) {
+      if (pin.titleStyle !== 'UNIT_TITLE' || !cleanTitle(entry.unitTitle))
+        fatal('INVALID_TITLE_STYLE:' + id);
+      title = cleanTitle(entry.unitTitle);
+    }
+    out.push({cartridgeId: id, title, subject: entry.subject, subjectLabel: entry.subjectLabel,
       grade: entry.grade, semester: entry.semester, publisher: entry.publisher, author: entry.author,
       unit: entry.unit, subunit: entry.subunit, questionCount: entry.questionCount,
       effectiveSha256: entry.effectiveSha256, releaseId: entry.releaseId, deploymentStatus: 'DEPLOYED'});
