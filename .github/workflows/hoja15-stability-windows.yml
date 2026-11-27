@@ -2,7 +2,7 @@ name: HOJA 1.5 Windows Chrome baseline
 on:
   push:
     branches: [work/hoja15-stability-20261127]
-    paths: ['.github/workflows/hoja15-stability-windows.yml', 'experimental/usage-v4-unified/verify_stability.py', 'experimental/usage-v4-unified/approved-catalog/*.mjs']
+    paths: ['.github/workflows/hoja15-stability-windows.yml', 'experimental/usage-v4-unified/verify_stability.py', 'experimental/usage-v4-unified/approved-catalog/*.mjs', 'experimental/unified-quiz-renderer/game-trial/build_trial.py']
   workflow_dispatch:
 permissions:
   contents: read
