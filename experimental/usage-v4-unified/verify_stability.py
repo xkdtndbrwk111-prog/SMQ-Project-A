@@ -46,7 +46,12 @@ async def main():
           step='catalog'; await to_catalog(page); await pick_unit(page,names[uid]); step='five-player'; await mode(page,'함께 놀기','5'); await page.wait_for_timeout(2800)
           step='first-balloon'; start=time.perf_counter(); await page.locator('#htTeamBoard button.htBalloon:visible').first.click(timeout=20000)
           shown=await approved_iframe(page,1); assert shown['q'] and shown['n']>0,shown; result['firstQuestionMs']=(time.perf_counter()-start)*1000
-          await page.evaluate('''()=>{window.__verdicts=[];new MutationObserver(()=>{const e=document.getElementById('hojaSoloJudgment');if(e&&e.getBoundingClientRect().width&&!window.__verdicts.some(x=>x.node===e)){window.__verdicts.push({node:e,text:e.innerText,t:performance.now()})}}).observe(document.getElementById('hqOverlay'),{childList:true,subtree:true})}''')
+          await page.evaluate('''()=>{window.__verdicts=[];window.__timing={};const t=window.__timing;
+            const observe=()=>{const e=document.getElementById('hojaSoloJudgment');if(e&&e.getBoundingClientRect().width&&!t.verdict){t.verdict=performance.now();performance.mark('stability-verdict');window.__verdicts.push({node:e,text:e.innerText,t:t.verdict});requestAnimationFrame(()=>requestAnimationFrame(()=>{t.verdictPaint=performance.now();performance.mark('stability-verdict-paint');if(t.input)performance.measure('answer-to-verdict-paint','stability-input','stability-verdict-paint')}))}
+            const p=document.querySelector('#htItemLayer .htPipeBtn');if(p&&p.getBoundingClientRect().width&&!t.pipe){t.pipe=performance.now();performance.mark('stability-pipe-visible');if(t.verdict)performance.measure('verdict-to-pipe','stability-verdict','stability-pipe-visible')}};
+            new MutationObserver(observe).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','style','class']});
+            const d=document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument;d.addEventListener('click',e=>{if(e.target.closest('button.hqChoice')&&!t.input){t.input=performance.now();performance.mark('stability-input')}},true);
+          }''')
           step='answer'; start=time.perf_counter(); kind,correct=await answer(page,True); assert kind is not None, 'question not ready or answer unavailable'; result['answerInputMs']=(time.perf_counter()-start)*1000
           step='verdict'; await page.wait_for_function("window.__verdicts.some(v=>v.text.includes('정답'))",timeout=15000)
           step='pipe'; start=time.perf_counter(); pipe=page.locator('#htItemLayer .htPipeBtn:visible').first; await pipe.wait_for(state='visible',timeout=15000); result['pipeVisibleMs']=(time.perf_counter()-start)*1000; await pipe.click(timeout=10000)
@@ -60,7 +65,10 @@ async def main():
           result.update({'nextQuestionMs':(time.perf_counter()-start)*1000,'status':'PASS','answerType':kind})
         except Exception as e:
           result.update({'status':'FAIL','step':step,'error':repr(e),'trace':traceback.format_exc()})
-        try: result['events']=await page.evaluate('window.__stability||[]')
+        try:
+          result['events']=await page.evaluate('window.__stability||[]')
+          result['timing']=await page.evaluate('window.__timing||{}')
+          result['measures']=await page.evaluate("performance.getEntriesByType('measure').filter(x=>x.name.includes('verdict')).map(x=>({name:x.name,duration:x.duration}))")
         except Exception as e: result['eventReadError']=repr(e)
         result['dialogs']=dialogs; result['pageErrors']=errors
         if dialogs or errors: result['status']='FAIL'
