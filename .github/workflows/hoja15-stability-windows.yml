@@ -62,6 +62,9 @@ jobs:
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.json',JSON.stringify(cat));
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
           JS
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
         run: |
           P=experimental/usage-v4-unified
@@ -69,9 +72,6 @@ jobs:
           # Keep test-only bundle inside this ephemeral CI job for browser tests.
       - name: Run 29-unit catalog RPC integration on registered runtime
         run: node experimental/usage-v4-unified/verify_remote_catalog_integration.mjs qbank-runtime 29 899
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install offline browser test dependencies
         run: |
           python -m pip install playwright
