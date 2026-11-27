@@ -72,6 +72,10 @@ jobs:
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.json',JSON.stringify(cat));
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
           JS
+      - name: Verify approved catalog and isolated statistics retention
+        run: |
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs experimental/usage-v4-unified/HOJA15_JOIN.test.mjs experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_AUTOSEAL.test.mjs experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.test.mjs experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_GAS.test.mjs experimental/usage-retention/HOJA_USAGE_V4_CORE.test.mjs experimental/usage-retention/HOJA_USAGE_V4_APPEND_GUARD_TRIAL.test.mjs
       - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
         run: |
           P=experimental/usage-v4-unified
