@@ -20,7 +20,7 @@ PROBE = r'''() => {
 }'''
 
 async def main():
-    p=argparse.ArgumentParser(); p.add_argument('--html',required=True); p.add_argument('--phaser',required=True); p.add_argument('--github-packages',required=True); p.add_argument('--port',type=int,default=8790); p.add_argument('--units',required=True); p.add_argument('--channel',default=None); p.add_argument('--runs',type=int,default=10); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--html',required=True); p.add_argument('--phaser',required=True); p.add_argument('--github-packages',required=True); p.add_argument('--port',type=int,default=8790); p.add_argument('--units',required=True); p.add_argument('--channel',default=None); p.add_argument('--runs',type=int,default=10); p.add_argument('--instrumentation',choices=['minimal','detailed'],default='detailed'); p.add_argument('--trace',choices=['on','off'],default='on'); a=p.parse_args()
     html=Path(a.html).read_text(encoding='utf-8').replace('<head>','<head>'+STUB.replace('PORT',str(a.port)),1); phaser=Path(a.phaser).read_bytes()
     uid=a.units; names={x['cartridgeId']:x['name'] for x in backend(a.port,'/rpc',{'fn':'hojaListPublicCartridges','args':[]})['v']}
     all_results=[]
@@ -28,7 +28,10 @@ async def main():
       b=await pw.chromium.launch(headless=True,channel=a.channel,args=['--enable-unsafe-swiftshader'])
       print('BROWSER',json.dumps({'version':b.version,'channel':a.channel or 'chromium'}),flush=True)
       for run in range(a.runs):
-        ctx=await b.new_context(viewport={'width':1280,'height':800}); await ctx.tracing.start(screenshots=True,snapshots=True); await ctx.add_init_script('('+PROBE+')()'); page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1}
+        ctx=await b.new_context(viewport={'width':1280,'height':800})
+        if a.trace=='on': await ctx.tracing.start(screenshots=True,snapshots=True)
+        if a.instrumentation=='detailed': await ctx.add_init_script('('+PROBE+')()')
+        page=await ctx.new_page(); dialogs=[]; errors=[]; console=[]; step='setup'; result={'run':run+1,'instrumentation':a.instrumentation,'tracing':a.trace}
         async def dialog(d):
           dialogs.append({'type':d.type,'message':d.message,'wallTime':time.time(),'step':step,'source':'javascript-dialog'}); await d.dismiss()
         page.on('dialog',lambda d: asyncio.create_task(dialog(d))); page.on('pageerror',lambda e: errors.append({'message':str(e),'stack':getattr(e,'stack',None),'step':step})); page.on('console',lambda m: console.append({'type':m.type,'text':m.text,'location':m.location,'step':step}) if m.type in ('warning','error') else None)
@@ -78,9 +81,10 @@ async def main():
         if dialogs or errors: result['status']='FAIL'
         if result['status']=='FAIL':
           try:
-            out=Path(os.environ.get('RUNNER_TEMP','.'))/'stability-traces';out.mkdir(exist_ok=True); await page.screenshot(path=str(out/f'case-{run+1}.png'),timeout=5000); await ctx.tracing.stop(path=str(out/f'case-{run+1}.zip'))
+            out=Path(os.environ.get('RUNNER_TEMP','.'))/'stability-traces';out.mkdir(exist_ok=True); await page.screenshot(path=str(out/f'case-{run+1}.png'),timeout=5000)
+            if a.trace=='on': await ctx.tracing.stop(path=str(out/f'case-{run+1}.zip'))
           except Exception as e: result['traceSaveError']=repr(e)
-        else: await ctx.tracing.stop()
+        elif a.trace=='on': await ctx.tracing.stop()
         all_results.append(result); print('CASE',json.dumps(result,ensure_ascii=False),flush=True); await ctx.close()
       await b.close()
     passed=sum(x['status']=='PASS' for x in all_results); print('STABILITY_SUMMARY',json.dumps({'passed':passed,'total':len(all_results)}),flush=True)
