@@ -10,6 +10,10 @@ jobs:
   verify-and-assemble:
     env:
       PYTHONUTF8: '1'
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3]
     runs-on: windows-latest
     defaults:
       run:
@@ -111,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stability-baseline-windows-chrome
+          name: stability-baseline-windows-chrome-${{ matrix.batch }}
           path: |
             ${{ runner.temp }}/stability.log
             ${{ runner.temp }}/stability-traces/
