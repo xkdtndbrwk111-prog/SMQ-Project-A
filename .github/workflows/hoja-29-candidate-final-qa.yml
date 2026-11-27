@@ -118,7 +118,9 @@ jobs:
           echo PRESENTATION_IDENTITY_START
           timeout --kill-after=10s 150s python3 -u "$P/verify_presentation_identity.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo PRESENTATION_IDENTITY_FAILED; result=1; }
           echo RENDERER_RECOVERY_START
-          timeout --kill-after=10s 150s python3 -u "$P/verify_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo RENDERER_RECOVERY_FAILED; result=1; }
+          for fault in embed load show; do
+            timeout --kill-after=10s 150s python3 -u "$P/verify_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --failure "$fault" || { echo "RENDERER_RECOVERY_FAILED $fault"; result=1; }
+          done
           echo QR_START
           timeout --kill-after=15s 240s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common || { echo QR_FAILED; result=1; }
           exit "$result"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Inject one renderer show failure in the real team game; retry through its UI."""
-import argparse, asyncio
+import argparse, asyncio, json
 from pathlib import Path
 from playwright.async_api import async_playwright
 from verify_f3_ui_e2e import STUB, backend, to_catalog, pick_unit, mode, approved_iframe
@@ -9,7 +9,7 @@ async def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--html',required=True);ap.add_argument('--phaser',required=True)
     ap.add_argument('--packages',required=True);ap.add_argument('--port',type=int,default=8790)
-    ap.add_argument('--channel',default=None);a=ap.parse_args()
+    ap.add_argument('--channel',default=None);ap.add_argument('--failure',choices=['embed','load','show'],default='show');a=ap.parse_args()
     html=Path(a.html).read_text(encoding='utf-8').replace('<head>','<head>'+STUB.replace('PORT',str(a.port)),1)
     phaser=Path(a.phaser).read_bytes()
     names={x['cartridgeId']:x['name'] for x in backend(a.port,'/rpc',{'fn':'hojaListPublicCartridges','args':[]})['v']}
@@ -31,13 +31,13 @@ async def main():
       await page.route('**/*',route)
       await page.goto(f'http://127.0.0.1:{a.port}/game.html',wait_until='domcontentloaded',timeout=60000);await page.wait_for_timeout(5000)
       await to_catalog(page);await pick_unit(page,names['sci5-s2-heat-common'])
-      await page.evaluate('''()=>{window.__injectedFaults=0;
+      await page.evaluate('''action=>{window.__injectedFaults=0;
         const js=`<script>window.addEventListener('message',function(e){
-          if(e.source===parent&&e.data?.type==='HOJA_UNIFIED_COMMAND'&&e.data.action==='show'&&!parent.__injectedFaults){
+          if(e.source===parent&&e.data?.type==='HOJA_UNIFIED_COMMAND'&&e.data.action===${JSON.stringify(action)}&&!parent.__injectedFaults){
             parent.__injectedFaults++;e.stopImmediatePropagation();parent.postMessage({type:'HOJA_UNIFIED_RESULT',requestId:e.data.requestId,ok:false,error:'QA_INJECTED_FAILURE'},'*');
           }},true)<\\/script>`;
         window.HOJA_TRIAL_APPROVED_HTML=window.HOJA_TRIAL_APPROVED_HTML.replace('<head>','<head>'+js);
-      }''')
+      }''',a.failure)
       await mode(page,'함께 놀기','2')
       await page.locator('#htTeamBoard button.htBalloon').first.click(timeout=30000)
       await page.locator('#hojaRendererRetry').wait_for(state='visible',timeout=30000)
@@ -53,10 +53,11 @@ async def main():
       if q['type']=='SHORT':
         await frame.locator('button.hqChoice').first.click();await frame.locator('button.teacher-judge.correct').first.click()
       else:
-        choice=str(q['answer']['value']) if q['type']=='OX' else q['answer']['choiceId']
+        value=q['answer'].get('value')
+        choice=(json.dumps(value) if isinstance(value,bool) else str(value)) if q['type']=='OX' else q['answer']['choiceId']
         await frame.locator('button.hqChoice[data-choice="'+choice+'"]' ).click()
       await page.locator('#htItemLayer .htPipeBtn').first.wait_for(state='visible',timeout=15000)
       assert len(dialogs)==1 and not errors,(dialogs,errors)
-      print('INJECTED_SHOW_FAILURE_RECOVERY_PASS',q['type'],flush=True)
+      print('INJECTED_RENDERER_FAILURE_RECOVERY_PASS',a.failure,q['type'],flush=True)
       await browser.close()
 if __name__=='__main__':asyncio.run(main())

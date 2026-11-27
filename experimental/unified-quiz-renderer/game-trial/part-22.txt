@@ -259,7 +259,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  async function hojaRetryRender_(fn){for(let i=0;;i++){try{return await fn();}catch(e){if(!hojaIsTimeout_(e)||i>=3)throw e;await hojaWhenVisible_();await new Promise(r=>setTimeout(r,400));}}}
 
  function hojaWhenDrawn_(f,qid){return new Promise(res=>{const t0=performance.now();const tick=()=>{let ok=false;try{const d=f.contentDocument,w=f.contentWindow;const cur=w.current&&w.current();const bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];ok=!d.body.classList.contains('hojaAwaitShow')&&bs.length>0&&(!qid||(cur&&cur.id===qid))&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===(cur&&cur.id));}catch(_e){ok=true}if(ok||performance.now()-t0>1500){requestAnimationFrame(()=>res());return;}requestAnimationFrame(tick)};tick();});}
- let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0;
+ let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0,lastQuestions=null;
  let header=null,nextButton=null,judgment=null,retryButton=null;
  function overlay(){return document.getElementById('hqOverlay')}
  function clearJudgment(){if(judgment){judgment.remove();judgment=null;}}
@@ -315,9 +315,9 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  function begin(questions){
    const bindings=questions.map(q=>q.approvedBinding);
    const payload=core.teamApprovedPayload(bindings);
-   serial++;answerHandler=null;
+   serial++;answerHandler=null;lastQuestions=questions;
    loaded=prepareFrame().then(async h=>{await hojaRetryRender_(()=>h.load(payload));return h;});
-   loaded.catch(error);return loaded;
+   loaded.catch(()=>{});return loaded;
  }
  function reveal(){
    const pane=overlay();pane.hidden=false;pane.dataset.hojaUnified='yes';
@@ -346,11 +346,11 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    }catch(e){
      if(token!==serial)return;
      error(e);
-     if(token!==serial||!h||/HOJA_FRAME_CLOSED/.test(String(e?.message||e)))return;
+     if(token!==serial||(!h&&!lastQuestions)||/HOJA_FRAME_CLOSED/.test(String(e?.message||e)))return;
      retryButton=document.createElement('button');retryButton.id='hojaRendererRetry';retryButton.type='button';
      retryButton.textContent='문제 다시 불러오기';
      retryButton.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;padding:16px 28px;border:3px solid #ffdb67;border-radius:14px;background:#23555a;color:white;font:900 clamp(20px,2.4vw,32px) system-ui,sans-serif;cursor:pointer';
-     retryButton.onclick=()=>{if(token===serial)show(q,mode,onAnswer,caption);};
+     retryButton.onclick=()=>{if(token!==serial)return;if(!h){const questions=lastQuestions;reset();begin(questions);}show(q,mode,onAnswer,caption);};
      overlay().append(retryButton);retryButton.focus();
    }
  }
@@ -393,7 +393,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(host)host.close();
    if(frame)frame.remove();
    if(header)header.remove();
-   frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;
+   frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;lastQuestions=null;
  }
  return Object.freeze({begin,show,reviewFeedback,hide,reset,error,feedback:showJudgment,inputWindow});
 })();
