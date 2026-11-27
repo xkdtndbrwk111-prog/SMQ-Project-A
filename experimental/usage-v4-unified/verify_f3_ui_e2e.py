@@ -10,7 +10,7 @@ Flow per selected unit, driven ONLY by visible UI clicks/keys:
 and the backend must show: usage rows A1 with the approved id, watermark == last row.
 Every check is an assert; any failure exits nonzero.
 Usage: verify_f3_ui_e2e.py --html <trial.html> --phaser <phaser.min.js> --port 8765 --units id1,id2,..."""
-import argparse, asyncio, json, re, subprocess, sys, urllib.request
+import argparse, asyncio, json, re, subprocess, sys, time, urllib.request
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -142,8 +142,13 @@ async def main():
             for flow in (('SOLO','TEAM') if a.flow=='BOTH' else (a.flow,)):
                 STEP['last']='start:'+uid+':'+flow; print('UI_STEP',STEP['last'],flush=True)
                 before = backend(a.port)
-                ctx = await b.new_context(viewport={'width': 1280, 'height': 800}); page = await ctx.new_page(); errs = []
-                page.on('pageerror', lambda e: errs.append(str(e)[:140])); page.on('dialog', lambda d: asyncio.ensure_future(d.dismiss()))
+                ctx = await b.new_context(viewport={'width': 1280, 'height': 800}); page = await ctx.new_page(); errs = []; dialogs = []
+                async def record_dialog(d):
+                    event = {'type': d.type, 'message': d.message, 'time': time.time(), 'step': STEP['last'], 'unit': uid, 'flow': flow, 'origin': 'javascript-dialog'}
+                    dialogs.append(event); print('UNEXPECTED_DIALOG', json.dumps(event, ensure_ascii=False), flush=True)
+                    await d.dismiss()
+                page.on('pageerror', lambda e: errs.append({'message': str(e), 'stack': getattr(e, 'stack', None), 'step': STEP['last']}))
+                page.on('dialog', lambda d: asyncio.ensure_future(record_dialog(d)))
                 async def route(r):
                     u = r.request.url
                     if u == f'http://127.0.0.1:{a.port}/game.html': await r.fulfill(body=html, content_type='text/html; charset=utf-8')
@@ -257,8 +262,8 @@ async def main():
                 assert after['watermarkMinusLastRow'] == 0
                 assert shown['q'] and shown['n'] >= 1, shown
                 hint_leak = any(t and t in shown['q'] for t in [])
-                bad = [e for e in errs if 'ResizeObserver' not in e]
-                assert not bad, ('JS_ERRORS', bad)
+                assert not dialogs, ('UNEXPECTED_DIALOGS', dialogs)
+                assert not errs, ('JS_ERRORS', errs)
                 r = {'unit': uid, 'flow': flow, 'choicesShown': shown['n'], 'imagesShown': shown['imgs'], 'verdict': verdict[:30],
                      'usageRow': new_rows[0]['schema'] + ':' + new_rows[0]['mode'], 'telemetryRpcOk': True}
                 results.append(r); print(json.dumps(r, ensure_ascii=False), flush=True)
@@ -279,3 +284,4 @@ async def run():
         print('F3_UI_E2E_FAIL at ' + STEP['last'] + ' ' + repr(e)[:6000]); sys.exit(1)
 if __name__ == '__main__':
     asyncio.run(run())
+
