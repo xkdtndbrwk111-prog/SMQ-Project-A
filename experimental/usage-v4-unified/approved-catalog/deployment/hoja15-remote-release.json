@@ -1,8 +1,8 @@
 {
   "schemaVersion": "hoja-approved-deployment-v1",
-  "deploymentId": "HOJA15-REMOTE-29-20261127-R1",
+  "deploymentId": "HOJA15-REMOTE-29-20261127-R2",
   "sourceCommit": "43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c",
-  "note": "Full 29-unit/899-question public publication explicitly directed by the teacher on 2026-11-27 after six rights holds were disclosed. mediaRightsAcknowledged=true for the six named Korean/science units records that informed publication direction only; it does not assert CLEARED rights or independent Nabi/Charlotte textbook-source recheck. Their source-index rights statuses and README holds remain unchanged. Runtime and question/renderer pins were verified separately. Production GAS rollout requires trusted-main credential, external student, statistics, trigger and rollback checks.",
+  "note": "Full 29-unit/899-question public publication explicitly directed by the teacher on 2026-11-27 after six rights holds were disclosed. mediaRightsAcknowledged=true for the six named Korean/science units records that informed publication direction only; it does not assert CLEARED rights or independent Nabi/Charlotte textbook-source recheck. Their source-index rights statuses and README holds remain unchanged. Runtime and question/renderer pins were verified separately. Production GAS rollout requires trusted-main credential, external student, statistics, trigger and rollback checks. R2: teacher requested only the two science labels use the approved unitTitle. All effective SHA pins and original rights/source records are unchanged.",
   "entries": [
     {
       "cartridgeId": "eng5-ham-u10",
@@ -254,7 +254,8 @@
       "effectiveSha256": "84a430dbd68b6dd5513697e32775a7026ea922461bacd0a4f5d141a9b7e408f8",
       "rendererGate": "PASS",
       "questionValidationGate": "PASS",
-      "mediaRightsAcknowledged": true
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
     },
     {
       "cartridgeId": "sci5-s2-u4-common",
@@ -263,7 +264,8 @@
       "effectiveSha256": "0195d07956baeada3b07c5f7a037f74bf407e4c4f5862f9281b25e3d0418c9a8",
       "rendererGate": "PASS",
       "questionValidationGate": "PASS",
-      "mediaRightsAcknowledged": true
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
     }
   ]
 }
