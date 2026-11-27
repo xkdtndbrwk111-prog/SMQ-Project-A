@@ -8,6 +8,8 @@ permissions:
   contents: read
 jobs:
   verify-and-assemble:
+    env:
+      PYTHONUTF8: '1'
     runs-on: windows-latest
     defaults:
       run:
@@ -65,6 +67,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Diagnose Windows bundle builder
+        env:
+          PYTHONUTF8: '1'
+        run: python -u experimental/usage-v4-unified/build_unified_gas.py --output "$RUNNER_TEMP/preflight-bundle" --game approved-rc
       - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
         run: |
           P=experimental/usage-v4-unified
