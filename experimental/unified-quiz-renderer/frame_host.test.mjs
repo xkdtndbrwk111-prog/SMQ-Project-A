@@ -55,3 +55,38 @@ test('late show responses cannot reactivate stale or suspended questions',async(
   assert.equal(answers.length,1);h.close();
  }finally{globalThis.window=old}
 });
+
+test('duplicate and late results cannot revive a closed host',async()=>{
+ const listeners=new Set(),commands=[],answers=[],old=globalThis.window;
+ globalThis.window={addEventListener:(_,f)=>listeners.add(f),removeEventListener:(_,f)=>listeners.delete(f)};
+ const frame={tagName:'IFRAME',contentWindow:{postMessage:c=>commands.push(c)}};
+ const send=data=>listeners.forEach(f=>f({data,source:frame.contentWindow}));
+ try{
+  const h=createApprovedFrameHost({frame,onAnswer:v=>answers.push(v)});
+  const pending=h.show({questionId:'q1'});h.close();
+  await assert.rejects(pending,/HOJA_FRAME_CLOSED/);
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[0].requestId,ok:true});
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[0].requestId,ok:true});
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'q1',choiceId:'c1'});
+  assert.equal(listeners.size,0);assert.equal(answers.length,0);
+ }finally{globalThis.window=old}
+});
+
+test('missing response times out, late result is ignored and a later request can succeed',async()=>{
+ const listeners=new Set(),commands=[],answers=[],old=globalThis.window;
+ globalThis.window={addEventListener:(_,f)=>listeners.add(f),removeEventListener:(_,f)=>listeners.delete(f)};
+ const frame={tagName:'IFRAME',contentWindow:{postMessage:c=>commands.push(c)}};
+ const send=data=>listeners.forEach(f=>f({data,source:frame.contentWindow}));
+ try{
+  const h=createApprovedFrameHost({frame,onAnswer:v=>answers.push(v),timeoutMs:20});
+  await assert.rejects(h.show({questionId:'q1'}),/HOJA_RENDERER_TIMEOUT: show/);
+  const next=h.show({questionId:'q2'});
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[0].requestId,ok:true});
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'q1',choiceId:'c1'});
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[1].requestId,ok:true});await next;
+  send({type:'HOJA_UNIFIED_RESULT',requestId:commands[1].requestId,ok:true});
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'q2',choiceId:'c2'});
+  send({type:'HOJA_UNIFIED_ANSWER',questionId:'q2',choiceId:'c2'});
+  assert.deepEqual(answers.map(a=>a.questionId),['q2']);h.close();
+ }finally{globalThis.window=old}
+});
