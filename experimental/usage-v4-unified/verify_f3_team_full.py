@@ -57,13 +57,13 @@ GH_HITS = []
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--html', required=True); ap.add_argument('--phaser', required=True)
-    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True)
+    ap.add_argument('--github-packages', help='F4: answer pinned raw.githubusercontent.com package URLs from this local dir (packages not yet published)'); ap.add_argument('--port', type=int, default=8766); ap.add_argument('--units', required=True); ap.add_argument('--channel', default=None)
     a = ap.parse_args()
     html = Path(a.html).read_text(encoding='utf-8').replace('<head>', '<head>' + STUB.replace('PORT', str(a.port)), 1)
     phaser = Path(a.phaser).read_bytes()
     names = {x['cartridgeId']: x['name'] for x in backend(a.port, '/rpc', {'fn': 'hojaListPublicCartridges', 'args': []})['v']}
     async with async_playwright() as pw:
-        b = await pw.chromium.launch(headless=True)
+        b = await pw.chromium.launch(headless=True,channel=a.channel)
         for uid in a.units.split(','):
             before = backend(a.port)
             ctx = await b.new_context(viewport={'width': 1280, 'height': 800}); page = await ctx.new_page(); errs = []
