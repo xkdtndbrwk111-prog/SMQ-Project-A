@@ -50,7 +50,7 @@ async def main():
             const observe=()=>{const e=document.querySelector('.htCorrectImpactTitle');if(e&&e.getBoundingClientRect().width&&!t.verdict){t.verdict=performance.now();performance.mark('stability-verdict');window.__verdicts.push({node:e,text:e.textContent,t:t.verdict});requestAnimationFrame(()=>requestAnimationFrame(()=>{t.verdictPaint=performance.now();performance.mark('stability-verdict-paint');if(t.input)performance.measure('answer-to-verdict-paint','stability-input','stability-verdict-paint')}))}
             const p=document.querySelector('#htItemLayer .htPipeBtn');if(p&&p.getBoundingClientRect().width&&!t.pipe){t.pipe=performance.now();performance.mark('stability-pipe-visible');if(t.verdict)performance.measure('verdict-to-pipe','stability-verdict','stability-pipe-visible')}};
             new MutationObserver(observe).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','style','class']});
-            const d=document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument;d.addEventListener('click',e=>{if(e.target.closest('button.hqChoice')&&!t.input){t.input=performance.now();performance.mark('stability-input')}},true);
+            const d=document.querySelector('iframe[id^="hojaTeamApproved"]').contentDocument;d.addEventListener('click',e=>{const judge=e.target.closest('button.teacher-judge');const choice=e.target.closest('button.hqChoice');if(judge||(choice&&!choice.classList.contains('teacher-reveal-btn')&&!t.input)){t.input=performance.now();performance.clearMarks('stability-input');performance.mark('stability-input')}},true);
           }''')
           step='answer'; start=time.perf_counter(); kind,correct=await answer(page,True); assert kind is not None, 'question not ready or answer unavailable'; result['answerInputMs']=(time.perf_counter()-start)*1000
           step='verdict'; await page.wait_for_function("window.__verdicts.some(v=>v.text.includes('정답'))",timeout=15000)
@@ -68,6 +68,7 @@ async def main():
         try:
           result['events']=await page.evaluate('window.__stability||[]')
           result['timing']=await page.evaluate('window.__timing||{}')
+          result['memoryEnd']=await page.evaluate('performance.memory?.usedJSHeapSize||null')
           result['measures']=await page.evaluate("performance.getEntriesByType('measure').filter(x=>x.name.includes('verdict')).map(x=>({name:x.name,duration:x.duration}))")
         except Exception as e: result['eventReadError']=repr(e)
         result['dialogs']=dialogs; result['pageErrors']=errors
