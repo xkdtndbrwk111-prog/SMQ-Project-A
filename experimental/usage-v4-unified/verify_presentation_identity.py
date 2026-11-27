@@ -32,20 +32,31 @@ async def main():
       await to_catalog(page);await pick_unit(page,names[a.unit])
       await page.evaluate('''async()=>{
         const bank=window.HOJA_B_LIVE.sources[0].data;
-        const q=bank.questions.find(x=>x.rendererQuestion?.type==='MCQ').rendererQuestion;
+        const types=['MCQ','OX','SHORT'];window.__testQs=types.map(t=>bank.questions.find(x=>x.rendererQuestion?.type===t)?.rendererQuestion);
+        if(window.__testQs.some(q=>!q))throw Error('REQUIRED_QUESTION_TYPE_MISSING');
         const frame=document.createElement('iframe');frame.id='testPresentationFrame';
         frame.style.cssText='position:fixed;inset:0;z-index:99999;width:100%;height:100%;border:0';document.body.appendChild(frame);
         await new Promise(resolve=>{frame.onload=resolve;frame.srcdoc=window.HOJA_TRIAL_APPROVED_HTML});
         window.__testIds=[];frame.contentWindow.addEventListener('message',ev=>{if(ev.data?.type==='HOJA_UNIFIED_COMMAND'&&ev.data.action==='show')window.__testIds.push(ev.data.requestId)});
         window.__testAnswers=[];const h=window.HOJA_UNIFIED_TRIAL_CORE.createApprovedFrameHost({frame,onAnswer:a=>window.__testAnswers.push(a)});window.__testHost=h;
-        await h.initialize();await h.load({questions:[q],images:bank.images||bank.rendererImages,tags:bank.tags||bank.rendererTags,unitMeta:bank.unitMeta,mode:'team'});
-        await h.show({questionId:q.id,mode:'team'});await h.show({questionId:q.id,mode:'team'});
-        if(window.__testIds.length!==2||window.__testIds[0]===window.__testIds[1])throw Error('PRESENTATION_ID_REUSED');
-        window.dispatchEvent(new MessageEvent('message',{source:frame.contentWindow,data:{type:'HOJA_UNIFIED_ANSWER',questionId:q.id,presentationId:window.__testIds[0],choiceId:q.answer.choiceId}}));
-        await new Promise(r=>setTimeout(r,100));if(window.__testAnswers.length)throw Error('STALE_ANSWER_ACCEPTED');
+        await h.initialize();await h.load({questions:window.__testQs,images:bank.images||bank.rendererImages,tags:bank.tags||bank.rendererTags,unitMeta:bank.unitMeta,mode:'team'});
+        window.__exercisePresentation=async i=>{const q=window.__testQs[i],previous=window.__testAnswers.length;window.__testIds=[];
+          await h.show({questionId:q.id,mode:'team'});await h.show({questionId:q.id,mode:'team'});
+          if(window.__testIds.length!==2||window.__testIds[0]===window.__testIds[1])throw Error('PRESENTATION_ID_REUSED');
+          window.dispatchEvent(new MessageEvent('message',{source:frame.contentWindow,data:{type:'HOJA_UNIFIED_ANSWER',questionId:q.id,presentationId:window.__testIds[0],choiceId:'stale'}}));
+          await new Promise(r=>setTimeout(r,100));if(window.__testAnswers.length!==previous)throw Error('STALE_ANSWER_ACCEPTED');
+        };
       }''')
-      await page.frame_locator('#testPresentationFrame').locator('button.hqChoice').first.click(timeout=15000)
-      await page.wait_for_function('window.__testAnswers.length===1',timeout=5000)
+      frame=page.frame_locator('#testPresentationFrame')
+      for i,kind in enumerate(('MCQ','OX','SHORT')):
+        await page.evaluate('i=>window.__exercisePresentation(i)',i)
+        if kind=='MCQ':await frame.locator('button.hqChoice').first.click(timeout=15000)
+        elif kind=='OX':await frame.locator('button.hqChoice').first.press('Enter',timeout=15000)
+        else:
+          await frame.locator('button.hqChoice').first.click(timeout=15000)
+          await frame.locator('button.teacher-judge.correct').first.click(timeout=15000)
+        await page.wait_for_function('n=>window.__testAnswers.length===n',arg=i+1,timeout=5000)
+        print('PRESENTATION_TYPE_PASS',kind,flush=True)
       await page.evaluate("window.__testHost.close();document.getElementById('testPresentationFrame').remove()")
       assert not errors and not dialogs,(errors,dialogs)
       print('PRESENTATION_IDENTITY_REAL_IFRAME_PASS',flush=True);await browser.close()
