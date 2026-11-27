@@ -46,15 +46,17 @@ async def main():
           step='catalog'; await to_catalog(page); await pick_unit(page,names[uid]); step='five-player'; await mode(page,'함께 놀기','5'); await page.wait_for_timeout(2800)
           step='first-balloon'; start=time.perf_counter(); await page.locator('#htTeamBoard button.htBalloon:visible').first.click(timeout=20000)
           shown=await approved_iframe(page,1); assert shown['q'] and shown['n']>0,shown; result['firstQuestionMs']=(time.perf_counter()-start)*1000
+          await page.evaluate('''()=>{window.__verdicts=[];new MutationObserver(()=>{const e=document.getElementById('hojaSoloJudgment');if(e&&e.getBoundingClientRect().width&&!window.__verdicts.some(x=>x.node===e)){window.__verdicts.push({node:e,text:e.innerText,t:performance.now()})}}).observe(document.getElementById('hqOverlay'),{childList:true,subtree:true})}''')
           step='answer'; start=time.perf_counter(); kind,correct=await answer(page,True); assert kind is not None, 'question not ready or answer unavailable'; result['answerInputMs']=(time.perf_counter()-start)*1000
+          step='verdict'; await page.wait_for_function("window.__verdicts.some(v=>v.text.includes('정답'))",timeout=15000)
           step='pipe'; start=time.perf_counter(); pipe=page.locator('#htItemLayer .htPipeBtn:visible').first; await pipe.wait_for(state='visible',timeout=15000); result['pipeVisibleMs']=(time.perf_counter()-start)*1000; await pipe.click(timeout=10000)
           step='next-question'; start=time.perf_counter()
           for _ in range(8):
-            if await page.locator('#htTeamBoard button.htBalloon:visible').count(): break
+            if await page.locator('#htTeamBoard button.htBalloon:visible:not([disabled])').count() and not await page.locator('#htItemLayer:visible button:visible').count(): break
             buttons=page.locator('#htItemLayer button:visible'); n=await buttons.count()
             if n: await buttons.first.click(timeout=5000)
             await page.wait_for_timeout(500)
-          await page.locator('#htTeamBoard button.htBalloon:visible').first.click(timeout=15000); shown2=await approved_iframe(page,1); assert shown2['q']
+          await page.locator('#htTeamBoard button.htBalloon:visible:not([disabled])').first.click(timeout=15000); shown2=await approved_iframe(page,1); assert shown2['q']
           result.update({'nextQuestionMs':(time.perf_counter()-start)*1000,'status':'PASS','answerType':kind})
         except Exception as e:
           result.update({'status':'FAIL','step':step,'error':repr(e),'trace':traceback.format_exc()})
