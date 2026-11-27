@@ -8,13 +8,14 @@ from verify_f3_team_full import answer
 
 PROBE = r'''() => {
   const rows = window.__stability = [];
-  const put = (kind, data={}) => { if (rows.length < 20000) rows.push({kind,t:performance.now(),...data}); };
+  const put = (kind, data={}) => { if (rows.length < 20000) rows.push({kind,t:performance.now(),epoch:performance.timeOrigin+performance.now(),...data}); };
   window.addEventListener('error', e => put('error',{message:e.message,source:e.filename,line:e.lineno,stack:e.error?.stack}));
   window.addEventListener('unhandledrejection', e => put('rejection',{message:String(e.reason),stack:e.reason?.stack}));
   const alert0=window.alert; window.alert=function(message){put('alert',{message:String(message),stack:new Error().stack});return alert0.apply(this,arguments)};
   try { new PerformanceObserver(list=>list.getEntries().forEach(e=>put('longtask',{duration:e.duration,start:e.startTime}))).observe({type:'longtask',buffered:true}); } catch(e) { put('observer-unavailable',{message:String(e)}); }
   let prev=performance.now(); function frame(now){if(now-prev>50)put('frame-gap',{duration:now-prev});prev=now;requestAnimationFrame(frame)} requestAnimationFrame(frame);
-  window.addEventListener('message',e=>{if(e.data?.type?.startsWith('HOJA_UNIFIED'))put('iframe-message',{type:e.data.type,requestId:e.data.requestId})},true);
+  window.addEventListener('message',e=>{if(e.data?.type?.startsWith('HOJA_UNIFIED'))put('iframe-message',{type:e.data.type,requestId:e.data.requestId,questionId:e.data.questionId,choiceId:e.data.choiceId})},true);
+  for(const type of ['pointerdown','pointerup','click']) window.addEventListener(type,e=>{const b=e.target?.closest?.('button');if(b)put('pointer-event',{event:type,trusted:e.isTrusted,button:b.className,questionId:b.dataset.hojaQid||null,choiceId:b.dataset.choice||null})},true);
   const fetch0=window.fetch; window.fetch=function(...args){const start=performance.now();return fetch0.apply(this,args).then(r=>{put('fetch',{url:String(args[0]),duration:performance.now()-start,status:r.status});return r},e=>{put('fetch-error',{url:String(args[0]),duration:performance.now()-start,message:String(e)});throw e})};
   put('memory',{used:performance.memory?.usedJSHeapSize});
 }'''
@@ -75,6 +76,12 @@ async def main():
           except Exception as de: result['hitTestError']=repr(de)
         try:
           result['events']=await page.evaluate('window.__stability||[]')
+          result['frameEvents']=[]
+          if a.instrumentation=='detailed':
+            for f in page.frames:
+              if f==page.main_frame: continue
+              try: result['frameEvents'].append({'url':f.url[:100], 'events':await asyncio.wait_for(f.evaluate('window.__stability||[]'),timeout=5)})
+              except Exception as fe: result['frameEvents'].append({'readError':repr(fe)})
           result['timing']=await page.evaluate('window.__timing||{}')
           result['memoryEnd']=await page.evaluate('performance.memory?.usedJSHeapSize||null')
           result['measures']=await page.evaluate("performance.getEntriesByType('measure').filter(x=>x.name.includes('verdict')).map(x=>({name:x.name,duration:x.duration}))")
