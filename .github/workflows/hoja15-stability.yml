@@ -92,5 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: stability-baseline-ubuntu
-          path: ${{ runner.temp }}/stability.log
+          path: |
+            ${{ runner.temp }}/stability.log
+            ${{ runner.temp }}/stability-traces/
           if-no-files-found: warn
