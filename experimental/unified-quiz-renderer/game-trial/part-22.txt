@@ -209,20 +209,35 @@ return Object.freeze({bindTeamApprovedQuestion,teamRendererAnswerIndex,teamAppro
 window.HOJA_TRIAL_APPROVED_HTML=/* HOJA_TRIAL_APPROVED_HTML_INLINE */null;
 /* Trial-only intro sound ownership: stop scene events, retain shared BGM and gameplay SFX. */
 window.HOJA_TRIAL_SCENE_AUDIO=(()=>{
+ let suspendGeneration=0, pausePending=false, pauseListener=null;
  function suspendAttract(){
-   const scene=window.HOJA_ATTRACT_SCENE;
-   if(!scene?.scene?.pause)return false;
+   const scene=window.HOJA_ATTRACT_SCENE,loop=window.HOJA_ATTRACT_GAME?.loop;
+   if(!scene?.scene?.pause||!loop?.sleep||!scene.events?.once)return false;
    try{
-     if(!scene.scene.isPaused?.())scene.scene.pause();
+     if(pausePending)return true;
+     const generation=++suspendGeneration;
+     if(scene.scene.isPaused?.()){loop.sleep();return true;}
+     pausePending=true;
+     pauseListener=()=>{
+       pauseListener=null;
+       if(generation!==suspendGeneration)return;
+       pausePending=false;
+       if(scene.scene.isPaused?.())loop.sleep();
+     };
+     scene.events.once('pause',pauseListener);
+     scene.scene.pause();
      return true;
-   }catch(err){console.warn('HOJA intro pause failed',err);return false;}
+   }catch(err){if(pauseListener)scene.events.off('pause',pauseListener);pauseListener=null;pausePending=false;++suspendGeneration;console.warn('HOJA intro pause failed',err);return false;}
  }
  function resumeAttract(){
-   const scene=window.HOJA_ATTRACT_SCENE;
-   if(!scene?.scene?.resume||scene.pausedByUser)return false;
+   const scene=window.HOJA_ATTRACT_SCENE,loop=window.HOJA_ATTRACT_GAME?.loop;
+   if(!scene?.scene?.resume)return false;
    try{
-     if(scene.scene.isPaused?.())scene.scene.resume();
-     return true;
+     const wasPending=pausePending;pausePending=false;++suspendGeneration;
+     if(pauseListener)scene.events.off('pause',pauseListener);pauseListener=null;
+     if(!scene.pausedByUser&&(wasPending||scene.scene.isPaused?.()))scene.scene.resume();
+     loop?.wake?.();
+     return !scene.pausedByUser;
    }catch(err){console.warn('HOJA intro resume failed',err);return false;}
  }
  const flow=window.HOJA_FLOW;

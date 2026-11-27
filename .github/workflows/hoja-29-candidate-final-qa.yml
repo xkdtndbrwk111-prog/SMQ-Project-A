@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify intro sleep and wake ordering
+        run: node --test experimental/unified-quiz-renderer/intro_loop.test.mjs
       - uses: actions/checkout@v4
         with:
           repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK

@@ -50,6 +50,7 @@ async def main():
         try:
           await page.goto(f'http://127.0.0.1:{a.port}/game.html',wait_until='domcontentloaded',timeout=60000); await page.wait_for_timeout(5000)
           step='catalog'; await to_catalog(page); await pick_unit(page,names[uid]); step='five-player'; await mode(page,'함께 놀기','5'); await page.wait_for_timeout(2800)
+          step='intro-loop-suspended'; intro=await page.evaluate("({paused:window.HOJA_ATTRACT_SCENE?.scene?.isPaused(),running:window.HOJA_ATTRACT_GAME?.loop?.running})"); assert intro=={'paused':True,'running':False},intro; result['introLoop']=intro
           step='first-balloon'; start=time.perf_counter(); await page.locator('#htTeamBoard button.htBalloon:visible').first.click(timeout=20000)
           shown=await approved_iframe(page,1); assert shown['q'] and shown['n']>0,shown; result['firstQuestionMs']=(time.perf_counter()-start)*1000; result['questionId']=await page.evaluate("document.querySelector('iframe[id^=hojaTeamApproved]').contentWindow.current().id")
           await page.evaluate('''()=>{window.__verdicts=[];window.__timing={};const t=window.__timing;

@@ -53,7 +53,9 @@ if without_display.count(mark) == 1:
 # 40-6BV: re-pinned after HOJA 1.5 UX fixes (was 22aa9041… 40-6BG, 1cb387c7… 40-6BF, 617f2228… before)
 # Prior audited RC: 9c9c6c041463cb1a3c017f4c57e7ac11ba1dc662ce56ffba7b56cee16ff75874.
 # 2026-11-27 stability RC: only the documented frame-host generation guard changed (PR #14).
-ok(rc.get('rcGameSha256') == '6c62da8d15da4d8fb44aa429e7e6c4c086fba37f4bef9a5ae55d498d02938be2', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# Previous frame-host stability RC: 6c62da8d15da4d8fb44aa429e7e6c4c086fba37f4bef9a5ae55d498d02938be2.
+# Intro-only scene pause / timestep sleep RC; evidence recorded in PR #14.
+ok(rc.get('rcGameSha256') == '15206197a4c311f12afea9a47b54c3c50e3a880f8c23fc5fc54594126ce877c0', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}
