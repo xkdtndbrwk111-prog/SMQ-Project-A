@@ -8,6 +8,7 @@ on:
       - 'experimental/unified-quiz-renderer/HOJA_APPROVED_RENDERER_BRIDGE.html'
       - 'experimental/usage-v4-unified/verify_presentation_identity.py'
       - 'experimental/usage-v4-unified/verify_f3_ui_e2e.py'
+      - 'experimental/usage-v4-unified/verify_arcade_intro.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -116,3 +117,4 @@ jobs:
             python -u "$P/verify_f3_ui_e2e.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --flow "$flow" --channel chrome
           done
           python -u "$P/verify_presentation_identity.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome
+          python -u "$P/verify_arcade_intro.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome
