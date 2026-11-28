@@ -1,0 +1,70 @@
+name: HOJA R4 offline 1195-question renderer QA
+on:
+  push:
+    branches: [work/soc6-296-render-r4-20261128]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  renderer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
+          ref: dbf6270bb007d0473f6145e9eaf3451df38fd96a
+          path: qbank-runtime
+          persist-credentials: false
+      - name: Verify pinned packages and prepare offline renderer payload
+        run: |
+          node experimental/unified-quiz-renderer/compose_renderer.mjs "$RUNNER_TEMP/composed.html"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const root='qbank-runtime', idx=JSON.parse(fs.readFileSync(root+'/game-runtime/approved-packages/v1/INDEX.json'));
+          const prior=JSON.parse(fs.readFileSync(root+'/game-runtime/active/v1/catalog.json'));
+          const pointer=JSON.parse(fs.readFileSync(root+'/game-runtime/active/v1/current.json'));
+          assert.equal(pointer.generation,3);
+          assert.equal(prior.entries.length,29);
+          const old=new Map(prior.entries.map(e=>[e.cartridgeId,e.packageSha256]));
+          const expected=new Map([['soc6-s2-u1-1-common',65],['soc6-s2-u1-2-common',72],['soc6-s2-u2-1-common',47],['soc6-s2-u2-2-common',59],['soc6-s2-u2-3-common',53]]);
+          assert.equal(idx.packages.length,34);
+          assert.equal(new Set(idx.packages.map(e=>e.cartridgeId)).size,34);
+          const units=idx.packages.map(e=>{
+            const b=fs.readFileSync(path.join(root,e.path));
+            assert.equal(crypto.createHash('sha256').update(b).digest('hex'),e.sha256);
+            assert.equal(b.length,e.bytes);
+            const d=JSON.parse(b);
+            assert.equal(d.cartridgeId,e.cartridgeId);
+            if(old.has(e.cartridgeId)){assert.equal(e.sha256,old.get(e.cartridgeId));old.delete(e.cartridgeId);}
+            else {assert.equal(d.questions.length,expected.get(e.cartridgeId));expected.delete(e.cartridgeId);}
+            return {id:e.cartridgeId,payload:{questions:d.questions.map(q=>q.rendererQuestion),originalQuestions:d.questions.map(q=>q.originalQuestion),images:d.images,tags:d.tags,unitMeta:d.unitMeta}};
+          });
+          assert.equal(old.size,0);assert.equal(expected.size,0);
+          assert.equal(units.reduce((s,u)=>s+u.payload.questions.length,0),1195);
+          fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'payloads.json'),JSON.stringify(units));
+          console.log('R4_PACKAGE_PINS_PASS 34/1195; prior 29 packages identical');
+          JS
+      - name: Install headless Chromium
+        run: |
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+      - name: Render all 1195 questions at four viewports
+        run: |
+          set -o pipefail
+          python3 experimental/usage-v4-unified/verify_f1b_render.py "$RUNNER_TEMP/payloads.json" "$RUNNER_TEMP/composed.html" | tee "$RUNNER_TEMP/hoja-r4-render.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hoja-r4-render-log
+          path: ${{ runner.temp }}/hoja-r4-render.log
+          if-no-files-found: ignore
