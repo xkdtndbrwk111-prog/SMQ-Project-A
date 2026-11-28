@@ -37,7 +37,7 @@ def build(output:Path,renderer:Path=RENDER):
     assert '</script>' not in inline, "Embedded script must never contain a raw closing tag"
     game=game.replace(ARCADE_MARK,inline)
     output.parent.mkdir(parents=True,exist_ok=True)
-    output.write_text(game,encoding='utf-8')
+    output.write_text(game,encoding='utf-8',newline='\n')
     print("TRIAL_ONLY",len(game.encode('utf-8')),hashlib.sha256(game.encode('utf-8')).hexdigest(),output)
 def main():
     p=argparse.ArgumentParser()

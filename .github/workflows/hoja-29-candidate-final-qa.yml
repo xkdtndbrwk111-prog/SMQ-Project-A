@@ -26,6 +26,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify intro, renderer and arcade clock
+        run: node --test experimental/unified-quiz-renderer/intro_loop.test.mjs experimental/unified-quiz-renderer/frame_host.test.mjs experimental/unified-quiz-renderer/arcade_clock.test.mjs
       - uses: actions/checkout@v4
         with:
           repository: xkdtndbrwk111-prog/HOJA-QUESTION-BANK
@@ -70,6 +72,10 @@ jobs:
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.json',JSON.stringify(cat));
           fs.writeFileSync(process.env.RUNNER_TEMP+'/test-catalog.gs','/* LOCAL CI FIXTURE ONLY; NEVER DEPLOY */\nvar HOJA_APPROVED_ACTIVE_CATALOG_=Object.freeze('+JSON.stringify(cat,null,1)+');\n');
           JS
+      - name: Verify approved catalog and isolated statistics retention
+        run: |
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_F1.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_R7.test.mjs experimental/usage-v4-unified/REMOTE_ACTIVE_CATALOG.test.mjs experimental/usage-v4-unified/HOJA15_JOIN.test.mjs experimental/usage-v4-unified/approved-catalog/approved_catalog_normalizer.test.mjs
+          node --test experimental/usage-v4-unified/UNIFIED_GAS_U1.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_U2.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_U3.test.mjs experimental/usage-v4-unified/UNIFIED_GAS_AUTOSEAL.test.mjs experimental/usage-retention/HOJA_USAGE_RETENTION_CORE.test.mjs experimental/usage-retention/HOJA_USAGE_RETENTION_TRIAL_GAS.test.mjs experimental/usage-retention/HOJA_USAGE_V4_CORE.test.mjs experimental/usage-retention/HOJA_USAGE_V4_APPEND_GUARD_TRIAL.test.mjs
       - name: Full exact GAS bundle assembly (isolated test only; no artifact or deployment)
         run: |
           P=experimental/usage-v4-unified
@@ -109,6 +115,14 @@ jobs:
             echo "GAME_UI_START $flow"
             timeout --kill-after=10s 150s python3 -u "$P/verify_f3_ui_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --github-packages qbank-runtime --port 8790 --units sci5-s2-heat-common --flow "$flow" || { echo "GAME_UI_FAILED $flow"; result=1; }
           done
+          echo PRESENTATION_IDENTITY_START
+          timeout --kill-after=10s 150s python3 -u "$P/verify_presentation_identity.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo PRESENTATION_IDENTITY_FAILED; result=1; }
+          echo RENDERER_RECOVERY_START
+          for fault in embed load show; do
+            timeout --kill-after=10s 150s python3 -u "$P/verify_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --failure "$fault" || { echo "RENDERER_RECOVERY_FAILED $fault"; result=1; }
+            timeout --kill-after=10s 150s python3 -u "$P/verify_solo_renderer_recovery.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --failure "$fault" || { echo "SOLO_RENDERER_RECOVERY_FAILED $fault"; result=1; }
+          done
+          timeout --kill-after=10s 150s python3 -u "$P/verify_stale_failure.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 || { echo STALE_FAILURE_FAILED; result=1; }
           echo QR_START
           timeout --kill-after=15s 240s python3 -u "$P/verify_hoja15_join_e2e.py" --html "$B/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --jsqr "$D/jsqr/dist/jsQR.js" --port 8790 --unit sci5-s2-u4-common || { echo QR_FAILED; result=1; }
           exit "$result"

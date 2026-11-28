@@ -6,6 +6,16 @@ function substituteOnce(s,oldText,newText) {
  if(n!==1)throw Error('ARCADE_INNER_ANCHOR_COUNT_'+n+': '+oldText.slice(0,32));
  return s.replace(oldText,newText);
 }
+
+// Phaser's startup/focus cooldown clamps delta to 60fps for 120 frames.
+// Keep the gameplay countdown close to elapsed time while visible and focused,
+// without charging an unbounded background-tab or suspended-browser gap.
+export function hojaArcadeClockDelta(delta,loop,visibility) {
+ const raw=loop?.rawDelta;
+ if(visibility==='visible'&&loop?.inFocus===true&&loop?._coolDown>0&&Number.isFinite(raw)&&raw>0)
+   return Math.min(raw,250);
+ return delta;
+}
 const CHILD_SCRIPT=[
  '<script id="hojaArcadeApprovedChildTrial">',
  "(()=>{'use strict';",
@@ -52,6 +62,9 @@ export function patchApprovedArcadeInnerHTML(html){
  if(typeof html!=='string'||html.length<400000||!html.includes('hojaV058ServerGate'))throw Error('ARCADE_APPROVED_INNER_HTML_REQUIRED');
  if(html.includes('hojaArcadeApprovedChildTrial'))throw Error('ARCADE_APPROVED_ALREADY_PATCHED');
  let s=html;
+ s=substituteOnce(s,'class HojaScene extends Phaser.Scene{',hojaArcadeClockDelta.toString()+'\nclass HojaScene extends Phaser.Scene{');
+ s=substituteOnce(s,'    this.remainingMs=Math.max(0,this.remainingMs-delta);',
+  "    this.remainingMs=Math.max(0,this.remainingMs-hojaArcadeClockDelta(delta,this.game.loop,document.visibilityState));");
  s=substituteOnce(s,
  '  closeQuizOverlay(){\n    this.quizToken=(this.quizToken||0)+1;',
  '  closeQuizOverlay(){\n    this.quizToken=(this.quizToken||0)+1;\n    window.HOJA_ARCADE_APPROVED_BRIDGE?.close();');

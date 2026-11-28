@@ -10,7 +10,7 @@
  */
 import {readFileSync, writeFileSync, existsSync, statSync, mkdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {join, resolve, dirname} from 'node:path';
+import {join, resolve, dirname, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildApprovedIndex} from './approved_catalog_normalizer.mjs';
 
@@ -26,7 +26,7 @@ const commit = execFileSync('git', ['-C', qbank, 'rev-parse', 'HEAD'], {encoding
 const dirty = execFileSync('git', ['-C', qbank, 'status', '--porcelain', '--', 'approved'], {encoding: 'utf8'}).trim();
 if (dirty) fail('QBANK_APPROVED_TREE_DIRTY: build only from a clean, committed source');
 const src = {
-  exists: p => { const f = join(qbank, p); return f.startsWith(qbank + '/') && existsSync(f) && statSync(f).isFile(); },
+  exists: p => { const f = join(qbank, p); return f.startsWith(qbank + sep) && existsSync(f) && statSync(f).isFile(); },
   readBytes: p => readFileSync(join(qbank, p)),
 };
 const {index, lock} = buildApprovedIndex(src, {sourceRepo: 'xkdtndbrwk111-prog/HOJA-QUESTION-BANK', sourceCommit: commit});

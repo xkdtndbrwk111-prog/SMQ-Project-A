@@ -94,8 +94,9 @@ function teamApprovedPayload(bindings) {
 /** Command/event host for the original teacher-approved A/C/D renderer. No scoring here. */
 function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={}) {
  if(!frame||frame.tagName!=='IFRAME'||typeof onAnswer!=='function') throw Error('HOJA_FRAME_OPTIONS_REQUIRED');
- const pending=new Map();let seq=0,closed=false,activeId=null,accepted=false;
- const reset=()=>{activeId=null;accepted=false};
+ const hostId=window.__hojaFrameHostSequence=(window.__hojaFrameHostSequence||0)+1;
+ const pending=new Map();let seq=0,closed=false,activeId=null,activePresentation=null,accepted=false,generation=0;
+ const reset=()=>{generation++;activeId=null;activePresentation=null;accepted=false};
  function onMessage(ev){
    if(closed||ev.source!==frame.contentWindow)return;
    const d=ev.data;if(!d||typeof d!=='object')return;
@@ -104,7 +105,7 @@ function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={}) {
      clearTimeout(job.timer);pending.delete(d.requestId);
      if(d.ok)job.resolve(d);else job.reject(Error('HOJA_RENDERER_COMMAND_FAILED: '+d.error));
    } else if(d.type==='HOJA_UNIFIED_ANSWER'){
-     if(typeof d.questionId!=='string'||d.questionId!==activeId||accepted||!d.choiceId)return;
+     if(typeof d.questionId!=='string'||d.questionId!==activeId||d.presentationId!==activePresentation||!activePresentation||accepted||!d.choiceId)return;
      accepted=true;
      onAnswer(Object.freeze({questionId:d.questionId,choiceId:String(d.choiceId),choiceText:String(d.choiceText||'')}));
    }
@@ -113,7 +114,7 @@ function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={}) {
  function request(action,payload){
    if(closed)return Promise.reject(Error('HOJA_FRAME_CLOSED'));
    if(!frame.contentWindow)return Promise.reject(Error('HOJA_FRAME_NOT_READY'));
-   const requestId='hq-'+(++seq);
+   const requestId='hq-'+hostId+'-'+(++seq);
    return new Promise((resolve,reject)=>{
      const timer=setTimeout(()=>{pending.delete(requestId);reject(Error('HOJA_RENDERER_TIMEOUT: '+action))},timeoutMs);
      pending.set(requestId,{timer,resolve,reject});
@@ -125,7 +126,7 @@ function createApprovedFrameHost({frame,onAnswer=()=>{},timeoutMs=6000}={}) {
    async load(payload){reset();return request('load',payload)},
    async show({questionId,mode='team',omitChoiceId=null}={}){
      if(typeof questionId!=='string'||!questionId)throw Error('HOJA_QUESTION_ID_REQUIRED');
-     reset();const response=await request('show',{questionId,mode,omitChoiceId});activeId=questionId;return response;
+     reset();const currentGeneration=generation;const response=await request('show',{questionId,mode,omitChoiceId});if(!closed&&generation===currentGeneration){activeId=questionId;activePresentation=response.requestId;}return response;
    },
    async inspect(){return request('inspect')},
    suspend(){reset()},
@@ -209,20 +210,35 @@ return Object.freeze({bindTeamApprovedQuestion,teamRendererAnswerIndex,teamAppro
 window.HOJA_TRIAL_APPROVED_HTML=/* HOJA_TRIAL_APPROVED_HTML_INLINE */null;
 /* Trial-only intro sound ownership: stop scene events, retain shared BGM and gameplay SFX. */
 window.HOJA_TRIAL_SCENE_AUDIO=(()=>{
+ let suspendGeneration=0, pausePending=false, pauseListener=null;
  function suspendAttract(){
-   const scene=window.HOJA_ATTRACT_SCENE;
-   if(!scene?.scene?.pause)return false;
+   const scene=window.HOJA_ATTRACT_SCENE,loop=window.HOJA_ATTRACT_GAME?.loop;
+   if(!scene?.scene?.pause||!loop?.sleep||!scene.events?.once)return false;
    try{
-     if(!scene.scene.isPaused?.())scene.scene.pause();
+     if(pausePending)return true;
+     const generation=++suspendGeneration;
+     if(scene.scene.isPaused?.()){loop.sleep();return true;}
+     pausePending=true;
+     pauseListener=()=>{
+       pauseListener=null;
+       if(generation!==suspendGeneration)return;
+       pausePending=false;
+       if(scene.scene.isPaused?.())loop.sleep();
+     };
+     scene.events.once('pause',pauseListener);
+     scene.scene.pause();
      return true;
-   }catch(err){console.warn('HOJA intro pause failed',err);return false;}
+   }catch(err){if(pauseListener)scene.events.off('pause',pauseListener);pauseListener=null;pausePending=false;++suspendGeneration;console.warn('HOJA intro pause failed',err);return false;}
  }
  function resumeAttract(){
-   const scene=window.HOJA_ATTRACT_SCENE;
-   if(!scene?.scene?.resume||scene.pausedByUser)return false;
+   const scene=window.HOJA_ATTRACT_SCENE,loop=window.HOJA_ATTRACT_GAME?.loop;
+   if(!scene?.scene?.resume)return false;
    try{
-     if(scene.scene.isPaused?.())scene.scene.resume();
-     return true;
+     const wasPending=pausePending;pausePending=false;++suspendGeneration;
+     if(pauseListener)scene.events.off('pause',pauseListener);pauseListener=null;
+     if(!scene.pausedByUser&&(wasPending||scene.scene.isPaused?.()))scene.scene.resume();
+     loop?.wake?.();
+     return !scene.pausedByUser;
    }catch(err){console.warn('HOJA intro resume failed',err);return false;}
  }
  const flow=window.HOJA_FLOW;
@@ -243,10 +259,11 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  async function hojaRetryRender_(fn){for(let i=0;;i++){try{return await fn();}catch(e){if(!hojaIsTimeout_(e)||i>=3)throw e;await hojaWhenVisible_();await new Promise(r=>setTimeout(r,400));}}}
 
  function hojaWhenDrawn_(f,qid){return new Promise(res=>{const t0=performance.now();const tick=()=>{let ok=false;try{const d=f.contentDocument,w=f.contentWindow;const cur=w.current&&w.current();const bs=[...d.querySelectorAll('#hqChoices button.hqChoice')];ok=!d.body.classList.contains('hojaAwaitShow')&&bs.length>0&&(!qid||(cur&&cur.id===qid))&&bs.every(b=>!b.dataset.hojaQid||b.dataset.hojaQid===(cur&&cur.id));}catch(_e){ok=true}if(ok||performance.now()-t0>1500){requestAnimationFrame(()=>res());return;}requestAnimationFrame(tick)};tick();});}
- let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0;
- let header=null,nextButton=null,judgment=null;
+ let frame=null,host=null,loading=null,loaded=null,answerHandler=null,serial=0,lastQuestions=null;
+ let header=null,nextButton=null,judgment=null,retryButton=null;
  function overlay(){return document.getElementById('hqOverlay')}
  function clearJudgment(){if(judgment){judgment.remove();judgment=null;}}
+ function clearRetry(){if(retryButton){retryButton.remove();retryButton=null;}}
  function showJudgment(correct){
    if(overlay()?.dataset.hojaUnified!=='yes')return;
    clearJudgment();
@@ -298,9 +315,9 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
  function begin(questions){
    const bindings=questions.map(q=>q.approvedBinding);
    const payload=core.teamApprovedPayload(bindings);
-   serial++;answerHandler=null;
+   serial++;answerHandler=null;lastQuestions=questions;
    loaded=prepareFrame().then(async h=>{await hojaRetryRender_(()=>h.load(payload));return h;});
-   loaded.catch(error);return loaded;
+   loaded.catch(()=>{});return loaded;
  }
  function reveal(){
    const pane=overlay();pane.hidden=false;pane.dataset.hojaUnified='yes';
@@ -309,14 +326,15 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(frame){frame.style.visibility='hidden';frame.hidden=false;}
  }
  async function show(q,mode,onAnswer,caption=''){
-   const token=++serial;answerHandler=null;clearJudgment();reveal();
+   const token=++serial;answerHandler=null;clearJudgment();clearRetry();reveal();
    const withHeader=mode==='review'||!!caption;
    if(header){header.style.display=withHeader?'block':'none';document.getElementById('hojaTeamReviewLabel').textContent=caption;}
    // HOJA 1.5: the review header sits ABOVE the question (not over its top lines)
    if(frame){const hh=withHeader&&header?Math.ceil(header.getBoundingClientRect().height):0;frame.style.top=hh+'px';frame.style.height=hh?'calc(100% - '+hh+'px)':'100%';}
    if(nextButton)nextButton.style.display='none';
+   let h;
    try {
-     const h=await loaded;
+     h=await loaded;
      if(token!==serial)return;
      if(!q?.approvedBinding)throw Error('APPROVED_BINDING_REQUIRED');
      await hojaRetryRender_(()=>h.show({questionId:q.approvedBinding.questionId,mode,omitChoiceId:q.approvedBinding.omitChoiceId}));
@@ -325,7 +343,16 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
      if(token!==serial)return;
      if(frame)frame.style.visibility='visible';
      answerHandler=onAnswer;
-   }catch(e){error(e);}
+   }catch(e){
+     if(token!==serial)return;
+     error(e);
+     if(token!==serial||(!h&&!lastQuestions)||/HOJA_FRAME_CLOSED/.test(String(e?.message||e)))return;
+     retryButton=document.createElement('button');retryButton.id='hojaRendererRetry';retryButton.type='button';
+     retryButton.textContent='문제 다시 불러오기';
+     retryButton.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:50;padding:16px 28px;border:3px solid #ffdb67;border-radius:14px;background:#23555a;color:white;font:900 clamp(20px,2.4vw,32px) system-ui,sans-serif;cursor:pointer';
+     retryButton.onclick=()=>{if(token!==serial)return;if(!h){const questions=lastQuestions;reset();begin(questions);}show(q,mode,onAnswer,caption);};
+     overlay().append(retryButton);retryButton.focus();
+   }
  }
  function reviewFeedback(label,onNext,correct,wrongText,nextText){
    if(!header||!nextButton)return;
@@ -352,7 +379,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    window.addEventListener('keydown',key,true);inputWindow()?.addEventListener('keydown',key,true);
  }
  function hide(){
-   serial++;answerHandler=null;clearJudgment();
+   serial++;answerHandler=null;clearJudgment();clearRetry();
    // HOJA 1.5: a mouse answer leaves keyboard focus inside the (now hidden) frame; give it back to the game.
    if(frame&&document.activeElement===frame){try{frame.blur();window.focus();}catch(_e){}}
    if(host)host.suspend();
@@ -366,7 +393,7 @@ window.HOJA_TEAM_APPROVED_TRIAL=(()=>{
    if(host)host.close();
    if(frame)frame.remove();
    if(header)header.remove();
-   frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;
+   frame=null;host=null;loading=null;loaded=null;header=null;nextButton=null;lastQuestions=null;
  }
  return Object.freeze({begin,show,reviewFeedback,hide,reset,error,feedback:showJudgment,inputWindow});
 })();

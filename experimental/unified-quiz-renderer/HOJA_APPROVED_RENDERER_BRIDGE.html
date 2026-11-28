@@ -1280,12 +1280,13 @@ window.HOJA_APPROVED_RENDERER=Object.freeze({
    choiceFont:getComputedStyle($('hqChoices').querySelector('.hqChoiceLabel')||$('hqChoices')).fontSize};
  }
 });
+let hojaActivePresentationId=null;
 $('hqChoices').addEventListener('click',function(ev){
  if(!window.HOJA_APPROVED_RENDERER_CAPTURE)return;
  const judge=ev.target.closest('button.teacher-judge');
  if(judge){
    ev.stopImmediatePropagation();ev.preventDefault();
-   parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,
+   parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,presentationId:hojaActivePresentationId,
      choiceId:judge.classList.contains('correct')?'teacher:true':'teacher:false',
      choiceText:judge.textContent},'*');
    return;
@@ -1293,14 +1294,14 @@ $('hqChoices').addEventListener('click',function(ev){
  const b=ev.target.closest('button.hqChoice');if(!b)return;
  ev.stopImmediatePropagation();ev.preventDefault();
  if(b.classList.contains('teacher-reveal-btn')){window.HOJA_APPROVED_RENDERER.reveal();return;}
- parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,choiceId:b.dataset.choice||null,choiceText:b.textContent},'*');
+ parent.postMessage({type:'HOJA_UNIFIED_ANSWER',questionId:state.question,presentationId:hojaActivePresentationId,choiceId:b.dataset.choice||null,choiceText:b.textContent},'*');
 },true);
 window.addEventListener('message',function(ev){
  const d=ev.data;if(ev.source!==parent||!d||d.type!=='HOJA_UNIFIED_COMMAND')return;
  try{
   let data;
-  if(d.action==='show')data=window.HOJA_APPROVED_RENDERER.show(d.payload);
-  else if(d.action==='load')data=window.HOJA_APPROVED_RENDERER.load(d.payload);
+  if(d.action==='show'){data=window.HOJA_APPROVED_RENDERER.show(d.payload);hojaActivePresentationId=d.requestId;}
+  else if(d.action==='load'){hojaActivePresentationId=null;data=window.HOJA_APPROVED_RENDERER.load(d.payload);}
   else if(d.action==='inspect')data=window.HOJA_APPROVED_RENDERER.inspect();
   else if(d.action==='embed')data=window.HOJA_APPROVED_RENDERER.embed();
   else if(d.action==='capture'){window.HOJA_APPROVED_RENDERER_CAPTURE=!!d.payload;data={capture:!!d.payload};}

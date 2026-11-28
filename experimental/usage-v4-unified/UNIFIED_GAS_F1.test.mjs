@@ -126,12 +126,12 @@ test('F1 extractConst reads JSON literals safely (strings with brackets, no eval
 
 /* ---------------- real approved source (committed, content-free report) ---------------- */
 const REPORT = DIR + '/approved-catalog/generated/approved-content-report.json';
-test('F1/F1-B REAL: 23 units / 732 questions packaged by three version-identified adapters', () => {
+test('F1/F1-B REAL: 29 units / 899 questions packaged by three version-identified adapters', () => {
   const r = JSON.parse(readFileSync(REPORT, 'utf8'));
-  assert.equal(r.sourceCommit, '9573f91d2845a9667e2540df051f499d937dd94a');
-  assert.deepEqual([r.units, r.ready, r.readyQuestions, r.blocked, r.blockedQuestions], [23, 23, 732, 0, 0]);
+  assert.equal(r.sourceCommit, '43df08f9a1edebb0ff4ed8c7c651cba005bb2f3c');
+  assert.deepEqual([r.units, r.ready, r.readyQuestions, r.blocked, r.blockedQuestions], [29, 29, 899, 0, 0]);
   const by = a => r.entries.filter(e => e.adapter === a);
-  assert.deepEqual([by('renderer-v2').length, by('presentation-v3').length, by('display-overlay-v1').length], [16, 6, 1]);
+  assert.deepEqual([by('renderer-v2').length, by('presentation-v3').length, by('display-overlay-v1').length], [22, 6, 1]);
   assert.equal(by('presentation-v3').reduce((n, e) => n + e.questionCount, 0), 201);
   const q21 = r.entries.find(e => e.mediaOverlay);
   assert.match(q21.mediaOverlay.questionId, /:q21$/);
@@ -152,7 +152,7 @@ test('F1/F1-B REAL: 23 units / 732 questions packaged by three version-identifie
   assert.equal(ready.filter(e => e.layoutPreferences?.schema === 'hoja-layout-preferences-v1').reduce((n, e) => n + e.layoutPreferences.verifiedFixed, 0), 11);
   assert.ok(math.every(e => e.presentationScriptsNotInBridge.length === 2), 'math display scripts the bridge lacks are reported');
   const dflt = r.entries.filter(e => e.renderTags === 'DERIVED_FROM_APPROVED_PAGE_DEFAULT_LAYOUT');
-  assert.equal(dflt.length, 2, 'soc5 3-1/3-2: derived from the approved page rule, not labelled approved');
+  assert.deepEqual(dflt.map(e => e.cartridgeId).sort(), ['sci5-s2-heat-common','sci5-s2-u4-common','soc5-s2-u3-1-common','soc5-s2-u3-2-common'].sort(), 'science and social use the derived approved page rule');
   assert.ok(dflt.every(e => e.visualParity === 'NOT_VERIFIED'));
   const txt = readFileSync(REPORT, 'utf8');
   assert.ok(!/data:image|"prompt"|"choices"/.test(txt), 'report carries no question content');

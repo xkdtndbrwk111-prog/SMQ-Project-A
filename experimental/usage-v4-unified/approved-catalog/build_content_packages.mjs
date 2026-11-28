@@ -16,7 +16,7 @@
  */
 import {readFileSync, writeFileSync, existsSync, statSync, mkdirSync, readdirSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
-import {join, resolve, dirname} from 'node:path';
+import {join, resolve, dirname, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildContentPackages} from './approved_content_packager.mjs';
 import {qaPreviewCatalog, renderCatalogGs, renderContentGs, approvedPackagePath, RUNTIME_REPO} from './qa_preview.mjs';
@@ -31,7 +31,7 @@ const commit = execFileSync('git', ['-C', qbank, 'rev-parse', 'HEAD'], {encoding
 if (commit !== index.sourceCommit) die('QBANK_COMMIT_DRIFT: checkout ' + commit + ' != pinned ' + index.sourceCommit + ' (report drift; do not auto-update the pin)');
 if (execFileSync('git', ['-C', qbank, 'status', '--porcelain', '--', 'approved'], {encoding: 'utf8'}).trim()) die('QBANK_APPROVED_TREE_DIRTY');
 const src = {
-  exists: p => { const f = join(qbank, p); return f.startsWith(qbank + '/') && existsSync(f) && statSync(f).isFile(); },
+  exists: p => { const f = join(qbank, p); return f.startsWith(qbank + sep) && existsSync(f) && statSync(f).isFile(); },
   readBytes: p => readFileSync(join(qbank, p)),
 };
 const bridge = readFileSync(join(here, '../../unified-quiz-renderer/HOJA_APPROVED_RENDERER_BRIDGE.html'), 'utf8');
@@ -51,7 +51,7 @@ const repoRoot = resolve(here, '../../..');
 let pkgOut = null;
 if (opt('--packages-out')) {
   const out = resolve(opt('--packages-out'));
-  if (out === repoRoot || out.startsWith(repoRoot + '/')) die('PACKAGES_OUT_MUST_BE_OUTSIDE_THIS_REPO');
+  if (out === repoRoot || out.startsWith(repoRoot + sep)) die('PACKAGES_OUT_MUST_BE_OUTSIDE_THIS_REPO');
   mkdirSync(out, {recursive: true});
   if (readdirSync(out).length) die('PACKAGES_OUT_NOT_EMPTY');
   const files = [];
