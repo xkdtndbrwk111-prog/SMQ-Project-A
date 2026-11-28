@@ -210,6 +210,45 @@ function patchNextSelected(){
  }).join(' · ');
  if(next!==prior)el.textContent=next;
 }
+
+// A real range control is visible even when macOS hides native overlay scrollbars.
+// The existing rail still owns scroll position, native gestures and card selection.
+function initializeRailScrollbar(rail){
+ if(document.getElementById('hoja15CatalogScrollbar'))return;
+ const bar=document.createElement('input');
+ bar.type='range';bar.id='hoja15CatalogScrollbar';bar.min='0';bar.max='1000';bar.step='1';bar.value='0';
+ bar.hidden=true;bar.setAttribute('aria-label','카트리지 가로 스크롤');bar.setAttribute('aria-controls',rail.id);
+ rail.insertAdjacentElement('afterend',bar);
+ let frame=0;
+ const maxScroll=()=>Math.max(0,rail.scrollWidth-rail.clientWidth);
+ const sync=()=>{
+  const max=maxScroll();
+  const visible=rail.clientWidth>0&&rail.getClientRects().length>0&&max>1;
+  bar.hidden=!visible;
+  if(!visible){bar.value='0';return;}
+  bar.value=String(Math.round(Math.max(0,Math.min(max,rail.scrollLeft))/max*1000));
+  bar.setAttribute('aria-valuetext',Math.round(Number(bar.value)/10)+'%');
+  bar.style.setProperty('--hcThumb',Math.max(0,Math.min(100,rail.clientWidth/rail.scrollWidth*100))+'%');
+ };
+ const schedule=()=>{if(!frame)frame=requestAnimationFrame(()=>{frame=0;sync();});};
+ bar.addEventListener('input',()=>{rail.scrollLeft=maxScroll()*Number(bar.value)/1000;sync();});
+ bar.addEventListener('keydown',e=>{
+  const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-1,ArrowDown:1,PageUp:-1,PageDown:1}[e.key];
+  if(delta||e.key==='Home'||e.key==='End'){
+   e.preventDefault();e.stopPropagation();
+   rail.scrollLeft=e.key==='Home'?0:e.key==='End'?maxScroll():rail.scrollLeft+delta*(e.key.startsWith('Page')?rail.clientWidth:Math.max(24,rail.clientWidth/10));
+   sync();
+  }
+ });
+ rail.addEventListener('scroll',sync,{passive:true});
+ new MutationObserver(schedule).observe(rail,{childList:true,subtree:true,characterData:true});
+ const catalog=document.getElementById('hojaCatalog');
+ if(catalog)new MutationObserver(schedule).observe(catalog,{attributes:true,attributeFilter:['class','style','hidden']});
+ if(typeof ResizeObserver==='function'){const observer=new ResizeObserver(schedule);observer.observe(rail);if(catalog)observer.observe(catalog);}
+ window.addEventListener('resize',schedule,{passive:true});
+ rail.classList.add('hoja15PersistentScroll');
+ sync();schedule();
+}
 function initialize(){
  const rail=document.getElementById('hcRail');
  const selected=document.getElementById('hcNextSelected');
@@ -219,9 +258,19 @@ function initialize(){
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hcEmblem{display:none!important}',
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace{gap:9px!important;padding:8px 9px!important}',
   '#hojaCatalog .hcPak.hoja15DisplayUnit .hoja15UnitNumber{display:block;flex:0 0 auto;font-size:clamp(21px,2.2vw,31px);font-weight:1000;line-height:1.1;color:#ffe4a0}',
-  '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace small[hidden]{display:none!important}'
+  '#hojaCatalog .hcPak.hoja15DisplayUnit .hcFace small[hidden]{display:none!important}',
+  '#hojaCatalog .hcRail.hoja15PersistentScroll{scrollbar-width:none!important}',
+  '#hojaCatalog .hcRail.hoja15PersistentScroll::-webkit-scrollbar{display:none!important}',
+  '#hojaCatalog #hoja15CatalogScrollbar{appearance:none;-webkit-appearance:none;box-sizing:border-box;display:block;flex:0 0 24px;order:1;width:calc(96% - 32px);max-width:calc(100% - 32px);height:24px;min-height:24px;margin:0 auto 5px;padding:0;background:transparent;border:0;box-shadow:none;cursor:pointer;touch-action:pan-y;accent-color:#e6c28a}',
+  '#hojaCatalog #hoja15CatalogScrollbar[hidden]{display:none!important}',
+  '#hojaCatalog #hoja15CatalogScrollbar::-webkit-slider-runnable-track{height:12px;background:#102a36;border:1px solid #a88755;border-radius:8px}',
+  '#hojaCatalog #hoja15CatalogScrollbar::-webkit-slider-thumb{-webkit-appearance:none;width:clamp(28px,var(--hcThumb,25%),95%);height:12px;border-radius:8px;background:#e6c28a;border:1px solid #fff0c7;margin-top:-1px}',
+  '#hojaCatalog #hoja15CatalogScrollbar::-moz-range-track{height:10px;background:#102a36;border:1px solid #a88755;border-radius:8px}',
+  '#hojaCatalog #hoja15CatalogScrollbar::-moz-range-thumb{width:clamp(28px,var(--hcThumb,25%),95%);height:10px;border-radius:8px;background:#e6c28a;border:1px solid #fff0c7}',
+  '#hojaCatalog #hoja15CatalogScrollbar:focus-visible{outline:2px solid #fff0c7;outline-offset:2px}'
  ].join(' ');
  document.head.appendChild(style);
+ initializeRailScrollbar(rail);
  new MutationObserver(patchCards).observe(rail,{childList:true});
  new MutationObserver(patchNextSelected).observe(selected,{childList:true,characterData:true,subtree:true});
  patchCards();patchNextSelected();
