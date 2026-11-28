@@ -1,8 +1,8 @@
 {
   "schemaVersion": "hoja-approved-deployment-v1",
-  "deploymentId": "HOJA15-REMOTE-29-20261128-R3",
-  "sourceCommit": "3573717a8af4a224f62bf51061267da8ce73632d",
-  "note": "Full 29-unit/899-question public publication explicitly directed by the teacher on 2026-11-27 after six rights holds were disclosed. mediaRightsAcknowledged=true for the six named Korean/science units records that informed publication direction only; it does not assert CLEARED rights or independent Nabi/Charlotte textbook-source recheck. Their source-index rights statuses and README holds remain unchanged. Runtime and question/renderer pins were verified separately. Production GAS rollout requires trusted-main credential, external student, statistics, trigger and rollback checks. R2: teacher requested only the two science labels use the approved unitTitle. All effective SHA pins and original rights/source records are unchanged. R3: teacher approval of 738 non-social explanation edits recorded in QBank PR #12, canonical rebuild merged in PR #13; exact package diff 899/738 verified in run 46143869832, pinned canonical rebuild and four-viewports 899 x 4 renderer regression PASS in run 46143999470. Retain all previous media-rights acknowledgments without asserting clearance; no changes to questions, choices, answers, images, layout, social, titles, or GAS. Renderer regression is offline, not live game or explanation-popup E2E.",
+  "deploymentId": "HOJA15-REMOTE-34-20261128-R4",
+  "sourceCommit": "fdf6081715fd01b00389f4b64c08bfe5221bba4f",
+  "note": "Full 29-unit/899-question public publication explicitly directed by the teacher on 2026-11-27 after six rights holds were disclosed. mediaRightsAcknowledged=true for the six named Korean/science units records that informed publication direction only; it does not assert CLEARED rights or independent Nabi/Charlotte textbook-source recheck. Their source-index rights statuses and README holds remain unchanged. Runtime and question/renderer pins were verified separately. Production GAS rollout requires trusted-main credential, external student, statistics, trigger and rollback checks. R2: teacher requested only the two science labels use the approved unitTitle. All effective SHA pins and original rights/source records are unchanged. R3: teacher approval of 738 non-social explanation edits recorded in QBank PR #12, canonical rebuild merged in PR #13; exact package diff 899/738 verified in run 46143869832, pinned canonical rebuild and four-viewports 899 x 4 renderer regression PASS in run 46143999470. Retain all previous media-rights acknowledgments without asserting clearance; no changes to questions, choices, answers, images, layout, social, titles, or GAS. Renderer regression is offline, not live game or explanation-popup E2E. R4: teacher explicitly directed publication of the five social grade 6 units after being informed that generated/redrawn media have not been independently rights-audited (HOLD remains; acknowledgment is not clearance). QBank PR #15/#16 merged; archive recovery run 46146247654 verified 34 packages/1195 questions, previous 29 package hashes identical. Independently recomputed five approved ZIP and effective file digests. SMQ run 46148622793 offline renderer 1195 x 4 PASS, not live game E2E. Preserve existing 29 manifest entries, all GAS and statistics. Use approved unit titles for five new units.",
   "entries": [
     {
       "cartridgeId": "eng5-ham-u10",
@@ -262,6 +262,56 @@
       "teacherDeploymentApproval": "APPROVED",
       "approvedOn": "2026-11-28",
       "effectiveSha256": "b1399c1f0e92cfe5c4bb969822dd5c821821a03aaf94ac0ccf7beeddeb8c8210",
+      "rendererGate": "PASS",
+      "questionValidationGate": "PASS",
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
+    },
+    {
+      "cartridgeId": "soc6-s2-u1-1-common",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-28",
+      "effectiveSha256": "80e6721d3020273b402ef45a48617c194428b841c5521b7ed3359cab8f7f62dd",
+      "rendererGate": "PASS",
+      "questionValidationGate": "PASS",
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
+    },
+    {
+      "cartridgeId": "soc6-s2-u1-2-common",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-28",
+      "effectiveSha256": "0507e25724b02b3237916d31c721b23cbbfc67b773203e2583c6e92ffe136b1d",
+      "rendererGate": "PASS",
+      "questionValidationGate": "PASS",
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
+    },
+    {
+      "cartridgeId": "soc6-s2-u2-1-common",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-28",
+      "effectiveSha256": "4bb91ad48e0ba8131bf1cd9e113ae12075eff08d91ba1b367531058dcf47eae8",
+      "rendererGate": "PASS",
+      "questionValidationGate": "PASS",
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
+    },
+    {
+      "cartridgeId": "soc6-s2-u2-2-common",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-28",
+      "effectiveSha256": "9de3729065960079e821346d23454e484928bccb7921a334de5a59c162de72e9",
+      "rendererGate": "PASS",
+      "questionValidationGate": "PASS",
+      "mediaRightsAcknowledged": true,
+      "titleStyle": "UNIT_TITLE"
+    },
+    {
+      "cartridgeId": "soc6-s2-u2-3-common",
+      "teacherDeploymentApproval": "APPROVED",
+      "approvedOn": "2026-11-28",
+      "effectiveSha256": "e7b6f2d9814c857f2422f2b70d89b47c391c26754400cc59cd331518ba0f1780",
       "rendererGate": "PASS",
       "questionValidationGate": "PASS",
       "mediaRightsAcknowledged": true,
