@@ -33,7 +33,7 @@ async def main():
       # Test fixture simulates the already-completed tutorial; the actual arcade opens through UI.
       await page.evaluate("localStorage.setItem('hoja_tutorial_stage0_completed_v1','1')")
       # Test-only read-only hook inside the arcade closure; it never changes game state.
-      await page.evaluate("""()=>{if(typeof window.HOJA_TT_ARCADE_BRIDGE_SOURCE!=='string')throw Error('ARCADE_BRIDGE_MISSING');window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=`\nwindow.__testArcadePosition=()=>({x:ACTIVE_SCENE?.playerBody?.x,remainingMs:ACTIVE_SCENE?.remainingMs,quizActive:ACTIVE_SCENE?.quizActive,hitStop:ACTIVE_SCENE?.hitStopActive,dying:ACTIVE_SCENE?.dying,paused:ACTIVE_SCENE?.manualPaused,clear:ACTIVE_SCENE?.clear,transitioning:ACTIVE_SCENE?.transitioning});\n`;}""")
+      await page.evaluate("""()=>{if(typeof window.HOJA_TT_ARCADE_BRIDGE_SOURCE!=='string')throw Error('ARCADE_BRIDGE_MISSING');window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=`\nwindow.__testArcadePosition=()=>({x:ACTIVE_SCENE?.playerBody?.x,remainingMs:ACTIVE_SCENE?.remainingMs,quizActive:ACTIVE_SCENE?.quizActive,hitStop:ACTIVE_SCENE?.hitStopActive,dying:ACTIVE_SCENE?.dying,paused:ACTIVE_SCENE?.manualPaused,clear:ACTIVE_SCENE?.clear,transitioning:ACTIVE_SCENE?.transitioning,loopCooldown:ACTIVE_SCENE?.game?.loop?._coolDown,loopFocus:ACTIVE_SCENE?.game?.loop?.inFocus,rawDelta:ACTIVE_SCENE?.game?.loop?.rawDelta,smoothedDelta:ACTIVE_SCENE?.game?.loop?.delta});\n`;}""")
       await mode(page,'혼자 놀기','아케이드 모드')
       direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
       if await direct.is_visible():await direct.click()
@@ -48,9 +48,9 @@ async def main():
       print('ARCADE_PHASER_LOOP_ACTIVE_PASS',{'fps':perf.get('fps'),'sampleCount':perf.get('sampleCount')},flush=True)
       import json
       samples=[]
-      for i in range(11):
+      for i in range(31):
         samples.append(await page.evaluate("""()=>{const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow,s=w.__testArcadePosition(),p=w.HOJA_V064_PERF_READ();return {...s,wall:performance.now(),fps:p.fps,frameCount:p.sampleCount,visibility:f.contentDocument.visibilityState}}"""))
-        if i<10: await page.wait_for_timeout(1000)
+        if i<30: await page.wait_for_timeout(1000)
       print('ARCADE_CLOCK_WALL_SAMPLES',json.dumps(samples,ensure_ascii=False),flush=True)
       assert not errors and not dialogs,(errors,dialogs)
       await browser.close()
