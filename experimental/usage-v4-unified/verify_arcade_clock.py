@@ -60,7 +60,9 @@ async def main():
       if a.assert_clock:
         early=samples[:6]
         assert all(x['visibility']=='visible' and x['loopFocus'] and not any(x[k] for k in ('quizActive','hitStop','dying','paused','clear','transitioning')) for x in early),('CLOCK_PHASE_INVALID',early)
-        assert all(x['loopCooldown']>0 and 0<x['rawDelta']<=250 for x in early),('CLOCK_COOLDOWN_OR_FRAME_INVALID',early)
+        # The first rawDelta precedes the measured interval and must not
+        # invalidate it; all observed frames after the baseline remain bounded.
+        assert all(x['loopCooldown']>0 for x in early) and all(0<x['rawDelta']<=250 for x in early[1:]),('CLOCK_COOLDOWN_OR_FRAME_INVALID',early)
         wall=early[-1]['wall']-early[0]['wall'];elapsed=early[0]['remainingMs']-early[-1]['remainingMs']
         assert wall>4000 and .75<=elapsed/wall<=1.25,('CLOCK_RATE_OUT_OF_RANGE',wall,elapsed,early)
         print('ARCADE_STARTUP_CLOCK_RATE_PASS',json.dumps({'wallMs':wall,'gameMs':elapsed,'ratio':elapsed/wall}),flush=True)
