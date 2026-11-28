@@ -62,7 +62,9 @@ if without_display.count(mark) == 1:
 # Renderer show-failure retry RC; two-build and source-boundary evidence in PR #14.
 # Previous show-failure retry RC: 8cddcbe1f84fdb51f015a756fdfcab9f84a947daf58ab93e41a4675c6ea1b69b.
 # Embed/load/show recovery RC; evidence in PR #14.
-ok(rc.get('rcGameSha256') == '25e2777ad18990ee922f9db588458f932408d0d39a7cc44bc647c55900dc9293', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
+# Previous renderer recovery RC: 25e2777ad18990ee922f9db588458f932408d0d39a7cc44bc647c55900dc9293.
+# Focused/visible arcade startup clock correction; evidence in PR #14.
+ok(rc.get('rcGameSha256') == 'bb3a06d789a40fa7ba2af946bd6cb06352f6abbeefb02b2ab978805a9fc29264', 'RC_GAME_BEFORE_PATCHES_IS_NOT_THE_F3_3_AUDITED_GAME')
 tblock = (Path(__file__).resolve().parent / 'gas/UsageTelemetryClient.html').read_bytes().strip()
 ok(game.count(tblock) == 1 and info.get('telemetryBlockNewSha256') == hashlib.sha256(tblock).hexdigest(), 'TELEMETRY_BLOCK_IS_NOT_THE_CURRENT_CLIENT')
 gs = {f.name: f.read_text(encoding='utf-8') for f in d.glob('*.gs')}

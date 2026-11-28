@@ -10,6 +10,8 @@ async def main():
     ap.add_argument('--html',required=True);ap.add_argument('--phaser',required=True)
     ap.add_argument('--packages',required=True);ap.add_argument('--port',type=int,default=8790)
     ap.add_argument('--unit',default='sci5-s2-heat-common');ap.add_argument('--channel',default=None)
+    ap.add_argument('--frame-ms',type=int,default=0,help='TEST ONLY: schedule child animation frames at this interval')
+    ap.add_argument('--assert-clock',action='store_true',help='Require startup clock to track elapsed time during controlled visible gameplay')
     a=ap.parse_args();html=Path(a.html).read_text(encoding='utf-8').replace('<head>','<head>'+STUB.replace('PORT',str(a.port)),1);phaser=Path(a.phaser).read_bytes()
     names={x['cartridgeId']:x['name'] for x in backend(a.port,'/rpc',{'fn':'hojaListPublicCartridges','args':[]})['v']}
     async with async_playwright() as pw:
@@ -34,6 +36,9 @@ async def main():
       await page.evaluate("localStorage.setItem('hoja_tutorial_stage0_completed_v1','1')")
       # Test-only read-only hook inside the arcade closure; it never changes game state.
       await page.evaluate("""()=>{if(typeof window.HOJA_TT_ARCADE_BRIDGE_SOURCE!=='string')throw Error('ARCADE_BRIDGE_MISSING');window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=`\nwindow.__testArcadePosition=()=>({x:ACTIVE_SCENE?.playerBody?.x,remainingMs:ACTIVE_SCENE?.remainingMs,quizActive:ACTIVE_SCENE?.quizActive,hitStop:ACTIVE_SCENE?.hitStopActive,dying:ACTIVE_SCENE?.dying,paused:ACTIVE_SCENE?.manualPaused,clear:ACTIVE_SCENE?.clear,transitioning:ACTIVE_SCENE?.transitioning,loopCooldown:ACTIVE_SCENE?.game?.loop?._coolDown,loopFocus:ACTIVE_SCENE?.game?.loop?.inFocus,rawDelta:ACTIVE_SCENE?.game?.loop?.rawDelta,smoothedDelta:ACTIVE_SCENE?.game?.loop?.delta});\n`;}""")
+      if a.frame_ms:
+        assert 50<=a.frame_ms<=200
+        await page.evaluate("""ms=>{window.HOJA_TT_ARCADE_BRIDGE_SOURCE+=`\nwindow.requestAnimationFrame=cb=>setTimeout(()=>cb(performance.now()),${ms});window.cancelAnimationFrame=id=>clearTimeout(id);\n`;}""",a.frame_ms)
       await mode(page,'혼자 놀기','아케이드 모드')
       direct=page.locator('#hoja15JoinLayer.open .h15Big',has_text='바로 시작하기')
       if await direct.is_visible():await direct.click()
@@ -52,6 +57,29 @@ async def main():
         samples.append(await page.evaluate("""()=>{const f=document.getElementById('hqArcadeFrame'),w=f.contentWindow,s=w.__testArcadePosition(),p=w.HOJA_V064_PERF_READ();return {...s,wall:performance.now(),fps:p.fps,frameCount:p.sampleCount,visibility:f.contentDocument.visibilityState}}"""))
         if i<30: await page.wait_for_timeout(1000)
       print('ARCADE_CLOCK_WALL_SAMPLES',json.dumps(samples,ensure_ascii=False),flush=True)
+      if a.assert_clock:
+        early=samples[:6]
+        assert all(x['visibility']=='visible' and x['loopFocus'] and not any(x[k] for k in ('quizActive','hitStop','dying','paused','clear','transitioning')) for x in early),('CLOCK_PHASE_INVALID',early)
+        assert all(x['loopCooldown']>0 and 0<x['rawDelta']<=250 for x in early),('CLOCK_COOLDOWN_OR_FRAME_INVALID',early)
+        wall=early[-1]['wall']-early[0]['wall'];elapsed=early[0]['remainingMs']-early[-1]['remainingMs']
+        assert wall>4000 and .75<=elapsed/wall<=1.25,('CLOCK_RATE_OUT_OF_RANGE',wall,elapsed,early)
+        print('ARCADE_STARTUP_CLOCK_RATE_PASS',json.dumps({'wallMs':wall,'gameMs':elapsed,'ratio':elapsed/wall}),flush=True)
+      arcade=page.frame_locator('#hqArcadeFrame')
+      await arcade.locator('#gameViewport canvas').first.click(timeout=15000)
+      for _ in range(4):
+        await page.keyboard.press('Enter');await page.wait_for_timeout(400)
+      await page.keyboard.press('h')
+      await page.wait_for_function("(()=>{const w=document.getElementById('hqArcadeFrame').contentWindow;return w.__testArcadePosition().paused&&w.document.getElementById('hojaTrialControlsHelp')?.style.display==='grid'})()",timeout=15000)
+      paused=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+      await page.wait_for_timeout(2000)
+      still=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+      assert still['remainingMs']==paused['remainingMs'],('CLOCK_CHANGED_DURING_MANUAL_PAUSE',paused,still)
+      await page.keyboard.press('h')
+      await page.wait_for_function("!document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition().paused",timeout=15000)
+      await page.wait_for_timeout(2000)
+      resumed=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+      assert resumed['remainingMs']<still['remainingMs'],('CLOCK_DID_NOT_RESUME',still,resumed)
+      print('ARCADE_CLOCK_MANUAL_PAUSE_RESUME_PASS',json.dumps({'paused':paused,'still':still,'resumed':resumed},ensure_ascii=False),flush=True)
       assert not errors and not dialogs,(errors,dialogs)
       await browser.close()
 if __name__=='__main__':asyncio.run(main())

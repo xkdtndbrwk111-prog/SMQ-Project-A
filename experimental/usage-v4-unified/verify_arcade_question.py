@@ -81,6 +81,10 @@ async def main():
         await page.wait_for_function("(()=>{let f=document.getElementById('hojaArcadeApprovedParentFrame');return f&&getComputedStyle(f).visibility==='visible'&&f.contentWindow?.current?.()&&f.contentDocument?.querySelectorAll('#hqChoices button.hqChoice').length})()",timeout=30000)
         q=await page.evaluate("document.getElementById('hojaArcadeApprovedParentFrame').contentWindow.current()")
         before=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+        assert before['quizActive'],before
+        await page.wait_for_timeout(2000)
+        during=await page.evaluate("document.getElementById('hqArcadeFrame').contentWindow.__testArcadePosition()")
+        assert during['quizActive'] and during['remainingMs']==before['remainingMs'],('CLOCK_CHANGED_DURING_QUESTION',before,during)
         frame=page.frame_locator('#hojaArcadeApprovedParentFrame')
         if q['type']=='SHORT':
           await frame.locator('button.hqChoice').first.click();await frame.locator('button.teacher-judge.correct').first.click()

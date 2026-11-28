@@ -109,4 +109,4 @@ jobs:
           for i in $(seq 1 30); do if grep -q '^READY' "$RUNNER_TEMP/mock-server.log"; then break; fi; sleep 1; done
           grep -q '^READY' "$RUNNER_TEMP/mock-server.log"
           D="$RUNNER_TEMP/browser-deps/node_modules"
-          python -u "$P/verify_arcade_clock.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome
+          python -u "$P/verify_arcade_clock.py" --html "$RUNNER_TEMP/test-bundle/Game.html" --phaser "$D/phaser/dist/phaser.min.js" --packages qbank-runtime --port 8790 --channel chrome --frame-ms 100 --assert-clock
