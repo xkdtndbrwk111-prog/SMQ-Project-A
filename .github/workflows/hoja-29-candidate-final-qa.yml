@@ -85,6 +85,8 @@ jobs:
           python -m pip install playwright
           python -m playwright install --with-deps chromium
           npm install --prefix "$RUNNER_TEMP/browser-deps" --ignore-scripts phaser@4.2.1 jsqr@1.4.0
+      - name: Persistent catalog scrollbar regression (four viewports)
+        run: python3 experimental/usage-v4-unified/verify_catalog_scrollbar.py --html "$RUNNER_TEMP/test-bundle/Game.html"
       - name: Actual game browser cache, solo/team and teacher/student QR
         run: |
           set -euo pipefail
