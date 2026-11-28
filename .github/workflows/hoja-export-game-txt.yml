@@ -1,0 +1,35 @@
+name: Export verified HOJA Game.html as TXT
+on:
+  push:
+    branches: [export/hoja15-game-scrollbar-txt-20261128]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 744cec9080aac65b22570ff1754ad66110333312
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assemble and audit exact merged game
+        run: |
+          set -euo pipefail
+          P=experimental/usage-v4-unified
+          python3 "$P/build_unified_gas.py" --output "$RUNNER_TEMP/build" --game approved-rc > "$RUNNER_TEMP/build-info.json"
+          python3 "$P/verify_release_candidate.py" "$RUNNER_TEMP/build" "$RUNNER_TEMP/build-info.json"
+          mkdir "$RUNNER_TEMP/export"
+          cp "$RUNNER_TEMP/build/Game.html" "$RUNNER_TEMP/export/Game.txt"
+          cmp "$RUNNER_TEMP/build/Game.html" "$RUNNER_TEMP/export/Game.txt"
+          sha256sum "$RUNNER_TEMP/export/Game.txt"
+          wc -c "$RUNNER_TEMP/export/Game.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HOJA15-Game-scrollbar-full-TXT
+          path: ${{ runner.temp }}/export/Game.txt
+          if-no-files-found: error
+          retention-days: 14
